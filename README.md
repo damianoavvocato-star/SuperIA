@@ -22,6 +22,10 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 ## Roadmap completa
 La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). L'architettura è Android-only; il registro dei runtime Android candidati è in [config/android-components.registry.json](config/android-components.registry.json). L'integrazione GitHub e il collegamento sicuro tra più telefoni sono specificati in [docs/GITHUB_AND_MULTI_DEVICE.md](docs/GITHUB_AND_MULTI_DEVICE.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) il [registro macchina dei componenti](config/components.registry.json) e il [registro dei modelli candidati](config/models.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
 
+## Prima base Android nativa
+
+Il progetto Kotlin/Jetpack Compose iniziale è in [android/](android/README.md). Include una dashboard e il rilevamento locale di modello, versione Android, memoria esposta dal sistema, ABI, spazio libero e stato termico. È uno scheletro iniziale: non è ancora un APK collaudato e non contiene ancora il runtime AI.
+
 ## Destinazione Android
 La decisione tecnica Android-only e il piano dettagliato sono in [docs/ANDROID_ONLY_ARCHITECTURE.md](docs/ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI resta un prototipo di riferimento: non sarà necessario per le funzioni principali dell'app Android.
 
