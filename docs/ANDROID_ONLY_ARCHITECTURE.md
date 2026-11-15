@@ -45,7 +45,7 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 - Immagini: analisi, OCR, modifica e generazione; generazione locale solo su dispositivi che superano il benchmark.
 - Video: player, estrazione audio/frame, taglio, sottotitoli e montaggio; generazione video locale resta sperimentale e non requisito minimo.
 - Audio: registrazione autorizzata, trascrizione, sintesi vocale, pulizia e traduzione/doppiaggio.
-- Coding: lettura e generazione di codice, editor mobile e operazioni repository con conferma.
+- Coding e GitHub: lettura/generazione codice, gestione repository, branch, commit, issue, pull request, GitHub Actions e agente software multi-step, con permessi granulari e conferme.
 - Produttività: note, testi, tabelle, CSV, documenti e presentazioni.
 - Agenti: strumenti con permessi minimi, cronologia azioni e conferma prima di invii, pubblicazioni, acquisti o cancellazioni.
 - Aree specialistiche: moduli di supporto con fonti, avvisi e limiti espliciti; non sostituiscono professionisti.
@@ -64,14 +64,14 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 ## Fasi Android aggiornate
 
 0. Inventario delle 182 IA, audit licenze/costi e decisione Android-only. Documentazione già mappata; verifiche puntuali ancora aperte.
-1. Fondamenta Android: progetto Kotlin/Compose, architettura modulare, storage, permessi, tema, navigazione, CI e build debug.
+1. Fondamenta Android: progetto Kotlin/Compose, architettura modulare, storage, permessi, tema, navigazione, profilo dispositivo, pairing sicuro multi-telefono, autenticazione GitHub e build debug.
 2. Motore AI: integrazione LiteRT-LM, download modelli, benchmark, chat streaming e gestione memoria.
 3. Documenti e RAG locale.
 4. Ricerca web opt-in, link e traduzione.
 5. Immagini e grafica.
 6. Video e montaggio mobile.
 7. Audio e voce.
-8. Coding e strumenti sviluppatore.
+8. Coding e strumenti sviluppatore: agente GitHub per repository, branch, commit, issue, pull request, Actions e revisione diff.
 9. Produttività e dati.
 10. Agenti e automazioni con conferme.
 11. Moduli professionali.
@@ -86,4 +86,4 @@ Una funzione è completa solo se è presente nell'app Android, ha test automatic
 
 ## Informazioni hardware ancora necessarie
 
-Non è ancora stato eseguito un benchmark sul telefono dell'utente. Prima di scegliere il modello predefinito e la quantizzazione finale occorre rilevare modello esatto, RAM, SoC/GPU, versione Android e spazio libero. Fino ad allora i modelli nel registro restano candidati e non approvati.
+Il telefono principale dichiarato ha 6 GB di RAM; esiste un secondo telefono più potente, ma modello e specifiche devono ancora essere rilevati. Non è ancora stato eseguito un benchmark sui dispositivi. Prima di scegliere il modello predefinito e la quantizzazione finale occorre rilevare modello esatto, RAM, SoC/GPU, versione Android e spazio libero. Fino ad allora i modelli nel registro restano candidati e non approvati.
