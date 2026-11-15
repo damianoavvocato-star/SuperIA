@@ -30,8 +30,8 @@
 
 | Componente | Motivo del blocco temporaneo |
 |---|---|
-| FFmpeg | Il codice base è LGPL-2.1-or-later; parti opzionali GPL si attivano con `--enable-gpl`; `--enable-nonfree` produce binari non redistribuibili. La build e le librerie esterne cambiano gli obblighi. | 
-| Piper TTS | Il repository storico `rhasspy/piper` è archiviato dal 6 ottobre 2025 e dichiara MIT; lo sviluppo è indicato come trasferito a `OHF-Voice/piper1-gpl`. Le voci hanno licenze per singolo modello. La presenza di eSpeak NG e relativi componenti richiede revisione della distribuzione. | 
+| FFmpeg | Il codice base è LGPL-2.1-or-later; parti opzionali GPL si attivano con `--enable-gpl`; `--enable-nonfree` produce binari non redistribuibili. La build e le librerie esterne cambiano gli obblighi. |
+| Piper TTS | Il repository storico `rhasspy/piper` è archiviato dal 6 ottobre 2025 e dichiara MIT; lo sviluppo è indicato come trasferito a `OHF-Voice/piper1-gpl`. Le voci hanno licenze per singolo modello. La presenza di eSpeak NG e relativi componenti richiede revisione della distribuzione. |
 | Inkscape | Verificare licenza del codice e delle dipendenze per la versione da distribuire. |
 | Modelli immagine/video/audio | Nessuna approvazione generica: controllare modello, versione, pesi, dataset, restrizioni commerciali/personali e condizioni di output. |
 
@@ -73,9 +73,10 @@ Ogni componente candidato deve ricevere:
 
 ## Stato
 
-- 9 componenti registrati.
-- 7 candidati o casi con classificazione preliminare del codice.
-- 6 gruppi di componenti ancora bloccati per verifica puntuale.
+- 13 componenti software con licenza del codice documentata a livello preliminare.
+- 4 nuovi candidati aggiunti in questa revisione: llama.cpp, Haystack, pandas e SymPy.
+- 3 componenti software restano da sbloccare o verificare prima della selezione: FFmpeg, Piper e Inkscape.
+- I modelli e le voci restano sempre soggetti a verifica individuale, non conteggiati come componenti approvati.
 - Nessuna approvazione generale dei pesi/modelli.
 - Nessuna nuova dipendenza installata nel prodotto in questo passaggio.
 - Registro iniziale creato; audit completo ancora aperto.
