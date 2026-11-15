@@ -18,7 +18,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-data class ChatLine(val id: Long, val text: String, val role: String = "user")
+data class ChatLine(val id: Long, val text: String, val role: String = "user", val pending: Boolean = false)
 
 /**
  * Persistent, append-by-replacement conversation archive.
@@ -57,7 +57,7 @@ class ChatHistoryStore(context: Context) {
     fun save(messages: List<ChatLine>) {
         val json = JSONArray()
         messages.forEach { line ->
-            json.put(JSONObject().put("id", line.id).put("text", line.text).put("role", line.role))
+            json.put(JSONObject().put("id", line.id).put("text", line.text).put("role", line.role).put("pending", line.pending))
         }
         val compressed = ByteArrayOutputStream().also { output ->
             GZIPOutputStream(output).use { gzip ->
@@ -104,7 +104,7 @@ class ChatHistoryStore(context: Context) {
         val array = JSONArray(json)
         return (0 until array.length()).map { index ->
             val item = array.getJSONObject(index)
-            ChatLine(item.getLong("id"), item.getString("text"), item.optString("role", "user"))
+            ChatLine(item.getLong("id"), item.getString("text"), item.optString("role", "user"), item.optBoolean("pending", false))
         }
     }
 
