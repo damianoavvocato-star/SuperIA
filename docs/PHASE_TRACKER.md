@@ -98,3 +98,19 @@ La Fase 3 è quindi **parziale e non completata**. Non considerare disponibile l
 - Run Android [43760034745](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760034745), commit `3b1c95f68b70c1fa5e0c41393fe34c0a49e721ed`: unit test, `assembleDebug` e upload APK tutti SUCCESS. Comprende il flusso documenti, BM25, OCR Tesseract e importazione del modello lingua.
 - Artefatto intermedio `superia-privata-debug`: 59.733.545 byte, SHA-256 archivio `d3a8d4967f79f601ae398a645184c0f52d641f738d36ed467bc622f2c53e0adc`, scadenza 13 febbraio 2027. Questo artefatto precede l'ultimo limite di quota dell'archivio e non va considerato la build definitiva.
 - Run [43760180500](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760180500) verifica la revisione successiva con quote 50 documenti/200 MB; al momento dell'aggiornamento è ancora in esecuzione. Non dichiarare superata la CI della revisione finale finché il run non termina con SUCCESS.
+
+
+## Nuovo requisito approvato: conversazione unica persistente — 15 novembre 2026
+
+L'utente ha approvato una conversazione principale continua, senza obbligo di aprire nuove chat quando il contesto diventa lungo. È un requisito di prodotto da implementare, non una funzione già disponibile o verificata.
+
+Attività da integrare nelle fasi:
+- **Fase 2:** cronologia persistente cifrata, memoria di progetto strutturata, riepiloghi progressivi, ricostruzione del contesto entro i limiti del modello e cambio modello mantenendo la conversazione.
+- **Fase 3:** retrieval locale su cronologia e documenti, citazioni/riferimenti verificabili e recupero selettivo dei contenuti pertinenti.
+- **Fase 10:** salvataggio dello stato degli agenti e ripresa sicura dei workflow interrotti.
+- **Fase 13:** interfaccia con conversazione principale persistente e continuità tra sessioni.
+- **Fase 14:** cifratura, esportazione/cancellazione sotto controllo utente, riepiloghi correggibili e tracciabilità delle informazioni ricordate.
+
+Criteri di accettazione: (1) riaprire la stessa conversazione dopo chiusura app e riavvio; (2) proseguire oltre la finestra di contesto del modello tramite riepiloghi e retrieval, senza perdere decisioni importanti; (3) cambiare modello senza iniziare una nuova conversazione; (4) riprendere attività interrotte mostrando stato e passaggi già completati; (5) consentire all'utente di verificare/correggere la memoria di progetto; (6) non presentare come ricordato ciò che non è presente nella cronologia o nei dati recuperati.
+
+**Stato:** requisito approvato e registrato nella roadmap; implementazione e test dedicati ancora da pianificare/eseguire. Non dichiarare la funzione disponibile fino al superamento dei criteri sopra.
