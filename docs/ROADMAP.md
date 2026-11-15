@@ -15,7 +15,7 @@ Decisioni da mantenere in tutte le fasi:
 
 ## Decisione Android-only
 
-Il prodotto finale è esclusivamente Android. Lo stack, la strategia prestazioni, i moduli e i gate sono descritti in [docs/ANDROID_ONLY_ARCHITECTURE.md](ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI già presente è un prototipo e non deve essere una dipendenza necessaria dell'app.
+Il prodotto finale è esclusivamente Android. Lo stack, la strategia prestazioni, i moduli e i gate sono descritti in [docs/ANDROID_ONLY_ARCHITECTURE.md](ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI già presente è un prototipo e non deve essere una dipendenza necessaria dell'app. Il piano di rilevamento hardware e benchmark comparativo dei telefoni è in [docs/DEVICE_DETECTION_AND_BENCHMARK_PLAN.md](DEVICE_DETECTION_AND_BENCHMARK_PLAN.md).
 
 ## Documentazione della Fase 0
 
@@ -26,7 +26,7 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 | Fase | Obiettivo | Contenuti principali | Stato reale |
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
-| 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; storage e build debug | Pianificata |
+| 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; storage e build debug | Pianificata; specifiche hardware iniziali raccolte, rilevamento automatico e benchmark ancora da implementare |
 | 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | Prototipo iniziale presente, in corso |
 | 3 | Documenti e conoscenza personale | Caricamento PDF/DOCX/TXT/CSV; estrazione testo; OCR; riassunti; domande sui file; ricerca semantica; RAG; citazioni e riferimenti alle pagine; archivio locale | Pianificata |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Pianificata |
