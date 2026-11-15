@@ -15,7 +15,7 @@ Decisioni da mantenere in tutte le fasi:
 
 ## Documentazione della Fase 0
 
-Il catalogo nominativo e la matrice di valutazione sono in [docs/AI_CATALOG.md](AI_CATALOG.md). L'inventario è preliminare: contiene 83 nomi recuperati e segnala esplicitamente le voci 84–182 da recuperare. La Fase 0 resta aperta fino alla verifica di tutti i 182 nomi e delle relative alternative.
+Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matrice delle alternative gratuite/locali è in [docs/AI_ALTERNATIVES_MATRIX.md](AI_ALTERNATIVES_MATRIX.md). L'inventario è preliminare: contiene 83 nomi recuperati e segnala esplicitamente le voci 84–182 da recuperare. La Fase 0 resta aperta fino alla verifica di tutti i 182 nomi e delle relative alternative.
 
 ## Fasi riorganizzate
 
