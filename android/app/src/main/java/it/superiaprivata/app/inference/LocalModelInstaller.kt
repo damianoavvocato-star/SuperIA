@@ -1,0 +1,96 @@
+package it.superiaprivata.app.inference
+
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.security.MessageDigest
+
+data class ModelImportResult(
+    val file: File,
+    val sizeBytes: Long,
+    val sha256: String
+)
+
+/**
+ * Imports a user-selected model into app-private storage.
+ * No external storage permission or network access is needed.
+ */
+class LocalModelInstaller(private val context: Context) {
+
+    suspend fun importModel(
+        uri: Uri,
+        artifact: LocalModelCatalog.LocalArtifact = LocalModelCatalog.gemma3_1b_it_int4
+    ): ModelImportResult = withContext(Dispatchers.IO) {
+        val displayName = queryDisplayName(uri)
+        require(displayName.endsWith(".litertlm", ignoreCase = true)) {
+            "Seleziona un file con estensione .litertlm."
+        }
+
+        val directory = LocalModelCatalog.modelDirectory(context)
+        val target = LocalModelCatalog.modelFile(context, artifact)
+        val temporary = File(directory, "${artifact.fileName}.importing")
+        val digest = MessageDigest.getInstance("SHA-256")
+        var totalBytes = 0L
+
+        try {
+            val input = requireNotNull(context.contentResolver.openInputStream(uri)) {
+                "Impossibile aprire il file selezionato."
+            }
+            input.use { source ->
+                FileOutputStream(temporary).use { output ->
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    while (true) {
+                        val read = source.read(buffer)
+                        if (read < 0) break
+                        totalBytes += read
+                        require(totalBytes <= MAX_MODEL_BYTES) {
+                            "Il file supera il limite di sicurezza di 2 GB."
+                        }
+                        digest.update(buffer, 0, read)
+                        output.write(buffer, 0, read)
+                    }
+                    output.fd.sync()
+                }
+            }
+
+            require(totalBytes > 0L) { "Il file selezionato è vuoto." }
+            if (target.exists()) target.delete()
+            check(temporary.renameTo(target)) {
+                "Impossibile completare l'importazione del modello."
+            }
+
+            ModelImportResult(
+                file = target,
+                sizeBytes = totalBytes,
+                sha256 = digest.digest().joinToString("") { "%02x".format(it) }
+            )
+        } catch (error: Throwable) {
+            temporary.delete()
+            throw error
+        }
+    }
+
+    private fun queryDisplayName(uri: Uri): String {
+        context.contentResolver.query(
+            uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0) return cursor.getString(index).orEmpty()
+            }
+        }
+        return uri.lastPathSegment.orEmpty()
+    }
+
+    private companion object {
+        const val MAX_MODEL_BYTES = 2L * 1024L * 1024L * 1024L
+    }
+}
