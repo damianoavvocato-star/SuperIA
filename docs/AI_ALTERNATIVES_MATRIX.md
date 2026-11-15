@@ -14,7 +14,7 @@
 | OCR | Tesseract | OCR integrato nei flussi documentali; test su scansioni italiane | Da valutare |
 | Immagini | ComfyUI | InvokeAI; scegliere modello e pesi separatamente | Da valutare |
 | Audio: trascrizione | Whisper / whisper.cpp | Faster-Whisper come alternativa di runtime | Candidato |
-| Audio: sintesi vocale | Piper | Verificare licenza di ogni voce e modello acustico | Da valutare |
+| Audio: sintesi vocale | TTS da selezionare; Piper storico archiviato e nuovo sviluppo GPL | Verificare licenza del motore, dipendenze e ogni voce | Bloccato per il core |
 | Video | FFmpeg per editing e pipeline; ComfyUI con modelli video compatibili | LTX-Video e altri modelli solo dopo verifica licenze e requisiti GPU | Da valutare |
 | Coding agent | Aider o Cline con endpoint locale | Approvazione esplicita prima di scrivere file o eseguire comandi | Da valutare |
 | Automazioni | Motore workflow interno minimale | n8n solo dopo verifica licenza e condizioni d'uso; non presumere che sia OSI open source | Da valutare |
@@ -29,7 +29,7 @@ La matrice non afferma che un solo modello replichi ogni prodotto commerciale. I
 | Assistenti e ricerca (1–20) | Chat, ragionamento, strumenti, ricerca e citazioni | Ollama + modello linguistico locale; ricerca web come modulo separato e disattivabile | La ricerca web richiede Internet; qualità dipende dal modello |
 | Immagini (21–40) | Generazione, modifica, inpainting, upscaling, OCR | ComfyUI/InvokeAI + modelli di diffusione selezionati | GPU/VRAM; licenze diverse tra modelli e versioni |
 | Video (41–60) | Montaggio, sottotitoli, trascrizione, generazione | FFmpeg + Whisper + pipeline ComfyUI/modello video | Generazione video locale molto onerosa; non promettere equivalenza con servizi cloud |
-| Audio e voce (61–83) | STT, TTS, separazione, doppiaggio, musica | Whisper/whisper.cpp, Piper e strumenti audio dedicati | Verificare diritti delle voci; musica generativa e separazione richiedono valutazione separata |
+| Audio e voce (61–83) | STT, TTS, separazione, doppiaggio, musica | Whisper/whisper.cpp, TTS da selezionare e strumenti audio dedicati | Verificare diritti delle voci; Piper non è approvato nel nucleo; musica generativa e separazione richiedono valutazione separata |
 | Sviluppo, web e design (84–113) | Coding assistito, agenti di sviluppo, siti, UI e design | Modelli locali per coding; toolchain web open source e librerie UI | Verificare licenze dei modelli e separare editor proprietari da motori locali |
 | Ricerca, scrittura e lingua (114–142) | Ricerca scientifica, Q&A documentale, scrittura, correzione e traduzione | RAG locale, modelli linguistici, OCR, motori di traduzione locali quando disponibili | Accuratezza, citazioni, qualità italiana e licenze dei dati |
 | Agenti, professioni, 3D e analisi (143–182) | Workflow, agenti, supporto professionale, 3D, formazione, sicurezza e BI | Framework agentici locali, motori 3D e strumenti di analisi con formati aperti | Elevato rischio di servizi cloud a pagamento; sicurezza, validazione e licenze specifiche |
