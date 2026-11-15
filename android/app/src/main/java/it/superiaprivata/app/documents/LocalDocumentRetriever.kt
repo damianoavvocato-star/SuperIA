@@ -76,7 +76,7 @@ object LocalDocumentRetriever {
     }
 
     private fun tokenize(text: String): List<String> =
-        Regex("[\p{L}\p{N}]{2,}").findAll(text.lowercase())
+        Regex("[\\p{L}\\p{N}]{2,}").findAll(text.lowercase())
             .map { it.value }
             .toList()
 
