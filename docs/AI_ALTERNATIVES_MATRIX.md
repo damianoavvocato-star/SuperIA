@@ -62,7 +62,7 @@ Per ogni componente candidato:
 
 1. Mantenere Ollama come primo runtime, già collegato al prototipo, ma confrontarlo con llama.cpp.
 2. Non sostituire il backend esistente con una piattaforma esterna.
-3. Trattare ComfyUI, InvokeAI, Whisper e Piper come motori separati, attivabili su richiesta.
+3. Trattare ComfyUI, InvokeAI e Whisper come motori separati, attivabili su richiesta; selezionare il TTS dopo audit delle licenze del motore e delle singole voci. Piper non è approvato per il nucleo.
 4. Non includere servizi cloud gratuiti con limiti come dipendenze essenziali.
 5. Non dichiarare supporto Android nativo finché non esiste un client e non sono stati eseguiti test su dispositivo.
 6. Non considerare equivalenti modelli open-weight e modelli completamente open source: registrare separatamente le licenze.
