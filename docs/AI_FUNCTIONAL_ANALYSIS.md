@@ -1,7 +1,7 @@
 # Analisi funzionale delle 182 IA — Fase 0
 
-> Versione: 1.0 — 15 novembre 2026  
-> Stato: mappatura preliminare delle capacità e delle alternative. Non equivale a verifica completa di ogni servizio, licenza, modello o benchmark.
+> Versione: 1.1 — 15 novembre 2026  
+> Stato: mappatura funzionale preliminare presente per 182/182 sistemi; l'audit strutturato per voce è in AI_182_AUDIT.json. Non equivale a verifica completa di ogni servizio, piano gratuito, licenza, modello o benchmark.
 
 ## Obiettivo e metodo
 
@@ -234,7 +234,7 @@ Legenda:
 
 ## 2. Componenti condivisi proposti
 
-Questi componenti possono coprire molte delle 182 capacità. La selezione definitiva dipende da test, licenze delle versioni e requisiti del dispositivo.
+Questi componenti possono coprire molte delle 182 capacità. La selezione definitiva dipende da test, licenze delle versioni e requisiti del dispositivo. Per lo stato per singola voce consultare AI_182_AUDIT.json.
 
 | Componente candidato | Ruolo centrale | Famiglie coperte |
 |---|---|---|
@@ -243,7 +243,7 @@ Questi componenti possono coprire molte delle 182 capacità. La selezione defini
 | ComfyUI | Pipeline visuali per generazione immagini/video | Immagini, grafica, parte video |
 | FFmpeg | Elaborazione e montaggio audio/video | Video, audio, conversioni |
 | Whisper / whisper.cpp | Trascrizione vocale | Meeting, sottotitoli, doppiaggio |
-| Piper o TTS alternativo | Sintesi vocale locale | Lettura, voice-over, doppiaggio |
+| TTS da selezionare (Piper legacy non approvato per il core) | Sintesi vocale locale | Lettura, voice-over, doppiaggio |
 | Tesseract | OCR | Documenti e immagini |
 | LlamaIndex o Haystack | Indicizzazione e RAG | PDF, knowledge base, ricerca |
 | SymPy / Python / pandas | Calcolo e analisi dati | Scienza, finanza, fogli e BI |
