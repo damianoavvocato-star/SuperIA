@@ -43,7 +43,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
-fun AssistantChatPanel() {
+fun AssistantChatPanel(documentContext: String? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val historyStore = remember(context) { ChatHistoryStore(context) }
@@ -221,7 +221,7 @@ fun AssistantChatPanel() {
                         if (request.isNotEmpty()) {
                             // The native LiteRT-LM conversation is in memory only.
                             // Rebuild a bounded context from the encrypted transcript.
-                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request)
+                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request, documentContext = documentContext)
                             val userLine = ChatLine(System.nanoTime(), request, "user")
                             messages.add(userLine)
                             draft = ""
