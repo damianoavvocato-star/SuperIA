@@ -281,7 +281,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Button(
-                    enabled = draft.isNotBlank() && availability.isReady && licenseAccepted && !generating,
+                    enabled = draft.isNotBlank() && availability.isReady && licenseAccepted && !generating && messages.none { it.pending },
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
