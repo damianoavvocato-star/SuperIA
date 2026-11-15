@@ -12,6 +12,9 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 
 ## Funzioni presenti
 - Dashboard Compose iniziale e pannello chat conversazionale.
+- Importazione locale di PDF, DOCX, TXT e CSV tramite selettore Android.
+- Estrazione testo offline: PDFBox-Android per PDF testuali, parser DOCX per il corpo principale e lettura UTF-8 per TXT/CSV.
+- Archivio dei testi estratti nello spazio privato dell'app, anteprima, selezione, eliminazione e passaggio di un estratto al prompt della chat locale.
 - Inserimento e visualizzazione dei messaggi dell'utente.
 - Cronologia chat locale cifrata con AES-GCM; chiave AES-256 non esportabile custodita in Android Keystore; pulsante per cancellare la cronologia.
 - Lettura di produttore/modello, versione Android/API, RAM totale e disponibile esposte da Android, ABI CPU, spazio libero nell'area dati e stato termico.
@@ -24,10 +27,12 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - La chat Android non è ancora collegata a un runtime AI: l'invio memorizza il testo, non genera risposte.
 - Non contiene ancora pairing completo, GitHub OAuth o runtime AI locale integrato.
 - La cronologia è cifrata a riposo; non è sincronizzata tra telefoni e non sostituisce un backup cifrato.
-- Nessuna autorizzazione speciale è richiesta in questa prima schermata.
+- Nessuna autorizzazione generale di archiviazione è richiesta: l'accesso ai file usa il selettore documenti Android.
+- L'estrazione non esegue OCR sui PDF scansiti e non indicizza ancora più documenti con ricerca semantica/RAG. Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; massimo 6.000 caratteri di contesto documentale per richiesta chat.
+- I file originali non vengono copiati nell'archivio: viene conservato il solo testo estratto nell'area privata dell'app.
 
 ## Prossimi incrementi
-Collegamento a un runtime AI locale Android, allegati con selettore documenti, test strumentali per archivio cifrato, inventario acceleratori supportati, benchmark controllato e completamento del pairing sicuro.
+OCR offline per PDF scansiti, indicizzazione e ricerca semantica/RAG multi-documento, riferimenti a pagina/paragrafo, cifratura dedicata dell'archivio documentale, test strumentali, benchmark e completamento del pairing sicuro.
 
 
 ## Contratto del motore AI Android
