@@ -17,22 +17,70 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 
 | Fase | Stato operativo | Lavoro residuo principale |
 |---|---|---|
-| 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
-| 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
-| 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato; CI superata su commit intermedio, verifica finale delle ultime quote pendente | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end; OCR italiano offline aggiunto con dizionario importabile |
-| 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
-| 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
-| 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
-| 7 — Audio, voce e musica | Da avviare | STT/TTS, pulizia, separazione, doppiaggio e musica originale; consenso e diritti per voci |
-| 8 — Programmazione e GitHub | Da avviare | Agente coding controllato, diff, branch, commit, issue/PR, Actions, log, test e APK con approvazioni |
-| 9 — Produttività e dati | Da avviare | Documenti, email, presentazioni, fogli, CSV, formule, grafici, attività e database locali |
-| 10 — Agenti e automazioni | Da avviare | Pianificazione multi-step, strumenti, workflow, schedulazione, audit e conferma umana per azioni sensibili |
-| 11 — Aree professionali | Da avviare | Moduli specialistici con fonti, limiti, avvertenze e verifiche specifiche; non sostituire professionisti |
-| 12 — Ecosistema modelli/componenti | Da avviare | Registry operativo, installazione/rimozione, versioni, dipendenze, cache, licenze, benchmark e fallback locale |
-| 13 — App unica e interfacce | Da avviare | Dashboard integrata, moduli, progetti, gestione dispositivi, accessibilità e sincronizzazione opt-in |
-| 14 — Privacy e sicurezza | Trasversale; hardening da fare | Threat model, cifratura, autenticazione, permessi, isolamento, backup/cancellazione, segreti, audit e verifiche |
-| 15 — Collaudo e distribuzione | Da avviare; CI parziale già presente | Suite test completa, prove su device, sicurezza, prestazioni, compatibilità, APK installabile, aggiornamenti e manuale |
+| 0 — Inventario e progettazione | Documentazione consolidata; audit individuale incompleto | Completare verifica nominativa delle 182 IA: licenze/termini, costi correnti, disponibilità, artefatti, requisiti e alternative Android; aggiornare fonti e checksum |
+| 1 — Fondamenta Android e connessioni | Parziale | Completare architettura/storage, pairing autenticato con handshake e trasporto reale, integrazione GitHub e test su telefoni; QR attuale è solo invito, non pairing |
+| 2 — Motore AI e assistente | Implementazione + CI verificate; test su device mancanti | Verificare import e inferenza Gemma reale, streaming, memoria, cronologia, ripresa e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
+| 3 — Documenti e conoscenza | Primo incremento implementato; CI Android superata; test pratici mancanti | Aggiungere retrieval semantico, citazioni pagina/paragrafo, OCR immagini autonome, retention e recupero/corruzione archivio; verificare import, OCR e chat con file reali |
+| 4 — Ricerca, navigazione e traduzione | Non implementata nell'app Android | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
+| 5 — Immagini e grafica | Non implementata | Pipeline locale/ibrida, generazione/modifica, OCR immagini, sfondi/oggetti, restauro, upscaling, licenze e benchmark |
+| 6 — Video | Non implementata | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
+| 7 — Audio, voce e musica | Non implementata | STT/TTS, pulizia, separazione, doppiaggio e musica originale; consenso e diritti per voci |
+| 8 — Programmazione e GitHub | Non implementata nell'app | Agente coding controllato, diff, branch, commit, issue/PR, Actions, log, test e APK con approvazioni |
+| 9 — Produttività e dati | Non implementata | Documenti, email, presentazioni, fogli, CSV, formule, grafici, attività e database locali |
+| 10 — Agenti e automazioni | Non implementata | Pianificazione multi-step, strumenti, workflow, schedulazione, audit e conferma umana per azioni sensibili |
+| 11 — Aree professionali | Non implementata | Moduli specialistici con fonti, limiti, avvertenze e verifiche specifiche; non sostituire professionisti |
+| 12 — Ecosistema modelli/componenti | Registry solo documentale; gestione runtime non implementata | Registry operativo, installazione/rimozione, versioni, dipendenze, cache, licenze, benchmark e fallback locale |
+| 13 — App unica e interfacce | Scheletro UI Android, non piattaforma integrata | Dashboard modulare, progetti, gestione dispositivi, selezione nodo AI, accessibilità e sincronizzazione opt-in |
+| 14 — Privacy e sicurezza | Protezioni locali parziali; hardening incompleto | Threat model, autenticazione, permessi, isolamento, backup/esportazione/cancellazione, segreti, audit e test di sicurezza |
+| 15 — Collaudo e distribuzione | CI Android/backend presente; collaudo e release non completati | Suite completa, test device, sicurezza, prestazioni, compatibilità, pairing, APK release, aggiornamenti e manuale |
+
+
+
+## Audit completo delle 16 fasi — 15 novembre 2026
+
+Questo controllo confronta roadmap, file realmente presenti nella branch `main`, test e run GitHub Actions. La presenza di un file o di una voce in un registry non equivale a una funzione integrata.
+
+| Fase | Evidenza concreta nel repository | Valutazione e blocchi |
+|---|---|---|
+| 0 | Catalogo, analisi funzionale, audit JSON con 182 voci, matrice alternative, registri componenti/modelli e registro licenze | **Documentazione consolidata, non chiusa.** Tutte le 182 voci risultano mappate ma marcate `mapped_not_individually_verified`; prezzi, termini e artefatti esatti, licenze di pesi/dati e compatibilità Android non sono verificati uno per uno. Il registro modelli è un elenco di candidati, non una selezione approvata. |
+| 1 | App Kotlin/Compose, rilevamento profilo dispositivo, identità Keystore, QR invito a scadenza e helper di verifica firma | **Parziale.** La UI stessa dichiara che il QR non crea connessione né fiducia. Non risultano scanner/trasporto/handshake completo, gestione peer fidati, sincronizzazione, login o browser GitHub nell'app. |
+| 2 | Chat Compose, adapter LiteRT-LM CPU, catalogo/import locale modello, consenso licenza, cronologia cifrata, memoria progetto editabile, retrieval lessicale e ripresa richiesta pending | **Implementazione + CI verificate; test dispositivo mancanti.** Run Android `43764049532` SUCCESS (unit test, APK e upload); backend `43764208860` SUCCESS. Nessuna prova reale con modello importato sui due telefoni. Cambio modello non disponibile/verificato; memoria automatica e riassunti progressivi non implementati. |
+| 3 | PDF/DOCX/TXT/CSV, archivio cifrato, pannello Compose, BM25, OCR Tesseract per PDF scansiti con dizionario italiano importabile | **Primo incremento implementato; non chiusa.** Manca retrieval semantico, citazione verificabile di pagina/paragrafo, OCR immagini autonome, retention, test corruzione/recupero e prove pratiche. Il codice OCR è presente ma un messaggio di errore PDF nel sorgente è rimasto obsoleto e viene corretto in questo audit. |
+| 4 | Nessun modulo Android di ricerca web, navigazione o traduzione nel tree corrente | **Non implementata.** Il prototipo backend non fornisce queste funzioni. |
+| 5 | Nessuna pipeline Android di generazione/modifica immagini | **Non implementata.** I registry elencano candidati, non un motore integrato. |
+| 6 | Nessun motore o editor video Android | **Non implementata.** FFmpeg è ancora bloccato in attesa di revisione della configurazione/licenza. |
+| 7 | Nessun modulo Android STT/TTS/audio/musica | **Non implementata.** Whisper/whisper.cpp sono candidati, non runtime integrati; licenze dei modelli/voce da verificare. |
+| 8 | Workflow GitHub Actions per build e test del repository; nessun agente coding o client GitHub Android | **Non implementata come funzione prodotto.** La CI esegue pipeline del repo, ma non costituisce agente coding dentro l'app. |
+| 9 | Nessun modulo Android documenti ufficio, fogli, presentazioni, grafici o DB di produttività | **Non implementata.** L'importazione documentale Fase 3 non equivale a suite ufficio. |
+| 10 | Nessun orchestratore agenti, scheduler o checkpoint multi-step nell'app | **Non implementata.** La ripresa dell'ultima richiesta chat pending è una funzione limitata della Fase 2, non workflow agentici. |
+| 11 | Nessun modulo professionale dedicato nel tree | **Non implementata.** Richiede fonti, limiti e validazioni specifiche per ciascun dominio. |
+| 12 | Registry JSON di componenti Android e generali, catalogo singolo Gemma e installer modello | **Solo base documentale e primo import.** Mancano gestione installazione/rimozione multi-modello, versioni, dipendenze, cache, benchmark e selezione/fallback automatici. |
+| 13 | MainActivity con dashboard essenziale, chat, documenti, profilo dispositivo e QR dimostrativo | **Scheletro UI, non app unica completa.** Mancano navigazione modulare, progetti, gestione dispositivi e sincronizzazione opt-in. |
+| 14 | AES-GCM/Android Keystore per cronologia e archivio documenti, consenso licenza modello, storage privato | **Parziale.** Mancano threat model completo, autenticazione/isolamento, policy di retention, export/backup cifrato, test di cancellazione/recupero, audit e test di sicurezza. Il prototipo web usa localStorage non cifrato e non va usato per dati riservati. |
+| 15 | CI Android unit test + assembleDebug + upload artifact; CI backend pytest; workflow Pages per anteprima web | **CI parziale, non collaudo/rilascio.** Non risultano test strumentali, test su device, benchmark, security test, APK release firmato, procedura aggiornamento o manuale di rilascio. |
+
+### Evidenze CI aggiornate
+- Android run [43764049532](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764049532), commit `5c4f8ab4`: **SUCCESS**, unit test Android, `assembleDebug` e upload APK.
+- Backend run [43764208860](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/306e01672ce6d2179d66b8c26dad677bbe5ec3da): **SUCCESS**.
+- Le CI non certificano inferenza reale, OCR pratico, pairing, prestazioni, sicurezza complessiva o compatibilità fisica.
+
+### Correzioni e discrepanze rilevate
+- Il registro Fase 3 conteneva una nota precedente che indicava CI/quote ancora pendenti: superata dalle run successive riportate sopra.
+- `DocumentTextExtractor.kt` implementa già OCR fallback Tesseract, ma il messaggio mostrato quando l'OCR non estrae testo diceva ancora “OCR non ancora disponibile”; corretto per descrivere il tentativo OCR fallito.
+- Il QR di pairing è correttamente etichettato come invito dimostrativo: non deve essere conteggiato come collegamento tra dispositivi.
+- Il workflow Android esegue unit test JVM e build debug; non contiene test instrumented/E2E su telefono.
+- Il prototipo FastAPI/web e la preview non devono essere scambiati per moduli Android nativi completati.
+
+### Ordine consigliato di prosecuzione
+1. Chiudere i gate pratici Fase 2 su entrambi i telefoni e registrare misure.
+2. Stabilizzare Fase 3: test estrattori/OCR, archivio, retrieval semantico e citazioni.
+3. Completare Fase 1 pairing reale e connessione GitHub, che sono prerequisiti per il lavoro multi-dispositivo.
+4. Costruire la Fase 4 (ricerca/link/traduzione) e poi le pipeline multimediali Fasi 5–7.
+5. Procedere con coding/produttività/agenti Fasi 8–10, quindi moduli specialistici Fase 11.
+6. Rendere operativo il registry Fase 12 e completare la UX Fase 13.
+7. Applicare hardening Fase 14 continuamente e svolgere il collaudo/release Fase 15 per ogni milestone.
+
+**Conclusione dell'audit:** al 15 novembre 2026 nessuna delle 16 fasi soddisfa tutti i gate di chiusura. Fasi 0–3 hanno materiale concreto e implementazioni parziali; Fasi 4–13 sono per lo più da avviare; Fasi 14–15 sono trasversali/parziali. Non assegnare percentuali globali artificiali: la roadmap è composta da funzioni con dipendenze e pesi diversi.
 
 ## Gate obbligatori per chiudere una fase
 
