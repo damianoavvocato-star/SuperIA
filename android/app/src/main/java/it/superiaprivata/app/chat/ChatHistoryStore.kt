@@ -12,7 +12,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-data class ChatLine(val id: Long, val text: String)
+data class ChatLine(val id: Long, val text: String, val role: String = "user")
 
 /**
  * Stores the local chat history encrypted with an AES-256 key held by Android Keystore.
@@ -35,14 +35,14 @@ class ChatHistoryStore(context: Context) {
         val array = JSONArray(json)
         return (0 until array.length()).map { index ->
             val item = array.getJSONObject(index)
-            ChatLine(item.getLong("id"), item.getString("text"))
+            ChatLine(item.getLong("id"), item.getString("text"), item.optString("role", "user"))
         }
     }
 
     fun save(messages: List<ChatLine>) {
         val array = JSONArray()
         messages.takeLast(MAX_MESSAGES).forEach { line ->
-            array.put(JSONObject().put("id", line.id).put("text", line.text))
+            array.put(JSONObject().put("id", line.id).put("text", line.text).put("role", line.role))
         }
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
