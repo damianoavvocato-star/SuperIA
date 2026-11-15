@@ -2,13 +2,27 @@
 
 Assistente AI personale, modulare e con priorità all'esecuzione locale. Questo repository è indipendente da **Editore Foto e Video IA**.
 
-## Stato
-- Fase 1: fondamenta e architettura documentate.
-- Fase 2: backend chat FastAPI, integrazione locale Ollama, selezione modelli, gestione conversazioni, esportazione e memoria personale locale.
-- La memoria personale è una nota configurabile dall'utente salvata nel browser e passata nel contesto della chat; non è apprendimento del modello.
-- Le funzioni non implementate restano esplicitamente pianificate.
+## Obiettivo
+Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella ricognizione iniziale, usando alternative open source/gratuite e rispettando licenze e requisiti. Non si clonano codice, pesi o servizi proprietari.
 
-## Avvio
+## Vincoli del progetto
+- Uso personale e riservato; repository e dati separati da Editore Foto e Video IA.
+- Nessun abbonamento o API a pagamento obbligatori.
+- Modelli locali e funzionamento offline dove possibile; Internet solo per funzioni che lo richiedono.
+- Destinazione PC e Android.
+- Moduli progressivi, privacy e controllo dell'utente.
+
+## Stato attuale
+- Fondamenta: backend FastAPI e documentazione iniziale.
+- Assistente: Ollama locale, API chat/modelli, interfaccia web, cronologia ed esportazione.
+- Memoria: nota personale locale nel browser, aggiunta al contesto chat; non addestra il modello.
+- I test backend GitHub Actions recenti risultano superati. Il collaudo end-to-end su Ollama e dispositivi PC/Android è ancora da fare.
+- Immagini, video, audio, coding avanzato, agenti e APK non sono ancora implementati.
+
+## Roadmap completa
+La pianificazione aggiornata in 16 fasi (0–15), con funzioni, vincoli, copertura delle 182 IA e criteri di completamento, è in [docs/ROADMAP.md](docs/ROADMAP.md).
+
+## Avvio sviluppo
 Requisiti: Python 3.11+.
 
 ```bash
@@ -25,11 +39,9 @@ Interfaccia: http://127.0.0.1:8000 — API docs: http://127.0.0.1:8000/docs
 ## Modello locale
 Installa Ollama, avvialo e scarica un modello compatibile, ad esempio `ollama pull llama3.2:3b`.
 Variabili: `OLLAMA_MODEL` (predefinito `llama3.2:3b`) e `OLLAMA_BASE_URL` (predefinito `http://127.0.0.1:11434`).
-Senza Ollama, stato e interfaccia funzionano; le richieste AI restituiscono un errore esplicito. Nessun fallback cloud.
+Senza Ollama, le richieste AI restituiscono un errore esplicito. Nessun fallback cloud.
 
-## Cronologia, memoria e privacy
-Le conversazioni e la memoria personale sono conservate nel localStorage del browser sul dispositivo corrente; il backend non le persiste. Puoi creare, selezionare, eliminare, svuotare ed esportare le chat. La memoria è una nota fino a 3000 caratteri che viene inviata nel contesto della chat: non addestra il modello e non si sincronizza. Il localStorage non è cifrato dall'app: evita dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
+## Privacy
+Cronologia e memoria personale sono conservate nel localStorage del browser sul dispositivo corrente e non sono cifrate dall'app. Non inserire dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
 
 Non esporre il server in rete senza autenticazione e revisione di sicurezza. Non inserire segreti nel repository.
-
-Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md).
