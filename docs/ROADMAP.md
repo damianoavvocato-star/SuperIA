@@ -23,6 +23,8 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 
 ## Fasi riorganizzate
 
+Per il quadro operativo aggiornato di tutte le fasi, le attività residue e i gate di completamento, consulta il [Registro operativo delle fasi](PHASE_TRACKER.md). La roadmap resta il piano ufficiale; il registro distingue documentazione, implementazione, CI e collaudo pratico.
+
 | Fase | Obiettivo | Contenuti principali | Stato reale |
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
