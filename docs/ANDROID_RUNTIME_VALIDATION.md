@@ -52,3 +52,10 @@ Non ancora verificato:
 6. Correggere i problemi riscontrati e ripetere CI.
 
 La Fase 2 resta **in corso** finché i gate pratici sopra non sono superati. La riuscita di CI non equivale a un test d'inferenza reale.
+
+
+## Chiarimento sull'estrazione del testo
+
+Il controllo della sorgente ufficiale conferma che `Message.toString()` restituisce `contents.toString()` e che `Contents.toString()` concatena i contenuti. Inoltre, la guida Kotlin ufficiale usa `collect { print(it.toString()) }` per lo streaming. Non è quindi necessario sostituire `message.toString()` con un accesso interno o una conversione JSON: l'implementazione attuale è coerente con l'API documentata. Questo controllo statico non sostituisce comunque una prova con il modello installato sul dispositivo.
+
+Fonti: [Message.kt](https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin/java/com/google/ai/edge/litertlm/Message.kt), [guida Android LiteRT-LM](https://developers.google.com/edge/litert-lm/android).
