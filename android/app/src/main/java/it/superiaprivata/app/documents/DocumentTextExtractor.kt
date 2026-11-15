@@ -7,6 +7,10 @@ import android.util.Xml
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.rendering.PDFRenderer
+import com.tom_roush.pdfbox.rendering.ImageType
+import com.googlecode.tesseract.android.TessBaseAPI
+import java.io.File
 import org.xmlpull.v1.XmlPullParser
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -22,6 +26,7 @@ class DocumentTextExtractor(context: Context) {
         const val MAX_FILE_BYTES = 25L * 1024L * 1024L
         const val MAX_TEXT_CHARACTERS = 200_000
         private const val MAX_PDF_PAGES = 250
+        private const val MAX_OCR_PAGES = 20
     }
 
     fun extract(uri: Uri): ExtractedDocument {
@@ -57,7 +62,48 @@ class DocumentTextExtractor(context: Context) {
             require(document.numberOfPages <= MAX_PDF_PAGES) {
                 "Il PDF supera il limite di $MAX_PDF_PAGES pagine."
             }
-            return PDFTextStripper().getText(document).take(MAX_TEXT_CHARACTERS + 1)
+            val embeddedText = PDFTextStripper().getText(document)
+            if (embeddedText.isNotBlank()) return embeddedText.take(MAX_TEXT_CHARACTERS + 1)
+            return extractScannedPdf(document)
+        }
+    }
+
+    private fun extractScannedPdf(document: PDDocument): String {
+        val dataDirectory = File(appContext.filesDir, "tesseract")
+        val languageData = File(dataDirectory, "tessdata/ita.traineddata")
+        require(languageData.isFile && languageData.length() > 0L) {
+            "PDF scansito: importa prima il file italiano ita.traineddata nella sezione OCR."
+        }
+        val api = TessBaseAPI()
+        check(api.init(dataDirectory.absolutePath, "ita")) {
+            api.recycle()
+            "Impossibile inizializzare OCR italiano. Verifica il file ita.traineddata."
+        }
+        try {
+            val renderer = PDFRenderer(document)
+            val output = StringBuilder()
+            val pagesToRead = minOf(document.numberOfPages, MAX_OCR_PAGES)
+            for (page in 0 until pagesToRead) {
+                val bitmap = renderer.renderImage(page, 1.5f, ImageType.RGB)
+                try {
+                    api.setImage(bitmap)
+                    val pageText = api.getUTF8Text().orEmpty().trim()
+                    if (pageText.isNotBlank()) {
+                        output.appendLine("[Pagina ${page + 1}]")
+                        output.appendLine(pageText)
+                        output.appendLine()
+                    }
+                } finally {
+                    bitmap.recycle()
+                }
+                if (output.length > MAX_TEXT_CHARACTERS) break
+            }
+            if (document.numberOfPages > MAX_OCR_PAGES) {
+                output.appendLine("Nota: OCR eseguito solo sulle prime $MAX_OCR_PAGES pagine.")
+            }
+            return output.toString().take(MAX_TEXT_CHARACTERS + 1)
+        } finally {
+            api.recycle()
         }
     }
 
