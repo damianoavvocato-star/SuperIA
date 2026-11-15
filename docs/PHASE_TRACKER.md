@@ -20,7 +20,7 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 | 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
 | 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
 | 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima e contesto singolo documento nella chat. Restano OCR, RAG multi-documento, citazioni/pagine, hardening e test end-to-end |
+| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano OCR, embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end |
 | 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
 | 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
 | 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
@@ -73,13 +73,14 @@ Commit di implementazione (sequenza sulla branch `main`):
 - `dbdf403e`: pannello Compose per importazione, anteprima, selezione e cancellazione.
 - `f191a521`: dipendenza PDFBox-Android 2.0.27.0 (Apache-2.0).
 - `f7009a22`, `9934737f`, `bc985429`, `abb463d2`: integrazione dashboard/chat, contesto documentale limitato e test del prompt.
+- `2a21d447`, `7dd6f999`, `f58b05ba`, `bdecd48b`, `bb8a8465`: retriever BM25 offline, test di ranking/limiti, correzioni tokenizer e UI di ricerca multi-documento.
 
 Funzioni incluse nel primo incremento:
 - Selettore Android senza permessi generali di archiviazione.
 - Estrazione testo PDF tramite PDFBox-Android; estrazione del corpo principale DOCX; lettura UTF-8 TXT/CSV.
 - Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti e 6.000 caratteri documentali nel prompt.
 - Salvataggio del solo testo estratto cifrato nella directory privata dell'app con AES-GCM/Android Keystore; anteprima e cancellazione dall'archivio.
-- Passaggio esplicito dell'estratto selezionato al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
+- Passaggio esplicito dell'estratto selezionato o dei blocchi recuperati al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
 
 Limiti e gate ancora aperti:
 - OCR dei PDF scansiti e immagini: non implementato.
