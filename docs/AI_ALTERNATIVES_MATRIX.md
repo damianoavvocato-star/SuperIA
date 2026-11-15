@@ -30,7 +30,9 @@ La matrice non afferma che un solo modello replichi ogni prodotto commerciale. I
 | Immagini (21–40) | Generazione, modifica, inpainting, upscaling, OCR | ComfyUI/InvokeAI + modelli di diffusione selezionati | GPU/VRAM; licenze diverse tra modelli e versioni |
 | Video (41–60) | Montaggio, sottotitoli, trascrizione, generazione | FFmpeg + Whisper + pipeline ComfyUI/modello video | Generazione video locale molto onerosa; non promettere equivalenza con servizi cloud |
 | Audio e voce (61–83) | STT, TTS, separazione, doppiaggio, musica | Whisper/whisper.cpp, Piper e strumenti audio dedicati | Verificare diritti delle voci; musica generativa e separazione richiedono valutazione separata |
-| Voci 84–182 | Non assegnabile finché non si recuperano i nomi originali | Nessuna attribuzione | Non inventare categorie o prodotti mancanti |
+| Sviluppo, web e design (84–113) | Coding assistito, agenti di sviluppo, siti, UI e design | Modelli locali per coding; toolchain web open source e librerie UI | Verificare licenze dei modelli e separare editor proprietari da motori locali |
+| Ricerca, scrittura e lingua (114–142) | Ricerca scientifica, Q&A documentale, scrittura, correzione e traduzione | RAG locale, modelli linguistici, OCR, motori di traduzione locali quando disponibili | Accuratezza, citazioni, qualità italiana e licenze dei dati |
+| Agenti, professioni, 3D e analisi (143–182) | Workflow, agenti, supporto professionale, 3D, formazione, sicurezza e BI | Framework agentici locali, motori 3D e strumenti di analisi con formati aperti | Elevato rischio di servizi cloud a pagamento; sicurezza, validazione e licenze specifiche |
 
 ## 3. Gate obbligatori prima dell'integrazione
 
