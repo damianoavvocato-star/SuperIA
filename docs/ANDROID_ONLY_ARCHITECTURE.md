@@ -45,6 +45,7 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 - Immagini: analisi, OCR, modifica e generazione; generazione locale solo su dispositivi che superano il benchmark.
 - Video: player, estrazione audio/frame, taglio, sottotitoli e montaggio; generazione video locale resta sperimentale e non requisito minimo.
 - Audio: registrazione autorizzata, trascrizione, sintesi vocale, pulizia e traduzione/doppiaggio.
+- Catalogo funzioni e moduli estendibili: integrazione di componenti open source, replica funzionale indipendente e connettori ufficiali; ogni modulo deve esporre provenienza, licenza, permessi, requisiti e stato reale.
 - Coding e GitHub: lettura/generazione codice, gestione repository, branch, commit, issue, pull request, GitHub Actions e agente software multi-step, con permessi granulari e conferme.
 - Produttività: note, testi, tabelle, CSV, documenti e presentazioni.
 - Agenti: strumenti con permessi minimi, cronologia azioni e conferma prima di invii, pubblicazioni, acquisti o cancellazioni.
