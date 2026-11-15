@@ -23,9 +23,17 @@ class LocalDocumentRepository(context: Context) {
 
     fun import(uri: Uri, extractor: DocumentTextExtractor): StoredDocument {
         val extracted = extractor.extract(uri)
-        val id = "${System.currentTimeMillis()}_${directory.listFiles()?.size ?: 0}"
-        val file = File(directory, "$id.enc")
+        val existingFiles = directory.listFiles { candidate -> candidate.isFile && candidate.extension == "enc" }.orEmpty()
+        require(existingFiles.size < MAX_DOCUMENTS) {
+            "Archivio pieno: il limite è $MAX_DOCUMENTS documenti. Elimina un file prima di importarne altri."
+        }
         val cleartext = "${extracted.title}\n${extracted.extension}\n\n${extracted.text}".toByteArray(Charsets.UTF_8)
+        val currentBytes = existingFiles.sumOf { it.length() }
+        require(currentBytes + cleartext.size + GCM_IV_BYTES + 16 <= MAX_TOTAL_BYTES) {
+            "Archivio documenti pieno: limite complessivo 200 MB. Elimina alcuni documenti."
+        }
+        val id = "${System.currentTimeMillis()}_${existingFiles.size}"
+        val file = File(directory, "$id.enc")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
         file.writeBytes(cipher.iv + cipher.doFinal(cleartext))
@@ -79,5 +87,7 @@ class LocalDocumentRepository(context: Context) {
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val GCM_IV_BYTES = 12
         const val GCM_TAG_BITS = 128
+        const val MAX_DOCUMENTS = 50
+        const val MAX_TOTAL_BYTES = 200L * 1024L * 1024L
     }
 }
