@@ -224,7 +224,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
             }
             status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             Text(
-                "Limiti: massimo 25 MB per file, 250 pagine PDF e 200.000 caratteri estratti. I PDF scansiti usano Tesseract offline se è stato importato ita.traineddata; l'OCR è limitato alle prime 20 pagine. La ricerca semantica basata su embeddings è uno step successivo; la ricerca testuale locale BM25 su più documenti è disponibile.",
+                "Limiti: massimo 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti, 50 documenti e 200 MB complessivi. I PDF scansiti usano Tesseract offline se è stato importato ita.traineddata; l'OCR è limitato alle prime 20 pagine. La ricerca semantica basata su embeddings è uno step successivo; la ricerca testuale locale BM25 su più documenti è disponibile.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
