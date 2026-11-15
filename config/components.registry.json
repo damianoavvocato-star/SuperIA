@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "project": "SuperIA Privata",
+  "updated_at": "2026-11-15",
+  "policy": {
+    "default_mode": "local_first",
+    "cloud_providers_enabled_by_default": false,
+    "install_dependencies_automatically": false,
+    "model_weights_require_individual_license_review": true,
+    "pin_commit_and_checksum_before_distribution": true
+  },
+  "components": [
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "purpose": "local LLM runtime",
+      "source": "https://github.com/ollama/ollama",
+      "code_license": "MIT",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "llama-cpp",
+      "name": "llama.cpp",
+      "purpose": "local LLM inference and server",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "code_license": "MIT",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "whisper",
+      "name": "OpenAI Whisper",
+      "purpose": "speech to text",
+      "source": "https://github.com/openai/whisper",
+      "code_license": "MIT",
+      "model_license": "MIT per upstream repository; verify artifact",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "whisper-cpp",
+      "name": "whisper.cpp",
+      "purpose": "local speech to text runtime",
+      "source": "https://github.com/ggml-org/whisper.cpp",
+      "code_license": "MIT",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "tesseract",
+      "name": "Tesseract OCR",
+      "purpose": "document OCR",
+      "source": "https://github.com/tesseract-ocr/tesseract",
+      "code_license": "Apache-2.0",
+      "model_license": "language_data_and_dependencies_separate",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "llamaindex-core",
+      "name": "LlamaIndex core",
+      "purpose": "RAG and indexing",
+      "source": "https://github.com/run-llama/llama_index",
+      "code_license": "MIT for core package reviewed",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "haystack",
+      "name": "Haystack",
+      "purpose": "RAG pipelines and orchestration",
+      "source": "https://github.com/deepset-ai/haystack",
+      "code_license": "Apache-2.0",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "purpose": "image generation workflows",
+      "source": "https://github.com/Comfy-Org/ComfyUI",
+      "code_license": "GPL-3.0",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "offline": true,
+      "status": "optional_isolated_pending_compatibility"
+    },
+    {
+      "id": "blender",
+      "name": "Blender",
+      "purpose": "3D and rendering",
+      "source": "https://github.com/blender/blender",
+      "code_license": "GPL-3.0-or-later",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "optional_isolated_pending_dependency_review"
+    },
+    {
+      "id": "ffmpeg",
+      "name": "FFmpeg",
+      "purpose": "audio and video processing",
+      "source": "https://github.com/FFmpeg/FFmpeg",
+      "code_license": "LGPL-2.1-or-later_base; GPL_optional; nonfree_build_not_redistributable",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android"
+      ],
+      "offline": true,
+      "status": "blocked_until_build_configuration_review"
+    },
+    {
+      "id": "piper-legacy",
+      "name": "Piper legacy",
+      "purpose": "local text to speech",
+      "source": "https://github.com/rhasspy/piper",
+      "code_license": "MIT_declared; repository_archived",
+      "model_license": "per_voice; dependencies_review_required",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "not_approved_development_moved_to_GPL_project"
+    },
+    {
+      "id": "pandas",
+      "name": "pandas",
+      "purpose": "data analysis",
+      "source": "https://github.com/pandas-dev/pandas",
+      "code_license": "BSD-3-Clause",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "sympy",
+      "name": "SymPy",
+      "purpose": "symbolic mathematics",
+      "source": "https://github.com/sympy/sympy",
+      "code_license": "BSD-style_with_embedded_component_notices",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": true,
+      "status": "candidate"
+    },
+    {
+      "id": "n8n",
+      "name": "n8n",
+      "purpose": "workflow automation",
+      "source": "https://github.com/n8n-io/n8n",
+      "code_license": "Sustainable_Use_License_and_Enterprise_License",
+      "model_license": "not_applicable",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": "partial",
+      "status": "exclude_from_core_pending_use_case_review"
+    },
+    {
+      "id": "autogpt",
+      "name": "AutoGPT",
+      "purpose": "agent workflows",
+      "source": "https://github.com/Significant-Gravitas/AutoGPT",
+      "code_license": "mixed_MIT_and_PolyForm_Shield_by_subdirectory",
+      "model_license": "per_model",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "offline": "partial",
+      "status": "blocked_until_subproject_isolation"
+    }
+  ],
+  "release_fields_required": [
+    "pinned_version_or_commit",
+    "artifact_sha256",
+    "spdx_license",
+    "dependency_sbom",
+    "model_or_voice_license",
+    "platform_test_results",
+    "offline_and_telemetry_review"
+  ]
+}
