@@ -31,6 +31,7 @@ class ChatHistoryStore(context: Context) {
         "superia_private_chat", Context.MODE_PRIVATE
     )
     private val archive = AtomicFile(File(context.applicationContext.filesDir, "conversation_history.enc"))
+    private val memoryArchive = AtomicFile(File(context.applicationContext.filesDir, "project_memory.enc"))
 
     fun load(): List<ChatLine> {
         if (archive.baseFile.exists()) {
@@ -63,14 +64,31 @@ class ChatHistoryStore(context: Context) {
                 gzip.write(json.toString().toByteArray(Charsets.UTF_8))
             }
         }.toByteArray()
-        val encrypted = encrypt(compressed)
+        writeAtomically(archive, encrypt(compressed))
+    }
+
+    /** User-editable project memory, encrypted with the same device-bound key. */
+    fun loadProjectMemory(): String {
+        if (!memoryArchive.baseFile.exists()) return ""
+        return String(decrypt(memoryArchive.openRead().use { it.readBytes() }), Charsets.UTF_8)
+    }
+
+    fun saveProjectMemory(memory: String) {
+        writeAtomically(memoryArchive, encrypt(memory.trim().toByteArray(Charsets.UTF_8)))
+    }
+
+    fun clearProjectMemory() {
+        memoryArchive.delete()
+    }
+
+    private fun writeAtomically(target: AtomicFile, bytes: ByteArray) {
         var stream: java.io.FileOutputStream? = null
         try {
-            stream = archive.startWrite()
-            stream.write(encrypted)
-            archive.finishWrite(stream)
+            stream = target.startWrite()
+            stream.write(bytes)
+            target.finishWrite(stream)
         } catch (error: Exception) {
-            if (stream != null) archive.failWrite(stream)
+            if (stream != null) target.failWrite(stream)
             throw error
         }
     }
