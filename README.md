@@ -19,10 +19,11 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - CI sul commit `8ba080ad4f43690f25c63f74d2ff7c3941944b5a`: test Android, compilazione APK e test backend tutti superati.
 - APK debug disponibile come artefatto GitHub Actions; i pesi Gemma non sono inclusi e vanno scaricati/importati separatamente dopo aver accettato i termini.
 - Fase 2: implementazione e CI verificate; collaudo end-to-end su Realme C75 e Xiaomi Mi 10T ancora necessario.
-- Immagini, video, audio, documenti, coding avanzato e agenti non sono ancora implementati nell'app nativa.
+- Fase 3 (primo incremento): importazione locale PDF/DOCX/TXT/CSV, estrazione testo, archivio cifrato AES-GCM e passaggio di un documento selezionato al prompt chat. OCR, RAG multi-documento e citazioni di pagina sono ancora da implementare.
+- Immagini, video, audio, coding avanzato e agenti non sono ancora implementati nell'app nativa.
 
 ## Roadmap completa
-La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). L'architettura è Android-only; il registro dei runtime Android candidati è in [config/android-components.registry.json](config/android-components.registry.json). L'integrazione GitHub e il collegamento sicuro tra più telefoni sono specificati in [docs/GITHUB_AND_MULTI_DEVICE.md](docs/GITHUB_AND_MULTI_DEVICE.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) il [registro macchina dei componenti](config/components.registry.json) e il [registro dei modelli candidati](config/models.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
+La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md); il registro operativo con stati e gate è in [docs/PHASE_TRACKER.md](docs/PHASE_TRACKER.md). L'architettura è Android-only; il registro dei runtime Android candidati è in [config/android-components.registry.json](config/android-components.registry.json). L'integrazione GitHub e il collegamento sicuro tra più telefoni sono specificati in [docs/GITHUB_AND_MULTI_DEVICE.md](docs/GITHUB_AND_MULTI_DEVICE.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) il [registro macchina dei componenti](config/components.registry.json) e il [registro dei modelli candidati](config/models.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
 
 ## App Android nativa
 
@@ -53,6 +54,6 @@ Variabili: `OLLAMA_MODEL` (predefinito `llama3.2:3b`) e `OLLAMA_BASE_URL` (prede
 Senza Ollama, le richieste AI restituiscono un errore esplicito. Nessun fallback cloud.
 
 ## Privacy
-Cronologia e memoria personale sono conservate nel localStorage del browser sul dispositivo corrente e non sono cifrate dall'app. Non inserire dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
+Nell'app Android la cronologia chat e il testo estratto dai documenti sono cifrati AES-GCM con chiavi non esportabili in Android Keystore. Il prototipo web/backend separato conserva cronologia e annotazioni nel localStorage del browser sul dispositivo corrente e non le cifra: non inserire dati altamente riservati in quel prototipo. Non inserire dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
 
 Non esporre il server in rete senza autenticazione e revisione di sicurezza. Non inserire segreti nel repository.
