@@ -4,7 +4,8 @@ Assistente AI personale, modulare e con priorità all'esecuzione locale. Questo 
 
 ## Stato
 - Fase 1: fondamenta e architettura documentate.
-- Fase 2: backend chat FastAPI, integrazione locale Ollama, interfaccia web, selezione modello, cronologia conversazioni locale, esportazione e cancellazione.
+- Fase 2: backend chat FastAPI, integrazione locale Ollama, selezione modelli, gestione conversazioni, esportazione e memoria personale locale.
+- La memoria personale è una nota configurabile dall'utente salvata nel browser e passata nel contesto della chat; non è apprendimento del modello.
 - Le funzioni non implementate restano esplicitamente pianificate.
 
 ## Avvio
@@ -26,8 +27,8 @@ Installa Ollama, avvialo e scarica un modello compatibile, ad esempio `ollama pu
 Variabili: `OLLAMA_MODEL` (predefinito `llama3.2:3b`) e `OLLAMA_BASE_URL` (predefinito `http://127.0.0.1:11434`).
 Senza Ollama, stato e interfaccia funzionano; le richieste AI restituiscono un errore esplicito. Nessun fallback cloud.
 
-## Cronologia e privacy
-Le conversazioni sono conservate nel localStorage del browser sul dispositivo corrente; il backend non le persiste. Puoi creare, selezionare, eliminare, svuotare ed esportare le chat. Il localStorage non è cifrato dall'app: evita dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
+## Cronologia, memoria e privacy
+Le conversazioni e la memoria personale sono conservate nel localStorage del browser sul dispositivo corrente; il backend non le persiste. Puoi creare, selezionare, eliminare, svuotare ed esportare le chat. La memoria è una nota fino a 3000 caratteri che viene inviata nel contesto della chat: non addestra il modello e non si sincronizza. Il localStorage non è cifrato dall'app: evita dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
 
 Non esporre il server in rete senza autenticazione e revisione di sicurezza. Non inserire segreti nel repository.
 
