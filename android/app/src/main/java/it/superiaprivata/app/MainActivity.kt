@@ -19,6 +19,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import it.superiaprivata.app.device.DeviceProfileReader
 import it.superiaprivata.app.pairing.DeviceIdentityStore
 import it.superiaprivata.app.pairing.PairingInvite
+import it.superiaprivata.app.chat.AssistantChatPanel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
                             Text("SuperIA Privata", style = MaterialTheme.typography.headlineMedium)
                             Text("La tua piattaforma AI personale · Android")
                         }
+                        item { AssistantChatPanel() }
                         item {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
