@@ -39,6 +39,7 @@ import it.superiaprivata.app.inference.InferenceRequest
 import it.superiaprivata.app.inference.LiteRtLmInferenceEngine
 import it.superiaprivata.app.inference.LocalModelCatalog
 import it.superiaprivata.app.inference.LocalModelInstaller
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,7 +92,9 @@ fun AssistantChatPanel() {
                     modelInstalled = true
                     modelMessage = "Modello importato: ${result.sizeBytes / (1024 * 1024)} MB · SHA-256 ${result.sha256.take(16)}…"
                     generationError = null
-                } catch (error: Throwable) {
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
                     modelMessage = error.message ?: "Importazione non riuscita."
                 } finally {
                     importing = false
@@ -143,7 +146,7 @@ fun AssistantChatPanel() {
                         )
                     }
                     OutlinedButton(
-                        enabled = licenseAccepted && !importing,
+                        enabled = licenseAccepted && !importing && !generating,
                         onClick = { modelPicker.launch(arrayOf("*/*")) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -216,6 +219,9 @@ fun AssistantChatPanel() {
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
+                            // The native LiteRT-LM conversation is in memory only.
+                            // Rebuild a bounded context from the encrypted transcript.
+                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request)
                             val userLine = ChatLine(System.nanoTime(), request, "user")
                             messages.add(userLine)
                             draft = ""
@@ -229,13 +235,15 @@ fun AssistantChatPanel() {
                                 try {
                                     val result = engine.generate(
                                         artifact.spec,
-                                        InferenceRequest(prompt = request)
+                                        InferenceRequest(prompt = promptWithHistory)
                                     )
                                     messages.add(
                                         ChatLine(System.nanoTime(), result.text, "assistant")
                                     )
                                     historyStore.save(messages.toList())
-                                } catch (error: Throwable) {
+                                } catch (error: CancellationException) {
+                                    throw error
+                                } catch (error: Exception) {
                                     generationError = error.message ?: "Errore durante l'inferenza locale."
                                 } finally {
                                     generating = false
