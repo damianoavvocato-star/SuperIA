@@ -14,7 +14,7 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 
 ## Stato attuale
 - Backend prototipo: FastAPI con provider Ollama locale, endpoint chat/modelli e interfaccia web dimostrativa. Il backend non è una dipendenza obbligatoria dell'app Android.
-- App Android nativa: Kotlin/Jetpack Compose, rilevamento dispositivo, adapter LiteRT-LM 0.16.1 CPU, catalogo Gemma 3 1B IT INT4, importazione locale del modello con consenso licenza e cronologia chat AES-GCM tramite Android Keystore.
+- App Android nativa: Kotlin/Jetpack Compose, rilevamento dispositivo, adapter LiteRT-LM 0.16.1 CPU, catalogo Gemma 3 1B IT INT4, importazione locale del modello con consenso licenza, cronologia chat e archivio documentale cifrati AES-GCM tramite Android Keystore.
 - Continuità chat: il contesto recente viene ricostruito dalla cronologia cifrata (fino a 12 messaggi e 6.000 caratteri) quando il runtime viene ricreato.
 - CI sul commit `8ba080ad4f43690f25c63f74d2ff7c3941944b5a`: test Android, compilazione APK e test backend tutti superati.
 - APK debug disponibile come artefatto GitHub Actions; i pesi Gemma non sono inclusi e vanno scaricati/importati separatamente dopo aver accettato i termini.
@@ -26,7 +26,7 @@ La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/RO
 
 ## App Android nativa
 
-Il progetto Kotlin/Jetpack Compose è in [android/](android/README.md). Include dashboard, rilevamento locale di hardware/RAM/storage/termica, chat LiteRT-LM CPU, catalogo Gemma 3 1B IT INT4, importazione del file `.litertlm` nello spazio privato, consenso esplicito ai termini del modello e cronologia cifrata AES-GCM. Il contesto recente viene ricostruito dalla cronologia dopo la ricreazione del runtime. Il modello non è incluso nell'APK e non viene scaricato automaticamente.
+Il progetto Kotlin/Jetpack Compose è in [android/](android/README.md). Include dashboard, rilevamento locale di hardware/RAM/storage/termica, chat LiteRT-LM CPU, catalogo Gemma 3 1B IT INT4, importazione del file `.litertlm` nello spazio privato, consenso esplicito ai termini del modello, cronologia chat e archivio documentale cifrati AES-GCM. Il contesto recente viene ricostruito dalla cronologia dopo la ricreazione del runtime. Il modello non è incluso nell'APK e non viene scaricato automaticamente.
 
 La build e i test CI sono superati, ma la Fase 2 resta aperta fino alla prova pratica di inferenza con il modello importato su Realme C75 e Xiaomi Mi 10T. Vedi [stato Fase 2](docs/PHASE2_STATUS.md) e [validazione runtime](docs/ANDROID_RUNTIME_VALIDATION.md).
 
