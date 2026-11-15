@@ -30,12 +30,9 @@
 
 | Componente | Motivo del blocco temporaneo |
 |---|---|
-| llama.cpp | La ricerca preliminare ha individuato file secondari MIT, ma occorre verificare il file LICENSE principale del commit scelto e i subcomponenti. |
-| FFmpeg | La licenza dipende dalle opzioni di compilazione e dalle librerie abilitate: build LGPL e build GPL/non-free non sono intercambiabili. Selezionare e fissare una build, poi esaminare configurazione e avvisi. |
-| Piper TTS | Verificare repository mantenuto, licenza della versione scelta, voci e modelli vocali; non riutilizzare automaticamente licenze di fork diversi. |
-| Haystack | Verificare il repository e la licenza della versione/pacchetto specifico prima di selezionarlo rispetto a LlamaIndex. |
+| FFmpeg | Il codice base è LGPL-2.1-or-later; parti opzionali GPL si attivano con `--enable-gpl`; `--enable-nonfree` produce binari non redistribuibili. La build e le librerie esterne cambiano gli obblighi. | 
+| Piper TTS | Il repository storico `rhasspy/piper` è archiviato dal 6 ottobre 2025 e dichiara MIT; lo sviluppo è indicato come trasferito a `OHF-Voice/piper1-gpl`. Le voci hanno licenze per singolo modello. La presenza di eSpeak NG e relativi componenti richiede revisione della distribuzione. | 
 | Inkscape | Verificare licenza del codice e delle dipendenze per la versione da distribuire. |
-| SymPy e pandas | Verificare i file LICENSE delle versioni bloccate nel lockfile e le dipendenze effettive. |
 | Modelli immagine/video/audio | Nessuna approvazione generica: controllare modello, versione, pesi, dataset, restrizioni commerciali/personali e condizioni di output. |
 
 ## Fonti ufficiali consultate
@@ -82,3 +79,23 @@ Ogni componente candidato deve ricevere:
 - Nessuna approvazione generale dei pesi/modelli.
 - Nessuna nuova dipendenza installata nel prodotto in questo passaggio.
 - Registro iniziale creato; audit completo ancora aperto.
+
+
+## Aggiornamento verifica puntuale — 15 novembre 2026
+
+Ulteriori file ufficiali consultati:
+
+- llama.cpp, file LICENSE principale: https://github.com/ggml-org/llama.cpp/blob/master/LICENSE — MIT. La decisione resta subordinata al pin di un commit e all'inventario dei componenti/avvisi.
+- Haystack, LICENSE: https://github.com/deepset-ai/haystack/blob/main/LICENSE — Apache-2.0.
+- pandas, LICENSE: https://github.com/pandas-dev/pandas/blob/main/LICENSE — BSD 3-Clause.
+- SymPy, LICENSE: https://github.com/sympy/sympy/blob/master/LICENSE — BSD-style, con sezioni che riportano licenze di componenti incorporati.
+- FFmpeg, pagina legale ufficiale: https://www.ffmpeg.org/legal.html e LICENSE: https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md — base LGPL-2.1-or-later; le opzioni GPL e non-free cambiano la licenza/redistribuibilità del risultato. Per la prima build di SuperIA è preferibile non distribuire un binario FFmpeg finché non è stata definita e verificata la configurazione.
+- Piper storico: https://github.com/rhasspy/piper — repository archiviato il 6 ottobre 2025, licenza MIT dichiarata; il repository indica lo spostamento dello sviluppo a https://github.com/OHF-Voice/piper1-gpl. Non selezionare automaticamente il nuovo progetto né distribuire voci senza verificare la licenza specifica del modello e delle dipendenze.
+
+### Decisioni aggiornate
+
+- **Aggiunti come candidati di codice**: llama.cpp, Haystack, pandas, SymPy.
+- **FFmpeg**: mantenuto in stato bloccato fino alla scelta e verifica di una build precisa; non usare build con `--enable-nonfree` per distribuzione.
+- **Piper**: non approvato per il nucleo; progetto storico archiviato e sviluppo trasferito a un progetto GPL. Valutare solo dopo verifica tecnica e legale della versione, del motore fonetico e di ogni voce.
+- **Inkscape**: ancora da verificare sul commit/versione che si intenderebbe distribuire.
+- Nessuna dipendenza è stata installata o inclusa nell'applicazione in questo aggiornamento.
