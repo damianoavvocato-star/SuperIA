@@ -162,3 +162,11 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Non sono stati eseguiti test strumentali di riavvio/process death, stress con cronologie grandi, migrazione su installazioni reali o test sui Realme C75 e Xiaomi Mi 10T.
 - Nessun test end-to-end con modello importato su telefono reale.
 - La continuità conversazionale è **parzialmente implementata**. Non chiudere il requisito trasversale né dichiarare conclusa la Fase 2/3/10/13/14 sulla sola base della CI.
+
+
+### Esito finale CI ripresa richieste — aggiornamento 15 novembre 2026
+- Android [run 43764049532](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764049532), commit `5c4f8ab4bed0075ee6c84314f90934eed7b91c57`: workflow **SUCCESS**; unit test Android, assemble debug APK e upload artifact tutti SUCCESS.
+- Backend [run 43764089944](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764089944), commit `2241caac22d39125e570e9fb2a9fbb2a9f62dfe0`: workflow **SUCCESS**.
+- Artefatto aggiornato `superia-privata-debug`, ID `14181935552`, 59.748.079 byte, digest SHA-256 archivio `a84696e6897848c5941ff877c1d8878e584f4a72af9e2e9252f7284d330b47f8`, scadenza 13 febbraio 2027.
+- Anche Android run intermedio `43764036071` ha completato test/build/upload; il riferimento definitivo resta l'ultimo commit `5c4f8ab4`.
+- La CI conferma compilazione e test automatici, non prova riavvio/process death, modello in esecuzione o comportamento su hardware reale.
