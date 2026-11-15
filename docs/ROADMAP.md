@@ -2,7 +2,7 @@
 
 ## Obiettivo e decisioni vincolanti
 
-Costruire un'unica piattaforma personale che riunisca, in un'interfaccia sola, le principali capacità delle 182 IA elencate nella ricognizione iniziale. Non si copiano codice, pesi, servizi proprietari o funzioni a pagamento: si integrano modelli, librerie e strumenti open source o gratuiti, rispettando licenze e condizioni d'uso.
+Costruire un'unica piattaforma Android personale e non commerciale che riunisca, in un'interfaccia sola, il maggior numero possibile di capacità delle 182 IA e di nuove funzioni richieste dall'utente. Le capacità si acquisiscono tramite componenti open source compatibili, replica funzionale indipendente e connettori/API ufficiali. L'uso personale non annulla automaticamente copyright, licenze o termini dei servizi: non si copiano codice, pesi, asset o servizi proprietari senza autorizzazione. Il processo è definito in [docs/FUNCTION_REPLICATION_AND_INTEGRATION.md](FUNCTION_REPLICATION_AND_INTEGRATION.md).
 
 Decisioni da mantenere in tutte le fasi:
 - Uso personale e riservato; progetto completamente separato da **Editore Foto e Video IA** (repository, codice, dati e configurazioni distinti).
