@@ -1,5 +1,7 @@
 package it.superiaprivata.app.documents
 
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -38,6 +40,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     val scope = rememberCoroutineScope()
     val repository = remember(context) { LocalDocumentRepository(context) }
     val extractor = remember(context) { DocumentTextExtractor(context) }
+    val ocrStore = remember(context) { OcrLanguageDataStore(context) }
     val documents = remember(repository) {
         mutableStateListOf<StoredDocument>().apply { addAll(repository.list()) }
     }
@@ -47,6 +50,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     var selectedContext by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<RetrievedChunk>>(emptyList()) }
+    var ocrReady by remember(ocrStore) { mutableStateOf(ocrStore.isItalianReady()) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
@@ -68,11 +72,43 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
         }
     }
 
+    val ocrPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            status = "Importazione del dizionario OCR…"
+            try {
+                val bytes = withContext(Dispatchers.IO) { ocrStore.importItalian(uri) }
+                ocrReady = true
+                status = "Dizionario italiano OCR importato: ${bytes / (1024 * 1024)} MB."
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                status = error.message ?: "Importazione del dizionario OCR non riuscita."
+            }
+        }
+    }
+
     val selected = documents.firstOrNull { it.id == selectedId }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Documenti e conoscenza personale", style = MaterialTheme.typography.titleLarge)
             Text("Importa PDF, DOCX, TXT o CSV. Il testo viene estratto sul telefono e conservato cifrato nell'area privata dell'app.")
+            Text(
+                if (ocrReady) "OCR italiano offline: pronto"
+                else "OCR italiano offline: importa il file ita.traineddata per leggere i PDF scansiti.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedButton(
+                onClick = { ocrPicker.launch(arrayOf("*/*")) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(if (ocrReady) "Sostituisci dizionario OCR italiano" else "Importa dizionario OCR italiano") }
+            OutlinedButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/tesseract-ocr/tessdata_fast/blob/4.1.0/ita.traineddata"))
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Apri dizionario italiano ufficiale") }
             Button(
                 enabled = !importing,
                 onClick = { picker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
@@ -188,7 +224,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
             }
             status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             Text(
-                "Limiti: massimo 25 MB per file, 250 pagine PDF e 200.000 caratteri estratti. I PDF scansiti richiedono OCR, non ancora incluso. La ricerca semantica basata su embeddings è uno step successivo; la ricerca testuale locale BM25 su più documenti è disponibile.",
+                "Limiti: massimo 25 MB per file, 250 pagine PDF e 200.000 caratteri estratti. I PDF scansiti usano Tesseract offline se è stato importato ita.traineddata; l'OCR è limitato alle prime 20 pagine. La ricerca semantica basata su embeddings è uno step successivo; la ricerca testuale locale BM25 su più documenti è disponibile.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
