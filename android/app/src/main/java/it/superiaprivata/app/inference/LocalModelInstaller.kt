@@ -62,8 +62,8 @@ class LocalModelInstaller(private val context: Context) {
 
             require(totalBytes > 0L) { "Il file selezionato è vuoto." }
 
-            // Prefer an atomic replacement. Some Android filesystems/providers do not
-            // support ATOMIC_MOVE, so fall back to a normal replacement on that case.
+            // Prefer an atomic replacement. If the filesystem does not support it,
+            // use a backup/restore path so a failed replacement preserves the old model.
             try {
                 Files.move(
                     temporary.toPath(),
@@ -72,11 +72,9 @@ class LocalModelInstaller(private val context: Context) {
                     StandardCopyOption.REPLACE_EXISTING
                 )
             } catch (_: AtomicMoveNotSupportedException) {
-                Files.move(
-                    temporary.toPath(),
-                    target.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING
-                )
+                replaceWithBackup(temporary, target)
+            } catch (_: UnsupportedOperationException) {
+                replaceWithBackup(temporary, target)
             }
 
             ModelImportResult(
@@ -87,6 +85,38 @@ class LocalModelInstaller(private val context: Context) {
         } catch (error: Throwable) {
             temporary.delete()
             throw error
+        }
+    }
+
+
+    private fun replaceWithBackup(temporary: File, target: File) {
+        val backup = File(target.parentFile, "${target.name}.backup")
+
+        // Recover a previous import interrupted after moving the old target aside.
+        if (backup.exists() && !target.exists()) {
+            Files.move(backup.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        } else if (backup.exists()) {
+            backup.delete()
+        }
+
+        val hadPreviousModel = target.exists()
+        if (hadPreviousModel) {
+            Files.move(target.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+
+        try {
+            Files.move(temporary.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            backup.delete()
+        } catch (failure: Throwable) {
+            target.delete()
+            if (backup.exists()) {
+                try {
+                    Files.move(backup.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                } catch (restoreFailure: Throwable) {
+                    failure.addSuppressed(restoreFailure)
+                }
+            }
+            throw failure
         }
     }
 
