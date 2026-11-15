@@ -189,6 +189,51 @@ fun AssistantChatPanel(documentContext: String? = null) {
                 }
             }
 
+            messages.lastOrNull { it.pending }?.let { pendingLine ->
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                ) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Richiesta non completata", style = MaterialTheme.typography.titleSmall)
+                        Text("L'app è stata chiusa o l'inferenza si è interrotta prima della risposta. Puoi riprovare senza reinserire il messaggio.")
+                        OutlinedButton(
+                            enabled = availability.isReady && licenseAccepted && !generating,
+                            onClick = {
+                                val contextHistory = messages.filterNot { it.pending }
+                                val retryPrompt = ChatPromptBuilder.build(
+                                    contextHistory,
+                                    pendingLine.text,
+                                    documentContext = documentContext,
+                                    memorySummary = projectMemory
+                                )
+                                scope.launch {
+                                    generating = true
+                                    generationError = null
+                                    try {
+                                        val result = engine.generate(
+                                            artifact.spec,
+                                            InferenceRequest(prompt = retryPrompt)
+                                        )
+                                        val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
+                                        if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
+                                        messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
+                                        historyStore.save(messages.toList())
+                                        storageError = null
+                                    } catch (error: CancellationException) {
+                                        throw error
+                                    } catch (error: Exception) {
+                                        generationError = error.message ?: "Ripresa della richiesta non riuscita."
+                                    } finally {
+                                        generating = false
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Riprendi richiesta") }
+                    }
+                }
+            }
+
             if (messages.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp),
@@ -243,12 +288,16 @@ fun AssistantChatPanel(documentContext: String? = null) {
                             // The native LiteRT-LM conversation is in memory only.
                             // Rebuild a bounded context from the encrypted transcript.
                             val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request, documentContext = documentContext, memorySummary = projectMemory)
-                            val userLine = ChatLine(System.nanoTime(), request, "user")
+                            val userLine = ChatLine(System.nanoTime(), request, "user", pending = true)
                             messages.add(userLine)
+                            val saved = runCatching { historyStore.save(messages.toList()) }
+                            if (saved.isFailure) {
+                                messages.remove(userLine)
+                                storageError = saved.exceptionOrNull()?.message ?: "Errore nel salvataggio"
+                                return@Button
+                            }
+                            storageError = null
                             draft = ""
-                            runCatching { historyStore.save(messages.toList()) }
-                                .onSuccess { storageError = null }
-                                .onFailure { storageError = it.message ?: "Errore nel salvataggio" }
 
                             scope.launch {
                                 generating = true
@@ -258,9 +307,9 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                         artifact.spec,
                                         InferenceRequest(prompt = promptWithHistory)
                                     )
-                                    messages.add(
-                                        ChatLine(System.nanoTime(), result.text, "assistant")
-                                    )
+                                    val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
+                                    if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
+                                    messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
                                     historyStore.save(messages.toList())
                                 } catch (error: CancellationException) {
                                     throw error
