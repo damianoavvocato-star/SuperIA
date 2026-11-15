@@ -95,16 +95,110 @@
 82. Papercup
 83. Deepgram
 
-### Voci da 84 a 182 — da recuperare
-Le 99 voci mancanti non sono state riportate perché il loro nome originale e la numerazione non sono attualmente verificabili. Non costituiscono 99 sistemi già identificati: sono soltanto gli slot ancora da completare dell'inventario dichiarato di 182 elementi.
+### Sviluppo software, creazione web e design (84–113)
+84. GitHub Copilot
+85. Cursor
+86. Claude Code
+87. OpenAI Codex
+88. Replit AI
+89. Windsurf
+90. Lovable
+91. Bolt.new
+92. Vercel v0
+93. Tabnine
+94. Amazon Q Developer
+95. Blackbox AI
+96. Devin
+97. Codeium
+98. Sourcegraph Cody
+99. Firebase Studio
+100. Wix AI
+101. Framer AI
+102. Webflow AI
+103. Durable AI
+104. 10Web AI
+105. Hostinger AI
+106. Figma AI
+107. Gamma
+108. Beautiful.ai
+109. Microsoft Designer
+110. Looka
+111. Brandmark
+112. Kittl AI
+113. NotebookLM
 
-| Intervallo | Stato |
-|---|---|
-| 84–100 | Nome originale da recuperare |
-| 101–120 | Nome originale da recuperare |
-| 121–140 | Nome originale da recuperare |
-| 141–160 | Nome originale da recuperare |
-| 161–182 | Nome originale da recuperare |
+### Ricerca, scrittura, traduzione e lingua (114–142)
+114. Elicit
+115. Consensus
+116. SciSpace
+117. Semantic Scholar
+118. Wolfram Alpha
+119. Humata AI
+120. ChatPDF
+121. Scholarcy
+122. Research Rabbit
+123. Scite
+124. Grammarly
+125. QuillBot
+126. Jasper AI
+127. Copy.ai
+128. Writesonic
+129. Rytr
+130. Wordtune
+131. Sudowrite
+132. Anyword
+133. LanguageTool
+134. DeepL
+135. Google Translate
+136. Microsoft Translator
+137. Reverso
+138. Lara Translate
+139. ModernMT
+140. LILT
+141. Smartling
+142. Wordly
+
+### Agenti, professioni, 3D, formazione e analisi (143–182)
+143. Manus
+144. Zapier AI
+145. Make AI
+146. n8n
+147. UiPath
+148. AutoGPT
+149. CrewAI
+150. LangChain
+151. Lindy AI
+152. Genspark
+153. Abridge
+154. Nabla
+155. OpenEvidence
+156. Harvey AI
+157. CoCounsel
+158. Lexis+ AI
+159. BloombergGPT
+160. AlphaSense
+161. FinChat
+162. Planner 5D
+163. Interior AI
+164. RoomGPT
+165. Meshy AI
+166. Tripo AI
+167. Rodin AI
+168. Microsoft Security Copilot
+169. Darktrace AI
+170. Khanmigo
+171. Duolingo Max
+172. MagicSchool AI
+173. HubSpot Breeze
+174. AdCreative.ai
+175. Intercom Fin
+176. Zendesk AI
+177. Otter.ai
+178. Fireflies.ai
+179. Fathom AI
+180. Julius AI
+181. Power BI Copilot
+182. Tableau AI
 
 ## 2. Tassonomia funzionale da applicare a tutte le voci
 
@@ -176,4 +270,4 @@ La Fase 0 sarà completata soltanto quando:
 - saranno identificati componenti duplicati e opportunità di riutilizzo;
 - sarà approvata una matrice di integrazione per le fasi successive.
 
-**Avanzamento attendibile:** 83 nomi recuperati su 182 (45,6% dell'inventario nominativo); analisi comparativa e verifica licenze ancora da svolgere. La percentuale non rappresenta il completamento complessivo della Fase 0.
+**Avanzamento nominativo:** 182 nomi su 182 (100% dell'elenco recuperato). La verifica delle singole capacità, dello stato dei servizi, delle licenze, dei costi e delle alternative gratuite/locali è ancora da svolgere: il completamento dei nomi non equivale al completamento della Fase 0.
