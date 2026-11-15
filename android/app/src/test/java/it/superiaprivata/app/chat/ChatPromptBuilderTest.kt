@@ -5,40 +5,31 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ChatPromptBuilderTest {
-
-    @Test
-    fun returnsOnlyNewPromptWhenHistoryIsEmpty() {
-        assertEquals(
-            "Ciao",
-            ChatPromptBuilder.build(emptyList(), "  Ciao  ")
-        )
+    @Test fun returnsOnlyNewPromptWhenHistoryIsEmpty() {
+        assertEquals("Ciao", ChatPromptBuilder.build(emptyList(), "  Ciao  "))
     }
 
-    @Test
-    fun includesRecentUserAndAssistantMessages() {
-        val history = listOf(
-            ChatLine(1L, "Mi chiamo Luca", "user"),
-            ChatLine(2L, "Piacere, Luca", "assistant")
-        )
-
+    @Test fun includesRecentUserAndAssistantMessages() {
+        val history = listOf(ChatLine(1L, "Mi chiamo Luca", "user"), ChatLine(2L, "Piacere, Luca", "assistant"))
         val prompt = ChatPromptBuilder.build(history, "Qual è il mio nome?")
-
         assertTrue(prompt.contains("Utente: Mi chiamo Luca"))
         assertTrue(prompt.contains("Assistente: Piacere, Luca"))
         assertTrue(prompt.endsWith("Qual è il mio nome?"))
     }
 
-    @Test
-    fun limitsHistoryToMostRecentMessages() {
-        val history = listOf(
-            ChatLine(1L, "Messaggio vecchio", "user"),
-            ChatLine(2L, "Messaggio recente", "user")
-        )
-
+    @Test fun limitsHistoryToMostRecentMessages() {
+        val history = listOf(ChatLine(1L, "Messaggio vecchio", "user"), ChatLine(2L, "Messaggio recente", "user"))
         val prompt = ChatPromptBuilder.build(history, "Continua", maxHistoryMessages = 1)
-
         assertTrue(!prompt.contains("Messaggio vecchio"))
         assertTrue(prompt.contains("Messaggio recente"))
+    }
+
+    @Test fun includesBoundedDocumentContext() {
+        val context = "Documento allegato: esempio\n" + "x".repeat(7000)
+        val prompt = ChatPromptBuilder.build(emptyList(), "Riassumi", documentContext = context)
+        assertTrue(prompt.contains("Documento allegato: esempio"))
+        assertTrue(prompt.length < 6200)
+        assertTrue(prompt.endsWith("Riassumi"))
     }
 
     @Test(expected = IllegalArgumentException::class)
