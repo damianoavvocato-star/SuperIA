@@ -20,7 +20,7 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 | 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
 | 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
 | 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano OCR, embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end |
+| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end; OCR italiano offline aggiunto con dizionario importabile |
 | 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
 | 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
 | 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
@@ -74,6 +74,7 @@ Commit di implementazione (sequenza sulla branch `main`):
 - `f191a521`: dipendenza PDFBox-Android 2.0.27.0 (Apache-2.0).
 - `f7009a22`, `9934737f`, `bc985429`, `abb463d2`: integrazione dashboard/chat, contesto documentale limitato e test del prompt.
 - `2a21d447`, `7dd6f999`, `f58b05ba`, `bdecd48b`, `bb8a8465`: retriever BM25 offline, test di ranking/limiti, correzioni tokenizer e UI di ricerca multi-documento.
+- `270a39dc`, `28a3f4e0`, `e7689cb3`, `2f22048c`, `3b1c95f6`, `bee2e877`: runtime Tesseract offline, importazione protetta del dizionario italiano e OCR fallback per PDF scansiti.
 
 Funzioni incluse nel primo incremento:
 - Selettore Android senza permessi generali di archiviazione.
@@ -83,7 +84,7 @@ Funzioni incluse nel primo incremento:
 - Passaggio esplicito dell'estratto selezionato o dei blocchi recuperati al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
 
 Limiti e gate ancora aperti:
-- OCR dei PDF scansiti e immagini: non implementato.
+- OCR italiano offline dei PDF scansiti: implementato con Tesseract, subordinato all'importazione di `ita.traineddata`; limite iniziale 20 pagine per PDF. OCR immagini autonome non incluso.
 - Indicizzazione semantica/RAG, ricerca su più documenti, citazioni di pagina/paragrafo: non implementati.
 - L'archivio cifra il testo estratto con AES-GCM e una chiave non esportabile Android Keystore; restano da aggiungere gestione quote/retention e test di recupero/corruzione.
 - Non è ancora stato eseguito il build Android né la suite test dopo queste modifiche; attendere GitHub Actions.
