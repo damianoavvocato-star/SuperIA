@@ -99,3 +99,6 @@ Tutto il lavoro di questa roadmap riguarda esclusivamente **SuperIA Privata**. N
 ### Collegamento chat e modello — 15 novembre 2026
 
 La UI Compose è stata aggiornata per importare un file LiteRT-LM dalla memoria accessibile tramite selettore Android, mostrare l'informativa/consenso Gemma e abilitare l'invio soltanto quando il runtime, il file, la licenza e la soglia RAM sono pronti. La cronologia AES-GCM conserva ora messaggi utente e risposte dell'assistente. Il modello non è incluso né scaricato dall'app. La build CI del commit con questi cambiamenti deve ancora essere completata; l'esecuzione effettiva del modello richiede anche importazione e test su device reali.
+
+
+Verifica CI intermedia: sul commit `272a7c805f030ca05eda8b66b02754f34eb021c6` il task `testDebugUnitTest` è SUCCESS; il task `assembleDebug` è ancora in corso nel run 43746849747. Il run non è da considerare completato e non è ancora disponibile un nuovo APK con LiteRT-LM.
