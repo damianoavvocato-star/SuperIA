@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "project": "SuperIA Privata",
+  "platform": "android_only",
+  "updated_at": "2026-11-15",
+  "purpose": "Android-native runtime and infrastructure candidates. None is integrated or approved for release until exact version, license, checksum and device tests are recorded.",
+  "policy": {
+    "no_paid_api_required": true,
+    "local_first": true,
+    "cloud_opt_in_only": true,
+    "versions_must_be_pinned": true,
+    "device_benchmark_required": true,
+    "model_license_review_required": true
+  },
+  "components": [
+    {
+      "id": "kotlin",
+      "name": "Kotlin",
+      "role": "native application language",
+      "source": "https://kotlinlang.org/",
+      "license": "Apache-2.0",
+      "status": "selected_for_architecture",
+      "version": null
+    },
+    {
+      "id": "jetpack-compose",
+      "name": "Jetpack Compose",
+      "role": "native UI",
+      "source": "https://developer.android.com/compose",
+      "license": "Apache-2.0",
+      "status": "selected_for_architecture",
+      "version": null
+    },
+    {
+      "id": "litert-lm-android",
+      "name": "LiteRT-LM Android",
+      "role": "on-device LLM runtime; streaming and tool use",
+      "source": "https://developers.google.com/edge/litert-lm",
+      "license": "verify exact artifact and transitive dependencies",
+      "status": "primary_candidate",
+      "version": null,
+      "hardware": "CPU/GPU as supported by exact build and device; benchmark required"
+    },
+    {
+      "id": "litert-android",
+      "name": "LiteRT Android CompiledModel",
+      "role": "specialized on-device ML inference",
+      "source": "https://developer.android.com/ai/custom",
+      "license": "verify exact artifact and transitive dependencies",
+      "status": "primary_candidate",
+      "version": null,
+      "hardware": "CPU/GPU; NPU only when supported by runtime and device"
+    },
+    {
+      "id": "llama-cpp-android",
+      "name": "llama.cpp Android",
+      "role": "alternative local GGUF inference runtime",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "license": "MIT",
+      "status": "secondary_candidate",
+      "version": null,
+      "hardware": "CPU and supported Vulkan/GPU paths; verify Android build and device"
+    },
+    {
+      "id": "whisper-cpp-android",
+      "name": "whisper.cpp Android",
+      "role": "offline speech recognition",
+      "source": "https://github.com/ggml-org/whisper.cpp",
+      "license": "MIT; verify model and bundled dependencies",
+      "status": "candidate",
+      "version": null,
+      "hardware": "CPU/GPU path depends on build; benchmark Italian accuracy and battery"
+    },
+    {
+      "id": "android-mlkit-ocr",
+      "name": "ML Kit Text Recognition",
+      "role": "on-device OCR",
+      "source": "https://developers.google.com/ml-kit/vision/text-recognition/v2",
+      "license": "verify Google SDK terms and model delivery behavior",
+      "status": "candidate",
+      "version": null,
+      "hardware": "on-device mode and offline model availability must be verified"
+    },
+    {
+      "id": "tesseract-android",
+      "name": "Tesseract OCR",
+      "role": "offline OCR alternative",
+      "source": "https://github.com/tesseract-ocr/tesseract",
+      "license": "Apache-2.0; traineddata and dependencies separate",
+      "status": "candidate",
+      "version": null
+    },
+    {
+      "id": "room",
+      "name": "Android Room",
+      "role": "local structured database",
+      "source": "https://developer.android.com/training/data-storage/room",
+      "license": "Apache-2.0",
+      "status": "candidate",
+      "version": null
+    },
+    {
+      "id": "datastore",
+      "name": "Android DataStore",
+      "role": "local preferences and settings",
+      "source": "https://developer.android.com/topic/libraries/architecture/datastore",
+      "license": "Apache-2.0",
+      "status": "candidate",
+      "version": null
+    },
+    {
+      "id": "workmanager",
+      "name": "Android WorkManager",
+      "role": "reliable background jobs",
+      "source": "https://developer.android.com/topic/libraries/architecture/workmanager",
+      "license": "Apache-2.0",
+      "status": "candidate",
+      "version": null
+    },
+    {
+      "id": "android-keystore",
+      "name": "Android Keystore",
+      "role": "local key protection",
+      "source": "https://developer.android.com/privacy-and-security/keystore",
+      "license": "Android platform API",
+      "status": "selected_for_security_design"
+    }
+  ],
+  "required_before_release": [
+    "exact artifact version and repository",
+    "license and dependency notices",
+    "SHA-256 for downloaded artifacts/models",
+    "minimum Android API and ABI",
+    "device-specific RAM/thermal/battery benchmark",
+    "offline behavior test",
+    "Italian language quality test",
+    "privacy and telemetry review",
+    "APK size and storage impact"
+  ]
+}
