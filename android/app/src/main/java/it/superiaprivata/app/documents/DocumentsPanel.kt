@@ -69,7 +69,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Documenti e conoscenza personale", style = MaterialTheme.typography.titleLarge)
-            Text("Importa PDF, DOCX, TXT o CSV. Il testo viene estratto sul telefono e conservato nell'area privata dell'app.")
+            Text("Importa PDF, DOCX, TXT o CSV. Il testo viene estratto sul telefono e conservato cifrato nell'area privata dell'app.")
             Button(
                 enabled = !importing,
                 onClick = { picker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
