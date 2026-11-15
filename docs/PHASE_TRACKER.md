@@ -226,3 +226,20 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
 - Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): ancora **IN_PROGRESS** al momento di questo aggiornamento; non dichiarare superati i nuovi test né disponibile il nuovo APK finché la run non termina.
 - Questi test coprono la costruzione del contesto del prompt; non sostituiscono test Android strumentali su cifratura, migrazione, recupero dopo process death, inferenza incrementale o dispositivi reali.
+
+
+## Output incrementale della risposta AI — 15 novembre 2026
+
+- Implementata una callback opzionale `onPartialText` nel contratto `InferenceEngine`.
+- L'adapter LiteRT-LM inoltra il testo accumulato a ogni emissione del flusso nativo, riportando l'aggiornamento sul dispatcher Main.
+- La chat Compose aggiorna una riga temporanea dell'assistente mentre il modello genera, sia nell'invio normale sia nella ripresa di una richiesta pending.
+- La riga temporanea viene rimossa in caso di errore; soltanto il risultato completato viene scritto come risposta definitiva nella cronologia cifrata.
+- Commit: `4d061f54` (contratto callback), `44ab9105` (adapter LiteRT-LM), `b65f4006` (UI incrementale), `e15453ab` (pulizia output temporaneo in caso di errore).
+- **Stato:** implementazione presente, ma non ancora convalidata dalla CI successiva a questi commit. Il comportamento dipende dal modo in cui la versione LiteRT-LM 0.16.1 emette i chunk; verificare build, test e comportamento effettivo su dispositivo. Non dichiarare ancora superato il test di streaming né la Fase 2.
+- La visualizzazione incrementale non garantisce da sola il token streaming: il runtime può emettere blocchi di testo di dimensione variabile. Il test pratico deve confermare aggiornamenti visibili prima del completamento della generazione.
+
+### CI dei test contesto conversazionale
+
+- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): **SUCCESS**, unit test, assembleDebug e upload APK.
+- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
+- Artefatto Android `superia-privata-debug`, ID `14181443808`, 59.748.118 byte, SHA-256 archivio `e4e14303623d858ae5d3548e119bb3d22f045b72c97b670feb835394bf57ca4c`, scadenza 13 febbraio 2027. È relativo al commit `ca49c9b3`, non contiene ancora l'incremento di output progressivo.
