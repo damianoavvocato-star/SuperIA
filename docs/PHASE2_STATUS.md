@@ -2,7 +2,7 @@
 
 ## Stato
 
-<badge>Implementazione e CI superate; collaudo fisico in attesa</badge>
+**Stato:** implementazione e CI superate; collaudo fisico in attesa.
 
 La base Android dell'assistente locale è implementata e compilata. La Fase 2 resta aperta fino alla verifica end-to-end con il modello importato su dispositivi reali.
 
