@@ -47,7 +47,7 @@ class DocumentTextExtractor(context: Context) {
         }.trim()
 
         require(extracted.isNotBlank()) {
-            if (extension == "pdf") "Il PDF non contiene testo estraibile. Potrebbe essere una scansione: OCR non ancora disponibile."
+            if (extension == "pdf") "Il PDF non contiene testo leggibile, neppure dopo il tentativo di OCR italiano. Verifica il dizionario ita.traineddata e la qualità della scansione."
             else "Non è stato trovato testo leggibile nel documento."
         }
         require(extracted.length <= MAX_TEXT_CHARACTERS) {
