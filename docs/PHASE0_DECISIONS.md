@@ -47,6 +47,10 @@ La ricognizione è stata consolidata in quattro livelli:
 - Azioni che inviano dati, pubblicano contenuti, cancellano o modificano file richiedono conferma.
 - Log locale, esportazione e cancellazione controllata dei dati.
 
+## Selezione preliminare dei modelli linguistici
+
+Il registro dei candidati è in config/models.registry.json. Le famiglie Qwen, Llama 3.2, Gemma 4 e Phi sono soltanto piste da benchmarkare: non si attribuisce una licenza uniforme a tutta una famiglia. Per ogni download vanno fissati modello esatto, revisione, scheda ufficiale, licenza, checksum/digest e quantizzazione. La documentazione ufficiale Meta descrive Llama 3.2 1B/3B quantizzati per dispositivi edge e integrazione ExecuTorch; ciò non dimostra ancora che l'app SuperIA funzioni su uno specifico telefono. Qwen precisa che le condizioni dei pesi dipendono dal modello specifico. Ollama espone digest e metadati del modello locale, utili per registrare l'artefatto effettivo. <https://dev.meta.ai/llama/docs/model-cards-and-prompt-formats/llama3_2> · <https://github.com/QwenLM/qwen> · <https://github.com/ollama/ollama/blob/main/docs/api.md>
+
 ## Matrice di decisione iniziale
 
 | Area | Decisione | Dipendenze candidate | Stato |
