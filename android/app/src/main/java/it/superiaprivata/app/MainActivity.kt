@@ -1,16 +1,24 @@
 package it.superiaprivata.app
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import it.superiaprivata.app.device.DeviceProfile
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import it.superiaprivata.app.device.DeviceProfileReader
+import it.superiaprivata.app.pairing.DeviceIdentityStore
+import it.superiaprivata.app.pairing.PairingInvite
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +27,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 var profile by remember { mutableStateOf(profileReader.read()) }
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                var pairingQr by remember { mutableStateOf<Bitmap?>(null) }
+                var pairingError by remember { mutableStateOf<String?>(null) }
+                val identityStore = remember { DeviceIdentityStore() }
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(20.dp),
@@ -51,13 +66,74 @@ class MainActivity : ComponentActivity() {
                         item {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text("Collegamento tra telefoni", style = MaterialTheme.typography.titleLarge)
+                                    Text("Genera un invito QR temporaneo da mostrare all'altro telefono.")
+                                    Button(onClick = {
+                                        runCatching {
+                                            val invite = PairingInvite.create(
+                                                deviceLabel = android.os.Build.MODEL ?: "Dispositivo Android",
+                                                identityStore = identityStore
+                                            )
+                                            val hints = mapOf(
+                                                EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
+                                                EncodeHintType.MARGIN to 2
+                                            )
+                                            val matrix = QRCodeWriter().encode(
+                                                invite.toQrPayload(),
+                                                BarcodeFormat.QR_CODE,
+                                                640,
+                                                640,
+                                                hints
+                                            )
+                                            Bitmap.createBitmap(640, 640, Bitmap.Config.ARGB_8888).also { bitmap ->
+                                                for (x in 0 until 640) {
+                                                    for (y in 0 until 640) {
+                                                        bitmap.setPixel(
+                                                            x, y,
+                                                            if (matrix[x, y]) android.graphics.Color.BLACK
+                                                            else android.graphics.Color.WHITE
+                                                        )
+                                                    }
+                                                }
+                                            }.also {
+                                                pairingQr = it
+                                                pairingError = null
+                                            }
+                                        }.onFailure {
+                                            pairingQr = null
+                                            pairingError = it.message ?: "Impossibile creare l'invito"
+                                        }
+                                    }) {
+                                        Text("Genera codice QR")
+                                    }
+                                    pairingQr?.let { qr ->
+                                        Image(
+                                            bitmap = qr.asImageBitmap(),
+                                            contentDescription = "Invito QR per collegare un dispositivo",
+                                            modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp)
+                                        )
+                                        Text("Invito valido per 5 minuti.")
+                                        Text(
+                                            "Il QR identifica il dispositivo ma non concede fiducia né avvia ancora una connessione.",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    pairingError?.let {
+                                        Text(it, color = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+                            }
+                        }
+                        item {
+                            ElevatedCard {
+                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text("Moduli", style = MaterialTheme.typography.titleLarge)
                                     Text("Assistente AI · In preparazione")
                                     Text("Documenti · In preparazione")
                                     Text("Immagini e video · In preparazione")
                                     Text("Audio e voce · In preparazione")
                                     Text("GitHub e coding · In preparazione")
-                                    Text("Collegamento tra telefoni · In preparazione")
+                                    Text("Collegamento tra telefoni · Invito QR iniziale disponibile")
                                 }
                             }
                         }
