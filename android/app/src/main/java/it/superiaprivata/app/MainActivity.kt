@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text("Moduli", style = MaterialTheme.typography.titleLarge)
-                                    Text("Assistente AI · In preparazione")
+                                    Text("Assistente AI · Chat locale LiteRT-LM (richiede un modello installato)")
                                     Text("Documenti · In preparazione")
                                     Text("Immagini e video · In preparazione")
                                     Text("Audio e voce · In preparazione")
@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
                         }
                         item {
                             Text(
-                                "Questa è una prima base tecnica. Non esegue ancora modelli AI e non stabilisce automaticamente quale telefono sia più veloce.",
+                                "La chat AI locale è disponibile dopo l’importazione di un modello compatibile e l’accettazione della relativa licenza. Il QR è ancora un invito dimostrativo: non crea una connessione tra telefoni.",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
