@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +45,8 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     var importing by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
     var selectedContext by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf<List<RetrievedChunk>>(emptyList()) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
@@ -94,6 +97,56 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
                             Text(if (document.id == selectedId) "Selezionato" else "Apri", color = MaterialTheme.colorScheme.primary)
                         }
                     }
+                }
+            }
+
+            if (documents.isNotEmpty()) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Cerca in tutti i documenti") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedButton(
+                    enabled = searchQuery.isNotBlank(),
+                    onClick = {
+                        val snapshot = documents.toList()
+                        scope.launch {
+                            searchResults = withContext(Dispatchers.Default) {
+                                LocalDocumentRetriever.search(searchQuery, snapshot, limit = 5)
+                            }
+                            status = if (searchResults.isEmpty()) "Nessun passaggio pertinente trovato."
+                            else "${searchResults.size} passaggi pertinenti trovati con ricerca locale."
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Cerca nell'archivio") }
+                searchResults.forEach { result ->
+                    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        Text(
+                            "${result.documentTitle} · blocco ${result.chunkNumber}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(result.text.take(360), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                if (searchResults.isNotEmpty()) {
+                    Button(
+                        onClick = {
+                            selectedContext = buildString {
+                                appendLine("Risultati recuperati dall'archivio documentale locale tramite BM25:")
+                                searchResults.forEach { result ->
+                                    appendLine("[Fonte: ${result.documentTitle}, blocco ${result.chunkNumber}]")
+                                    appendLine(result.text)
+                                    appendLine()
+                                }
+                            }.take(6000)
+                            onContextChanged(selectedContext)
+                            status = "Passaggi documentali aggiunti al contesto della chat."
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Usa i risultati nella chat AI") }
                 }
             }
 
