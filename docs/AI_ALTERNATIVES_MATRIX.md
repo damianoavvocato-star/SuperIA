@@ -82,3 +82,29 @@ Per ogni componente candidato:
 - Haystack: https://github.com/deepset-ai/haystack
 
 **Stato:** prima selezione di candidati per capacità; nessuna licenza o compatibilità hardware è considerata definitivamente approvata.
+
+
+## 7. Prima verifica documentale delle licenze (15 novembre 2026)
+
+Questa verifica riguarda il codice dei repository citati, non costituisce approvazione automatica di ogni modello, voce, checkpoint, dataset o dipendenza.
+
+| Componente | Evidenza consultata | Esito preliminare | Conseguenza per SuperIA |
+|---|---|---|---|
+| Ollama | Repository ufficiale indica licenza MIT | Codice con licenza permissiva | Candidato idoneo per il runtime; verificare separatamente ogni modello scaricato |
+| Whisper | Repository ufficiale dichiara MIT per codice e pesi del modello | Candidato permissivo per trascrizione | Candidato prioritario per test offline in italiano |
+| whisper.cpp | File LICENSE ufficiale MIT | Candidato permissivo per runtime C/C++ | Da benchmarkare su PC e Android |
+| Tesseract | Repository ufficiale Apache-2.0; dipendenze con licenze proprie | Candidato permissivo per OCR | Candidato per documenti e immagini; verificare anche i file lingua e dipendenze |
+| n8n | Sustainable Use License e licenza Enterprise; il progetto dichiara di non definirsi open source OSI | Source-available/fair-code, non OSI open source | Non inserirlo nel nucleo open source; eventuale uso personale va valutato nei limiti della licenza e senza presumerne la redistribuibilità |
+| AutoGPT | La licenza è mista: MIT per gran parte del repository, PolyForm Shield per la cartella autoGPT_platform secondo la ricognizione disponibile | Non trattare l'intero progetto come MIT | Valutare solo componenti e cartelle con licenza verificata; escludere la parte con licenza incompatibile |
+
+### Fonti ufficiali consultate
+- Ollama — https://github.com/ollama/ollama
+- Whisper — https://github.com/openai/whisper
+- whisper.cpp — https://github.com/ggml-org/whisper.cpp/blob/master/LICENSE
+- Tesseract — https://github.com/tesseract-ocr/tesseract
+- n8n license — https://github.com/n8n-io/n8n/blob/master/LICENSE.md
+- n8n Community License — https://github.com/n8n-io/n8n-docs/blob/main/docs/n8n-community-license/README.md
+- AutoGPT — https://github.com/Significant-Gravitas/AutoGPT
+
+### Regola rafforzata
+La dicitura “open source” sarà usata soltanto per componenti con licenza approvata OSI. Per licenze source-available, fair-code, commerciali o miste verrà usata la dicitura corretta e il componente non sarà considerato automaticamente idoneo. La licenza del codice non sostituisce la verifica dei pesi, dei dati, dei modelli vocali e dei plugin.
