@@ -27,7 +27,7 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
 | 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; storage; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; build debug | In corso: scheletro Kotlin/Compose e rilevamento base aggiunti; primitive iniziali per identità Keystore e inviti QR a scadenza; pipeline SDK corretta e in verifica; handshake, rete, GitHub e test reali ancora da completare |
-| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | In corso: UI Compose e cronologia cifrata; contratto Kotlin InferenceEngine e registro con selezione esplicita e stati di disponibilità; runtime concreto, modello/pesi, generazione, streaming, allegati e voce ancora da collegare |
+| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | In corso: UI Compose e cronologia cifrata; contratto e registro inference; adapter LiteRT-LM 0.16.1 CPU con streaming e conversazione in memoria; catalogo Gemma 3 1B IT INT4; import modello, consenso licenza, UI di attivazione e test su telefoni reali ancora da completare |
 | 3 | Documenti e conoscenza personale | Caricamento PDF/DOCX/TXT/CSV; estrazione testo; OCR; riassunti; domande sui file; ricerca semantica; RAG; citazioni e riferimenti alle pagine; archivio locale | Pianificata |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Pianificata |
 | 5 | Immagini e grafica | Generazione da testo; modifica immagini; inpainting/outpainting; rimozione/sostituzione sfondo e oggetti; restauro; upscaling; OCR immagini; grafica, loghi e layout | Pianificata |
@@ -85,3 +85,12 @@ Una fase passa a "completata" solo quando:
 ## Regola di separazione
 
 Tutto il lavoro di questa roadmap riguarda esclusivamente **SuperIA Privata**. Non modificare repository, file, database, impostazioni o pipeline di **Editore Foto e Video IA**.
+
+
+## Aggiornamento motore AI locale — 15 novembre 2026
+
+- Kotlin Gradle Plugin aggiornato a 2.2.0; AGP 8.9.2 e Gradle 8.11.1 invariati.
+- Dipendenza LiteRT-LM Android 0.16.1 aggiunta e adapter Kotlin locale implementato, CPU-first e senza fallback cloud.
+- Il catalogo propone Gemma 3 1B IT INT4; modello esterno all'APK, circa 584 MB secondo la scheda Hugging Face, con termini Gemma da accettare prima dell'uso.
+- L'adapter richiede file locale, licenza approvata e almeno 2 GB di RAM disponibile secondo la soglia iniziale. La soglia è provvisoria.
+- Non dichiarare ancora l'assistente operativo: la build con LiteRT-LM deve superare CI; l'importazione modello, il collegamento alla UI e i test fisici sui due telefoni sono ancora da completare.
