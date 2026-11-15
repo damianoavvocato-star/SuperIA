@@ -20,6 +20,7 @@
 | OpenAI Whisper | Speech-to-text | MIT | Verificare licenze e provenienza di modelli, eventuali conversioni e dataset aggiuntivi. | Candidato per trascrizione |
 | whisper.cpp | Runtime C/C++ per Whisper | MIT | Verificare modello Whisper utilizzato e licenze delle dipendenze/binari distribuiti. | Candidato per trascrizione locale |
 | Tesseract OCR | OCR | Apache-2.0 | Il progetto segnala dipendenze con licenze distinte; verificare Leptonica e pacchetti binari. | Candidato per OCR |
+| PdfBox-Android 2.0.27.0 | Estrazione testo PDF nell'app Android | Apache-2.0 | Dipendenza AAR da Maven Central; verificare e includere nell'SBOM le dipendenze transitive Bouncy Castle e i relativi avvisi prima di una release. | Integrato nel prototipo Android; build/compatibilità da verificare |
 | LlamaIndex core | Indicizzazione e RAG | MIT per il pacchetto core esaminato | Il progetto è composto da più pacchetti: verificare la licenza di ciascun pacchetto effettivamente installato e delle dipendenze. | Candidato RAG, installazione minima |
 | ComfyUI | Pipeline generazione immagini | GPL-3.0 | Copyleft: prima di incorporare, modificare o distribuire l'applicazione insieme a ComfyUI, fare revisione compatibilità e modalità di collegamento. Plugin e modelli hanno licenze proprie. | Candidato opzionale, isolato come processo esterno |
 | Blender | 3D e rendering | GPL-3.0-or-later dichiarata per Blender | Le dipendenze incluse hanno licenze differenti; controllare avvisi di terze parti e modalità di distribuzione. | Candidato opzionale, tool esterno |
@@ -100,3 +101,12 @@ Ulteriori file ufficiali consultati:
 - **Piper**: non approvato per il nucleo; progetto storico archiviato e sviluppo trasferito a un progetto GPL. Valutare solo dopo verifica tecnica e legale della versione, del motore fonetico e di ogni voce.
 - **Inkscape**: ancora da verificare sul commit/versione che si intenderebbe distribuire.
 - Nessuna dipendenza è stata installata o inclusa nell'applicazione in questo aggiornamento.
+
+
+### PdfBox-Android — integrazione Fase 3
+
+- Repository ufficiale: https://github.com/TomRoush/PdfBox-Android
+- Coordinate Maven: `com.tom-roush:pdfbox-android:2.0.27.0`
+- Licenza del progetto: Apache-2.0, come dichiarato dal repository.
+- Utilizzo limitato all'estrazione del testo da PDF nell'app Android; non è un servizio remoto.
+- La release e le dipendenze transitive devono essere bloccate e incluse nell'SBOM della futura distribuzione. L'integrazione nel prototipo non equivale ad approvazione per la release finale.
