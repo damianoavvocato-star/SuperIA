@@ -20,7 +20,7 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 | 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
 | 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
 | 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | Da avviare | Import PDF/DOCX/TXT/CSV, estrazione, OCR, indicizzazione locale, RAG, citazioni/pagine e test con documenti campione |
+| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo; anteprima e contesto singolo documento nella chat. Restano OCR, RAG multi-documento, citazioni/pagine, hardening e test end-to-end |
 | 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
 | 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
 | 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
@@ -63,3 +63,29 @@ Per ciascun dispositivo registrare: modello esatto, versione Android, spazio lib
 - Non sommare la RAM virtuale a quella fisica.
 - Non dichiarare disponibile una funzione solo perché compare nella roadmap o in una demo statica.
 - Mantenere SuperIA-Privata separata da **Editore Foto e Video IA** e **Imperium_Italia**.
+
+
+## Avanzamento Fase 3 — primo incremento implementato
+
+Commit di implementazione (sequenza sulla branch `main`):
+- `b346eebe`: estrattore locale PDF/DOCX/TXT/CSV.
+- `e0970d90`: archivio privato del testo estratto.
+- `dbdf403e`: pannello Compose per importazione, anteprima, selezione e cancellazione.
+- `f191a521`: dipendenza PDFBox-Android 2.0.27.0 (Apache-2.0).
+- `f7009a22`, `9934737f`, `bc985429`, `abb463d2`: integrazione dashboard/chat, contesto documentale limitato e test del prompt.
+
+Funzioni incluse nel primo incremento:
+- Selettore Android senza permessi generali di archiviazione.
+- Estrazione testo PDF tramite PDFBox-Android; estrazione del corpo principale DOCX; lettura UTF-8 TXT/CSV.
+- Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti e 6.000 caratteri documentali nel prompt.
+- Salvataggio del solo testo estratto nella directory privata dell'app; anteprima e cancellazione dall'archivio.
+- Passaggio esplicito dell'estratto selezionato al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
+
+Limiti e gate ancora aperti:
+- OCR dei PDF scansiti e immagini: non implementato.
+- Indicizzazione semantica/RAG, ricerca su più documenti, citazioni di pagina/paragrafo: non implementati.
+- L'archivio contiene testo estratto in file privati, ma non ha ancora cifratura dedicata né gestione di quote/retention.
+- Non è ancora stato eseguito il build Android né la suite test dopo queste modifiche; attendere GitHub Actions.
+- Test pratico su dispositivi Android e verifica con modello locale restano obbligatori.
+
+La Fase 3 è quindi **parziale e non completata**. Non considerare disponibile l'analisi AI documentale finché CI e prova end-to-end su telefono con modello importato non risultano superate.
