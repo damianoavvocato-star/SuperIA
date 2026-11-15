@@ -13,18 +13,22 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - Moduli progressivi, privacy e controllo dell'utente.
 
 ## Stato attuale
-- Fondamenta: backend FastAPI e documentazione iniziale.
-- Assistente: Ollama locale, API chat/modelli, interfaccia web, cronologia ed esportazione.
-- Memoria: nota personale locale nel browser, aggiunta al contesto chat; non addestra il modello.
-- I test backend GitHub Actions recenti risultano superati. Il collaudo end-to-end su Ollama e dispositivi PC/Android è ancora da fare.
-- Immagini, video, audio, coding avanzato, agenti e APK non sono ancora implementati.
+- Backend prototipo: FastAPI con provider Ollama locale, endpoint chat/modelli e interfaccia web dimostrativa. Il backend non è una dipendenza obbligatoria dell'app Android.
+- App Android nativa: Kotlin/Jetpack Compose, rilevamento dispositivo, adapter LiteRT-LM 0.16.1 CPU, catalogo Gemma 3 1B IT INT4, importazione locale del modello con consenso licenza e cronologia chat AES-GCM tramite Android Keystore.
+- Continuità chat: il contesto recente viene ricostruito dalla cronologia cifrata (fino a 12 messaggi e 6.000 caratteri) quando il runtime viene ricreato.
+- CI sul commit `8ba080ad4f43690f25c63f74d2ff7c3941944b5a`: test Android, compilazione APK e test backend tutti superati.
+- APK debug disponibile come artefatto GitHub Actions; i pesi Gemma non sono inclusi e vanno scaricati/importati separatamente dopo aver accettato i termini.
+- Fase 2: implementazione e CI verificate; collaudo end-to-end su Realme C75 e Xiaomi Mi 10T ancora necessario.
+- Immagini, video, audio, documenti, coding avanzato e agenti non sono ancora implementati nell'app nativa.
 
 ## Roadmap completa
 La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). L'architettura è Android-only; il registro dei runtime Android candidati è in [config/android-components.registry.json](config/android-components.registry.json). L'integrazione GitHub e il collegamento sicuro tra più telefoni sono specificati in [docs/GITHUB_AND_MULTI_DEVICE.md](docs/GITHUB_AND_MULTI_DEVICE.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) il [registro macchina dei componenti](config/components.registry.json) e il [registro dei modelli candidati](config/models.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
 
-## Prima base Android nativa
+## App Android nativa
 
-Il progetto Kotlin/Jetpack Compose iniziale è in [android/](android/README.md). Include una dashboard e il rilevamento locale di modello, versione Android, memoria esposta dal sistema, ABI, spazio libero e stato termico. È uno scheletro iniziale: non è ancora un APK collaudato e non contiene ancora il runtime AI.
+Il progetto Kotlin/Jetpack Compose è in [android/](android/README.md). Include dashboard, rilevamento locale di hardware/RAM/storage/termica, chat LiteRT-LM CPU, catalogo Gemma 3 1B IT INT4, importazione del file `.litertlm` nello spazio privato, consenso esplicito ai termini del modello e cronologia cifrata AES-GCM. Il contesto recente viene ricostruito dalla cronologia dopo la ricreazione del runtime. Il modello non è incluso nell'APK e non viene scaricato automaticamente.
+
+La build e i test CI sono superati, ma la Fase 2 resta aperta fino alla prova pratica di inferenza con il modello importato su Realme C75 e Xiaomi Mi 10T. Vedi [stato Fase 2](docs/PHASE2_STATUS.md) e [validazione runtime](docs/ANDROID_RUNTIME_VALIDATION.md).
 
 ## Destinazione Android
 La decisione tecnica Android-only e il piano dettagliato sono in [docs/ANDROID_ONLY_ARCHITECTURE.md](docs/ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI resta un prototipo di riferimento: non sarà necessario per le funzioni principali dell'app Android.

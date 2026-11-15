@@ -27,7 +27,7 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
 | 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; storage; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; build debug | In corso: scheletro Kotlin/Compose e rilevamento base aggiunti; primitive iniziali per identità Keystore e inviti QR a scadenza; pipeline SDK corretta e in verifica; handshake, rete, GitHub e test reali ancora da completare |
-| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | In corso: chat collegata all'adapter LiteRT-LM 0.16.1 CPU; catalogo Gemma 3 1B IT INT4; import locale tramite selettore Android, consenso licenza, cronologia cifrata con ruoli; build con runtime e test fisici ancora da verificare |
+| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | Implementazione Android e CI verificate sul commit 8ba080a: LiteRT-LM CPU, catalogo/import Gemma con consenso, cronologia AES-GCM e ricostruzione contesto; test fisici con modello reale ancora da eseguire |
 | 3 | Documenti e conoscenza personale | Caricamento PDF/DOCX/TXT/CSV; estrazione testo; OCR; riassunti; domande sui file; ricerca semantica; RAG; citazioni e riferimenti alle pagine; archivio locale | Pianificata |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Pianificata |
 | 5 | Immagini e grafica | Generazione da testo; modifica immagini; inpainting/outpainting; rimozione/sostituzione sfondo e oggetti; restauro; upscaling; OCR immagini; grafica, loghi e layout | Pianificata |
@@ -118,3 +118,20 @@ La documentazione ufficiale LiteRT-LM conferma che `Message.toString()` restitui
 - La verifica della sorgente/API ufficiale conferma che `Message.toString()` restituisce il contenuto testuale (`Contents.toString()` concatena i contenuti) e che la guida Kotlin usa lo stesso approccio nel `Flow.collect`. Non è richiesta una modifica al codice per questo punto.
 - La Fase 2 resta in corso: nessun test end-to-end è stato ancora eseguito con Gemma importato su Realme C75 o Xiaomi Mi 10T. Non dichiarare completata l'inferenza locale fino a tali prove.
 - Dettagli, digest e gate pratici: [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
+
+
+## Aggiornamento Fase 2 — 15 novembre 2026 (stato corrente)
+
+Questo aggiornamento sostituisce le note precedenti che descrivevano la chat Android come non ancora collegata a un runtime. Sul commit `8ba080ad4f43690f25c63f74d2ff7c3941944b5a` sono verificati:
+- test unitari Android superati, inclusi i test del ricostruttore di contesto conversazionale;
+- compilazione APK debug superata e artefatto caricato;
+- test backend superati;
+- adapter LiteRT-LM 0.16.1 CPU collegato alla UI;
+- importazione modello in area privata con controllo estensione, limite dimensione, SHA-256 e sostituzione protetta da backup se lo spostamento atomico non è disponibile;
+- cronologia chat cifrata AES-GCM con Android Keystore;
+- ricostruzione del contesto a partire dagli ultimi 12 messaggi, limitata a 6.000 caratteri;
+- chiusura delle risorse native anche quando l'inizializzazione del runtime fallisce e gestione esplicita delle risposte vuote.
+
+CI: Android run [43758098267](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098267); backend run [43758098112](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098112). Artefatto `superia-privata-debug`, archivio 38.276.044 byte, SHA-256 `ff54a42a7fdcb49b986e9da31c0fdfe6939b49322241b49d9d6450fb6dbefda4`, scadenza 13 febbraio 2027.
+
+**La Fase 2 non viene dichiarata completata**: manca la prova end-to-end con il modello Gemma scaricato/importato e inferenza locale reale su Realme C75 e Xiaomi Mi 10T. Dettagli e gate in [docs/PHASE2_STATUS.md](PHASE2_STATUS.md) e [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
