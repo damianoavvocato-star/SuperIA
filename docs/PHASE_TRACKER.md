@@ -114,3 +114,20 @@ Attività da integrare nelle fasi:
 Criteri di accettazione: (1) riaprire la stessa conversazione dopo chiusura app e riavvio; (2) proseguire oltre la finestra di contesto del modello tramite riepiloghi e retrieval, senza perdere decisioni importanti; (3) cambiare modello senza iniziare una nuova conversazione; (4) riprendere attività interrotte mostrando stato e passaggi già completati; (5) consentire all'utente di verificare/correggere la memoria di progetto; (6) non presentare come ricordato ciò che non è presente nella cronologia o nei dati recuperati.
 
 **Stato:** requisito approvato e registrato nella roadmap; implementazione e test dedicati ancora da pianificare/eseguire. Non dichiarare la funzione disponibile fino al superamento dei criteri sopra.
+
+
+## Conversazione continua: primo incremento implementato — 15 novembre 2026
+
+Nel modulo chat Android è stato aggiunto un primo blocco funzionale per la continuità della conversazione:
+- La cronologia completa non viene più limitata agli ultimi 100 messaggi: viene serializzata, compressa GZIP e cifrata AES-GCM con chiave non esportabile Android Keystore.
+- L'archivio viene scritto tramite Android AtomicFile per ridurre il rischio di perdere la cronologia se il processo si interrompe durante il salvataggio.
+- È prevista la migrazione automatica della vecchia cronologia cifrata in SharedPreferences al nuovo archivio; la copia legacy viene rimossa solo dopo il salvataggio riuscito.
+- Il prompt mantiene i messaggi recenti e recupera fino a 6 messaggi più vecchi pertinenti alla nuova richiesta con un semplice ranking lessicale locale.
+- Aggiunta una memoria di progetto modificabile dall'utente, salvata separatamente e cifrata con la stessa chiave locale; viene inserita nel contesto quando si invia un messaggio.
+- Aggiunti test unitari per il recupero di messaggi vecchi pertinenti e per il blocco di memoria di progetto nel prompt.
+
+Commit principali: `05b09501` (archivio cronologia completa), `e9242651` (recupero messaggi pertinenti), `0b369469` (test), `e79ce1e1` (memoria progetto cifrata), `440e4c4d` (UI memoria progetto).
+
+Verifica CI: run Android `43763662848` è stato avviato per l'ultima revisione ma risulta ancora in coda al momento della nota; run Android precedenti `43763593435`, `43763597203` e `43763600739` risultano in corso. Non dichiarare ancora superati i test/build della nuova implementazione.
+
+Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la memoria di progetto è attualmente compilata/modificata dall'utente, non generata automaticamente dall'IA; non è ancora verificato il cambio modello senza perdita del filo; non sono ancora eseguiti test di riapertura/riavvio, stress su cronologie molto grandi o prove sui due telefoni reali. Il requisito "conversazione unica" è quindi **parzialmente implementato, non completato**.
