@@ -20,7 +20,7 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 | 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
 | 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
 | 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo; anteprima e contesto singolo documento nella chat. Restano OCR, RAG multi-documento, citazioni/pagine, hardening e test end-to-end |
+| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima e contesto singolo documento nella chat. Restano OCR, RAG multi-documento, citazioni/pagine, hardening e test end-to-end |
 | 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
 | 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
 | 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
@@ -84,7 +84,7 @@ Funzioni incluse nel primo incremento:
 Limiti e gate ancora aperti:
 - OCR dei PDF scansiti e immagini: non implementato.
 - Indicizzazione semantica/RAG, ricerca su più documenti, citazioni di pagina/paragrafo: non implementati.
-- L'archivio contiene testo estratto in file privati, ma non ha ancora cifratura dedicata né gestione di quote/retention.
+- L'archivio cifra il testo estratto con AES-GCM e una chiave non esportabile Android Keystore; restano da aggiungere gestione quote/retention e test di recupero/corruzione.
 - Non è ancora stato eseguito il build Android né la suite test dopo queste modifiche; attendere GitHub Actions.
 - Test pratico su dispositivi Android e verifica con modello locale restano obbligatori.
 
