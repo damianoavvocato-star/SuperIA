@@ -24,6 +24,26 @@ class ChatPromptBuilderTest {
         assertTrue(prompt.contains("Messaggio recente"))
     }
 
+    @Test fun recallsOlderRelevantMessagesFromLongConversation() {
+        val history = buildList {
+            add(ChatLine(1L, "Il progetto si chiama SuperIA-Privata e deve restare offline.", "user"))
+            repeat(20) { index -> add(ChatLine((index + 2).toLong(), "Discussione generica numero $index", "user")) }
+        }
+        val prompt = ChatPromptBuilder.build(history, "Quali erano i requisiti del progetto SuperIA-Privata?")
+        assertTrue(prompt.contains("progetto si chiama SuperIA-Privata"))
+        assertTrue(prompt.contains("Discussione generica numero 19"))
+    }
+
+    @Test fun includesEditableProjectMemorySummary() {
+        val prompt = ChatPromptBuilder.build(
+            emptyList(),
+            "Continua il lavoro",
+            memorySummary = "Obiettivo: app Android privata. Decisione: nessun cloud obbligatorio."
+        )
+        assertTrue(prompt.contains("Memoria di progetto salvata"))
+        assertTrue(prompt.contains("nessun cloud obbligatorio"))
+    }
+
     @Test fun includesBoundedDocumentContext() {
         val context = "Documento allegato: esempio\n" + "x".repeat(7000)
         val prompt = ChatPromptBuilder.build(emptyList(), "Riassumi", documentContext = context)
