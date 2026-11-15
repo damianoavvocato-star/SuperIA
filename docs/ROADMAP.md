@@ -109,3 +109,12 @@ Verifica CI intermedia: sul commit `272a7c805f030ca05eda8b66b02754f34eb021c6` il
 La precedente nota che indicava il run 43746849747 come ancora in corso è superata. Il run è terminato con **SUCCESS**: test Android, `assembleDebug` e upload APK sono tutti riusciti sul commit `272a7c805f030ca05eda8b66b02754f34eb021c6`. L'artefatto `superia-privata-debug` è disponibile (archivio 38.272.811 byte; scadenza 13 febbraio 2027). Dettagli e limiti sono registrati in [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
 
 La documentazione ufficiale LiteRT-LM conferma che `Message.toString()` restituisce i contenuti del messaggio, quindi l'uso corrente nello streaming non stampa la rappresentazione di debug dell'oggetto. Restano obbligatori importazione del modello e test end-to-end su entrambi i telefoni: **la Fase 2 è ancora in corso** e non è dichiarata completata.
+
+
+### Verifica finale CI e streaming LiteRT-LM — 15 novembre 2026
+
+- Run Android `43746849747`: `assemble-debug` SUCCESS; i passaggi `Run Android unit tests`, `Assemble debug APK` e `Upload debug APK` sono tutti SUCCESS.
+- Artefatto `superia-privata-debug`: 38.272.811 byte (archivio), SHA-256 `b9297e396bbeb57cd6dc4647138664f132264ebc39fa3a5218765d1e7463bdcb`, scadenza 13 febbraio 2027.
+- La verifica della sorgente/API ufficiale conferma che `Message.toString()` restituisce il contenuto testuale (`Contents.toString()` concatena i contenuti) e che la guida Kotlin usa lo stesso approccio nel `Flow.collect`. Non è richiesta una modifica al codice per questo punto.
+- La Fase 2 resta in corso: nessun test end-to-end è stato ancora eseguito con Gemma importato su Realme C75 o Xiaomi Mi 10T. Non dichiarare completata l'inferenza locale fino a tali prove.
+- Dettagli, digest e gate pratici: [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
