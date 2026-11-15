@@ -27,7 +27,7 @@ La ricognizione è stata consolidata in quattro livelli:
 - Aree professionali: strumenti di supporto, non sostituti di professionisti; fonti e limiti visibili.
 
 ### 2. Android-only (decisione aggiornata)
- - Il prodotto finale è esclusivamente un'app Android nativa (smartphone e tablet); non è previsto un client PC né un PC remoto obbligatorio.
+- Il prodotto finale è esclusivamente un'app Android nativa (smartphone e tablet); non è previsto un client PC né un PC remoto obbligatorio.
 - L'app deve funzionare localmente e offline per tutte le funzioni per cui esistono modelli/componenti compatibili.
 - Stack candidato: Kotlin + Jetpack Compose; LiteRT-LM per LLM on-device; LiteRT CompiledModel per modelli ML specializzati; runtime alternativi solo dopo benchmark.
 - GPU/NPU non sono garantite: selezione runtime dinamica, fallback CPU e benchmark sul dispositivo reale.
@@ -59,18 +59,18 @@ Il registro dei candidati è in config/models.registry.json. Le famiglie Qwen, L
 | Chat/LLM | Integrare per primo | Ollama, llama.cpp | Candidati, benchmark necessario |
 | Documenti/OCR/RAG | Integrare dopo il nucleo | Tesseract, parser, LlamaIndex/Haystack | Licenze e test da completare |
 | Ricerca/traduzione | Modulo opzionale | ricerca web + MT locale | Fonti e licenze da verificare |
-| Immagini | Modulo PC opzionale | ComfyUI/InvokeAI + checkpoint selezionato | GPL e licenze modelli da esaminare |
-| Video | Modulo PC opzionale | FFmpeg build controllata + modelli | Bloccato fino a revisione build |
+| Immagini | Modulo Android opzionale | LiteRT e pipeline mobile compatibile | Modelli e prestazioni da verificare |
+| Video | Modulo Android | API multimediali Android; FFmpeg solo se build e licenza approvate | Editing prima; generazione avanzata non garantita offline |
 | Audio | ASR prima, TTS dopo | Whisper/whisper.cpp; TTS da selezionare | Voci e pesi da verificare |
 | Coding | Integrare in sandbox | agente codice + modello locale | Progettazione/test necessari |
 | Produttività/dati | Integrare gradualmente | Python, pandas, SymPy | Candidati |
 | Agenti/RPA | Solo dopo sicurezza | orchestratore locale | Componenti con licenze miste da isolare |
 | Professionale | Supporto con limiti | RAG su fonti autorizzate | Non certificato per decisioni professionali |
-| 3D | Opzionale PC | Blender e modelli 3D | GPL/dipendenze da verificare |
-| Android on-device | Non bloccare l'app sul runtime PC | LiteRT/ONNX/llama.cpp mobile da valutare | Non implementato |
+| 3D | Modulo Android opzionale | Visualizzatore e strumenti compatibili mobile | Da valutare; Blender desktop escluso dal prodotto |
+| LLM Android on-device | Runtime nativo Kotlin | LiteRT-LM; llama.cpp come alternativa da benchmarkare | Non implementato |
 
 ## Elementi che richiedono test su dispositivi e versioni reali
-- Compatibilità e velocità su PC e telefono dell'utente.
+- Compatibilità e velocità su smartphone/tablet Android reali.
 - Qualità in italiano per i modelli candidati.
 - Consumo RAM/VRAM, temperatura, autonomia e tempi reali.
 - Build Android e APK.
@@ -81,6 +81,6 @@ Questi sono test di validazione e implementazione, non ragioni per inventare ris
 
 ## Gate di uscita dalla Fase 0
 
-La documentazione di ricognizione e le decisioni architetturali sono consolidate. La fase non va marcata come **100% verificata** finché non sono completati l'audit aggiornato di stato e condizioni dei servizi, l'approvazione degli artefatti specifici, i benchmark su PC/Android reali e la verifica legale della distribuzione dei componenti scelti.
+La documentazione di ricognizione e le decisioni architetturali sono consolidate. La fase non va marcata come **100% verificata** finché non sono completati l'audit aggiornato di stato e condizioni dei servizi, l'approvazione degli artefatti specifici, i benchmark su dispositivi Android reali e la verifica legale della distribuzione dei componenti scelti.
 
 Per avanzare senza bloccare il progetto, la Fase 1 può partire con il nucleo già presente e con dipendenze minime; i moduli non approvati restano disattivati.
