@@ -58,6 +58,7 @@ interface InferenceEngine {
 
     suspend fun generate(
         model: ModelSpec,
-        request: InferenceRequest
+        request: InferenceRequest,
+        onPartialText: (String) -> Unit = {}
     ): InferenceResult
 }
