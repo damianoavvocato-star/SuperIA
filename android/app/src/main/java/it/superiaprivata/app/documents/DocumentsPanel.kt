@@ -188,7 +188,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
             }
             status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             Text(
-                "Limiti: massimo 25 MB per file, 250 pagine PDF e 200.000 caratteri estratti. I PDF scansiti richiedono OCR, non ancora incluso. La ricerca semantica/RAG multi-documento è uno step successivo.",
+                "Limiti: massimo 25 MB per file, 250 pagine PDF e 200.000 caratteri estratti. I PDF scansiti richiedono OCR, non ancora incluso. La ricerca semantica basata su embeddings è uno step successivo; la ricerca testuale locale BM25 su più documenti è disponibile.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
