@@ -102,3 +102,10 @@ La UI Compose è stata aggiornata per importare un file LiteRT-LM dalla memoria 
 
 
 Verifica CI intermedia: sul commit `272a7c805f030ca05eda8b66b02754f34eb021c6` il task `testDebugUnitTest` è SUCCESS; il task `assembleDebug` è ancora in corso nel run 43746849747. Il run non è da considerare completato e non è ancora disponibile un nuovo APK con LiteRT-LM.
+
+
+## Correzione stato CI Android — 15 novembre 2026
+
+La precedente nota che indicava il run 43746849747 come ancora in corso è superata. Il run è terminato con **SUCCESS**: test Android, `assembleDebug` e upload APK sono tutti riusciti sul commit `272a7c805f030ca05eda8b66b02754f34eb021c6`. L'artefatto `superia-privata-debug` è disponibile (archivio 38.272.811 byte; scadenza 13 febbraio 2027). Dettagli e limiti sono registrati in [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
+
+La documentazione ufficiale LiteRT-LM conferma che `Message.toString()` restituisce i contenuti del messaggio, quindi l'uso corrente nello streaming non stampa la rappresentazione di debug dell'oggetto. Restano obbligatori importazione del modello e test end-to-end su entrambi i telefoni: **la Fase 2 è ancora in corso** e non è dichiarata completata.
