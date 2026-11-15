@@ -38,6 +38,9 @@ jobs:
         run: |
           yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses
           sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
+      - name: Run Android unit tests
+        working-directory: android
+        run: gradle --no-daemon testDebugUnitTest
       - name: Assemble debug APK
         working-directory: android
         run: gradle --no-daemon assembleDebug
