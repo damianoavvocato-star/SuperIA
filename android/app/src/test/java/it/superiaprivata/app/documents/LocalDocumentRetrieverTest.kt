@@ -28,7 +28,7 @@ class LocalDocumentRetrieverTest {
 
     @Test
     fun limitsNumberOfReturnedChunks() {
-        val text = (1..12).joinToString("\\n\\n") { "Capitolo $it contiene parole comuni e ricerca locale." }
+        val text = (1..12).joinToString("\n\n") { "Capitolo $it contiene parole comuni e ricerca locale." }
         val documents = listOf(StoredDocument("1", "Libro", text, File("1.enc")))
         assertTrue(LocalDocumentRetriever.search("ricerca locale", documents, limit = 3).size <= 3)
     }
