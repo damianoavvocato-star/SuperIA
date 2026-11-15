@@ -51,3 +51,18 @@ Fonti tecniche:
 - llama.cpp Android: https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md
 
 La selezione definitiva dipende da build riproducibile, licenza del modello scelto, uso RAM/temperatura e benchmark reali sul Realme C75 e sullo Xiaomi Mi 10T. Nessun runtime è ancora integrato e nessun modello è ancora installato.
+## Runtime locale LiteRT-LM (prototipo integrato)
+
+- Kotlin Gradle Plugin aggiornato a 2.2.0 per soddisfare i requisiti di metadata della versione LiteRT-LM selezionata; AGP 8.9.2 e Gradle 8.11.1 restano invariati.
+- Dipendenza LiteRT-LM Android fissata a `0.16.1` (non usare `latest.release` in una build riproducibile).
+- Aggiunto `LiteRtLmInferenceEngine`: esecuzione CPU locale, conversazione multi-turno mantenuta in memoria, streaming via Kotlin Flow, nessun fallback cloud, controllo esplicito della licenza e verifica del file `.litertlm`.
+- Aggiunto catalogo iniziale `Gemma 3 1B IT INT4`; i pesi non sono inclusi nell'APK e non vengono scaricati automaticamente.
+- Il file modello deve essere fornito dall'utente nella directory privata `files/models`. Prima di attivare l'esecuzione, l'app dovrà offrire importazione sicura del file e consenso esplicito ai termini Gemma.
+- Requisito RAM preliminare impostato a 2 GB disponibili come soglia prudenziale, da rivedere dopo benchmark su telefoni reali. Non è una garanzia di compatibilità.
+
+Il modello candidato è distribuito su Hugging Face con accesso soggetto all'accettazione dei Gemma Terms of Use. La variante `gemma3-1b-it-int4.litertlm` è indicata nella scheda modello come circa 584 MB. I benchmark pubblicati per LiteRT-LM provengono da Samsung S24 Ultra e non sono trasferibili automaticamente a Realme C75 o Xiaomi Mi 10T.
+
+Fonti modello e runtime:
+- LiteRT-LM Kotlin API 0.16.1: https://github.com/google-ai-edge/LiteRT-LM/blob/v0.16.1/docs/api/kotlin/getting_started.md
+- Modello e varianti: https://huggingface.co/litert-community/Gemma3-1B-IT
+- Termini Gemma: https://ai.google.dev/gemma/terms
