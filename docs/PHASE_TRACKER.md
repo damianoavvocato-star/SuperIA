@@ -1,0 +1,65 @@
+# Registro operativo delle fasi — SuperIA Privata
+
+Aggiornato: 15 novembre 2026  
+Ambito: esclusivamente il repository **SuperIA-Privata**. La roadmap ufficiale resta `docs/ROADMAP.md`; questo documento ne rende verificabili stato, attività residue e criteri di chiusura. Il progetto resta Android-only, personale, gratuito senza API a pagamento obbligatorie e local-first.
+
+## Legenda degli stati
+
+- **Documentazione consolidata**: analisi e decisioni scritte; non significa implementazione.
+- **Implementazione + CI verificate**: codice presente e controlli automatici indicati superati; non equivale a test su telefono.
+- **In corso / parziale**: esistono componenti, ma mancano funzioni o verifiche.
+- **Da avviare**: pianificata, senza implementazione funzionale sufficiente.
+- **Trasversale**: requisiti da applicare a tutte le fasi.
+
+## Quadro complessivo
+
+Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindici fasi di sviluppo/validazione (1–15). Nessuna fase viene dichiarata integralmente completata in questo registro: per la Fase 0 resta l'audit puntuale; per la Fase 1 mancano integrazioni e prove; per la Fase 2 manca il test end-to-end su dispositivi reali; le altre sono pianificate o trasversali.
+
+| Fase | Stato operativo | Lavoro residuo principale |
+|---|---|---|
+| 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
+| 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
+| 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
+| 3 — Documenti e conoscenza | Da avviare | Import PDF/DOCX/TXT/CSV, estrazione, OCR, indicizzazione locale, RAG, citazioni/pagine e test con documenti campione |
+| 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
+| 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
+| 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
+| 7 — Audio, voce e musica | Da avviare | STT/TTS, pulizia, separazione, doppiaggio e musica originale; consenso e diritti per voci |
+| 8 — Programmazione e GitHub | Da avviare | Agente coding controllato, diff, branch, commit, issue/PR, Actions, log, test e APK con approvazioni |
+| 9 — Produttività e dati | Da avviare | Documenti, email, presentazioni, fogli, CSV, formule, grafici, attività e database locali |
+| 10 — Agenti e automazioni | Da avviare | Pianificazione multi-step, strumenti, workflow, schedulazione, audit e conferma umana per azioni sensibili |
+| 11 — Aree professionali | Da avviare | Moduli specialistici con fonti, limiti, avvertenze e verifiche specifiche; non sostituire professionisti |
+| 12 — Ecosistema modelli/componenti | Da avviare | Registry operativo, installazione/rimozione, versioni, dipendenze, cache, licenze, benchmark e fallback locale |
+| 13 — App unica e interfacce | Da avviare | Dashboard integrata, moduli, progetti, gestione dispositivi, accessibilità e sincronizzazione opt-in |
+| 14 — Privacy e sicurezza | Trasversale; hardening da fare | Threat model, cifratura, autenticazione, permessi, isolamento, backup/cancellazione, segreti, audit e verifiche |
+| 15 — Collaudo e distribuzione | Da avviare; CI parziale già presente | Suite test completa, prove su device, sicurezza, prestazioni, compatibilità, APK installabile, aggiornamenti e manuale |
+
+## Gate obbligatori per chiudere una fase
+
+Una fase può passare a **Completata** soltanto quando tutti i punti applicabili sono documentati:
+
+1. Funzioni previste implementate e raggiungibili dall'interfaccia Android.
+2. Test automatici pertinenti superati (unitari, integrazione e regressione).
+3. Test pratico end-to-end su hardware reale o ambiente rappresentativo, con risultati registrati.
+4. Requisiti hardware, versioni Android, limiti, modalità offline e uso rete documentati.
+5. Licenze di codice, modelli, pesi e asset controllate; nessuna dipendenza obbligatoria a pagamento.
+6. Privacy e sicurezza verificate; azioni esterne/distruttive protette da consenso o conferma.
+7. Documentazione e istruzioni d'uso aggiornate; eventuali difetti residui classificati.
+
+## Collaudo dispositivi: blocco attuale della Fase 2
+
+Dispositivi di riferimento dichiarati:
+- **Realme C75**: 8 GB RAM fisica; fino a 16 GB di espansione virtuale. La RAM virtuale non va conteggiata come RAM fisica.
+- **Xiaomi Mi 10T**: 6 GB RAM; Snapdragon 865 / Adreno 650.
+
+Per ciascun dispositivo registrare: modello esatto, versione Android, spazio libero, versione APK/commit, file modello e relativo SHA-256, consenso licenza, esito caricamento, prompt di prova, risposta generata, tempo al primo token e tempo totale, RAM prima/durante/dopo, temperatura, batteria, crash e ripetibilità. Non presumere il SoC del Realme senza rilevarlo sul dispositivo.
+
+**Prerequisito utente**: il test richiede di installare l'APK debug, procurarsi il modello secondo i termini ufficiali e importarlo nell'app. La CI remota non può sostituire queste prove fisiche.
+
+## Regole di aggiornamento
+
+- Aggiornare lo stato solo con evidenze verificabili (commit, run CI, test report, dispositivo e data).
+- Distinguere sempre **codice presente**, **CI superata**, **test reale superato** e **fase chiusa**.
+- Non sommare la RAM virtuale a quella fisica.
+- Non dichiarare disponibile una funzione solo perché compare nella roadmap o in una demo statica.
+- Mantenere SuperIA-Privata separata da **Editore Foto e Video IA** e **Imperium_Italia**.
