@@ -232,6 +232,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                     } catch (error: CancellationException) {
                                         throw error
                                     } catch (error: Exception) {
+                                        messages.removeAll { it.id == Long.MIN_VALUE }
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
                                     } finally {
                                         generating = false
@@ -334,6 +335,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                 } catch (error: CancellationException) {
                                     throw error
                                 } catch (error: Exception) {
+                                    messages.removeAll { it.id == Long.MIN_VALUE }
                                     generationError = error.message ?: "Errore durante l'inferenza locale."
                                 } finally {
                                     generating = false
