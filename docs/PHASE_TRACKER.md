@@ -131,3 +131,34 @@ Commit principali: `05b09501` (archivio cronologia completa), `e9242651` (recupe
 Verifica CI: run Android `43763662848` è stato avviato per l'ultima revisione ma risulta ancora in coda al momento della nota; run Android precedenti `43763593435`, `43763597203` e `43763600739` risultano in corso. Non dichiarare ancora superati i test/build della nuova implementazione.
 
 Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la memoria di progetto è attualmente compilata/modificata dall'utente, non generata automaticamente dall'IA; non è ancora verificato il cambio modello senza perdita del filo; non sono ancora eseguiti test di riapertura/riavvio, stress su cronologie molto grandi o prove sui due telefoni reali. Il requisito "conversazione unica" è quindi **parzialmente implementato, non completato**.
+
+
+## Conversazione continua: verifica CI e ripresa richieste interrotte — 15 novembre 2026
+
+### Evidenze verificate del primo incremento
+- Android run [43763662848](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43763662848), commit `440e4c4d`: unit test Android, assemble debug e upload APK **SUCCESS**.
+- Backend run [43763683712](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43763683712), commit `0f7f2836`: test backend **SUCCESS**.
+- Artefatto Android `superia-privata-debug`, 59.742.747 byte, digest SHA-256 archivio `49ae27b189478d391cc4e35dddded0f9dd78e895213e62874f9774cb62b8ffb1`, scadenza 13 febbraio 2027. È l'artefatto della revisione con memoria modificabile, non include le successive modifiche di ripresa richieste interrotte.
+
+### Incremento ripresa richieste
+- Commit `1f18aa7a`: ogni messaggio utente può conservare il flag `pending` nell'archivio cifrato; i record precedenti restano compatibili perché il campo mancante viene letto come `false`.
+- Commit `5ce60335`: la UI evidenzia una richiesta rimasta senza risposta e permette di riprovarla dopo la riapertura, ricostruendo il prompt dalla cronologia precedente senza aggiungere un secondo messaggio utente.
+- Commit `5c4f8ab4`: impedisce di inviare nuove richieste finché ne esiste una in stato pending.
+- Il messaggio utente viene ora salvato prima di avviare l'inferenza; se il salvataggio fallisce, l'inferenza non parte.
+- La richiesta resta pending se l'inferenza fallisce o il processo viene interrotto; dopo il riavvio l'utente può premere “Riprendi richiesta”.
+- La ripresa è di tipo *at-least-once*: se l'app viene interrotta dopo che il modello ha prodotto una risposta ma prima che questa sia salvata, la richiesta può essere eseguita nuovamente. Non è garantita esecuzione exactly-once.
+
+### CI dell'incremento di ripresa
+- Commit `1f18aa7a`: backend run `43764011604` SUCCESS; Android run `43764011571` da verificare.
+- Commit `5ce60335`: Android run `43764036071` e backend run `43764036082` da verificare.
+- Commit `5c4f8ab4`: Android run `43764049532` e backend run `43764049485` da verificare.
+- Non dichiarare superata la modifica finché le Actions dell'ultimo commit non terminano con SUCCESS.
+
+### Limiti residui e criteri non ancora superati
+- Recupero della cronologia ancora lessicale, non semantico/embedding.
+- La memoria di progetto è manuale e modificabile; non esiste ancora un riepilogo progressivo generato automaticamente e verificabile.
+- Cambio modello mantenendo il filo non è verificabile con l'attuale singolo modello locale integrato.
+- Ripresa disponibile per l'ultima richiesta utente rimasta pending, non per workflow multi-step/agenti con checkpoint.
+- Non sono stati eseguiti test strumentali di riavvio/process death, stress con cronologie grandi, migrazione su installazioni reali o test sui Realme C75 e Xiaomi Mi 10T.
+- Nessun test end-to-end con modello importato su telefono reale.
+- La continuità conversazionale è **parzialmente implementata**. Non chiudere il requisito trasversale né dichiarare conclusa la Fase 2/3/10/13/14 sulla sola base della CI.
