@@ -62,6 +62,9 @@ fun AssistantChatPanel(documentContext: String? = null) {
     var importing by remember { mutableStateOf(false) }
     var generating by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
+    var projectMemory by remember(historyStore) { mutableStateOf(runCatching { historyStore.loadProjectMemory() }.getOrDefault("")) }
+    var memorySaved by remember { mutableStateOf(false) }
+    var memoryError by remember { mutableStateOf<String?>(null) }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
     var modelMessage by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
@@ -109,6 +112,24 @@ fun AssistantChatPanel(documentContext: String? = null) {
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Parla con SuperIA", style = MaterialTheme.typography.titleLarge)
+            Text("Una conversazione persistente: la cronologia viene conservata sul dispositivo anche quando chiudi l'app.", style = MaterialTheme.typography.bodyMedium)
+            OutlinedTextField(
+                value = projectMemory,
+                onValueChange = { projectMemory = it; memorySaved = false },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Memoria del progetto") },
+                placeholder = { Text("Decisioni, obiettivi e informazioni da ricordare nelle prossime sessioni…") },
+                minLines = 2,
+                maxLines = 5
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                OutlinedButton(onClick = {
+                    runCatching { historyStore.saveProjectMemory(projectMemory) }
+                        .onSuccess { memorySaved = true; memoryError = null }
+                        .onFailure { memoryError = it.message ?: "Impossibile salvare la memoria." }
+                }) { Text(if (memorySaved) "Memoria salvata" else "Salva memoria") }
+            }
+            memoryError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Text(
                 "Assistente locale sul telefono. Il modello non è incluso nell'APK: va scaricato e importato una sola volta.",
                 style = MaterialTheme.typography.bodyMedium
@@ -221,7 +242,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                         if (request.isNotEmpty()) {
                             // The native LiteRT-LM conversation is in memory only.
                             // Rebuild a bounded context from the encrypted transcript.
-                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request, documentContext = documentContext)
+                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request, documentContext = documentContext, memorySummary = projectMemory)
                             val userLine = ChatLine(System.nanoTime(), request, "user")
                             messages.add(userLine)
                             draft = ""
