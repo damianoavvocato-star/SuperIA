@@ -69,7 +69,8 @@ class LiteRtLmInferenceEngine(
 
     override suspend fun generate(
         model: ModelSpec,
-        request: InferenceRequest
+        request: InferenceRequest,
+        onPartialText: (String) -> Unit
     ): InferenceResult = mutex.withLock {
         require(request.prompt.isNotBlank()) { "La richiesta non può essere vuota." }
         require(isLicenseApproved(model.licenseId)) {
@@ -92,6 +93,10 @@ class LiteRtLmInferenceEngine(
             val activeConversation = requireNotNull(conversation)
             activeConversation.sendMessageAsync(request.prompt).collect { message ->
                 output.append(message.toString())
+                val partial = output.toString()
+                withContext(Dispatchers.Main.immediate) {
+                    onPartialText(partial)
+                }
             }
             val generatedText = output.toString().trim()
             check(generatedText.isNotEmpty()) {
