@@ -108,3 +108,8 @@ Questa verifica riguarda il codice dei repository citati, non costituisce approv
 
 ### Regola rafforzata
 La dicitura “open source” sarà usata soltanto per componenti con licenza approvata OSI. Per licenze source-available, fair-code, commerciali o miste verrà usata la dicitura corretta e il componente non sarà considerato automaticamente idoneo. La licenza del codice non sostituisce la verifica dei pesi, dei dati, dei modelli vocali e dei plugin.
+
+
+## Registro tecnico delle licenze
+
+La verifica iniziale del codice sorgente e i blocchi ancora aperti sono documentati nel [registro tecnico dei componenti](COMPONENTS_LICENSE_REGISTER.md). Non installare o distribuire un candidato sulla sola base della licenza del repository: verificare anche dipendenze, modelli, pesi, voci, dataset e configurazione dei binari.
