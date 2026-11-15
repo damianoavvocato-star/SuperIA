@@ -1,8 +1,8 @@
 # Catalogo funzionale delle 182 IA — Fase 0
 
-> Stato: inventario preliminare, non ancora completo. Sono riportati soltanto i nomi recuperabili con sufficiente certezza dalla documentazione e dal contesto disponibile. Le voci 84–182 restano volutamente non compilate: non vengono inventati nomi né attribuite capacità senza verifica. L'elenco originale completo dovrà essere reinserito o recuperato prima di dichiarare conclusa la Fase 0.
+> Stato: inventario nominativo completo (182/182) e tassonomia funzionale. Il catalogo è un elenco di prodotti di riferimento, non un elenco di dipendenze da copiare o installare. La verifica puntuale di stato, prezzi, condizioni, licenze e disponibilità delle singole funzioni resta tracciata nell'audit e non va dedotta dal solo nome.
 
-## 1. Inventario nominativo recuperabile
+## 1. Inventario nominativo completo
 
 ### Assistenti, ricerca e chat (1–20)
 1. ChatGPT
@@ -270,4 +270,4 @@ La Fase 0 sarà completata soltanto quando:
 - saranno identificati componenti duplicati e opportunità di riutilizzo;
 - sarà approvata una matrice di integrazione per le fasi successive.
 
-**Avanzamento nominativo:** 182 nomi su 182 (100% dell'elenco recuperato). La verifica delle singole capacità, dello stato dei servizi, delle licenze, dei costi e delle alternative gratuite/locali è ancora da svolgere: il completamento dei nomi non equivale al completamento della Fase 0.
+**Avanzamento nominativo:** 182 nomi su 182 (100%). La mappatura funzionale preliminare è presente per 182/182. La verifica puntuale dei servizi, dei piani gratuiti, delle licenze e dei requisiti hardware non è completata: consultare AI_182_AUDIT.json e PHASE0_DECISIONS.md.
