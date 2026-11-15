@@ -79,14 +79,14 @@ Commit di implementazione (sequenza sulla branch `main`):
 Funzioni incluse nel primo incremento:
 - Selettore Android senza permessi generali di archiviazione.
 - Estrazione testo PDF tramite PDFBox-Android; estrazione del corpo principale DOCX; lettura UTF-8 TXT/CSV.
-- Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti e 6.000 caratteri documentali nel prompt.
+- Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti, 50 documenti, 200 MB di archivio e 6.000 caratteri documentali nel prompt.
 - Salvataggio del solo testo estratto cifrato nella directory privata dell'app con AES-GCM/Android Keystore; anteprima e cancellazione dall'archivio.
 - Passaggio esplicito dell'estratto selezionato o dei blocchi recuperati al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
 
 Limiti e gate ancora aperti:
 - OCR italiano offline dei PDF scansiti: implementato con Tesseract, subordinato all'importazione di `ita.traineddata`; limite iniziale 20 pagine per PDF. OCR immagini autonome non incluso.
 - Indicizzazione semantica/RAG, ricerca su più documenti, citazioni di pagina/paragrafo: non implementati.
-- L'archivio cifra il testo estratto con AES-GCM e una chiave non esportabile Android Keystore; restano da aggiungere gestione quote/retention e test di recupero/corruzione.
+- L'archivio cifra il testo estratto con AES-GCM e una chiave non esportabile Android Keystore; restano da aggiungere policy di retention e test di recupero/corruzione.
 - Non è ancora stato eseguito il build Android né la suite test dopo queste modifiche; attendere GitHub Actions.
 - Test pratico su dispositivi Android e verifica con modello locale restano obbligatori.
 
