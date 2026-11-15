@@ -218,3 +218,11 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Artefatto aggiornato `superia-privata-debug`, ID `14181935552`, 59.748.079 byte, digest SHA-256 archivio `a84696e6897848c5941ff877c1d8878e584f4a72af9e2e9252f7284d330b47f8`, scadenza 13 febbraio 2027.
 - Anche Android run intermedio `43764036071` ha completato test/build/upload; il riferimento definitivo resta l'ultimo commit `5c4f8ab4`.
 - La CI conferma compilazione e test automatici, non prova riavvio/process death, modello in esecuzione o comportamento su hardware reale.
+
+
+## Copertura aggiuntiva test conversazione lunga — 15 novembre 2026
+
+- Commit `ca49c9b3f8c5fd44349985ff335f219441bdd670`: aggiunti test unitari per verificare che i messaggi più pertinenti recuperati dalla cronologia mantengano l'ordine temporale originale, che il recupero sia limitato a `MAX_RECALLED_MESSAGES`, che i messaggi non pertinenti vengano esclusi e che memoria/documenti siano etichettati esplicitamente come contesto e non come istruzioni.
+- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
+- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): ancora **IN_PROGRESS** al momento di questo aggiornamento; non dichiarare superati i nuovi test né disponibile il nuovo APK finché la run non termina.
+- Questi test coprono la costruzione del contesto del prompt; non sostituiscono test Android strumentali su cifratura, migrazione, recupero dopo process death, inferenza incrementale o dispositivi reali.
