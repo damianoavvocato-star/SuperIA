@@ -87,3 +87,10 @@ Nel codice Android sono stati aggiunti i primi mattoni crittografici:
 - parser con limiti di dimensione, versione protocollo e controllo scadenza.
 
 **Limite esplicito:** questi componenti non completano ancora il pairing. Non esistono ancora scanner QR, handshake di challenge reciproca, approvazione esplicita nell'interfaccia, TLS reciproco, discovery LAN, trasferimento lavori o revoca delle coppie. Un invito QR non autorizza da solo un dispositivo. Questi passaggi saranno implementati e testati prima di dichiarare il collegamento operativo.
+
+
+### Schermata invito QR (prima integrazione Android)
+
+La schermata principale ora può generare e mostrare un QR temporaneo usando la chiave pubblica dell'installazione e un nonce casuale. È stata aggiunta la libreria ZXing Core per codificare il payload QR. È inoltre presente un helper per fingerprint SHA-256 e verifica di firme ECDSA su challenge da 32 byte.
+
+Questa versione è solo il lato generazione invito e gli strumenti crittografici iniziali: non contiene ancora lettura/scansione QR, trasporto di rete, handshake completo, archivio dei peer fidati o consenso reciproco. Il fingerprint deve essere confrontato/autenticato fuori banda e ciascun telefono deve approvare esplicitamente l'altro prima di trasferire dati.
