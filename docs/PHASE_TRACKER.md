@@ -61,7 +61,7 @@ Questo controllo confronta roadmap, file realmente presenti nella branch `main`,
 
 ### Evidenze CI aggiornate
 - Android run [43764049532](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764049532), commit `5c4f8ab4`: **SUCCESS**, unit test Android, `assembleDebug` e upload APK.
-- Backend run [43764208860](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/306e01672ce6d2179d66b8c26dad677bbe5ec3da): **SUCCESS**.
+- Backend run [43764208860](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764208860): **SUCCESS**.
 - Le CI non certificano inferenza reale, OCR pratico, pairing, prestazioni, sicurezza complessiva o compatibilità fisica.
 
 ### Correzioni e discrepanze rilevate
