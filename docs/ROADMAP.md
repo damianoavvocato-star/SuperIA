@@ -26,21 +26,21 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 | Fase | Obiettivo | Contenuti principali | Stato reale |
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
-| 1 | Fondamenta tecniche | Repository separato; architettura modulare; backend/API; configurazione; logging essenziale; struttura moduli; documentazione; ambiente di sviluppo | Base iniziale presente, da completare |
+| 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; storage e build debug | Pianificata |
 | 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | Prototipo iniziale presente, in corso |
 | 3 | Documenti e conoscenza personale | Caricamento PDF/DOCX/TXT/CSV; estrazione testo; OCR; riassunti; domande sui file; ricerca semantica; RAG; citazioni e riferimenti alle pagine; archivio locale | Pianificata |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Pianificata |
 | 5 | Immagini e grafica | Generazione da testo; modifica immagini; inpainting/outpainting; rimozione/sostituzione sfondo e oggetti; restauro; upscaling; OCR immagini; grafica, loghi e layout | Pianificata |
 | 6 | Video e contenuti visuali in movimento | Generazione video da testo/immagine; editing; taglio e montaggio; sottotitoli; trascrizione; traduzione e doppiaggio; riassunto video; clip brevi; elaborazione batch | Pianificata |
 | 7 | Audio, voce e musica | Speech-to-text; text-to-speech; voci; clonazione vocale solo con consenso e diritti; doppiaggio; pulizia audio; separazione sorgenti; trascrizione; musica originale; effetti sonori | Pianificata |
-| 8 | Programmazione e creazione software | Generazione e spiegazione codice; debug; refactoring; test; analisi repository; creazione siti/app; assistenza Flutter/Android; build APK; documentazione tecnica | Pianificata |
+| 8 | Programmazione, GitHub e creazione software | Agente coding; analisi repository; branch; modifica file e diff; commit; issue; pull request; review; GitHub Actions; log e test; creazione app/APK e documentazione | Pianificata |
 | 9 | Produttività, dati e strumenti da ufficio | Testi, email e documenti; presentazioni; fogli di calcolo; formule; analisi CSV; grafici; dashboard; pianificazione; gestione attività e basi dati locali | Pianificata |
 | 10 | Agenti e automazioni | Agenti specializzati; pianificazione multi-step; strumenti e plugin; flussi automatici; esecuzioni programmate; collaborazione tra agenti; registro attività; approvazione umana per azioni sensibili | Pianificata |
 | 11 | Aree professionali e specialistiche | Supporto giuridico; ricerca sanitaria e scientifica; finanza e contabilità; istruzione; marketing; architettura; CAD/3D; design; cybersecurity difensiva; analisi e simulazioni, con limiti e verifiche specifici | Pianificata |
 | 12 | Ecosistema di modelli e componenti | Registro modelli; installazione/rimozione; versioni; dipendenze; cache; download; licenze; benchmark; selezione automatica del modello adatto; fallback solo locale e configurabile | Pianificata |
-| 13 | Applicazione unica e interfacce | Dashboard unificata; moduli attivabili; interfaccia coerente; gestione progetti e file; cronologia; impostazioni; accessibilità; UX mobile; sincronizzazione solo se scelta e protetta | Pianificata |
+| 13 | Applicazione unica e interfacce | Dashboard; moduli; progetti; gestione dispositivi associati; selezione nodo AI; sincronizzazione solo se scelta e protetta; accessibilità e UX mobile | Pianificata |
 | 14 | Privacy, sicurezza e controllo | Modalità offline; cifratura dei dati locali; autenticazione; permessi; backup/esportazione; cancellazione; isolamento moduli; protezione segreti; audit; consenso e conferma delle azioni esterne | Requisito trasversale, hardening da fare |
-| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; uso RAM/GPU; compatibilità modelli; build APK Android; installazione; aggiornamenti; manuale e rilascio | Pianificata |
+| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; uso RAM/GPU; compatibilità modelli; pairing tra telefoni; integrazione GitHub; build APK Android; installazione; aggiornamenti; manuale e rilascio | Pianificata |
 
 ## Copertura funzionale della ricognizione iniziale
 
