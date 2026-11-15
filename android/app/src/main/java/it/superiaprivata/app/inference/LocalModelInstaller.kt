@@ -8,6 +8,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 data class ModelImportResult(
     val file: File,
@@ -58,10 +60,14 @@ class LocalModelInstaller(private val context: Context) {
             }
 
             require(totalBytes > 0L) { "Il file selezionato è vuoto." }
-            if (target.exists()) target.delete()
-            check(temporary.renameTo(target)) {
-                "Impossibile completare l'importazione del modello."
-            }
+            // Replace the previous model atomically: a failed import must not delete
+            // the last known-good model from app-private storage.
+            Files.move(
+                temporary.toPath(),
+                target.toPath(),
+                StandardCopyOption.ATOMIC_MOVE,
+                StandardCopyOption.REPLACE_EXISTING
+            )
 
             ModelImportResult(
                 file = target,
