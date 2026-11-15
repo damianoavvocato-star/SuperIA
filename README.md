@@ -20,7 +20,7 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - Immagini, video, audio, coding avanzato, agenti e APK non sono ancora implementati.
 
 ## Roadmap completa
-La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). La Fase 0 comprende il [catalogo delle IA](docs/AI_CATALOG.md), la [matrice preliminare delle alternative gratuite/locali](docs/AI_ALTERNATIVES_MATRIX.md), la [mappatura funzionale delle 182 IA](docs/AI_FUNCTIONAL_ANALYSIS.md) il [registro tecnico delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) e il [registro macchina dei componenti](config/components.registry.json). L'inventario nominativo originale ora contiene 182 nomi su 182; resta da analizzare ogni sistema e validare alternative, licenze, costi e requisiti.
+La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) e il [registro macchina dei componenti](config/components.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
 
 ## Avvio sviluppo
 Requisiti: Python 3.11+.
