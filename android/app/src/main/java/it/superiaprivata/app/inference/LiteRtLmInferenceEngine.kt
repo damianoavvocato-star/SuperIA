@@ -93,8 +93,12 @@ class LiteRtLmInferenceEngine(
             activeConversation.sendMessageAsync(request.prompt).collect { message ->
                 output.append(message.toString())
             }
+            val generatedText = output.toString().trim()
+            check(generatedText.isNotEmpty()) {
+                "Il runtime locale non ha restituito testo. Verifica il modello e riprova."
+            }
             InferenceResult(
-                text = output.toString(),
+                text = generatedText,
                 modelId = model.id
             )
         }
@@ -117,12 +121,18 @@ class LiteRtLmInferenceEngine(
                 cacheDir = cache.absolutePath
             )
         )
-        createdEngine.initialize()
-        val createdConversation = createdEngine.createConversation()
+        try {
+            createdEngine.initialize()
+            val createdConversation = createdEngine.createConversation()
 
-        engine = createdEngine
-        conversation = createdConversation
-        activeModelId = model.id
+            engine = createdEngine
+            conversation = createdConversation
+            activeModelId = model.id
+        } catch (error: Throwable) {
+            // Do not leak native runtime resources when initialization fails.
+            runCatching { createdEngine.close() }
+            throw error
+        }
     }
 
     override fun close() {
