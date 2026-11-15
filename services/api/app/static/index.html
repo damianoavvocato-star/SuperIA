@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SuperIA Privata</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#10131b;color:#edf1fa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;grid-template-columns:235px 1fr}
+aside{padding:26px 20px;background:#171c28;border-right:1px solid #2b3344}.brand{font-size:20px;font-weight:750}
+.tag,.muted{color:#99a6bd;font-size:12px;margin-top:7px}main{display:flex;flex-direction:column;min-height:100vh;max-width:1050px;width:100%;margin:auto;padding:25px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:21px;margin:0}#status{font-size:12px;color:#a8b4c9}
+#feed{flex:1;overflow:auto;padding:25px 0;display:flex;flex-direction:column;gap:13px}
+.msg{padding:14px 16px;border:1px solid #30394b;border-radius:14px;max-width:85%;white-space:pre-wrap;line-height:1.5}
+.user{align-self:flex-end;background:#26334a}.assistant{align-self:flex-start;background:#1a2230}
+.welcome{margin:auto;text-align:center;color:#aab6ca;max-width:540px}.welcome strong{display:block;color:#f2f5fb;font-size:26px;margin-bottom:10px}
+form{display:flex;gap:10px;padding:10px;border:1px solid #354057;border-radius:16px;background:#171d29}
+textarea{flex:1;resize:vertical;min-height:54px;max-height:180px;border:0;outline:0;background:transparent;color:inherit;font:inherit;padding:10px}
+button,select{border:0;border-radius:10px;background:#8bb7ff;color:#101827;font-weight:650;padding:10px 15px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}select{padding:7px 9px;margin-left:7px}.hint{font-size:11px;color:#8592a9;text-align:center;margin-top:9px}
+@media(max-width:650px){body{display:block}aside{padding:14px 18px;border-right:0;border-bottom:1px solid #2b3344}main{padding:16px;min-height:calc(100vh - 60px)}.msg{max-width:96%}}
+</style></head><body>
+<aside><div class="brand">✦ SuperIA Privata</div><div class="tag">Il tuo spazio AI, con priorità locale</div></aside>
+<main><header><h1>Assistente intelligente</h1><div><span id="status">Controllo modello…</span><select id="model" aria-label="Modello AI"><option value="">Predefinito</option></select></div></header>
+<section id="feed"><div class="welcome"><strong>Da dove iniziamo?</strong>Scrivi un messaggio: la risposta viene elaborata dal modello locale tramite Ollama.</div></section>
+<form id="chat"><textarea id="prompt" placeholder="Scrivi qui la tua richiesta…" required></textarea><button id="send">Invia</button></form>
+<div class="hint">Nessun fallback cloud. Le conversazioni non vengono salvate dal backend.</div></main>
+<script>
+const feed=document.querySelector('#feed'),form=document.querySelector('#chat'),box=document.querySelector('#prompt'),send=document.querySelector('#send'),status=document.querySelector('#status'),select=document.querySelector('#model');let history=[];
+function add(role,text){const w=feed.querySelector('.welcome');if(w)w.remove();const el=document.createElement('div');el.className='msg '+role;el.textContent=text;feed.append(el);feed.scrollTop=feed.scrollHeight}
+async function load(){try{const r=await fetch('/api/v1/models');if(!r.ok)throw Error();const d=await r.json();d.models.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;select.append(o)});status.textContent=d.models.length?'Locale · '+d.models.length+' modello/i':'Ollama attivo, nessun modello'}catch{status.textContent='Ollama non collegato'}}
+load();
+form.addEventListener('submit',async e=>{e.preventDefault();const text=box.value.trim();if(!text)return;history.push({role:'user',content:text});add('user',text);box.value='';send.disabled=true;
+try{const payload={messages:history};if(select.value)payload.model=select.value;const r=await fetch('/api/v1/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw Error(d.detail||'Richiesta non riuscita');history.push({role:'assistant',content:d.content});add('assistant',d.content);status.textContent='Locale · '+d.model}
+catch(err){history.pop();add('assistant','Modello locale non raggiungibile. '+err.message+'\nInstalla e avvia Ollama, poi scarica un modello compatibile.')}
+finally{send.disabled=false;box.focus()}})
+</script></body></html>
