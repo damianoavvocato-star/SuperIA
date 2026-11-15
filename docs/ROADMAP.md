@@ -13,6 +13,10 @@ Decisioni da mantenere in tutte le fasi:
 - Ogni modello/strumento deve essere verificato per licenza, requisiti hardware, compatibilità e possibilità di uso commerciale/personale.
 - Nessuna fase è dichiarata completata solo perché il codice è stato caricato: servono test pertinenti, verifica pratica e documentazione dei limiti.
 
+## Documentazione della Fase 0
+
+Il catalogo nominativo e la matrice di valutazione sono in [docs/AI_CATALOG.md](AI_CATALOG.md). L'inventario è preliminare: contiene 83 nomi recuperati e segnala esplicitamente le voci 84–182 da recuperare. La Fase 0 resta aperta fino alla verifica di tutti i 182 nomi e delle relative alternative.
+
 ## Fasi riorganizzate
 
 | Fase | Obiettivo | Contenuti principali | Stato reale |
