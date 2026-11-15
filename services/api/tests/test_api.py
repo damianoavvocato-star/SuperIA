@@ -44,3 +44,5 @@ def test_home_page():
     assert r.status_code == 200 and "SuperIA Privata" in r.text
     assert "localStorage" in r.text
     assert "Nuova conversazione" in r.text
+    assert "Memoria personale locale" in r.text
+    assert "MEMORY_KEY" in r.text
