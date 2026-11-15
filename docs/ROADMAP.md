@@ -15,7 +15,7 @@ Decisioni da mantenere in tutte le fasi:
 
 ## Documentazione della Fase 0
 
-Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matrice delle alternative gratuite/locali è in [docs/AI_ALTERNATIVES_MATRIX.md](AI_ALTERNATIVES_MATRIX.md); la [mappatura funzionale preliminare di tutte le 182 IA](AI_FUNCTIONAL_ANALYSIS.md) associa ogni voce a capacità, candidati tecnici e modalità locale/ibrida. L'inventario nominativo completo contiene ora 182 nomi recuperati; resta da completare l'analisi funzionale, delle licenze, dei costi, dell'hardware e delle alternative per ciascuna voce. La Fase 0 resta aperta fino alla verifica di tutti i 182 nomi e delle relative alternative.
+Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matrice delle alternative gratuite/locali è in [docs/AI_ALTERNATIVES_MATRIX.md](AI_ALTERNATIVES_MATRIX.md); la [mappatura funzionale preliminare di tutte le 182 IA](AI_FUNCTIONAL_ANALYSIS.md) associa ogni voce a capacità, candidati tecnici e modalità locale/ibrida; il [registro tecnico dei componenti e delle licenze](COMPONENTS_LICENSE_REGISTER.md) separa le licenze del codice da quelle di modelli, pesi e dipendenze. L'inventario nominativo completo contiene ora 182 nomi recuperati; resta da completare l'analisi funzionale, delle licenze, dei costi, dell'hardware e delle alternative per ciascuna voce. La Fase 0 resta aperta fino alla verifica di tutti i 182 nomi e delle relative alternative.
 
 ## Fasi riorganizzate
 
