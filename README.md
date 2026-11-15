@@ -20,7 +20,7 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - Immagini, video, audio, coding avanzato, agenti e APK non sono ancora implementati.
 
 ## Roadmap completa
-La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). La Fase 0 comprende il [catalogo delle IA](docs/AI_CATALOG.md) e la [matrice preliminare delle alternative gratuite/locali](docs/AI_ALTERNATIVES_MATRIX.md). L'elenco originale recuperato contiene per ora 83 nomi su 182: i restanti non vengono inventati.
+La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). La Fase 0 comprende il [catalogo delle IA](docs/AI_CATALOG.md) e la [matrice preliminare delle alternative gratuite/locali](docs/AI_ALTERNATIVES_MATRIX.md). L'inventario nominativo originale ora contiene 182 nomi su 182; resta da analizzare ogni sistema e validare alternative, licenze, costi e requisiti.
 
 ## Avvio sviluppo
 Requisiti: Python 3.11+.
