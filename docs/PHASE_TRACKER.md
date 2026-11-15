@@ -78,7 +78,7 @@ Funzioni incluse nel primo incremento:
 - Selettore Android senza permessi generali di archiviazione.
 - Estrazione testo PDF tramite PDFBox-Android; estrazione del corpo principale DOCX; lettura UTF-8 TXT/CSV.
 - Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti e 6.000 caratteri documentali nel prompt.
-- Salvataggio del solo testo estratto nella directory privata dell'app; anteprima e cancellazione dall'archivio.
+- Salvataggio del solo testo estratto cifrato nella directory privata dell'app con AES-GCM/Android Keystore; anteprima e cancellazione dall'archivio.
 - Passaggio esplicito dell'estratto selezionato al prompt della chat LiteRT-LM; il contenuto del documento è etichettato come dato e non come istruzione.
 
 Limiti e gate ancora aperti:
