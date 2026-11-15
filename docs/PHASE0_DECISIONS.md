@@ -26,12 +26,13 @@ La ricognizione è stata consolidata in quattro livelli:
 - Agenti e automazioni: scheduler e workflow con audit log e approvazione umana.
 - Aree professionali: strumenti di supporto, non sostituti di professionisti; fonti e limiti visibili.
 
-### 2. PC e Android
-- PC è il nodo principale per modelli medi/grandi, generazione immagini/video, sviluppo e batch.
-- Android è prima di tutto client/controller: chat, gestione attività, upload controllato e collegamento al PC sulla rete privata.
-- Inferenza sul telefono come modulo autonomo solo per modelli leggeri e dispositivi compatibili, dopo misure reali di RAM, temperatura, storage e velocità.
+### 2. Android-only (decisione aggiornata)
+ - Il prodotto finale è esclusivamente un'app Android nativa (smartphone e tablet); non è previsto un client PC né un PC remoto obbligatorio.
+- L'app deve funzionare localmente e offline per tutte le funzioni per cui esistono modelli/componenti compatibili.
+- Stack candidato: Kotlin + Jetpack Compose; LiteRT-LM per LLM on-device; LiteRT CompiledModel per modelli ML specializzati; runtime alternativi solo dopo benchmark.
+- GPU/NPU non sono garantite: selezione runtime dinamica, fallback CPU e benchmark sul dispositivo reale.
 - Non promettere video generativo avanzato o modelli grandi su ogni smartphone.
-- Nessun requisito hardware dell'utente è stato inventato: i profili prestazionali si fissano dopo un rilevamento esplicito del dispositivo.
+- I profili prestazionali si fissano dopo il rilevamento esplicito del dispositivo e misure di RAM, temperatura, storage, batteria e velocità.
 
 ### 3. Costi e gratuità
 - Nessuna API a pagamento o abbonamento è requisito del nucleo.
