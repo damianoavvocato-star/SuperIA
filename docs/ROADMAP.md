@@ -67,7 +67,7 @@ Una fase passa a "completata" solo quando:
 - almeno un test pratico end-to-end è stato eseguito;
 - privacy, licenze, limiti e requisiti sono documentati;
 - la funzione non dipende da API a pagamento obbligatorie;
-- PC/Android e modalità offline sono dichiarati come supportati, parziali o non applicabili.
+- Versioni Android, RAM, chipset, acceleratori e modalità offline sono dichiarati come supportati, parziali o non applicabili.
 
 ## Stato verificato al 15 novembre 2026
 
