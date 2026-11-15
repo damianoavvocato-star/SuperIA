@@ -67,7 +67,7 @@ object LocalDocumentRetriever {
                     result += current.toString()
                     current = StringBuilder()
                 }
-                if (current.isNotEmpty()) current.append("\\n\\n")
+                if (current.isNotEmpty()) current.append("\n\n")
                 current.append(normalized)
             }
         }
