@@ -20,7 +20,7 @@ Sono previste **16 fasi numerate da 0 a 15**: una fase preparatoria (0) e quindi
 | 0 — Inventario e progettazione | Documentazione consolidata, audit aperto | Verificare puntualmente licenze/termini, prezzi e disponibilità dei singoli artefatti, requisiti hardware, compatibilità e alternative; aggiornare registri e fonti |
 | 1 — Fondamenta Android e connessioni | In corso / parziale | Completare architettura e storage, rilevamento hardware, pairing con handshake e rete, autenticazione/integrazione GitHub; test su entrambi i telefoni |
 | 2 — Motore AI e assistente | Implementazione + CI verificate; collaudo fisico pendente | Importare modello Gemma autorizzato e provare inferenza reale, streaming, cronologia, riapertura sessione, errori e stabilità su Realme C75 e Xiaomi Mi 10T; misurare RAM, tempi, temperatura e batteria |
-| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato, CI da verificare | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end; OCR italiano offline aggiunto con dizionario importabile |
+| 3 — Documenti e conoscenza | In corso: primo flusso Android implementato; CI superata su commit intermedio, verifica finale delle ultime quote pendente | Importazione/estrazione locale PDF testuali, DOCX, TXT e CSV; archivio privato del testo cifrato AES-GCM con chiave Android Keystore; anteprima, ricerca testuale BM25 multi-documento e contesto dei blocchi recuperati nella chat. Restano embeddings/ricerca semantica, citazioni pagina/paragrafo, hardening e test end-to-end; OCR italiano offline aggiunto con dizionario importabile |
 | 4 — Ricerca, navigazione e traduzione | Da avviare | Ricerca web esplicita, lettura link, estrazione contenuti, traduzione, confronto fonti, date e citazioni |
 | 5 — Immagini e grafica | Da avviare | Pipeline locale/ibrida selezionabile, generazione/modifica, OCR, sfondi/oggetti, restauro, upscaling e verifica licenze/prestazioni |
 | 6 — Video | Da avviare | Import, editing, taglio, sottotitoli, trascrizione, traduzione/doppiaggio, riassunti e benchmark |
@@ -91,3 +91,10 @@ Limiti e gate ancora aperti:
 - Test pratico su dispositivi Android e verifica con modello locale restano obbligatori.
 
 La Fase 3 è quindi **parziale e non completata**. Non considerare disponibile l'analisi AI documentale finché CI e prova end-to-end su telefono con modello importato non risultano superate.
+
+
+### Evidenze CI Fase 3
+
+- Run Android [43760034745](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760034745), commit `3b1c95f68b70c1fa5e0c41393fe34c0a49e721ed`: unit test, `assembleDebug` e upload APK tutti SUCCESS. Comprende il flusso documenti, BM25, OCR Tesseract e importazione del modello lingua.
+- Artefatto intermedio `superia-privata-debug`: 59.733.545 byte, SHA-256 archivio `d3a8d4967f79f601ae398a645184c0f52d641f738d36ed467bc622f2c53e0adc`, scadenza 13 febbraio 2027. Questo artefatto precede l'ultimo limite di quota dell'archivio e non va considerato la build definitiva.
+- Run [43760180500](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760180500) verifica la revisione successiva con quote 50 documenti/200 MB; al momento dell'aggiornamento è ancora in esecuzione. Non dichiarare superata la CI della revisione finale finché il run non termina con SUCCESS.
