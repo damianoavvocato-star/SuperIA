@@ -66,3 +66,13 @@ Fonti modello e runtime:
 - LiteRT-LM Kotlin API 0.16.1: https://github.com/google-ai-edge/LiteRT-LM/blob/v0.16.1/docs/api/kotlin/getting_started.md
 - Modello e varianti: https://huggingface.co/litert-community/Gemma3-1B-IT
 - Termini Gemma: https://ai.google.dev/gemma/terms
+
+### Chat collegata al runtime locale
+
+- La chat ora usa `LiteRtLmInferenceEngine` per generare risposte reali quando il modello è presente e la licenza è stata accettata.
+- La UI permette di aprire la pagina Hugging Face, leggere i termini Gemma, dichiararne l'accettazione e importare il file `.litertlm` tramite il selettore documenti Android.
+- L'importazione copia il modello in `files/models`, verifica estensione e dimensione massima, calcola SHA-256 e non richiede permessi generali di archiviazione.
+- Il pulsante Invia resta disabilitato finché runtime, modello, licenza e soglia RAM non risultano disponibili.
+- La cronologia cifrata ora conserva anche il ruolo dei messaggi (utente/assistente), mantenendo compatibilità con le vecchie voci che non avevano il campo ruolo.
+- Non scaricare il modello automaticamente: l'accesso Hugging Face è soggetto all'accettazione dei termini e l'utente deve scaricare il file corretto. Nessun token Hugging Face viene richiesto o incorporato nell'APK.
+- La risposta AI usa streaming LiteRT-LM; l'uso CPU è la modalità iniziale per privilegiare compatibilità. GPU/NPU e accelerazione vanno valutate successivamente.
