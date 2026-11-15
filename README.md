@@ -9,7 +9,7 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - Uso personale e riservato; repository e dati separati da Editore Foto e Video IA.
 - Nessun abbonamento o API a pagamento obbligatori.
 - Modelli locali e funzionamento offline dove possibile; Internet solo per funzioni che lo richiedono.
-- Destinazione PC e Android.
+- Destinazione esclusiva Android (smartphone e tablet); nessun client PC previsto.
 - Moduli progressivi, privacy e controllo dell'utente.
 
 ## Stato attuale
@@ -22,7 +22,10 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 ## Roadmap completa
 La pianificazione aggiornata in 16 fasi (0–15) è in [docs/ROADMAP.md](docs/ROADMAP.md). La Fase 0 comprende il [catalogo delle 182 IA](docs/AI_CATALOG.md), la [mappatura funzionale](docs/AI_FUNCTIONAL_ANALYSIS.md), l'[audit strutturato di tutte le 182 voci](docs/AI_182_AUDIT.json), le [decisioni architetturali](docs/PHASE0_DECISIONS.md), la [matrice delle alternative](docs/AI_ALTERNATIVES_MATRIX.md), il [registro delle licenze](docs/COMPONENTS_LICENSE_REGISTER.md) il [registro macchina dei componenti](config/components.registry.json) e il [registro dei modelli candidati](config/models.registry.json). La ricognizione documentale è consolidata; audit puntuali di prezzi, licenze dei singoli artefatti e benchmark hardware restano esplicitamente aperti.
 
-## Avvio sviluppo
+## Destinazione Android
+La decisione tecnica Android-only e il piano dettagliato sono in [docs/ANDROID_ONLY_ARCHITECTURE.md](docs/ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI resta un prototipo di riferimento: non sarà necessario per le funzioni principali dell'app Android.
+
+## Avvio prototipo backend
 Requisiti: Python 3.11+.
 
 ```bash
