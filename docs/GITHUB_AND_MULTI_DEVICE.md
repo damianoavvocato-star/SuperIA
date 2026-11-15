@@ -75,3 +75,15 @@ Le GitHub Actions usano runner GitHub e sono soggette a quote, limiti e condizio
 ## Stato
 
 Questo documento definisce il requisito e il disegno tecnico. L'integrazione non è ancora implementata nell'app Android.
+
+
+## Implementazione iniziale pairing (15 novembre 2026)
+
+Nel codice Android sono stati aggiunti i primi mattoni crittografici:
+- identità di installazione ECDSA P-256 generata e conservata in Android Keystore; la chiave privata non viene esportata;
+- esportazione della sola chiave pubblica e firma di challenge;
+- verifica delle firme ECDSA con chiave pubblica ricevuta;
+- invito QR in JSON con nonce casuale da 256 bit e scadenza di cinque minuti;
+- parser con limiti di dimensione, versione protocollo e controllo scadenza.
+
+**Limite esplicito:** questi componenti non completano ancora il pairing. Non esistono ancora scanner QR, handshake di challenge reciproca, approvazione esplicita nell'interfaccia, TLS reciproco, discovery LAN, trasferimento lavori o revoca delle coppie. Un invito QR non autorizza da solo un dispositivo. Questi passaggi saranno implementati e testati prima di dichiarare il collegamento operativo.
