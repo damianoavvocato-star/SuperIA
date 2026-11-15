@@ -32,7 +32,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - I file originali non vengono copiati nell'archivio: viene conservato il solo testo estratto, cifrato AES-GCM nell'area privata dell'app con chiave dedicata in Android Keystore.
 
 ## Prossimi incrementi
-OCR offline per PDF scansiti, indicizzazione e ricerca semantica/RAG multi-documento, riferimenti a pagina/paragrafo, cifratura dedicata dell'archivio documentale, test strumentali, benchmark e completamento del pairing sicuro.
+OCR offline per PDF scansiti, embeddings/ricerca semantica e riferimenti a pagina/paragrafo, test strumentali, benchmark e completamento del pairing sicuro.
 
 
 ## Contratto del motore AI Android
