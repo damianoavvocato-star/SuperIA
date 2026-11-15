@@ -23,7 +23,7 @@ class OcrLanguageDataStore(context: Context) {
                 if (index >= 0) cursor.getString(index) else null
             } else null
         }.orEmpty()
-        require(displayName.endsWith(".traineddata", ignoreCase = true)) {
+        require(displayName.equals("ita.traineddata", ignoreCase = true)) {
             "Seleziona il file ita.traineddata di Tesseract."
         }
         check(tessdataDirectory.exists() || tessdataDirectory.mkdirs()) {
@@ -48,12 +48,17 @@ class OcrLanguageDataStore(context: Context) {
                 }
             }
             require(total > 0L) { "Il file lingua OCR è vuoto." }
-            if (italianDataFile.exists()) check(italianDataFile.delete()) {
-                "Impossibile sostituire il file lingua OCR precedente."
+            val backup = File(tessdataDirectory, "ita.traineddata.bak")
+            if (backup.exists()) backup.delete()
+            val hadPrevious = italianDataFile.exists()
+            if (hadPrevious) check(italianDataFile.renameTo(backup)) {
+                "Impossibile proteggere il dizionario OCR precedente."
             }
-            check(temporary.renameTo(italianDataFile)) {
-                "Impossibile salvare il file lingua OCR nell'area privata."
+            if (!temporary.renameTo(italianDataFile)) {
+                if (hadPrevious) backup.renameTo(italianDataFile)
+                throw IllegalStateException("Impossibile salvare il file lingua OCR nell'area privata.")
             }
+            backup.delete()
             return total
         } catch (error: Exception) {
             temporary.delete()
