@@ -28,3 +28,10 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 
 ## Prossimi incrementi
 Collegamento a un runtime AI locale Android, allegati con selettore documenti, test strumentali per archivio cifrato, inventario acceleratori supportati, benchmark controllato e completamento del pairing sicuro.
+
+
+## Contratto del motore AI Android
+
+È stato aggiunto il contratto Kotlin `InferenceEngine`, con richieste/risposte tipizzate, stati espliciti di disponibilità e un registro `InferenceEngineRegistry`. Il registro non contiene provider predefiniti: finché un runtime Android reale, un modello e la relativa licenza non sono verificati, la chat non deve dichiarare di poter generare risposte. Non è previsto alcun fallback cloud automatico.
+
+I test unitari del registro verificano che un registro vuoto non dichiari inferenza disponibile e che venga selezionato solo un motore marcato come pronto. Il runtime concreto, il caricamento dei pesi e la generazione sul dispositivo restano da implementare e collaudare.
