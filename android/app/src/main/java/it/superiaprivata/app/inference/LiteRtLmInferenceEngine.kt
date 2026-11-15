@@ -91,7 +91,7 @@ class LiteRtLmInferenceEngine(
             val output = StringBuilder()
             val activeConversation = requireNotNull(conversation)
             activeConversation.sendMessageAsync(request.prompt).collect { message ->
-                output.append(message.text)
+                output.append(message.toString())
             }
             InferenceResult(
                 text = output.toString(),
