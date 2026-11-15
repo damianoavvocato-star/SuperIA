@@ -13,6 +13,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 ## Funzioni presenti
 - Dashboard Compose iniziale e pannello chat conversazionale.
 - Importazione locale di PDF, DOCX, TXT e CSV tramite selettore Android.
+- OCR offline italiano dei PDF scansiti con Tesseract, dopo importazione del file lingua `ita.traineddata`.
 - Estrazione testo offline: PDFBox-Android per PDF testuali, parser DOCX per il corpo principale e lettura UTF-8 per TXT/CSV.
 - Archivio dei testi estratti cifrato AES-GCM con chiave non esportabile Android Keystore, anteprima, selezione, eliminazione e passaggio di un estratto al prompt della chat locale.
 - Inserimento e visualizzazione dei messaggi dell'utente.
@@ -28,11 +29,11 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - Non contiene ancora pairing completo, GitHub OAuth o runtime AI locale integrato.
 - La cronologia è cifrata a riposo; non è sincronizzata tra telefoni e non sostituisce un backup cifrato.
 - Nessuna autorizzazione generale di archiviazione è richiesta: l'accesso ai file usa il selettore documenti Android.
-- L'estrazione non esegue OCR sui PDF scansiti e non indicizza ancora più documenti con ricerca semantica/RAG. Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; massimo 6.000 caratteri di contesto documentale per richiesta chat.
+- L'OCR dei PDF scansiti richiede il file `ita.traineddata` importato dall'utente e processa al massimo le prime 20 pagine; non è incluso nell'APK. La ricerca testuale BM25 multi-documento è disponibile, mentre embeddings/ricerca semantica non sono ancora implementati. Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; massimo 6.000 caratteri di contesto documentale per richiesta chat.
 - I file originali non vengono copiati nell'archivio: viene conservato il solo testo estratto, cifrato AES-GCM nell'area privata dell'app con chiave dedicata in Android Keystore.
 
 ## Prossimi incrementi
-OCR offline per PDF scansiti, embeddings/ricerca semantica e riferimenti a pagina/paragrafo, test strumentali, benchmark e completamento del pairing sicuro.
+embeddings/ricerca semantica e riferimenti a pagina/paragrafo, test strumentali, benchmark e completamento del pairing sicuro.
 
 
 ## Contratto del motore AI Android
