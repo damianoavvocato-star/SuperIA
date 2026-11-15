@@ -20,6 +20,7 @@ import it.superiaprivata.app.device.DeviceProfileReader
 import it.superiaprivata.app.pairing.DeviceIdentityStore
 import it.superiaprivata.app.pairing.PairingInvite
 import it.superiaprivata.app.chat.AssistantChatPanel
+import it.superiaprivata.app.documents.DocumentsPanel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
                 var profile by remember { mutableStateOf(profileReader.read()) }
                 var pairingQr by remember { mutableStateOf<Bitmap?>(null) }
                 var pairingError by remember { mutableStateOf<String?>(null) }
+                var documentContext by remember { mutableStateOf<String?>(null) }
                 val identityStore = remember { DeviceIdentityStore() }
 
                 Surface(
@@ -45,7 +47,8 @@ class MainActivity : ComponentActivity() {
                             Text("SuperIA Privata", style = MaterialTheme.typography.headlineMedium)
                             Text("La tua piattaforma AI personale · Android")
                         }
-                        item { AssistantChatPanel() }
+                        item { DocumentsPanel(onContextChanged = { documentContext = it }) }
+                        item { AssistantChatPanel(documentContext = documentContext) }
                         item {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -105,9 +108,7 @@ class MainActivity : ComponentActivity() {
                                             pairingQr = null
                                             pairingError = it.message ?: "Impossibile creare l'invito"
                                         }
-                                    }) {
-                                        Text("Genera codice QR")
-                                    }
+                                    }) { Text("Genera codice QR") }
                                     pairingQr?.let { qr ->
                                         Image(
                                             bitmap = qr.asImageBitmap(),
@@ -120,9 +121,7 @@ class MainActivity : ComponentActivity() {
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
-                                    pairingError?.let {
-                                        Text(it, color = MaterialTheme.colorScheme.error)
-                                    }
+                                    pairingError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                                 }
                             }
                         }
@@ -131,7 +130,7 @@ class MainActivity : ComponentActivity() {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text("Moduli", style = MaterialTheme.typography.titleLarge)
                                     Text("Assistente AI · Chat locale LiteRT-LM (richiede un modello installato)")
-                                    Text("Documenti · In preparazione")
+                                    Text("Documenti · Importazione ed estrazione locale PDF/DOCX/TXT/CSV")
                                     Text("Immagini e video · In preparazione")
                                     Text("Audio e voce · In preparazione")
                                     Text("GitHub e coding · In preparazione")
@@ -141,7 +140,7 @@ class MainActivity : ComponentActivity() {
                         }
                         item {
                             Text(
-                                "La chat AI locale è disponibile dopo l’importazione di un modello compatibile e l’accettazione della relativa licenza. Il QR è ancora un invito dimostrativo: non crea una connessione tra telefoni.",
+                                "La chat AI locale richiede l'importazione di un modello compatibile e l'accettazione della relativa licenza. Il QR è ancora un invito dimostrativo: non crea una connessione tra telefoni.",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
