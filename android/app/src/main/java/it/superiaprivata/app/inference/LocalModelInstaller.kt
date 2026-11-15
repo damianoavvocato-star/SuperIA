@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -60,14 +61,23 @@ class LocalModelInstaller(private val context: Context) {
             }
 
             require(totalBytes > 0L) { "Il file selezionato è vuoto." }
-            // Replace the previous model atomically: a failed import must not delete
-            // the last known-good model from app-private storage.
-            Files.move(
-                temporary.toPath(),
-                target.toPath(),
-                StandardCopyOption.ATOMIC_MOVE,
-                StandardCopyOption.REPLACE_EXISTING
-            )
+
+            // Prefer an atomic replacement. Some Android filesystems/providers do not
+            // support ATOMIC_MOVE, so fall back to a normal replacement on that case.
+            try {
+                Files.move(
+                    temporary.toPath(),
+                    target.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (_: AtomicMoveNotSupportedException) {
+                Files.move(
+                    temporary.toPath(),
+                    target.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            }
 
             ModelImportResult(
                 file = target,
