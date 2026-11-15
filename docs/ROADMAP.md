@@ -8,14 +8,18 @@ Decisioni da mantenere in tutte le fasi:
 - Uso personale e riservato; progetto completamente separato da **Editore Foto e Video IA** (repository, codice, dati e configurazioni distinti).
 - Gratuità come requisito: nessun abbonamento o servizio/API a pagamento obbligatorio. Eventuali servizi esterni devono essere facoltativi e disattivati per impostazione predefinita.
 - Esecuzione locale e offline dove tecnicamente possibile; le funzioni che richiedono Internet (ricerca web, download, servizi esterni) devono dichiararlo.
-- Supporto previsto per PC e Android, con moduli attivabili progressivamente.
+- Destinazione esclusiva Android (smartphone e tablet); non sviluppare client PC. Moduli attivabili progressivamente.
 - Priorità alla privacy, controllo dell'utente e approvazione prima di operazioni distruttive o azioni esterne.
 - Ogni modello/strumento deve essere verificato per licenza, requisiti hardware, compatibilità e possibilità di uso commerciale/personale.
 - Nessuna fase è dichiarata completata solo perché il codice è stato caricato: servono test pertinenti, verifica pratica e documentazione dei limiti.
 
+## Decisione Android-only
+
+Il prodotto finale è esclusivamente Android. Lo stack, la strategia prestazioni, i moduli e i gate sono descritti in [docs/ANDROID_ONLY_ARCHITECTURE.md](ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI già presente è un prototipo e non deve essere una dipendenza necessaria dell'app.
+
 ## Documentazione della Fase 0
 
-Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matrice delle alternative gratuite/locali è in [docs/AI_ALTERNATIVES_MATRIX.md](AI_ALTERNATIVES_MATRIX.md); la [mappatura funzionale preliminare di tutte le 182 IA](AI_FUNCTIONAL_ANALYSIS.md) associa ogni voce a capacità, candidati tecnici e modalità locale/ibrida; il [registro tecnico dei componenti e delle licenze](COMPONENTS_LICENSE_REGISTER.md) separa le licenze del codice da quelle di modelli, pesi e dipendenze; il [registro macchina JSON](../config/components.registry.json) traccia candidati, stato di approvazione e controlli richiesti; l'[audit strutturato delle 182 voci](AI_182_AUDIT.json) registra per ogni sistema capacità, alternativa, modalità, costi, licenze e compatibilità ancora da verificare; le [decisioni architetturali](PHASE0_DECISIONS.md) fissano i criteri di selezione e i limiti PC/Android; il [registro modelli candidati](../config/models.registry.json) mantiene le famiglie da benchmarkare senza approvarne automaticamente i pesi. La ricognizione documentale è consolidata, mentre la verifica puntuale dei piani commerciali, dei singoli artefatti e dei benchmark su hardware reale resta aperta.
+Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matrice delle alternative gratuite/locali è in [docs/AI_ALTERNATIVES_MATRIX.md](AI_ALTERNATIVES_MATRIX.md); la [mappatura funzionale preliminare di tutte le 182 IA](AI_FUNCTIONAL_ANALYSIS.md) associa ogni voce a capacità, candidati tecnici e modalità locale/ibrida; il [registro tecnico dei componenti e delle licenze](COMPONENTS_LICENSE_REGISTER.md) separa le licenze del codice da quelle di modelli, pesi e dipendenze; il [registro macchina JSON](../config/components.registry.json) traccia candidati, stato di approvazione e controlli richiesti; l'[audit strutturato delle 182 voci](AI_182_AUDIT.json) registra per ogni sistema capacità, alternativa, modalità, costi, licenze e compatibilità ancora da verificare; le [decisioni architetturali](PHASE0_DECISIONS.md) fissano i criteri di selezione e i limiti Android; il [registro modelli candidati](../config/models.registry.json) mantiene le famiglie da benchmarkare senza approvarne automaticamente i pesi. La ricognizione documentale è consolidata, mentre la verifica puntuale dei piani commerciali, dei singoli artefatti e dei benchmark su hardware reale resta aperta.
 
 ## Fasi riorganizzate
 
@@ -36,7 +40,7 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 | 12 | Ecosistema di modelli e componenti | Registro modelli; installazione/rimozione; versioni; dipendenze; cache; download; licenze; benchmark; selezione automatica del modello adatto; fallback solo locale e configurabile | Pianificata |
 | 13 | Applicazione unica e interfacce | Dashboard unificata; moduli attivabili; interfaccia coerente; gestione progetti e file; cronologia; impostazioni; accessibilità; UX mobile; sincronizzazione solo se scelta e protetta | Pianificata |
 | 14 | Privacy, sicurezza e controllo | Modalità offline; cifratura dei dati locali; autenticazione; permessi; backup/esportazione; cancellazione; isolamento moduli; protezione segreti; audit; consenso e conferma delle azioni esterne | Requisito trasversale, hardening da fare |
-| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; uso RAM/GPU; compatibilità modelli; build PC e APK Android; installazione; aggiornamenti; manuale e rilascio | Pianificata |
+| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; uso RAM/GPU; compatibilità modelli; build APK Android; installazione; aggiornamenti; manuale e rilascio | Pianificata |
 
 ## Copertura funzionale della ricognizione iniziale
 
@@ -69,7 +73,7 @@ Una fase passa a "completata" solo quando:
 
 - Il repository contiene un backend FastAPI iniziale, provider Ollama, endpoint health/capabilities/models/chat, interfaccia web, cronologia conversazioni nel browser, esportazione e annotazione personale locale.
 - La nota personale locale viene aggiunta al contesto della chat; non è apprendimento del modello e non è una memoria persistente lato server.
-- I workflow GitHub Actions recenti risultano con esito SUCCESS per i test backend. Questo non equivale ancora a un collaudo completo su Ollama, PC e Android.
+- I workflow GitHub Actions recenti risultano con esito SUCCESS per i test backend. Questo non equivale ancora a un collaudo completo su Ollama, Android.
 - Le fasi 0–2 non sono da considerare completate: l'inventario funzionale va consolidato e il prototipo della chat va ulteriormente verificato.
 - Nessun modulo immagini, video, audio, agenti o APK Android è dichiarato già realizzato.
 
