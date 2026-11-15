@@ -19,7 +19,7 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 - CI sul commit `8ba080ad4f43690f25c63f74d2ff7c3941944b5a`: test Android, compilazione APK e test backend tutti superati.
 - APK debug disponibile come artefatto GitHub Actions; i pesi Gemma non sono inclusi e vanno scaricati/importati separatamente dopo aver accettato i termini.
 - Fase 2: implementazione e CI verificate; collaudo end-to-end su Realme C75 e Xiaomi Mi 10T ancora necessario.
-- Fase 3 (primo incremento): importazione locale PDF/DOCX/TXT/CSV, estrazione testo, archivio cifrato AES-GCM e passaggio di un documento selezionato o dei blocchi recuperati da BM25 al prompt chat. OCR, embeddings/ricerca semantica e citazioni di pagina sono ancora da implementare.
+- Fase 3 (primo incremento): importazione locale PDF/DOCX/TXT/CSV, estrazione testo, archivio cifrato AES-GCM e passaggio di un documento selezionato o dei blocchi recuperati da BM25 al prompt chat. OCR italiano offline per PDF scansiti aggiunto (richiede il dizionario `ita.traineddata`); embeddings/ricerca semantica e citazioni di pagina sono ancora da implementare.
 - Immagini, video, audio, coding avanzato e agenti non sono ancora implementati nell'app nativa.
 
 ## Roadmap completa
