@@ -27,7 +27,7 @@ Il catalogo nominativo è in [docs/AI_CATALOG.md](AI_CATALOG.md); la prima matri
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Ricognizione documentale consolidata; verifica puntuale di servizi, modelli e hardware ancora aperta |
 | 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; storage; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; build debug | In corso: scheletro Kotlin/Compose e rilevamento base aggiunti; primitive iniziali per identità Keystore e inviti QR a scadenza; pipeline SDK corretta e in verifica; handshake, rete, GitHub e test reali ancora da completare |
-| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | In corso: UI Compose; cronologia locale cifrata AES-GCM con chiave Android Keystore e cancellazione; runtime AI, streaming, allegati e voce ancora da collegare |
+| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | In corso: UI Compose e cronologia cifrata; contratto Kotlin InferenceEngine e registro con selezione esplicita e stati di disponibilità; runtime concreto, modello/pesi, generazione, streaming, allegati e voce ancora da collegare |
 | 3 | Documenti e conoscenza personale | Caricamento PDF/DOCX/TXT/CSV; estrazione testo; OCR; riassunti; domande sui file; ricerca semantica; RAG; citazioni e riferimenti alle pagine; archivio locale | Pianificata |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Pianificata |
 | 5 | Immagini e grafica | Generazione da testo; modifica immagini; inpainting/outpainting; rimozione/sostituzione sfondo e oggetti; restauro; upscaling; OCR immagini; grafica, loghi e layout | Pianificata |
@@ -77,7 +77,10 @@ Una fase passa a "completata" solo quando:
 - Le fasi 0–2 non sono da considerare completate: l'inventario funzionale va consolidato e il prototipo della chat va ulteriormente verificato.
 - L'app Android ha uno scheletro Kotlin/Compose, profilo dispositivo, primitive iniziali per identità crittografica/inviti QR, interfaccia chat e cronologia locale cifrata con Android Keystore. La chat non esegue ancora inferenza; pairing completo, runtime AI e moduli immagini/video/audio/agenti non sono ancora operativi.
 - La build Android del commit `c6654884036b916a7d8265dd1c0c386b11f96a1e` è terminata con SUCCESS su GitHub Actions (run 43745811323); i test backend sullo stesso commit sono SUCCESS (run 43745811311). Le modifiche successive alla cronologia cifrata sono ancora da compilare e verificare.
-- La build Android debug è in verifica dopo la correzione della configurazione SDK; nessun APK è dichiarato disponibile finché Actions non completa con successo e l'artefatto non viene controllato.
+- La build Android debug del commit `e91033d8bd49c52561c0b3f7df514a5b84f6c4e4` è SUCCESS (run 43745987105); artefatto `superia-privata-debug` presente, 16.059.886 byte, scadenza 13 febbraio 2027. Questo APK precede il nuovo contratto inference e non contiene ancora tali file.
+- I test backend del commit `4b952b65805d105eb6274beb4d661f1ea5c79f45` sono SUCCESS (run 43745991308).
+- Aggiunto il contratto Android `InferenceEngine`, il registro `InferenceEngineRegistry` e test unitari per registro vuoto/selezione solo di provider pronti; la build e i nuovi test Kotlin devono ancora essere verificati da Actions.
+- Nessun runtime Android concreto o modello locale è ancora integrato; nessuna risposta AI viene ancora generata dall'app.
 
 ## Regola di separazione
 
