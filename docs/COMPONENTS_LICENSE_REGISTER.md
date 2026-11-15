@@ -21,6 +21,7 @@
 | whisper.cpp | Runtime C/C++ per Whisper | MIT | Verificare modello Whisper utilizzato e licenze delle dipendenze/binari distribuiti. | Candidato per trascrizione locale |
 | Tesseract OCR | OCR | Apache-2.0 | Il progetto segnala dipendenze con licenze distinte; verificare Leptonica e pacchetti binari. | Candidato per OCR |
 | PdfBox-Android 2.0.27.0 | Estrazione testo PDF nell'app Android | Apache-2.0 | Dipendenza AAR da Maven Central; verificare e includere nell'SBOM le dipendenze transitive Bouncy Castle e i relativi avvisi prima di una release. | Integrato nel prototipo Android; build/compatibilità da verificare |
+| Tesseract4Android 4.4.0 | OCR offline italiano su PDF scansiti | Apache-2.0 per wrapper; Tesseract Apache-2.0 | Distribuito tramite JitPack; include Leptonica, libjpeg e libpng con licenze proprie. Verificare SBOM/avvisi e versione esatta. Il file ita.traineddata è importato separatamente dall'utente e va controllata la licenza del file/modello esatto. | Integrato nel prototipo Android; build/compatibilità da verificare |
 | LlamaIndex core | Indicizzazione e RAG | MIT per il pacchetto core esaminato | Il progetto è composto da più pacchetti: verificare la licenza di ciascun pacchetto effettivamente installato e delle dipendenze. | Candidato RAG, installazione minima |
 | ComfyUI | Pipeline generazione immagini | GPL-3.0 | Copyleft: prima di incorporare, modificare o distribuire l'applicazione insieme a ComfyUI, fare revisione compatibilità e modalità di collegamento. Plugin e modelli hanno licenze proprie. | Candidato opzionale, isolato come processo esterno |
 | Blender | 3D e rendering | GPL-3.0-or-later dichiarata per Blender | Le dipendenze incluse hanno licenze differenti; controllare avvisi di terze parti e modalità di distribuzione. | Candidato opzionale, tool esterno |
@@ -110,3 +111,13 @@ Ulteriori file ufficiali consultati:
 - Licenza del progetto: Apache-2.0, come dichiarato dal repository.
 - Utilizzo limitato all'estrazione del testo da PDF nell'app Android; non è un servizio remoto.
 - La release e le dipendenze transitive devono essere bloccate e incluse nell'SBOM della futura distribuzione. L'integrazione nel prototipo non equivale ad approvazione per la release finale.
+
+
+### OCR offline Android — Tesseract4Android
+
+- Wrapper: https://github.com/adaptech-cz/Tesseract4Android — Apache-2.0.
+- Motore Tesseract: https://github.com/tesseract-ocr/tesseract — Apache-2.0.
+- Il wrapper include dipendenze native (Leptonica, libjpeg, libpng) con licenze da riportare nell'SBOM.
+- Dipendenza prototipale: `com.github.adaptech-cz.Tesseract4Android:tesseract4android:4.4.0` tramite JitPack.
+- Dati lingua italiani non incorporati nell'APK: l'utente importa `ita.traineddata` nell'area privata. Prima della release verificare e archiviare la licenza e il checksum del file effettivamente usato.
+- L'OCR viene eseguito sul dispositivo; nessun servizio cloud è richiesto.
