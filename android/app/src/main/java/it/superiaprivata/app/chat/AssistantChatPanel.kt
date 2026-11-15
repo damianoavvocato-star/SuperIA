@@ -210,10 +210,20 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                     generating = true
                                     generationError = null
                                     try {
+                                        val streamingId = Long.MIN_VALUE
+                                        messages.removeAll { it.id == streamingId }
+                                        messages.add(ChatLine(streamingId, "", "assistant"))
                                         val result = engine.generate(
                                             artifact.spec,
-                                            InferenceRequest(prompt = retryPrompt)
+                                            InferenceRequest(prompt = retryPrompt),
+                                            onPartialText = { partial ->
+                                                val streamingIndex = messages.indexOfFirst { it.id == streamingId }
+                                                if (streamingIndex >= 0) {
+                                                    messages[streamingIndex] = ChatLine(streamingId, partial, "assistant")
+                                                }
+                                            }
                                         )
+                                        messages.removeAll { it.id == streamingId }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
                                         messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
@@ -303,10 +313,20 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                 generating = true
                                 generationError = null
                                 try {
+                                    val streamingId = Long.MIN_VALUE
+                                    messages.removeAll { it.id == streamingId }
+                                    messages.add(ChatLine(streamingId, "", "assistant"))
                                     val result = engine.generate(
                                         artifact.spec,
-                                        InferenceRequest(prompt = promptWithHistory)
+                                        InferenceRequest(prompt = promptWithHistory),
+                                        onPartialText = { partial ->
+                                            val streamingIndex = messages.indexOfFirst { it.id == streamingId }
+                                            if (streamingIndex >= 0) {
+                                                messages[streamingIndex] = ChatLine(streamingId, partial, "assistant")
+                                            }
+                                        }
                                     )
+                                    messages.removeAll { it.id == streamingId }
                                     val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
                                     messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
