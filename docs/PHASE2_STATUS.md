@@ -75,3 +75,14 @@ Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e
 - Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518): SUCCESS.
 
 **Stato Fase 2 invariato:** compilazione e test unitari della revisione verificati; test strumentali in corso; inferenza Gemma reale e collaudo sui due telefoni ancora da eseguire.
+
+
+## Aggiornamento CI — 16 novembre 2026 (run 43890341130)
+
+- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
+- Test unitari Android, build APK Debug e upload dell'artefatto: **SUCCESS**.
+- Test strumentali Android Keystore: **6 test avviati e 6 terminati** su emulatore API 34; `connectedDebugAndroidTest` e Gradle **BUILD SUCCESSFUL**.
+- Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte; SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`; scadenza 14 febbraio 2027.
+- I risultati CI non sostituiscono i test di inferenza locale Gemma reale, streaming, ripresa dopo chiusura/riavvio e benchmark su Realme C75 e Xiaomi Mi 10T.
+
+**Stato:** CI Android completa superata sulla revisione indicata; Fase 2 ancora aperta fino al collaudo end-to-end e fisico sui due dispositivi.
