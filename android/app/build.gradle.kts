@@ -4,6 +4,19 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val stableKeystorePath = System.getenv("SUPERIA_KEYSTORE_FILE")
+val stableStorePassword = System.getenv("SUPERIA_KEYSTORE_PASSWORD")
+val stableKeyAlias = System.getenv("SUPERIA_KEY_ALIAS")
+val stableKeyPassword = System.getenv("SUPERIA_KEY_PASSWORD")
+val hasStableSigning = listOf(
+    stableKeystorePath,
+    stableStorePassword,
+    stableKeyAlias,
+    stableKeyPassword
+).all { !it.isNullOrBlank() }
+
+val ciVersionCode = maxOf(1, System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1)
+
 android {
     namespace = "it.superiaprivata.app"
     compileSdk = 35
@@ -12,9 +25,29 @@ android {
         applicationId = "it.superiaprivata.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = ciVersionCode
+        versionName = "0.1.$ciVersionCode"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    if (hasStableSigning) {
+        signingConfigs {
+            create("stable") {
+                storeFile = file(stableKeystorePath!!)
+                storePassword = stableStorePassword
+                keyAlias = stableKeyAlias
+                keyPassword = stableKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            if (hasStableSigning) {
+                signingConfig = signingConfigs.getByName("stable")
+            }
+        }
     }
 
     buildFeatures { compose = true }
