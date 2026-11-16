@@ -329,3 +329,10 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Commit `5f660ca2978e2405810d1dda6b663ce30d7ff04d`: l'adapter mantiene il motore quando il modello è invariato ma ricrea una conversazione LiteRT-LM pulita per ogni richiesta, evitando di sommare il transcript ricostruito allo stato conversazionale precedente.
 - Android CI sul commit `5f660ca...`: run `43889593074` avviato in coda al controllo; backend run `43889593257` anch'esso in coda. L'esecuzione precedente `43888872060` era ancora in corso nella fase di instrumentation.
 - Questa correzione è implementata ma resta da convalidare con la nuova CI e con inferenza reale su entrambi i telefoni.
+
+
+### Stabilizzazione CI emulator — 16 novembre 2026
+
+- I run Android `43888872060` e `43889593074` hanno completato i test unitari ma sono rimasti nella fase di instrumentation/emulatore senza avviare assemble/upload; al controllo risultavano ancora in corso. Il primo tentativo precedente aveva mostrato un rifiuto TCP 5554/ADB durante la fase emulator.
+- Commit `fa712c9b3e7064c607e17d97133a8ad5e6a0b2f9`: aggiunto un ciclo di retry ADB con attesa fino a 5 minuti e controllo esplicito di `sys.boot_completed` prima di avviare `connectedDebugAndroidTest`. Se l'emulatore non diventa pronto, lo step fallisce esplicitamente invece di lanciare i test su un device non avviato.
+- La modifica è in attesa di CI sul nuovo commit. Non considerare superati i test strumentali finché il run non termina con successo.
