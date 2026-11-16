@@ -343,3 +343,12 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - La CI sul commit `fa712c9...` ha superato i test unitari Android; la fase emulator/Keystore è rimasta in corso durante il controllo. Il backend sul medesimo commit è SUCCESS.
 - Commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: riordinati gli step Android per compilare e caricare l'APK debug dopo i test unitari e prima dell'emulatore. In questo modo un problema del boot emulator non blocca più la disponibilità dell'APK del commit verificato. I test strumentali restano comunque gate obbligatorio e non vengono saltati.
 - La nuova CI è da attendere; nessun APK di questo commit è ancora dichiarato disponibile.
+
+
+### Pubblicazione APK e stato CI — 16 novembre 2026 (run 43890341130)
+
+- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android **SUCCESS**; `assembleDebug` **SUCCESS**; upload artifact **SUCCESS**.
+- Artefatto `superia-privata-debug`, ID `14235164539`, dimensione archivio 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
+- Al controllo delle 15:54 CET, lo step `Run Android Keystore instrumentation tests` risultava ancora **IN_PROGRESS**. La run Android nel suo complesso non è quindi conclusa e i test strumentali non sono ancora attestati come superati su questa revisione.
+- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518), commit documentale `edce5e40a01bdae002065178c3ace5e2d437c188`: **SUCCESS**.
+- L'APK è un artefatto debug CI, non una release firmata né una certificazione di compatibilità sui telefoni. Restano obbligatori test reali con Gemma importato, ripresa dopo chiusura/riavvio e misure su Realme C75 e Xiaomi Mi 10T.
