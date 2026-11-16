@@ -230,6 +230,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                         historyStore.save(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
+                                        messages.removeAll { it.id == Long.MIN_VALUE }
                                         throw error
                                     } catch (error: Exception) {
                                         messages.removeAll { it.id == Long.MIN_VALUE }
@@ -333,6 +334,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                     messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
                                     historyStore.save(messages.toList())
                                 } catch (error: CancellationException) {
+                                    messages.removeAll { it.id == Long.MIN_VALUE }
                                     throw error
                                 } catch (error: Exception) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
