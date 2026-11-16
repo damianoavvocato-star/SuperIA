@@ -41,6 +41,15 @@ jobs:
       - name: Run Android unit tests
         working-directory: android
         run: gradle --no-daemon testDebugUnitTest
+      - name: Assemble debug APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: superia-privata-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
       - name: Run Android Keystore instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -52,12 +61,3 @@ jobs:
           disable-animations: true
           script: >-
             for attempt in $(seq 1 60); do if adb wait-for-device && adb shell '[ "$(getprop sys.boot_completed)" = "1" ]'; then break; fi; sleep 5; done; adb shell '[ "$(getprop sys.boot_completed)" = "1" ]' && sleep 10 && cd android && gradle --no-daemon connectedDebugAndroidTest
-      - name: Assemble debug APK
-        working-directory: android
-        run: gradle --no-daemon assembleDebug
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: superia-privata-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
