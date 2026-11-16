@@ -310,3 +310,14 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Commit [516b5e2d](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/516b5e2d9b3fdf2b8e4628472143480858075e05). Il commit modifica un file sotto android/, quindi è previsto l'avvio del workflow Android configurato sul branch main.
 - Esito dei nuovi test e della CI non ancora disponibile/verificato in questa registrazione.
 - Restano aperti i gate di inferenza reale Gemma, ripresa dopo interruzione, compatibilità/performance sui due telefoni target e verifica finale APK sulla revisione più recente.
+
+
+## Aggiornamento operativo — 16 novembre 2026 (CI chat e Android)
+
+- Commit `63c326759a9769d2fbeccc2e11a7f19bdafbc68c`: lo script di attesa emulator è stato convertito in un comando shell singolo per evitare il precedente errore di parsing della multilinea. Il run Android `43888225880` è comunque fallito durante la preparazione dell'emulatore: il log segnala errore di lettura ZIP del pacchetto Android Emulator e connessione rifiutata alla porta TCP 5554. L'esecuzione non è arrivata a `connectedDebugAndroidTest`; non è un fallimento di un test applicativo.
+- Commit `516b5e2d9b3fdf2b8e4628472143480858075e05`: aggiunti tre test unitari di regressione per limite memoria progetto, limite combinato cronologia/documento con conservazione del nuovo messaggio e rifiuto di `maxHistoryMessages=0`.
+- Backend run `43888872641` sul commit `516b5e2...`: **SUCCESS**. Backend run `43888917797` sul successivo commit di documentazione `982a3a4...`: **SUCCESS**.
+- Android run `43888872060` sul commit `516b5e2...`: unit test **SUCCESS**; test strumentali Android Keystore **IN CORSO** al momento dell'ultimo controllo; assemble APK e upload non ancora avviati. Non dichiarare l'intera CI Android superata fino alla conclusione del run.
+- I controlli automatici non sostituiscono il test di inferenza con Gemma realmente importato su Realme C75 e Xiaomi Mi 10T. RAM, latenza, temperatura, batteria e ripresa dopo riavvio restano gate fisici aperti.
+
+**Stato Fase 2:** implementazione estesa e test unitari superati; validazione strumentale Android in corso; collaudo end-to-end sui due telefoni non eseguito. Fase 2 resta aperta.
