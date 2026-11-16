@@ -73,6 +73,7 @@ class LiteRtLmInferenceEngine(
         onPartialText: (String) -> Unit
     ): InferenceResult = mutex.withLock {
         require(request.prompt.isNotBlank()) { "La richiesta non può essere vuota." }
+        require(request.maxOutputTokens > 0) { "Il limite dei token di output deve essere positivo." }
         require(isLicenseApproved(model.licenseId)) {
             "La licenza del modello deve essere approvata prima dell'esecuzione."
         }
@@ -91,7 +92,10 @@ class LiteRtLmInferenceEngine(
             ensureConversation(model, file)
             val output = StreamingTextAccumulator()
             val activeConversation = requireNotNull(conversation)
-            activeConversation.sendMessageAsync(request.prompt).collect { message ->
+            activeConversation.sendMessageAsync(
+                request.prompt,
+                maxOutputToken = request.maxOutputTokens
+            ).collect { message ->
                 val partial = output.append(message.toString())
                 withContext(Dispatchers.Main.immediate) {
                     onPartialText(partial)
