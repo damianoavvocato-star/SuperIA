@@ -270,6 +270,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     }
                 }
                 OutlinedButton(
+                    enabled = !generating,
                     onClick = {
                         runCatching { historyStore.clear() }
                             .onSuccess {
