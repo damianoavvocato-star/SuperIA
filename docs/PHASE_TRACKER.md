@@ -293,3 +293,12 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Commit test: `0cd6c299`.
 - La revisione deve ancora superare la CI Android su emulatore; fino all'esito non considerare questi nuovi test superati.
 - La run Android sul commit precedente `3355bc05` è ancora in corso: unit test in esecuzione al controllo più recente; backend sul medesimo commit **SUCCESS**. Il commit `0cd6c299` ha generato una nuova revisione da verificare separatamente.
+
+
+### Diagnostica CI emulatore e correzione invocazione script — 16 novembre 2026
+
+- Android run [43883393409](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883393409) e [43883636513](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883636513): unit test Android **SUCCESS**, ma il job strumentale è terminato prima di Gradle con errore di sintassi della shell (ciclo for incompleto). Non è un fallimento di test dell'app: lo script multi-linea passato all'azione dell'emulatore è stato interpretato in modo incompleto.
+- Backend [43883636647](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883636647) e [43883668712](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883668712): **SUCCESS**.
+- Corretto il workflow Android nel commit [63c32675](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/63c326759a9769d2fbeccc2e11a7f19bdafbc68c): il comando di attesa boot + avvio test è ora una singola istruzione shell, evitando il troncamento del blocco multi-linea.
+- **Verifica ancora pendente:** la nuova run Android deve dimostrare che l'emulatore arriva alla suite strumentale, che tutti i test passano e che APK debug e artefatto vengono prodotti. Non anticipare l'esito.
+- Il gate fisico Fase 2 resta aperto: Gemma importato, inferenza/streaming, persistenza dopo riavvio e benchmark su Realme C75 e Xiaomi Mi 10T richiedono i dispositivi reali; la CI emulata non può certificare questi risultati.
