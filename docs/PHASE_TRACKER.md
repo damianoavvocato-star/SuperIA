@@ -255,3 +255,12 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - CI di riferimento precedente: Android run [43810811687](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811687) **SUCCESS** e backend run [43810811557](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811557) **SUCCESS** sul commit `875ded1e`; queste run precedono i quattro commit elencati sopra. La nuova CI deve essere eseguita e superata prima di convalidare questa revisione.
 - **Residui che impediscono la chiusura Fase 2:** test strumentali di `ChatHistoryStore` (Android Keystore/AES-GCM, migrazione, archivio corrotto e recupero AtomicFile), test pratico con Gemma importato e inferenza/streaming visibili, verifica della persistenza dopo chiusura forzata/riavvio, misure RAM/tempi/temperatura/batteria su Realme C75 e Xiaomi Mi 10T. Restano inoltre fuori dal primo incremento la memoria automatica/riassunti progressivi, il retrieval semantico e il cambio modello senza perdere la conversazione.
 - **Stato aggiornato:** codice streaming e limite token implementati; test unitari aggiunti; nuova CI in attesa. Fase 2 resta parziale e non chiusa. Nessun test fisico può essere simulato dalla CI remota.
+
+
+### Test strumentali archivio conversazione — 16 novembre 2026
+
+- Aggiunta suite Android instrumented `ChatHistoryStoreInstrumentedTest`, eseguibile su emulator API 35 con Android Keystore reale dell'emulatore.
+- Casi coperti: persistenza di 160 messaggi e flag pending; assenza del testo in chiaro nell'archivio; round-trip/cancellazione della memoria progetto; rifiuto di un archivio cifrato alterato.
+- Configurati AndroidX Test Runner/Core/JUnit e aggiornato `.github/workflows/android-build.yml` per eseguire `connectedDebugAndroidTest` tramite emulatore prima della build APK.
+- Commit: `e25efe93` (suite strumentale), `c705785f` (dipendenze/runner), `4d8028f0` (workflow emulatore).
+- **Stato:** test e workflow aggiunti; esito della prima esecuzione CI su emulatore ancora da verificare. Questi test non sostituiscono i test su Realme C75 e Xiaomi Mi 10T, né simulano interruzione fisica dell'alimentazione o ogni scenario di recovery AtomicFile.
