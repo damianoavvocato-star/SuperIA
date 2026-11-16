@@ -57,6 +57,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
     val modelFile = remember(context) { LocalModelCatalog.modelFile(context, artifact) }
     val installer = remember(context) { LocalModelInstaller(context) }
     val deviceProfile = remember(context) { DeviceProfileReader(context).read() }
+    var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
     var licenseAccepted by rememberSaveable { mutableStateOf(false) }
     var modelInstalled by remember(modelFile) { mutableStateOf(modelFile.isFile && modelFile.length() > 0L) }
     var importing by remember { mutableStateOf(false) }
@@ -112,6 +113,16 @@ fun AssistantChatPanel(documentContext: String? = null) {
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Parla con SuperIA", style = MaterialTheme.typography.titleLarge)
+            Card {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Diagnostica ultima chiusura", style = MaterialTheme.typography.titleSmall)
+                    Text(exitDiagnostic, style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(
+                        onClick = { exitDiagnostic = RuntimeExitDiagnostics.read(context) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Aggiorna diagnostica") }
+                }
+            }
             Text("Una conversazione persistente: la cronologia viene conservata sul dispositivo anche quando chiudi l'app.", style = MaterialTheme.typography.bodyMedium)
             OutlinedTextField(
                 value = projectMemory,
@@ -232,6 +243,10 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                     } catch (error: CancellationException) {
                                         messages.removeAll { it.id == Long.MIN_VALUE }
                                         throw error
+                                    } catch (error: OutOfMemoryError) {
+                                        messages.removeAll { it.id == Long.MIN_VALUE }
+                                        runCatching { engine.close() }
+                                        generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                     } catch (error: Exception) {
                                         messages.removeAll { it.id == Long.MIN_VALUE }
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
@@ -337,6 +352,10 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                 } catch (error: CancellationException) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
                                     throw error
+                                } catch (error: OutOfMemoryError) {
+                                    messages.removeAll { it.id == Long.MIN_VALUE }
+                                    runCatching { engine.close() }
+                                    generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                 } catch (error: Exception) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
                                     generationError = error.message ?: "Errore durante l'inferenza locale."
