@@ -65,3 +65,13 @@ Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e
 - I run Android precedenti `43888872060` e `43889593074` risultavano ancora in corso nella fase di instrumentation. Non sono disponibili risultati finali e non vanno interpretati come successi.
 
 **Gate aperti:** CI Android completa sul commit corrente; test Keystore strumentali; installazione e inferenza reale Gemma su Realme C75 e Xiaomi Mi 10T; misure di RAM, latenza, stabilità, temperatura e batteria. Fase 2 non chiusa.
+
+
+## Aggiornamento CI — 16 novembre 2026 (run 43890341130)
+
+- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android SUCCESS, build APK debug SUCCESS e upload SUCCESS.
+- Artifact `superia-privata-debug`, ID `14235164539`, 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
+- Al controllo delle 15:54 CET, i test strumentali Android Keystore risultavano ancora IN_PROGRESS; non si dichiara la run Android completa né la suite strumentale superata su questo commit.
+- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518): SUCCESS.
+
+**Stato Fase 2 invariato:** compilazione e test unitari della revisione verificati; test strumentali in corso; inferenza Gemma reale e collaudo sui due telefoni ancora da eseguire.
