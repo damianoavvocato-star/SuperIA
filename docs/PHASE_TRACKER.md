@@ -352,3 +352,14 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Al controllo delle 15:54 CET, lo step `Run Android Keystore instrumentation tests` risultava ancora **IN_PROGRESS**. La run Android nel suo complesso non è quindi conclusa e i test strumentali non sono ancora attestati come superati su questa revisione.
 - Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518), commit documentale `edce5e40a01bdae002065178c3ace5e2d437c188`: **SUCCESS**.
 - L'APK è un artefatto debug CI, non una release firmata né una certificazione di compatibilità sui telefoni. Restano obbligatori test reali con Gemma importato, ripresa dopo chiusura/riavvio e misure su Realme C75 e Xiaomi Mi 10T.
+
+
+### Esito CI Android Keystore — 16 novembre 2026 (run 43890341130)
+
+- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
+- Test unitari Android: SUCCESS; compilazione APK debug: SUCCESS; upload artifact: SUCCESS.
+- Test strumentali Android Keystore eseguiti su emulatore API 34: **6 test avviati, 6 terminati; task `connectedDebugAndroidTest` e build Gradle SUCCESS**.
+- Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte; SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`; scadenza 14 febbraio 2027.
+- Questo risultato convalida la suite strumentale sul solo emulatore CI. Non dimostra inferenza Gemma reale, ripresa dopo force-stop/riavvio su device, né prestazioni sui telefoni Realme C75 e Xiaomi Mi 10T.
+- Una precedente run Android [43890080541](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890080541), commit `fa712c9...`, risultava ancora in corso al controllo; è una run distinta e più vecchia. Non è stata modificata o annullata.
+- **Stato Fase 2:** test automatici e strumentali CI superati su questa revisione; fase ancora **parziale** in attesa dei test end-to-end con Gemma e dei collaudi fisici sui due dispositivi target.
