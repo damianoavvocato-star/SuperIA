@@ -73,3 +73,12 @@ Fonti: [Message.kt](https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin
 - Il pannello impedisce l'importazione durante una generazione e non inghiotte la cancellazione delle coroutine.
 
 **Limite residuo obbligatorio:** CI non dimostra che il file Gemma sia valido né che l'inferenza funzioni sui telefoni. Servono importazione del modello e prove reali su Realme C75 e Xiaomi Mi 10T, con misure di RAM, tempi di risposta, stabilità e temperatura.
+
+
+## Aggiornamento CI Android — 16 novembre 2026
+
+La run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), sul commit `a82cf5ca255ebcb9b619d773768adb97b87facee`, è terminata con **SUCCESS**. Dai log del job Android risulta: test unitari superati, APK Debug compilato e caricato, 6 test strumentali avviati e 6 terminati sull'emulatore API 34; `connectedDebugAndroidTest` ha concluso con `BUILD SUCCESSFUL`.
+
+Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
+
+Il protocollo pratico per la prova end-to-end è stato aggiunto in [DEVICE_SMOKE_TEST.md](DEVICE_SMOKE_TEST.md). I test su Realme C75 e Xiaomi Mi 10T non sono stati eseguiti da CI e restano obbligatori prima di chiudere la Fase 2.
