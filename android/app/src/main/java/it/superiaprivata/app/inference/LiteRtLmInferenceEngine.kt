@@ -89,16 +89,15 @@ class LiteRtLmInferenceEngine(
 
         withContext(Dispatchers.IO) {
             ensureConversation(model, file)
-            val output = StringBuilder()
+            val output = StreamingTextAccumulator()
             val activeConversation = requireNotNull(conversation)
             activeConversation.sendMessageAsync(request.prompt).collect { message ->
-                output.append(message.toString())
-                val partial = output.toString()
+                val partial = output.append(message.toString())
                 withContext(Dispatchers.Main.immediate) {
                     onPartialText(partial)
                 }
             }
-            val generatedText = output.toString().trim()
+            val generatedText = output.result().trim()
             check(generatedText.isNotEmpty()) {
                 "Il runtime locale non ha restituito testo. Verifica il modello e riprova."
             }
