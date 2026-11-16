@@ -113,7 +113,15 @@ class LiteRtLmInferenceEngine(
     }
 
     private suspend fun ensureConversation(model: ModelSpec, file: File) {
-        if (activeModelId == model.id && engine != null && conversation != null) return
+        // ChatPromptBuilder already reconstructs the bounded transcript from the
+        // encrypted archive. Start each turn with a fresh conversation so the
+        // same history is not appended twice (once by LiteRT-LM's in-memory
+        // conversation and once inside the rebuilt prompt).
+        if (activeModelId == model.id && engine != null) {
+            conversation?.close()
+            conversation = requireNotNull(engine).createConversation()
+            return
+        }
 
         conversation?.close()
         conversation = null
