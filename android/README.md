@@ -82,3 +82,12 @@ Fonti modello e runtime:
 - La cronologia cifrata ora conserva anche il ruolo dei messaggi (utente/assistente), mantenendo compatibilità con le vecchie voci che non avevano il campo ruolo.
 - Non scaricare il modello automaticamente: l'accesso Hugging Face è soggetto all'accettazione dei termini e l'utente deve scaricare il file corretto. Nessun token Hugging Face viene richiesto o incorporato nell'APK.
 - La risposta AI usa streaming LiteRT-LM; l'uso CPU è la modalità iniziale per privilegiare compatibilità. GPU/NPU e accelerazione vanno valutate successivamente.
+
+
+## Stato aggiornato al 16 novembre 2026
+
+Le note storiche precedenti che descrivono la chat come non collegata a un runtime o il runtime come non integrato sono superate dagli incrementi successivi riportati in questo documento. La chat Android è ora collegata al prototipo LiteRT-LM 0.16.1 CPU; il catalogo include Gemma 3 1B IT INT4 e l'utente può accettare i termini e importare il file `.litertlm` localmente.
+
+La CI Android [run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130) ha superato test unitari, compilazione APK Debug e 6 test strumentali Keystore su emulatore API 34. Questo non prova ancora il caricamento reale di Gemma né le prestazioni sui telefoni.
+
+**Collaudo fisico ancora da eseguire:** seguire [docs/DEVICE_SMOKE_TEST.md](../docs/DEVICE_SMOKE_TEST.md) su Realme C75 e Xiaomi Mi 10T. Fino a quel momento non dichiarare il runtime validato sui dispositivi target.
