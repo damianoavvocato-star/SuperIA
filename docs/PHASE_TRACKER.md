@@ -302,3 +302,11 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Corretto il workflow Android nel commit [63c32675](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/63c326759a9769d2fbeccc2e11a7f19bdafbc68c): il comando di attesa boot + avvio test è ora una singola istruzione shell, evitando il troncamento del blocco multi-linea.
 - **Verifica ancora pendente:** la nuova run Android deve dimostrare che l'emulatore arriva alla suite strumentale, che tutti i test passano e che APK debug e artefatto vengono prodotti. Non anticipare l'esito.
 - Il gate fisico Fase 2 resta aperto: Gemma importato, inferenza/streaming, persistenza dopo riavvio e benchmark su Realme C75 e Xiaomi Mi 10T richiedono i dispositivi reali; la CI emulata non può certificare questi risultati.
+
+
+### Test di regressione contesto conversazione — 16 novembre 2026
+
+- Aggiunti tre test unitari a ChatPromptBuilderTest: limite della memoria di progetto molto lunga, limiti simultanei di cronologia e documento con conservazione del nuovo messaggio, rifiuto di un limite cronologia pari a zero.
+- Commit [516b5e2d](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/516b5e2d9b3fdf2b8e4628472143480858075e05). Il commit modifica un file sotto android/, quindi è previsto l'avvio del workflow Android configurato sul branch main.
+- Esito dei nuovi test e della CI non ancora disponibile/verificato in questa registrazione.
+- Restano aperti i gate di inferenza reale Gemma, ripresa dopo interruzione, compatibilità/performance sui due telefoni target e verifica finale APK sulla revisione più recente.
