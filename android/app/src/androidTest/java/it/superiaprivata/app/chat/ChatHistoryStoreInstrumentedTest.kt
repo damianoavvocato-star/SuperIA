@@ -1,12 +1,21 @@
 package it.superiaprivata.app.chat
 
 import android.content.Context
+import android.security.keystore.KeyProperties
+import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -23,6 +32,8 @@ class ChatHistoryStoreInstrumentedTest {
         store = ChatHistoryStore(context)
         store.clear()
         store.clearProjectMemory()
+        context.getSharedPreferences("superia_private_chat", Context.MODE_PRIVATE)
+            .edit().clear().commit()
     }
 
     @Test
@@ -54,6 +65,18 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun projectMemoryIsEncryptedAtRest() {
+        val secret = "memoria-progetto-riservata"
+        store.saveProjectMemory(secret)
+
+        val archive = File(context.filesDir, "project_memory.enc")
+        val raw = String(archive.readBytes(), StandardCharsets.ISO_8859_1)
+
+        assertFalse(raw.contains(secret))
+        assertEquals(secret, store.loadProjectMemory())
+    }
+
+    @Test
     fun projectMemoryCanBeSavedLoadedAndCleared() {
         store.saveProjectMemory("decisione privata del progetto")
 
@@ -62,6 +85,36 @@ class ChatHistoryStoreInstrumentedTest {
         store.clearProjectMemory()
 
         assertEquals("", store.loadProjectMemory())
+    }
+
+    @Test
+    fun migratesLegacyEncryptedSharedPreferencesAndRemovesOldCopy() {
+        store.save(emptyList()) // Creates the Android Keystore key used by the legacy format.
+        store.clear()
+        val legacyLine = ChatLine(7L, "messaggio legacy", "user", pending = true)
+        val legacyJson = JSONArray().put(
+            JSONObject()
+                .put("id", legacyLine.id)
+                .put("text", legacyLine.text)
+                .put("role", legacyLine.role)
+                .put("pending", legacyLine.pending)
+        ).toString().toByteArray(StandardCharsets.UTF_8)
+
+        val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val key = keyStore.getKey("superia_chat_history_aes", null) as SecretKey
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val legacyPacked = cipher.iv + cipher.doFinal(legacyJson)
+        val preferences = context.getSharedPreferences("superia_private_chat", Context.MODE_PRIVATE)
+        assertTrue(
+            preferences.edit()
+                .putString("encrypted_history", Base64.encodeToString(legacyPacked, Base64.NO_WRAP))
+                .commit()
+        )
+
+        assertEquals(listOf(legacyLine), store.load())
+        assertNull(preferences.getString("encrypted_history", null))
+        assertEquals(listOf(legacyLine), ChatHistoryStore(context).load())
     }
 
     @Test
