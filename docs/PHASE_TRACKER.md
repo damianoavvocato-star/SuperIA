@@ -321,3 +321,11 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - I controlli automatici non sostituiscono il test di inferenza con Gemma realmente importato su Realme C75 e Xiaomi Mi 10T. RAM, latenza, temperatura, batteria e ripresa dopo riavvio restano gate fisici aperti.
 
 **Stato Fase 2:** implementazione estesa e test unitari superati; validazione strumentale Android in corso; collaudo end-to-end sui due telefoni non eseguito. Fase 2 resta aperta.
+
+
+### Correzione aggiuntiva Fase 2 — contesto duplicato
+
+- Revisione di `AssistantChatPanel.kt` e `LiteRtLmInferenceEngine.kt`: il prompt include già la cronologia recuperata dall'archivio cifrato, ma il runtime conservava anche la conversazione multi-turno in memoria. Dalla seconda richiesta poteva quindi essere ripetuto lo stesso contesto.
+- Commit `5f660ca2978e2405810d1dda6b663ce30d7ff04d`: l'adapter mantiene il motore quando il modello è invariato ma ricrea una conversazione LiteRT-LM pulita per ogni richiesta, evitando di sommare il transcript ricostruito allo stato conversazionale precedente.
+- Android CI sul commit `5f660ca...`: run `43889593074` avviato in coda al controllo; backend run `43889593257` anch'esso in coda. L'esecuzione precedente `43888872060` era ancora in corso nella fase di instrumentation.
+- Questa correzione è implementata ma resta da convalidare con la nuova CI e con inferenza reale su entrambi i telefoni.
