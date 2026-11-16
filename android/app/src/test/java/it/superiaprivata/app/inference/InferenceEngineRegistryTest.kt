@@ -62,7 +62,11 @@ class InferenceEngineRegistryTest {
 
         override suspend fun generate(
             model: ModelSpec,
-            request: InferenceRequest
-        ): InferenceResult = InferenceResult("test", model.id)
+            request: InferenceRequest,
+            onPartialText: (String) -> Unit
+        ): InferenceResult {
+            onPartialText("test")
+            return InferenceResult("test", model.id)
+        }
     }
 }
