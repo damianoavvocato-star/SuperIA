@@ -50,23 +50,8 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            adb wait-for-device
-            for attempt in $(seq 1 90); do
-              booted="$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')"
-              if [ "$booted" = "1" ] && adb shell cmd package list packages >/dev/null 2>&1; then
-                break
-              fi
-              if [ "$attempt" -eq 90 ]; then
-                echo "Android emulator system services did not become ready"
-                adb shell getprop
-                exit 1
-              fi
-              sleep 2
-            done
-            sleep 10
-            cd android
-            gradle --no-daemon connectedDebugAndroidTest
+          script: >-
+            adb wait-for-device && adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 2; done' && sleep 10 && cd android && gradle --no-daemon connectedDebugAndroidTest
       - name: Assemble debug APK
         working-directory: android
         run: gradle --no-daemon assembleDebug
