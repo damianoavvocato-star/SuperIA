@@ -45,3 +45,13 @@ Il modello pesa circa 584 MB secondo il catalogo attuale, ma l'utilizzo reale ri
 ## Criterio di chiusura
 
 La Fase 2 può essere dichiarata completata solo dopo inferenza locale reale su entrambi i telefoni, continuità della conversazione verificata e registrazione delle misure di stabilità/prestazioni. Il successo CI dimostra compilazione e test automatici, non sostituisce questo collaudo.
+
+
+## Aggiornamento tecnico — 16 novembre 2026
+
+- Aggiunti test unitari per limiti di memoria/cronologia e validazione del parametro `maxHistoryMessages` nel commit `516b5e2d9b3fdf2b8e4628472143480858075e05`; backend CI SUCCESS sul medesimo commit.
+- Corretto un problema di duplicazione del contesto: il builder ricostruisce il transcript dall'archivio cifrato a ogni richiesta, mentre LiteRT-LM manteneva anche la conversazione in memoria. Ora, quando il modello non cambia, l'adapter riutilizza il motore ma crea una conversazione LiteRT-LM nuova per ogni richiesta, così la cronologia ricostruita viene inviata una sola volta. Modifica nel commit `5f660ca2978e2405810d1dda6b663ce30d7ff04d`.
+- CI Android del commit `516b5e2...`: unit test SUCCESS; instrumentation emulator ancora in corso al controllo. CI Android del commit `5f660ca...`: appena avviata/queued, da verificare prima di considerare validata la modifica.
+- Un precedente run Android (`43888225880`) è fallito durante il setup dell'emulatore per errore di lettura ZIP del pacchetto Android Emulator e porta TCP 5554 non raggiungibile; il job non ha raggiunto i test strumentali. Non è evidenza di un difetto dei test o del codice applicativo.
+
+Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e Xiaomi Mi 10T. Nessun risultato CI può sostituire queste prove.
