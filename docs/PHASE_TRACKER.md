@@ -264,3 +264,13 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Configurati AndroidX Test Runner/Core/JUnit e aggiornato `.github/workflows/android-build.yml` per eseguire `connectedDebugAndroidTest` tramite emulatore prima della build APK.
 - Commit: `e25efe93` (suite strumentale), `c705785f` (dipendenze/runner), `4d8028f0` (workflow emulatore).
 - **Stato:** test e workflow aggiunti; esito della prima esecuzione CI su emulatore ancora da verificare. Questi test non sostituiscono i test su Realme C75 e Xiaomi Mi 10T, né simulano interruzione fisica dell'alimentazione o ogni scenario di recovery AtomicFile.
+
+
+### Stabilizzazione emulatore CI e protezione cronologia durante inferenza — 16 novembre 2026
+
+- La prima esecuzione strumentale [43817419853](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43817419853) ha superato i test unitari ma è fallita prima dei test Android perché l'emulatore API 35 non ha completato il boot entro il timeout.
+- Aggiornata la matrice emulatore a API 34 / Google APIs / x86_64, boot timeout 900 secondi, rendering SwiftShader, snapshot disabilitati e animazioni disabilitate.
+- Nuova esecuzione [43833756542](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833756542): unit test superati; test strumentali in esecuzione al momento della registrazione.
+- Commit successivo [92dd143a](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/92dd143a170f1243a48b0adbc0c3e85b04f595f5) disabilita il comando "Cancella cronologia" mentre l'inferenza è attiva, evitando che una risposta in corso possa riscrivere una cronologia appena cancellata.
+- Nuova CI sul commit 92dd143a: Android [43833963899](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963899) in esecuzione; backend [43833963975](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963975) in coda al momento dell'aggiornamento.
+- La Fase 2 resta aperta fino all'esito dei test strumentali, alla verifica di inferenza reale e ai test sui dispositivi target.
