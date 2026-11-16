@@ -274,3 +274,13 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Commit successivo [92dd143a](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/92dd143a170f1243a48b0adbc0c3e85b04f595f5) disabilita il comando "Cancella cronologia" mentre l'inferenza è attiva, evitando che una risposta in corso possa riscrivere una cronologia appena cancellata.
 - Nuova CI sul commit 92dd143a: Android [43833963899](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963899) in esecuzione; backend [43833963975](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963975) in coda al momento dell'aggiornamento.
 - La Fase 2 resta aperta fino all'esito dei test strumentali, alla verifica di inferenza reale e ai test sui dispositivi target.
+
+
+### Esito CI Keystore e correzione avvio emulatore — 16 novembre 2026
+
+- Android [run 43833756542](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833756542), commit `ebf08e62`: **SUCCESS**. I test unitari, i test strumentali Android Keystore, la compilazione APK debug e l'upload dell'artefatto sono tutti terminati con successo.
+- Android [run 43833963899](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963899), commit `92dd143a`: **FAILURE ambientale prima dell'esecuzione dei test**. Il log mostra `Starting 0 tests` e fallimento installazione APK perché Android Package Installer ha tentato di leggere il provider Settings prima che i system providers fossero installati. Non è un fallimento di un'asserzione della suite; i test strumentali non sono partiti.
+- Corretto il workflow nel commit `3355bc05`: prima di `connectedDebugAndroidTest` attende `sys.boot_completed=1`, la disponibilità del package manager e altri 10 secondi di stabilizzazione; se i servizi non diventano pronti entro 180 secondi, il job fallisce con diagnostica invece di lanciare test su un emulatore incompleto.
+- La nuova esecuzione CI sul commit `3355bc05` deve ancora terminare: non considerare convalidata la correzione finché la run Android non risulta SUCCESS.
+- La suite strumentale ha già un'esecuzione riuscita sul commit `ebf08e62`; la successiva revisione `92dd143a` include anche la protezione UI che disabilita la cancellazione cronologia durante inferenza, ma la sua CI è stata interrotta dal problema di avvio/installazione dell'emulatore.
+- Fase 2 resta **parziale**: servono CI verde sulla revisione più recente, inferenza/streaming Gemma reali e verifiche fisiche su Realme C75 e Xiaomi Mi 10T. La CI emulata non dimostra prestazioni o compatibilità su quei dispositivi.
