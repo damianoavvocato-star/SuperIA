@@ -51,7 +51,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: >-
-            adb wait-for-device && adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 2; done' && sleep 10 && cd android && gradle --no-daemon connectedDebugAndroidTest
+            for attempt in $(seq 1 60); do if adb wait-for-device && adb shell '[ "$(getprop sys.boot_completed)" = "1" ]'; then break; fi; sleep 5; done; adb shell '[ "$(getprop sys.boot_completed)" = "1" ]' && sleep 10 && cd android && gradle --no-daemon connectedDebugAndroidTest
       - name: Assemble debug APK
         working-directory: android
         run: gradle --no-daemon assembleDebug
