@@ -18,6 +18,11 @@ jobs:
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      SUPERIA_KEYSTORE_BASE64: ${{ secrets.SUPERIA_KEYSTORE_BASE64 }}
+      SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
+      SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
+      SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
+      SUPERIA_KEYSTORE_FILE: ${{ runner.temp }}/superia-upload.jks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,17 +43,31 @@ jobs:
         run: |
           yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses
           sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
+      - name: Prepare persistent Android signing key
+        if: env.SUPERIA_KEYSTORE_BASE64 != ''
+        run: |
+          printf '%s' "$SUPERIA_KEYSTORE_BASE64" | base64 --decode > "$SUPERIA_KEYSTORE_FILE"
+          test -s "$SUPERIA_KEYSTORE_FILE"
+          chmod 600 "$SUPERIA_KEYSTORE_FILE"
+      - name: Report missing persistent signing configuration
+        if: env.SUPERIA_KEYSTORE_BASE64 == ''
+        run: echo "::warning::Stable signing secrets are not configured. No installable release APK will be uploaded."
       - name: Run Android unit tests
         working-directory: android
         run: gradle --no-daemon testDebugUnitTest
-      - name: Assemble debug APK
+      - name: Assemble debug APK for emulator tests
         working-directory: android
         run: gradle --no-daemon assembleDebug
-      - name: Upload debug APK
+      - name: Assemble stable signed APK
+        if: env.SUPERIA_KEYSTORE_BASE64 != ''
+        working-directory: android
+        run: gradle --no-daemon assembleRelease
+      - name: Upload stable signed APK
+        if: env.SUPERIA_KEYSTORE_BASE64 != ''
         uses: actions/upload-artifact@v4
         with:
-          name: superia-privata-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: superia-privata-installable
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
       - name: Run Android Keystore instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
