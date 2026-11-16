@@ -57,3 +57,13 @@ Senza Ollama, le richieste AI restituiscono un errore esplicito. Nessun fallback
 Nell'app Android la cronologia chat e il testo estratto dai documenti sono cifrati AES-GCM con chiavi non esportabili in Android Keystore. Il prototipo web/backend separato conserva cronologia e annotazioni nel localStorage del browser sul dispositivo corrente e non le cifra: non inserire dati altamente riservati in quel prototipo. Non inserire dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
 
 Non esporre il server in rete senza autenticazione e revisione di sicurezza. Non inserire segreti nel repository.
+
+
+## Verifica Android CI — 16 novembre 2026
+
+- [Android debug build — run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
+- Test unitari Android: SUCCESS.
+- Test strumentali Android Keystore: 6 test avviati e 6 terminati su emulatore API 34; task `connectedDebugAndroidTest`: SUCCESS.
+- APK Debug compilato e caricato come artefatto `superia-privata-debug` (ID `14235164539`, 59.756.044 byte; SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`; scadenza 14 febbraio 2027).
+- L'APK è una build Debug, non una release firmata. Il modello Gemma non è incluso e va importato separatamente.
+- La Fase 2 resta aperta: inferenza Gemma reale, continuità/ripresa dopo interruzioni e misure sui dispositivi Realme C75 e Xiaomi Mi 10T non sono ancora verificate.
