@@ -18,10 +18,6 @@ jobs:
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      SUPERIA_KEYSTORE_BASE64: ${{ secrets.SUPERIA_KEYSTORE_BASE64 }}
-      SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
-      SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
-      SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,15 +39,27 @@ jobs:
           yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses
           sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
       - name: Prepare persistent Android signing key
-        if: env.SUPERIA_KEYSTORE_BASE64 != ''
+        id: prepare-signing
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        env:
+          SUPERIA_KEYSTORE_BASE64: ${{ secrets.SUPERIA_KEYSTORE_BASE64 }}
+          SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
+          SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
+          SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
         run: |
-          echo "SUPERIA_KEYSTORE_FILE=$RUNNER_TEMP/superia-upload.jks" >> "$GITHUB_ENV"
-          printf '%s' "$SUPERIA_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/superia-upload.jks"
-          test -s "$RUNNER_TEMP/superia-upload.jks"
-          chmod 600 "$RUNNER_TEMP/superia-upload.jks"
-      - name: Report missing persistent signing configuration
-        if: env.SUPERIA_KEYSTORE_BASE64 == ''
-        run: echo "::warning::Stable signing secrets are not configured. No installable release APK will be uploaded."
+          if [ -n "$SUPERIA_KEYSTORE_BASE64" ] && [ -n "$SUPERIA_KEYSTORE_PASSWORD" ] && [ -n "$SUPERIA_KEY_ALIAS" ] && [ -n "$SUPERIA_KEY_PASSWORD" ]; then
+            echo "SUPERIA_KEYSTORE_FILE=$RUNNER_TEMP/superia-upload.jks" >> "$GITHUB_ENV"
+            printf '%s' "$SUPERIA_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/superia-upload.jks"
+            test -s "$RUNNER_TEMP/superia-upload.jks"
+            chmod 600 "$RUNNER_TEMP/superia-upload.jks"
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Stable signing secrets are missing or incomplete. No installable release APK will be uploaded."
+          fi
+      - name: Report signing unavailable for untrusted event
+        if: github.event_name == 'pull_request'
+        run: echo "::notice::Release signing is intentionally disabled for pull requests."
       - name: Run Android unit tests
         working-directory: android
         run: gradle --no-daemon testDebugUnitTest
@@ -59,11 +67,15 @@ jobs:
         working-directory: android
         run: gradle --no-daemon assembleDebug
       - name: Assemble stable signed APK
-        if: env.SUPERIA_KEYSTORE_BASE64 != ''
+        if: steps.prepare-signing.outputs.ready == 'true'
         working-directory: android
+        env:
+          SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
+          SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
+          SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
         run: gradle --no-daemon assembleRelease
       - name: Upload stable signed APK
-        if: env.SUPERIA_KEYSTORE_BASE64 != ''
+        if: steps.prepare-signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: superia-privata-installable
