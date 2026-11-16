@@ -86,3 +86,12 @@ Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e
 - I risultati CI non sostituiscono i test di inferenza locale Gemma reale, streaming, ripresa dopo chiusura/riavvio e benchmark su Realme C75 e Xiaomi Mi 10T.
 
 **Stato:** CI Android completa superata sulla revisione indicata; Fase 2 ancora aperta fino al collaudo end-to-end e fisico sui due dispositivi.
+
+
+## Prossimo gate operativo — 16 novembre 2026
+
+La CI Android [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130) è SUCCESS: unit tests, APK Debug e 6 test strumentali Keystore su emulatore API 34 completati. Tre controlli backend dei commit documentali precedenti sono anch'essi SUCCESS.
+
+Il prossimo gate non è un altro test emulato: è la prova end-to-end con il modello Gemma importato sui dispositivi fisici. Procedura e scheda di misurazione: [DEVICE_SMOKE_TEST.md](DEVICE_SMOKE_TEST.md).
+
+**Fase 2 resta parziale** fino ai risultati effettivi su Realme C75 e Xiaomi Mi 10T. Non è autorizzato dichiarare completata la fase sulla sola base della CI.
