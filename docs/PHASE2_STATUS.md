@@ -55,3 +55,13 @@ La Fase 2 può essere dichiarata completata solo dopo inferenza locale reale su 
 - Un precedente run Android (`43888225880`) è fallito durante il setup dell'emulatore per errore di lettura ZIP del pacchetto Android Emulator e porta TCP 5554 non raggiungibile; il job non ha raggiunto i test strumentali. Non è evidenza di un difetto dei test o del codice applicativo.
 
 Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e Xiaomi Mi 10T. Nessun risultato CI può sostituire queste prove.
+
+
+## Aggiornamento CI e correzioni successive — 16 novembre 2026
+
+- Commit `5f660ca2978e2405810d1dda6b663ce30d7ff04d`: conversazione LiteRT-LM ricreata a ogni turno mantenendo il motore del modello, per evitare di duplicare il transcript che viene ricostruito dall'archivio cifrato. Backend CI sul commit: SUCCESS.
+- Commit `fa712c9b3e7064c607e17d97133a8ad5e6a0b2f9`: retry ADB e verifica esplicita del completamento del boot prima dei test strumentali. Backend CI sul commit: SUCCESS.
+- Android CI sul commit `fa712c9...` (run `43890080541`): in corso durante l'ultimo controllo, ancora nella fase di setup Gradle; test unitari, instrumentation, APK e artifact non ancora attestati su questo commit.
+- I run Android precedenti `43888872060` e `43889593074` risultavano ancora in corso nella fase di instrumentation. Non sono disponibili risultati finali e non vanno interpretati come successi.
+
+**Gate aperti:** CI Android completa sul commit corrente; test Keystore strumentali; installazione e inferenza reale Gemma su Realme C75 e Xiaomi Mi 10T; misure di RAM, latenza, stabilità, temperatura e batteria. Fase 2 non chiusa.
