@@ -336,3 +336,10 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - I run Android `43888872060` e `43889593074` hanno completato i test unitari ma sono rimasti nella fase di instrumentation/emulatore senza avviare assemble/upload; al controllo risultavano ancora in corso. Il primo tentativo precedente aveva mostrato un rifiuto TCP 5554/ADB durante la fase emulator.
 - Commit `fa712c9b3e7064c607e17d97133a8ad5e6a0b2f9`: aggiunto un ciclo di retry ADB con attesa fino a 5 minuti e controllo esplicito di `sys.boot_completed` prima di avviare `connectedDebugAndroidTest`. Se l'emulatore non diventa pronto, lo step fallisce esplicitamente invece di lanciare i test su un device non avviato.
 - La modifica è in attesa di CI sul nuovo commit. Non considerare superati i test strumentali finché il run non termina con successo.
+
+
+### Pubblicazione APK indipendente dall'emulatore — 16 novembre 2026
+
+- La CI sul commit `fa712c9...` ha superato i test unitari Android; la fase emulator/Keystore è rimasta in corso durante il controllo. Il backend sul medesimo commit è SUCCESS.
+- Commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: riordinati gli step Android per compilare e caricare l'APK debug dopo i test unitari e prima dell'emulatore. In questo modo un problema del boot emulator non blocca più la disponibilità dell'APK del commit verificato. I test strumentali restano comunque gate obbligatorio e non vengono saltati.
+- La nuova CI è da attendere; nessun APK di questo commit è ancora dichiarato disponibile.
