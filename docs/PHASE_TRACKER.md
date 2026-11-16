@@ -243,3 +243,15 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): **SUCCESS**, unit test, assembleDebug e upload APK.
 - Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
 - Artefatto Android `superia-privata-debug`, ID `14181443808`, 59.748.118 byte, SHA-256 archivio `e4e14303623d858ae5d3548e119bb3d22f045b72c97b670feb835394bf57ca4c`, scadenza 13 febbraio 2027. È relativo al commit `ca49c9b3`, non contiene ancora l'incremento di output progressivo.
+
+
+## Fase 2 — verifica streaming e limiti di generazione — 16 novembre 2026
+
+- Verificata la documentazione ufficiale LiteRT-LM Kotlin: `sendMessageAsync(text)` restituisce un `Flow<Message>` di chunk incrementali; ogni elemento rappresenta il nuovo blocco emesso, non una copia cumulativa dell'intera risposta. Il client deve concatenare i chunk per ricostruire il testo completo.
+- Riferimenti tecnici: [API Kotlin LiteRT-LM](https://developers.google.com/edge/litert-lm/android) e [implementazione Conversation.kt](https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin/java/com/google/ai/edge/litertlm/Conversation.kt). La documentazione pubblica consultata descrive l'API corrente; il build della versione dipendenza fissata nel progetto resta il controllo di compatibilità effettivo.
+- Estratto l'accumulo in `StreamingTextAccumulator` e aggiunti test unitari per concatenazione ordinata, testo cumulativo e chunk vuoti.
+- L'adapter ora passa anche `InferenceRequest.maxOutputTokens` a `sendMessageAsync(..., maxOutputToken = ...)` e rifiuta limiti non positivi: prima il campo della richiesta non veniva applicato.
+- Commit: `5b540fff` (accumulatore), `2a4f4573` (test), `415ff74c` (adapter), `59a393c0` (limite token).
+- CI di riferimento precedente: Android run [43810811687](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811687) **SUCCESS** e backend run [43810811557](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811557) **SUCCESS** sul commit `875ded1e`; queste run precedono i quattro commit elencati sopra. La nuova CI deve essere eseguita e superata prima di convalidare questa revisione.
+- **Residui che impediscono la chiusura Fase 2:** test strumentali di `ChatHistoryStore` (Android Keystore/AES-GCM, migrazione, archivio corrotto e recupero AtomicFile), test pratico con Gemma importato e inferenza/streaming visibili, verifica della persistenza dopo chiusura forzata/riavvio, misure RAM/tempi/temperatura/batteria su Realme C75 e Xiaomi Mi 10T. Restano inoltre fuori dal primo incremento la memoria automatica/riassunti progressivi, il retrieval semantico e il cambio modello senza perdere la conversazione.
+- **Stato aggiornato:** codice streaming e limite token implementati; test unitari aggiunti; nuova CI in attesa. Fase 2 resta parziale e non chiusa. Nessun test fisico può essere simulato dalla CI remota.
