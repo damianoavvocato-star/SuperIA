@@ -284,3 +284,12 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - La nuova esecuzione CI sul commit `3355bc05` deve ancora terminare: non considerare convalidata la correzione finché la run Android non risulta SUCCESS.
 - La suite strumentale ha già un'esecuzione riuscita sul commit `ebf08e62`; la successiva revisione `92dd143a` include anche la protezione UI che disabilita la cancellazione cronologia durante inferenza, ma la sua CI è stata interrotta dal problema di avvio/installazione dell'emulatore.
 - Fase 2 resta **parziale**: servono CI verde sulla revisione più recente, inferenza/streaming Gemma reali e verifiche fisiche su Realme C75 e Xiaomi Mi 10T. La CI emulata non dimostra prestazioni o compatibilità su quei dispositivi.
+
+
+### Estensione test strumentali migrazione e memoria cifrata — 16 novembre 2026
+
+- Estesa `ChatHistoryStoreInstrumentedTest` con verifica che anche `project_memory.enc` non contenga testo in chiaro.
+- Aggiunto test di migrazione del vecchio archivio cifrato in SharedPreferences: prepara un archivio legacy AES-GCM con la chiave Android Keystore, verifica il recupero di messaggi e flag pending, la creazione del nuovo archivio e la rimozione della vecchia copia soltanto dopo la migrazione riuscita.
+- Commit test: `0cd6c299`.
+- La revisione deve ancora superare la CI Android su emulatore; fino all'esito non considerare questi nuovi test superati.
+- La run Android sul commit precedente `3355bc05` è ancora in corso: unit test in esecuzione al controllo più recente; backend sul medesimo commit **SUCCESS**. Il commit `0cd6c299` ha generato una nuova revisione da verificare separatamente.
