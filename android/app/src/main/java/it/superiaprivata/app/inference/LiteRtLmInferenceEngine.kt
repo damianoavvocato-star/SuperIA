@@ -1,15 +1,20 @@
 package it.superiaprivata.app.inference
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.MessageCallback
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Real on-device LiteRT-LM adapter.
@@ -27,6 +32,7 @@ class LiteRtLmInferenceEngine(
 
     private val appContext = context.applicationContext
     private val mutex = Mutex()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var activeModelId: String? = null
     private var engine: Engine? = null
     private var conversation: com.google.ai.edge.litertlm.Conversation? = null
@@ -91,20 +97,45 @@ class LiteRtLmInferenceEngine(
         withContext(Dispatchers.IO) {
             ensureConversation(model, file)
             val output = StreamingTextAccumulator()
+            val outputLock = Any()
             val activeConversation = requireNotNull(conversation)
-            activeConversation.sendMessageAsync(
-                request.prompt,
-                maxOutputToken = request.maxOutputTokens
-            ).collect { message ->
-                val partial = output.append(message.toString())
-                withContext(Dispatchers.Main.immediate) {
-                    onPartialText(partial)
+
+            // Use LiteRT-LM's callback API directly. Its Flow overload internally
+            // creates a callbackFlow and calls SendChannel.close() from the JNI
+            // completion thread; affected published AARs contain an incompatible
+            // synthetic call that crashes with NoSuchMethodError on Android.
+            val generatedText = suspendCancellableCoroutine { continuation ->
+                activeConversation.sendMessageAsync(
+                    request.prompt,
+                    object : MessageCallback {
+                        override fun onMessage(message: com.google.ai.edge.litertlm.Message) {
+                            if (!continuation.isActive) return
+                            val partial = synchronized(outputLock) {
+                                output.append(message.toString())
+                            }
+                            mainHandler.post {
+                                if (continuation.isActive) onPartialText(partial)
+                            }
+                        }
+
+                        override fun onDone() {
+                            if (!continuation.isActive) return
+                            val result = synchronized(outputLock) { output.result().trim() }
+                            continuation.resume(result)
+                        }
+
+                        override fun onError(error: Throwable) {
+                            if (continuation.isActive) continuation.resumeWithException(error)
+                        }
+                    },
+                    maxOutputToken = request.maxOutputTokens
+                )
+            }.also { result ->
+                check(result.isNotEmpty()) {
+                    "Il runtime locale non ha restituito testo. Verifica il modello e riprova."
                 }
             }
-            val generatedText = output.result().trim()
-            check(generatedText.isNotEmpty()) {
-                "Il runtime locale non ha restituito testo. Verifica il modello e riprova."
-            }
+
             InferenceResult(
                 text = generatedText,
                 modelId = model.id
