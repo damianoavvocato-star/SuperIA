@@ -20,11 +20,13 @@ import it.superiaprivata.app.device.DeviceProfileReader
 import it.superiaprivata.app.pairing.DeviceIdentityStore
 import it.superiaprivata.app.pairing.PairingInvite
 import it.superiaprivata.app.chat.AssistantChatPanel
+import it.superiaprivata.app.chat.CrashLogStore
 import it.superiaprivata.app.documents.DocumentsPanel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CrashLogStore.install(applicationContext)
         val profileReader = DeviceProfileReader(this)
         setContent {
             MaterialTheme {
