@@ -34,6 +34,10 @@ object RuntimeExitDiagnostics {
                 append(time)
                 latest.description?.takeIf { it.isNotBlank() }?.let { append("\nDettaglio: " + it.take(500)) }
                 append("\nCodice uscita: " + latest.status)
+                CrashLogStore.read(context)?.let { trace ->
+                    append("\n\nTRACCIA TECNICA JAVA/KOTLIN:\n")
+                    append(trace)
+                }
             }
         }.getOrElse { error ->
             "Diagnostica non disponibile: " + error.javaClass.simpleName + ": " + error.message.orEmpty()
