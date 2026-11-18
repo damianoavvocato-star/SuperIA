@@ -30,7 +30,7 @@ object LocalDocumentChunker {
                 if (current.length + normalized.length + 2 > maxCharacters && current.isNotEmpty()) {
                     flush()
                 }
-                if (current.isNotEmpty()) current.append("\\n\\n")
+                if (current.isNotEmpty()) current.append("\n\n")
                 current.append(normalized)
             }
         }
