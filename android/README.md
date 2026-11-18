@@ -105,3 +105,18 @@ La CI Android [run 43890341130](https://github.com/damianoavvocato-star/SuperIA-
 - I file originali non vengono caricati su server: estrazione, archivio e ricerca restano sul dispositivo.
 
 L'incremento è in attesa della verifica CI Android e non è ancora distribuito nell'APK installato sul telefono.
+
+
+### Ricerca vettoriale semantica — base tecnica
+
+- Aggiunto il contratto `LocalTextEmbeddingProvider` per un futuro modello di embedding eseguito interamente sul dispositivo, con metodi separati per indicizzare i documenti e codificare le query.
+- Aggiunto `SemanticVectorSearch`: ranking cosine su vettori locali, normalizzazione per la magnitudine, controllo dimensioni, valori non finiti, vettori nulli, soglia minima e numero massimo di risultati.
+- Aggiunti test unitari per ordinamento, similarità cosine, dimensioni incompatibili, vettori nulli, soglia e input non validi.
+- **Non è ancora attiva la ricerca semantica nell'app**: manca il provider concreto e il modello di embedding da importare. Fino a quel momento la chat continua a usare il recupero BM25 già integrato, senza dichiarare che gli embeddings siano operativi.
+- Il modello candidato è EmbeddingGemma V2 Text 270M, distribuito come file `.litertlm`. La documentazione Google descrive l'API `UniversalEmbedder` e l'esecuzione locale; prima di introdurla va risolta la compatibilità con il runtime LiteRT-LM 0.15.0 che è stato mantenuto per evitare di reintrodurre il crash già riscontrato sul telefono.
+- Non aggiornare automaticamente il runtime dell'app né sostituire il modello Gemma chat: il modello di embedding dovrà essere opzionale, scaricato/importato separatamente e attivabile solo dopo test CI e prova sul Realme C75.
+
+Riferimenti:
+- Google AI Edge — Universal Embedder: https://developers.google.cn/edge/mediapipe/solutions/retrieval/universal_embedder
+- Google AI Edge — Semantic Retriever: https://developers.google.cn/edge/mediapipe/solutions/retrieval/semantic_retriever
+- Google AI Edge — Android setup e dipendenza tasks-retrieval: https://developers.google.cn/edge/mediapipe/solutions/setup_android
