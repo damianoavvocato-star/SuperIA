@@ -1,6 +1,5 @@
 package it.superiaprivata.app.documents
 
-import java.io.File
 import kotlin.math.ln
 
 data class RetrievedChunk(
@@ -12,7 +11,6 @@ data class RetrievedChunk(
 
 /** Small offline BM25 index over locally decrypted document text. */
 object LocalDocumentRetriever {
-    private const val CHUNK_CHARACTERS = 900
     private const val BM25_K1 = 1.2
     private const val BM25_B = 0.75
 
@@ -22,7 +20,7 @@ object LocalDocumentRetriever {
         if (queryTerms.isEmpty() || documents.isEmpty()) return emptyList()
 
         val chunks = documents.flatMap { document ->
-            chunk(document.text).mapIndexed { index, text ->
+            LocalDocumentChunker.chunk(document.text).mapIndexed { index, text ->
                 Chunk(document.title, index + 1, text, tokenize(text))
             }
         }
@@ -47,32 +45,6 @@ object LocalDocumentRetriever {
         }.filter { it.score > 0.0 }
             .sortedByDescending { it.score }
             .take(limit)
-    }
-
-    private fun chunk(text: String): List<String> {
-        val paragraphs = text.split(Regex("\\n\\s*\\n"))
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        for (paragraph in paragraphs) {
-            val normalized = paragraph.trim()
-            if (normalized.isEmpty()) continue
-            if (normalized.length > CHUNK_CHARACTERS) {
-                if (current.isNotEmpty()) {
-                    result += current.toString()
-                    current = StringBuilder()
-                }
-                normalized.chunked(CHUNK_CHARACTERS).forEach { result += it }
-            } else {
-                if (current.length + normalized.length + 2 > CHUNK_CHARACTERS && current.isNotEmpty()) {
-                    result += current.toString()
-                    current = StringBuilder()
-                }
-                if (current.isNotEmpty()) current.append("\n\n")
-                current.append(normalized)
-            }
-        }
-        if (current.isNotEmpty()) result += current.toString()
-        return result
     }
 
     private fun tokenize(text: String): List<String> =
