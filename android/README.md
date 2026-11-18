@@ -120,3 +120,16 @@ Riferimenti:
 - Google AI Edge — Universal Embedder: https://developers.google.cn/edge/mediapipe/solutions/retrieval/universal_embedder
 - Google AI Edge — Semantic Retriever: https://developers.google.cn/edge/mediapipe/solutions/retrieval/semantic_retriever
 - Google AI Edge — Android setup e dipendenza tasks-retrieval: https://developers.google.cn/edge/mediapipe/solutions/setup_android
+
+### Compatibilità embedding — verifica 18 novembre 2026
+
+La verifica delle dipendenze ha evidenziato un conflitto concreto: `com.google.mediapipe:tasks-retrieval:1.1.1` dichiara una dipendenza transitiva da `com.google.ai.edge.litertlm:litertlm-android:0.17.0-alpha1`. La guida Kotlin ufficiale di LiteRT-LM segnala che le release 0.17.0 e successive qui considerate portano metadata Kotlin 2.4.0 e richiedono un compilatore Kotlin 2.3 o superiore; questo progetto usa Kotlin Gradle Plugin 2.2.0 e mantiene LiteRT-LM 0.15.0 per evitare la regressione ABI già osservata sul Realme C75.
+
+**Decisione:** non aggiungere `tasks-retrieval` e non aggiornare il runtime della chat in questa fase. Il solo fatto che la libreria sia documentata da Google non dimostra compatibilità binaria con la combinazione corrente.
+
+Percorso alternativo da verificare in un prototipo isolato: LiteRT CompiledModel 2.3.2 con un modello embedding compatibile in formato `.tflite`. Questo runtime è separato da LiteRT-LM e non richiede di sostituire il motore Gemma della chat. Prima dell'integrazione occorre verificare il modello concreto, la firma dei tensori, tokenizer/preprocessing, licenza e memoria su dispositivo. Non è ancora un provider attivo nell'app.
+
+Fonti:
+- LiteRT-LM Kotlin API e requisiti Kotlin: https://github.com/google-ai-edge/LiteRT-LM/blob/main/docs/api/kotlin/getting_started.md
+- MediaPipe tasks-retrieval 1.1.1 e dipendenze: https://www.mavenpackages.com/packages/com.google.mediapipe/tasks-retrieval
+- LiteRT CompiledModel Android: https://developers.google.com/edge/litert/android
