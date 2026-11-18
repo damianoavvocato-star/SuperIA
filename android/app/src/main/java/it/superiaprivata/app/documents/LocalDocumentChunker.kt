@@ -9,7 +9,7 @@ object LocalDocumentChunker {
 
     fun chunk(text: String, maxCharacters: Int = DEFAULT_MAX_CHARACTERS): List<String> {
         require(maxCharacters > 0) { "La dimensione del blocco deve essere positiva." }
-        val paragraphs = text.split(Regex("\\n\\s*\\n"))
+        val paragraphs = text.split(Regex("\\n[ \\t]*\\n"))
         val result = mutableListOf<String>()
         var current = StringBuilder()
 
