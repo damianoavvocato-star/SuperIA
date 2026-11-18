@@ -15,7 +15,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - Importazione locale di PDF, DOCX, TXT e CSV tramite selettore Android.
 - OCR offline italiano dei PDF scansiti con Tesseract, dopo importazione del file lingua `ita.traineddata`.
 - Estrazione testo offline: PDFBox-Android per PDF testuali, parser DOCX per il corpo principale e lettura UTF-8 per TXT/CSV.
-- Archivio dei testi estratti cifrato AES-GCM con chiave non esportabile Android Keystore, anteprima, selezione, eliminazione e passaggio di un estratto al prompt della chat locale.
+- Archivio dei testi estratti cifrato AES-GCM con chiave non esportabile Android Keystore, anteprima, selezione, eliminazione, ricerca BM25 e recupero automatico dei passaggi pertinenti nel prompt della chat locale.
 - Inserimento e visualizzazione dei messaggi dell'utente.
 - Cronologia chat locale cifrata con AES-GCM; chiave AES-256 non esportabile custodita in Android Keystore; pulsante per cancellare la cronologia.
 - Lettura di produttore/modello, versione Android/API, RAM totale e disponibile esposte da Android, ABI CPU, spazio libero nell'area dati e stato termico.
@@ -29,7 +29,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - Non contiene ancora pairing completo, GitHub OAuth o runtime AI locale integrato.
 - La cronologia è cifrata a riposo; non è sincronizzata tra telefoni e non sostituisce un backup cifrato.
 - Nessuna autorizzazione generale di archiviazione è richiesta: l'accesso ai file usa il selettore documenti Android.
-- L'OCR dei PDF scansiti richiede il file `ita.traineddata` importato dall'utente e processa al massimo le prime 20 pagine; non è incluso nell'APK. La ricerca testuale BM25 multi-documento è disponibile, mentre embeddings/ricerca semantica non sono ancora implementati. Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; massimo 6.000 caratteri di contesto documentale per richiesta chat.
+- L'OCR dei PDF scansiti richiede il file `ita.traineddata` importato dall'utente e processa al massimo le prime 20 pagine; non è incluso nell'APK. La ricerca testuale BM25 multi-documento è disponibile e viene eseguita automaticamente sulle richieste chat; embeddings/ricerca semantica non sono ancora implementati. Limiti iniziali: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; massimo 6.000 caratteri di contesto documentale per richiesta chat.
 - I file originali non vengono copiati nell'archivio: viene conservato il solo testo estratto, cifrato AES-GCM nell'area privata dell'app con chiave dedicata in Android Keystore.
 
 ## Prossimi incrementi
@@ -91,3 +91,17 @@ Le note storiche precedenti che descrivono la chat come non collegata a un runti
 La CI Android [run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130) ha superato test unitari, compilazione APK Debug e 6 test strumentali Keystore su emulatore API 34. Questo non prova ancora il caricamento reale di Gemma né le prestazioni sui telefoni.
 
 **Collaudo fisico ancora da eseguire:** seguire [docs/DEVICE_SMOKE_TEST.md](../docs/DEVICE_SMOKE_TEST.md) su Realme C75 e Xiaomi Mi 10T. Fino a quel momento non dichiarare il runtime validato sui dispositivi target.
+
+
+## Fase 3 — Documenti e conoscenza personale (incremento corrente)
+
+- La chat cerca automaticamente, in locale, nei testi di tutti i documenti importati prima di ogni nuova richiesta e quando si riprende una richiesta interrotta.
+- Il recupero usa BM25 su blocchi testuali, seleziona al massimo 5 passaggi pertinenti e limita il contesto documentale complessivo a 6.000 caratteri.
+- I passaggi recuperati sono accompagnati dal titolo del documento e dal numero del blocco; il contesto manuale selezionato dall'utente resta supportato.
+- Lettura/decrittazione dell'archivio su dispatcher IO e ricerca su dispatcher Default: il lavoro documentale non viene eseguito sul thread UI.
+- Il contenuto dei documenti viene etichettato nel prompt come contenuto non attendibile, non come istruzioni.
+- Aggiunti test unitari per pertinenza, assenza di risultati, contesto manuale e limite caratteri.
+- Non sono ancora presenti embeddings, ricerca semantica, citazioni con pagine PDF affidabili, indicizzazione incrementale persistente o test OCR su scansioni reali. La ricerca BM25 è lessicale: non garantisce di trovare sinonimi o concetti espressi con parole diverse.
+- I file originali non vengono caricati su server: estrazione, archivio e ricerca restano sul dispositivo.
+
+L'incremento è in attesa della verifica CI Android e non è ancora distribuito nell'APK installato sul telefono.
