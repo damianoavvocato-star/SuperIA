@@ -35,12 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import it.superiaprivata.app.device.DeviceProfileReader
+import it.superiaprivata.app.documents.LocalDocumentContextBuilder
+import it.superiaprivata.app.documents.LocalDocumentRepository
 import it.superiaprivata.app.inference.InferenceRequest
 import it.superiaprivata.app.inference.LiteRtLmInferenceEngine
 import it.superiaprivata.app.inference.LocalModelCatalog
 import it.superiaprivata.app.inference.LocalModelInstaller
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AssistantChatPanel(documentContext: String? = null) {
@@ -84,6 +88,25 @@ fun AssistantChatPanel(documentContext: String? = null) {
     }
 
     val availability = engine.checkAvailability(deviceProfile, artifact.spec)
+
+    suspend fun buildRequestPrompt(
+        history: List<ChatLine>,
+        request: String,
+        explicitlySelectedContext: String?
+    ): String {
+        val storedDocuments = withContext(Dispatchers.IO) {
+            LocalDocumentRepository(context).list()
+        }
+        val retrievedContext = withContext(Dispatchers.Default) {
+            LocalDocumentContextBuilder.build(request, storedDocuments, explicitlySelectedContext)
+        }
+        return ChatPromptBuilder.build(
+            history,
+            request,
+            documentContext = retrievedContext,
+            memorySummary = projectMemory
+        )
+    }
     val modelPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -211,16 +234,15 @@ fun AssistantChatPanel(documentContext: String? = null) {
                             enabled = availability.isReady && licenseAccepted && !generating,
                             onClick = {
                                 val contextHistory = messages.filterNot { it.pending }
-                                val retryPrompt = ChatPromptBuilder.build(
-                                    contextHistory,
-                                    pendingLine.text,
-                                    documentContext = documentContext,
-                                    memorySummary = projectMemory
-                                )
                                 scope.launch {
                                     generating = true
                                     generationError = null
                                     try {
+                                        val retryPrompt = buildRequestPrompt(
+                                            contextHistory,
+                                            pendingLine.text,
+                                            documentContext
+                                        )
                                         val streamingId = Long.MIN_VALUE
                                         messages.removeAll { it.id == streamingId }
                                         messages.add(ChatLine(streamingId, "", "assistant"))
@@ -313,9 +335,8 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
-                            // The native LiteRT-LM conversation is in memory only.
-                            // Rebuild a bounded context from the encrypted transcript.
-                            val promptWithHistory = ChatPromptBuilder.build(messages.toList(), request, documentContext = documentContext, memorySummary = projectMemory)
+                            // Capture history before appending the new pending user turn.
+                            val contextHistory = messages.toList()
                             val userLine = ChatLine(System.nanoTime(), request, "user", pending = true)
                             messages.add(userLine)
                             val saved = runCatching { historyStore.save(messages.toList()) }
@@ -331,6 +352,11 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                 generating = true
                                 generationError = null
                                 try {
+                                    val promptWithHistory = buildRequestPrompt(
+                                        contextHistory,
+                                        request,
+                                        documentContext
+                                    )
                                     val streamingId = Long.MIN_VALUE
                                     messages.removeAll { it.id == streamingId }
                                     messages.add(ChatLine(streamingId, "", "assistant"))
