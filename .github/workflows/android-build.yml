@@ -98,5 +98,4 @@ jobs:
             adb shell df -h /data
             adb shell pm list packages | head -n 20
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
-            cd android
-            gradle --no-daemon connectedDebugAndroidTest
+            gradle --no-daemon -p android connectedDebugAndroidTest
