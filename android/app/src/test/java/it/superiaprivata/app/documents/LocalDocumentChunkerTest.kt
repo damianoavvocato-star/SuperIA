@@ -7,8 +7,8 @@ import org.junit.Test
 class LocalDocumentChunkerTest {
     @Test
     fun combinesParagraphsWithoutExceedingLimit() {
-        val chunks = LocalDocumentChunker.chunk("Primo paragrafo.\\n\\nSecondo paragrafo.", maxCharacters = 40)
-        assertEquals(listOf("Primo paragrafo.\\n\\nSecondo paragrafo."), chunks)
+        val chunks = LocalDocumentChunker.chunk("Primo paragrafo.\n\nSecondo paragrafo.", maxCharacters = 40)
+        assertEquals(listOf("Primo paragrafo.\n\nSecondo paragrafo."), chunks)
     }
 
     @Test
@@ -21,7 +21,7 @@ class LocalDocumentChunkerTest {
 
     @Test
     fun ignoresEmptyParagraphsAndRejectsInvalidLimit() {
-        assertEquals(listOf("testo"), LocalDocumentChunker.chunk("  \\n\\n testo \\n\\n"))
+        assertEquals(listOf("testo"), LocalDocumentChunker.chunk("  \n\n testo \n\n"))
         assertTrue(runCatching { LocalDocumentChunker.chunk("testo", 0) }.isFailure)
     }
 }
