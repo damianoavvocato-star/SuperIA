@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import it.superiaprivata.app.device.DeviceProfileReader
+import it.superiaprivata.app.documents.DocumentTextExtractor
 import it.superiaprivata.app.documents.LocalDocumentContextBuilder
 import it.superiaprivata.app.documents.LocalDocumentRepository
 import it.superiaprivata.app.inference.InferenceRequest
@@ -74,6 +75,9 @@ fun AssistantChatPanel(documentContext: String? = null) {
     var modelMessage by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
+    var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
+    var attachmentStatus by remember { mutableStateOf<String?>(null) }
+    var importingDocument by remember { mutableStateOf(false) }
 
     val engine = remember(context) {
         LiteRtLmInferenceEngine(
@@ -98,8 +102,10 @@ fun AssistantChatPanel(documentContext: String? = null) {
         val storedDocuments = withContext(Dispatchers.IO) {
             LocalDocumentRepository(context).list()
         }
+        val combinedContext = listOfNotNull(explicitlySelectedContext, attachedDocumentContext)
+            .filter { it.isNotBlank() }.joinToString("\\n\\n")
         val retrievedContext = withContext(Dispatchers.Default) {
-            LocalDocumentContextBuilder.build(request, storedDocuments, explicitlySelectedContext)
+            LocalDocumentContextBuilder.build(request, storedDocuments, combinedContext.ifBlank { null })
         }
         return ChatPromptBuilder.build(
             history,
@@ -108,6 +114,31 @@ fun AssistantChatPanel(documentContext: String? = null) {
             memorySummary = projectMemory
         )
     }
+    val documentPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                importingDocument = true
+                attachmentStatus = "Importazione documento in corso…"
+                try {
+                    val repository = LocalDocumentRepository(context)
+                    val stored = withContext(Dispatchers.IO) {
+                        repository.import(uri, DocumentTextExtractor(context))
+                    }
+                    attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\\nContenuto estratto:\\n${stored.text.take(6000)}"
+                    attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato e sarà consultabile anche nelle prossime chat."
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    attachmentStatus = error.message ?: "Importazione documento non riuscita."
+                } finally {
+                    importingDocument = false
+                }
+            }
+        }
+    }
+
     val modelPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -334,11 +365,16 @@ fun AssistantChatPanel(documentContext: String? = null) {
                 ) { Text("Cancella cronologia") }
             }
 
+            attachmentStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
+                OutlinedButton(
+                    enabled = !importingDocument && !generating,
+                    onClick = { documentPicker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) }
+                ) { Text(if (importingDocument) "…" else "+") }
                 OutlinedTextField(
                     value = draft,
                     onValueChange = { draft = it },
