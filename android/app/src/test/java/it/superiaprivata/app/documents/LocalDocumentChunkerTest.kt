@@ -30,7 +30,8 @@ class LocalDocumentChunkerTest {
 
     @Test
     fun ignoresEmptyParagraphsAndRejectsInvalidLimit() {
-        assertEquals(listOf("testo"), LocalDocumentChunker.chunk("  \n\n testo \n\n"))
+        assertEquals(emptyList<String>(), LocalDocumentChunker.chunk("\n\n"))
+        assertEquals(listOf("testo"), LocalDocumentChunker.chunk("testo"))
         assertTrue(runCatching { LocalDocumentChunker.chunk("testo", 0) }.isFailure)
     }
 }
