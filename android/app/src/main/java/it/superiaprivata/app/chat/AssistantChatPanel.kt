@@ -103,7 +103,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
             LocalDocumentRepository(context).list()
         }
         val combinedContext = listOfNotNull(explicitlySelectedContext, attachedDocumentContext)
-            .filter { it.isNotBlank() }.joinToString("\\n\\n")
+            .filter { it.isNotBlank() }.joinToString("\n\n")
         val retrievedContext = withContext(Dispatchers.Default) {
             LocalDocumentContextBuilder.build(request, storedDocuments, combinedContext.ifBlank { null })
         }
