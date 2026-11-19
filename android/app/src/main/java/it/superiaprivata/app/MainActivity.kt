@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
                 var pairingQr by remember { mutableStateOf<Bitmap?>(null) }
                 var pairingError by remember { mutableStateOf<String?>(null) }
                 var documentContext by remember { mutableStateOf<String?>(null) }
-                var showDocuments by remember { mutableStateOf(false) }
                 var showMore by remember { mutableStateOf(false) }
                 val identityStore = remember { DeviceIdentityStore() }
 
@@ -56,14 +55,9 @@ class MainActivity : ComponentActivity() {
                                     Text("SuperIA", style = MaterialTheme.typography.headlineMedium)
                                     Text("La tua intelligenza artificiale privata")
                                 }
-                                Button(onClick = { showDocuments = !showDocuments }) {
-                                    Text(if (showDocuments) "Chiudi +" else "+")
+                                OutlinedButton(onClick = { showMore = !showMore }) {
+                                    Text(if (showMore) "Chiudi menu" else "Menu")
                                 }
-                            }
-                        }
-                        if (showDocuments) {
-                            item {
-                                DocumentsPanel(onContextChanged = { documentContext = it })
                             }
                         }
                         item { AssistantChatPanel(documentContext = documentContext) }
@@ -76,6 +70,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         if (showMore) {
+                        item { DocumentsPanel(onContextChanged = { documentContext = it }) }
                         item {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
