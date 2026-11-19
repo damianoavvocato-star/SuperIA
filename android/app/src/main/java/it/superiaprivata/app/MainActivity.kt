@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
                 var pairingError by remember { mutableStateOf<String?>(null) }
                 var documentContext by remember { mutableStateOf<String?>(null) }
                 var showDocuments by remember { mutableStateOf(false) }
+                var showMore by remember { mutableStateOf(false) }
                 val identityStore = remember { DeviceIdentityStore() }
 
                 Surface(
@@ -66,6 +67,15 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         item { AssistantChatPanel(documentContext = documentContext) }
+                        item {
+                            OutlinedButton(
+                                onClick = { showMore = !showMore },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(if (showMore) "Nascondi altre funzioni" else "Altre funzioni")
+                            }
+                        }
+                        if (showMore) {
                         item {
                             ElevatedCard {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -160,6 +170,7 @@ class MainActivity : ComponentActivity() {
                                 "La chat AI locale richiede l'importazione di un modello compatibile e l'accettazione della relativa licenza. Il QR è ancora un invito dimostrativo: non crea una connessione tra telefoni.",
                                 style = MaterialTheme.typography.bodySmall
                             )
+                        }
                         }
                     }
                 }
