@@ -17,7 +17,7 @@ data class ModelSpec(
 data class InferenceRequest(
     val prompt: String,
     val systemInstruction: String? = null,
-    val maxOutputTokens: Int = 512
+    val maxOutputTokens: Int = 1024
 )
 
 data class InferenceResult(
