@@ -73,6 +73,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
     var modelMessage by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
 
     val engine = remember(context) {
         LiteRtLmInferenceEngine(
@@ -135,7 +136,16 @@ fun AssistantChatPanel(documentContext: String? = null) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Parla con SuperIA", style = MaterialTheme.typography.titleLarge)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Chat", style = MaterialTheme.typography.titleLarge)
+                OutlinedButton(onClick = { showSettings = !showSettings }) {
+                    Text(if (showSettings) "Nascondi opzioni" else "Impostazioni")
+                }
+            }
+            if (showSettings) {
             Card {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("Diagnostica ultima chiusura", style = MaterialTheme.typography.titleSmall)
@@ -146,6 +156,8 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     ) { Text("Aggiorna diagnostica") }
                 }
             }
+            }
+            if (showSettings) {
             Text("Una conversazione persistente: la cronologia viene conservata sul dispositivo anche quando chiudi l'app.", style = MaterialTheme.typography.bodyMedium)
             OutlinedTextField(
                 value = projectMemory,
@@ -221,6 +233,8 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     )
                     modelMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 }
+            }
+
             }
 
             messages.lastOrNull { it.pending }?.let { pendingLine ->
@@ -320,16 +334,18 @@ fun AssistantChatPanel(documentContext: String? = null) {
                 ) { Text("Cancella cronologia") }
             }
 
-            OutlinedTextField(
-                value = draft,
-                onValueChange = { draft = it },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Scrivi cosa vuoi che faccia…") },
-                placeholder = { Text("Es. Riassumi questo documento") },
-                minLines = 2,
-                maxLines = 5
-            )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Scrivi a SuperIA…") },
+                    singleLine = true
+                )
                 Button(
                     enabled = draft.isNotBlank() && availability.isReady && licenseAccepted && !generating && messages.none { it.pending },
                     onClick = {
