@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
                 var pairingQr by remember { mutableStateOf<Bitmap?>(null) }
                 var pairingError by remember { mutableStateOf<String?>(null) }
                 var documentContext by remember { mutableStateOf<String?>(null) }
+                var showDocuments by remember { mutableStateOf(false) }
                 val identityStore = remember { DeviceIdentityStore() }
 
                 Surface(
@@ -46,10 +47,24 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         item {
-                            Text("SuperIA Privata", style = MaterialTheme.typography.headlineMedium)
-                            Text("La tua piattaforma AI personale · Android")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("SuperIA", style = MaterialTheme.typography.headlineMedium)
+                                    Text("La tua intelligenza artificiale privata")
+                                }
+                                Button(onClick = { showDocuments = !showDocuments }) {
+                                    Text(if (showDocuments) "Chiudi +" else "+")
+                                }
+                            }
                         }
-                        item { DocumentsPanel(onContextChanged = { documentContext = it }) }
+                        if (showDocuments) {
+                            item {
+                                DocumentsPanel(onContextChanged = { documentContext = it })
+                            }
+                        }
                         item { AssistantChatPanel(documentContext = documentContext) }
                         item {
                             ElevatedCard {
