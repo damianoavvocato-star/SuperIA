@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import it.superiaprivata.app.device.DeviceProfileReader
 import it.superiaprivata.app.documents.DocumentTextExtractor
@@ -63,7 +65,10 @@ fun AssistantChatPanel(documentContext: String? = null) {
     val installer = remember(context) { LocalModelInstaller(context) }
     val deviceProfile = remember(context) { DeviceProfileReader(context).read() }
     var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
-    var licenseAccepted by rememberSaveable { mutableStateOf(false) }
+    var licenseAccepted by remember(context) {
+        mutableStateOf(context.getSharedPreferences("superia_model_consent", 0)
+            .getBoolean(artifact.spec.licenseId, false))
+    }
     var modelInstalled by remember(modelFile) { mutableStateOf(modelFile.isFile && modelFile.length() > 0L) }
     var importing by remember { mutableStateOf(false) }
     var generating by remember { mutableStateOf(false) }
@@ -236,7 +241,11 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     Row {
                         Checkbox(
                             checked = licenseAccepted,
-                            onCheckedChange = { licenseAccepted = it }
+                            onCheckedChange = {
+                                licenseAccepted = it
+                                context.getSharedPreferences("superia_model_consent", 0).edit()
+                                    .putBoolean(artifact.spec.licenseId, it).apply()
+                            }
                         )
                         Text(
                             "Ho letto e accetto i termini Gemma per questo modello.",
@@ -346,7 +355,14 @@ fun AssistantChatPanel(documentContext: String? = null) {
                                     if (line.role == "assistant") "SuperIA" else "Tu",
                                     style = MaterialTheme.typography.labelMedium
                                 )
-                                Text(line.text, style = MaterialTheme.typography.bodyMedium)
+                                val expanded = remember(line.id) { mutableStateOf(false) }
+                                Text(
+                                    line.text,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = if (expanded.value) Int.MAX_VALUE else 16,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.clickable { expanded.value = !expanded.value }
+                                )
                             }
                         }
                     }
@@ -452,7 +468,11 @@ fun AssistantChatPanel(documentContext: String? = null) {
                 Text("Errore AI: $it", color = MaterialTheme.colorScheme.error)
             }
             Text(
-                "L'inferenza viene eseguita localmente via LiteRT-LM CPU. Nessun fallback cloud. La compatibilità e la velocità sui telefoni reali devono ancora essere verificate.",
+                when {
+                    !licenseAccepted -> "Per inviare, accetta prima i termini della licenza del modello nelle Impostazioni."
+                    !availability.isReady -> availability.detail
+                    else -> "Inferenza locale tramite LiteRT-LM su CPU. Nessun fallback cloud. Le prestazioni dipendono dal modello, dalla RAM disponibile e dalla temperatura del dispositivo."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
