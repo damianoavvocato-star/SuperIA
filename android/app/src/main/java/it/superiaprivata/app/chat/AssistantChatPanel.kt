@@ -265,10 +265,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         
                                         throw error
                                     } catch (error: OutOfMemoryError) {
-                                        messages.removeAll { it.id == Long.MIN_VALUE }
                                             generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                     } catch (error: Exception) {
-                                        messages.removeAll { it.id == Long.MIN_VALUE }
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
                                     } finally {
                                         generating = false
@@ -371,13 +369,10 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                     historyStore.save(messages.toList())
                                 } catch (error: CancellationException) {
-                                    messages.removeAll { it.id == Long.MIN_VALUE }
                                     throw error
                                 } catch (error: OutOfMemoryError) {
-                                    messages.removeAll { it.id == Long.MIN_VALUE }
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                 } catch (error: Exception) {
-                                    messages.removeAll { it.id == Long.MIN_VALUE }
                                     generationError = error.message ?: "Errore durante la richiesta online."
                                 } finally {
                                     generating = false
