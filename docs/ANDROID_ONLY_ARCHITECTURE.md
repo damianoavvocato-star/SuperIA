@@ -4,7 +4,7 @@ Data decisione: 15 novembre 2026
 
 ## Decisione vincolante
 
-Il prodotto è destinato esclusivamente ad Android (smartphone e tablet). Non sviluppare client PC, APK desktop, pannelli web come prodotto finale o dipendenze da un PC remoto. Il backend FastAPI esistente è un prototipo di riferimento e non deve essere un requisito per usare l'app sul telefono: le funzioni principali devono essere native e locali.
+Il prodotto client è destinato esclusivamente ad Android (smartphone e tablet): non sviluppare client PC o APK desktop. La decisione aggiornata del 20 novembre 2026 stabilisce che l'inferenza della versione finale avviene online tramite backend SuperIA e provider gratuiti verificati. Il backend è quindi necessario per la chat IA; l'app Android mantiene localmente cronologia e documenti cifrati e invia solo il contesto necessario. Non è previsto un fallback automatico a inferenza locale nella versione finale.
 
 ## Obiettivo
 
@@ -15,7 +15,7 @@ Una sola applicazione Android, in italiano, modulare e utilizzabile senza abbona
 | Livello | Scelta iniziale | Motivo e condizione |
 |---|---|---|
 | App | Kotlin + Jetpack Compose | UI nativa, accessibilità, gestione lifecycle e processi Android |
-| LLM locale | LiteRT-LM Android (Kotlin) | Runtime Google attuale per chat, streaming, tool use e modelli aperti; benchmark obbligatorio |
+| LLM locale | Non previsto nella versione finale | Gemma/LiteRT-LM resta soltanto nella build legacy di transizione; rimozione dopo test end-to-end online superati |
 | Modelli ML specializzati | LiteRT CompiledModel | Inferenza CPU/GPU e acceleratori supportati; NPU solo se effettivamente disponibile sul dispositivo/runtime |
 | Motore alternativo | llama.cpp Android/NDK | Fallback/benchmark per modelli GGUF, non doppio runtime obbligatorio |
 | Speech-to-text | whisper.cpp Android | Trascrizione locale; modelli e licenze verificati separatamente |
@@ -53,7 +53,7 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 
 ## Privacy e sicurezza Android
 
-- Modalità offline realmente utilizzabile per i moduli locali.
+- La chat richiede connessione Internet; la cronologia e i documenti già salvati restano cifrati sul dispositivo.
 - Nessun caricamento automatico di file o conversazioni.
 - Dati locali protetti con cifratura appropriata e chiavi custodite da Android Keystore.
 - Permessi runtime minimi; Photo Picker/SAF preferiti all'accesso generalizzato.
@@ -66,7 +66,7 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 
 0. Inventario delle 182 IA, audit licenze/costi e decisione Android-only. Documentazione già mappata; verifiche puntuali ancora aperte.
 1. Fondamenta Android: progetto Kotlin/Compose, architettura modulare, storage, permessi, tema, navigazione, profilo dispositivo, pairing sicuro multi-telefono, autenticazione GitHub e build debug.
-2. Motore AI: integrazione LiteRT-LM, download modelli, benchmark, chat streaming e gestione memoria.
+2. Motore AI: client Android HTTPS verso backend SuperIA, chat streaming, invio del contesto conversazionale e failover provider gratuito; nessuna chiave provider nell'APK.
 3. Documenti e RAG locale.
 4. Ricerca web opt-in, link e traduzione.
 5. Immagini e grafica.
