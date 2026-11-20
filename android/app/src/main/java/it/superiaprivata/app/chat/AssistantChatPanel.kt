@@ -74,6 +74,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var backendEndpoint by remember { mutableStateOf(savedConnection.endpoint) }
     var backendToken by remember { mutableStateOf(savedConnection.token) }
     var connectionStatus by remember { mutableStateOf(if (savedConnection.isConfigured) "Configurazione backend caricata in modo protetto." else "Collega un backend HTTPS per iniziare.") }
+    var checkingBackend by remember { mutableStateOf(false) }
     var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
     var generating by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
@@ -211,6 +212,22 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         }
                     }
                 ) { Text("Salva collegamento") }
+                OutlinedButton(
+                    enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
+                    onClick = {
+                        scope.launch {
+                            checkingBackend = true
+                            connectionStatus = "Verifica del backend in corso…"
+                            try {
+                                connectionStatus = OnlineAssistantClient.checkHealth(backendEndpoint)
+                            } catch (error: Exception) {
+                                connectionStatus = error.message ?: "Verifica del backend non riuscita."
+                            } finally {
+                                checkingBackend = false
+                            }
+                        }
+                    }
+                ) { Text(if (checkingBackend) "Verifica…" else "Verifica backend") }
                 TextButton(
                     enabled = !generating,
                     onClick = {
