@@ -156,6 +156,16 @@ class FreeOnlyRouter:
         model: str | None = None,
     ) -> dict[str, str]:
         providers = self.configured_providers()
+        if model is not None:
+            providers = [
+                provider
+                for provider in providers
+                if f"{provider.provider_id}:{provider.model}" == model
+            ]
+            if not providers:
+                raise NoFreeProviderAvailable(
+                    "Il modello richiesto non è tra quelli gratuiti attualmente configurati."
+                )
         if not providers:
             raise NoFreeProviderAvailable(
                 "Nessun provider gratuito verificato è configurato. La richiesta è stata conservata; riprova più tardi."
