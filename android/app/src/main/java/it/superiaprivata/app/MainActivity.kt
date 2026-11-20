@@ -23,6 +23,7 @@ import it.superiaprivata.app.pairing.PairingInvite
 import it.superiaprivata.app.chat.AssistantChatPanel
 import it.superiaprivata.app.chat.CrashLogStore
 import it.superiaprivata.app.documents.DocumentsPanel
+import it.superiaprivata.app.multimedia.RenderforestPanel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,6 +157,9 @@ class MainActivity : ComponentActivity() {
                                             pairingError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                                         }
                                     }
+                                }
+                                item {
+                                    RenderforestPanel()
                                 }
                                 item {
                                     ElevatedCard {
