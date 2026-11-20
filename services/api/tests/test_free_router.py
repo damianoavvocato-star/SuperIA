@@ -71,7 +71,7 @@ def test_payment_method_and_no_fiat_billing_flags_are_mandatory(tmp_path):
         assert await router.list_models() == []
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING"] = "false"
-        router = FreeOnlyRouter(environ=env)
+        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "router-state-3.sqlite3"))
         assert await router.list_models() == []
     asyncio.run(run())
 
