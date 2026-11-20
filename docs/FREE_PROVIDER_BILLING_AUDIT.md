@@ -4,7 +4,7 @@ Data della verifica documentale: **20 novembre 2026**.
 
 ## Regola di ammissione
 
-Un servizio entra nella rotazione di produzione solo se offre un'API realmente utilizzabile, il piano approvato ha prezzo zero, non richiede carta/metodo di pagamento, non prevede top-up o passaggio automatico a pagamento, si blocca a quota esaurita e consente l'uso previsto in Italia/UE. Non si usano account multipli o chiavi multiple per aggirare quote e termini.
+Un servizio entra nella rotazione di produzione solo se offre un'API realmente utilizzabile con una quota d'uso gratuita autentica, prezzo zero, nessuna carta/metodo di pagamento, nessun acquisto, ricarica, credito monetario regalato/promozionale, deposito, prova a credito o passaggio automatico a pagamento. Deve fermarsi a quota esaurita e consentire l'uso previsto in Italia/UE. **Sono esclusi anche i servizi che regalano denaro o crediti convertibili in denaro/consumo a pagamento**, persino se non chiedono carta. Sono ammesse soltanto quote gratuite native del servizio (richieste/token/minuti/compute) senza valore monetario, senza pagamento e senza top-up. Non si usano account multipli o chiavi multiple per aggirare quote e termini.
 
 **Stati:** CANDIDATO = piano gratuito documentato ma da collaudare; CONDIZIONATO = gratuito con restrizioni o modelli a pagamento da escludere; SOLO PROVA = credito iniziale non ricorrente; ESCLUSO = API a pagamento/non adatta; NON VERIFICATO = documentazione ufficiale insufficiente. Tutti gli stati diversi da CANDIDATO restano disabilitati.
 
@@ -107,14 +107,14 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 6. NVIDIA NIM: solo dopo prova documentata no-card/no-billing.
 7. Cohere: solo test finché non viene confermata idoneità produzione.
 8. Cartesia: solo se il piano Free autorizza l'uso previsto.
-9. Deepgram e AssemblyAI: crediti iniziali per collaudo, mai conteggiati come capacità ricorrente.
+9. Deepgram e AssemblyAI: esclusi perché l'offerta si basa su crediti monetari iniziali.
 
 ## Regole obbligatorie nel codice
 
-- Provider attivo solo con piano e modello a prezzo zero verificati, carta non richiesta, hard-stop quota attivo e termini approvati.
-- Non salvare metodi di pagamento; non fare top-up, upgrade o acquisti crediti.
+- Provider attivo solo con quota gratuita nativa (non credito monetario), piano e modello a prezzo zero verificati, carta non richiesta, nessun pagamento/top-up, hard-stop quota attivo e termini approvati.
+- Non salvare metodi di pagamento; non fare top-up, upgrade, depositi, acquisti crediti o uso di crediti regalati/promozionali.
 - Non chiamare modelli/endpoint a pagamento.
-- Crediti una tantum separati dalle quote ricorrenti.
+- Qualsiasi credito monetario regalato, promozionale, di prova o acquistato comporta esclusione totale del provider; non si usa neppure per i test.
 - Stato non verificato = provider disabilitato.
 - 402, errori billing, quota esaurita o richiesta upgrade = stop; mai tentare pagamenti.
 - Rispettare rate limit e condizioni; non aggirare quote con account multipli.
