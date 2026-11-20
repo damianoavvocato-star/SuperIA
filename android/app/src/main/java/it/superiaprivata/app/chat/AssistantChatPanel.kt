@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -25,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun AssistantChatPanel(documentContext: String? = null) {
+fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val historyStore = remember(context) { ChatHistoryStore(context) }
@@ -83,6 +85,11 @@ fun AssistantChatPanel(documentContext: String? = null) {
     var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
     var attachmentStatus by remember { mutableStateOf<String?>(null) }
     var importingDocument by remember { mutableStateOf(false) }
+    val messageListState = rememberLazyListState()
+
+    LaunchedEffect(messages.size, messages.lastOrNull()?.text) {
+        if (messages.isNotEmpty()) messageListState.animateScrollToItem(messages.lastIndex)
+    }
 
     val engine = remember(context) {
         LiteRtLmInferenceEngine(
@@ -131,7 +138,7 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     val stored = withContext(Dispatchers.IO) {
                         repository.import(uri, DocumentTextExtractor(context))
                     }
-                    attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\\nContenuto estratto:\\n${stored.text.take(6000)}"
+                    attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\nContenuto estratto:\n${stored.text.take(6000)}"
                     attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato e sarà consultabile anche nelle prossime chat."
                 } catch (error: CancellationException) {
                     throw error
@@ -168,10 +175,10 @@ fun AssistantChatPanel(documentContext: String? = null) {
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -339,7 +346,8 @@ fun AssistantChatPanel(documentContext: String? = null) {
 
             if (messages.isNotEmpty()) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp),
+                    state = messageListState,
+                    modifier = Modifier.fillMaxWidth().weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(messages, key = { it.id }) { line ->
@@ -379,6 +387,15 @@ fun AssistantChatPanel(documentContext: String? = null) {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Cancella cronologia") }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                ) {
+                    Text("Ciao, sono SuperIA", style = MaterialTheme.typography.headlineSmall)
+                    Text("Scrivi un messaggio oppure usa + per allegare un documento.", style = MaterialTheme.typography.bodyMedium)
+                }
             }
 
             attachmentStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
