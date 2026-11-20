@@ -1,6 +1,8 @@
 import os
 import sqlite3
 import time
+from contextlib import closing
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Callable
 
@@ -43,20 +45,23 @@ class FreeOnlyRouter:
         self._init_state()
 
     def _connect_state(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.state_db_path, timeout=10)
+        db_path = Path(self.state_db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        connection = sqlite3.connect(str(db_path), timeout=10)
         connection.execute(
             "CREATE TABLE IF NOT EXISTS provider_state ("
             "provider_id TEXT PRIMARY KEY, cooldown_until REAL NOT NULL DEFAULT 0, "
             "disabled INTEGER NOT NULL DEFAULT 0)"
         )
+        connection.commit()
         return connection
 
     def _init_state(self) -> None:
-        with self._connect_state() as connection:
-            connection.commit()
+        with closing(self._connect_state()):
+            pass
 
     def _state(self, provider_id: str) -> tuple[float, bool]:
-        with self._connect_state() as connection:
+        with closing(self._connect_state()) as connection:
             row = connection.execute(
                 "SELECT cooldown_until, disabled FROM provider_state WHERE provider_id = ?",
                 (provider_id,),
@@ -65,21 +70,23 @@ class FreeOnlyRouter:
 
     def _set_cooldown(self, provider_id: str, seconds: float) -> None:
         until = time.time() + max(1.0, min(seconds, 3600.0))
-        with self._connect_state() as connection:
+        with closing(self._connect_state()) as connection:
             connection.execute(
                 "INSERT INTO provider_state(provider_id, cooldown_until, disabled) "
                 "VALUES (?, ?, 0) ON CONFLICT(provider_id) DO UPDATE SET "
                 "cooldown_until = excluded.cooldown_until",
                 (provider_id, until),
             )
+            connection.commit()
 
     def _disable(self, provider_id: str) -> None:
-        with self._connect_state() as connection:
+        with closing(self._connect_state()) as connection:
             connection.execute(
                 "INSERT INTO provider_state(provider_id, cooldown_until, disabled) "
                 "VALUES (?, 0, 1) ON CONFLICT(provider_id) DO UPDATE SET disabled = 1",
                 (provider_id,),
             )
+            connection.commit()
 
     def _provider(self, provider_id: str) -> ProviderConfig | None:
         env = self.environ
