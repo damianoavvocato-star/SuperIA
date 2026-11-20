@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import time
 from dataclasses import dataclass
 from typing import Callable
@@ -32,11 +33,53 @@ class FreeOnlyRouter:
         self,
         environ: dict[str, str] | None = None,
         client_factory: Callable[..., httpx.AsyncClient] = httpx.AsyncClient,
+        state_db_path: str | None = None,
     ) -> None:
         self.environ = os.environ if environ is None else environ
         self.client_factory = client_factory
-        self._cooldowns: dict[str, float] = {}
-        self._disabled: set[str] = set()
+        self.state_db_path = state_db_path or self.environ.get(
+            "SUPERIA_ROUTER_STATE_DB", "/tmp/superia-router-state.sqlite3"
+        )
+        self._init_state()
+
+    def _connect_state(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.state_db_path, timeout=10)
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS provider_state ("
+            "provider_id TEXT PRIMARY KEY, cooldown_until REAL NOT NULL DEFAULT 0, "
+            "disabled INTEGER NOT NULL DEFAULT 0)"
+        )
+        return connection
+
+    def _init_state(self) -> None:
+        with self._connect_state() as connection:
+            connection.commit()
+
+    def _state(self, provider_id: str) -> tuple[float, bool]:
+        with self._connect_state() as connection:
+            row = connection.execute(
+                "SELECT cooldown_until, disabled FROM provider_state WHERE provider_id = ?",
+                (provider_id,),
+            ).fetchone()
+        return (float(row[0]), bool(row[1])) if row else (0.0, False)
+
+    def _set_cooldown(self, provider_id: str, seconds: float) -> None:
+        until = time.time() + max(1.0, min(seconds, 3600.0))
+        with self._connect_state() as connection:
+            connection.execute(
+                "INSERT INTO provider_state(provider_id, cooldown_until, disabled) "
+                "VALUES (?, ?, 0) ON CONFLICT(provider_id) DO UPDATE SET "
+                "cooldown_until = excluded.cooldown_until",
+                (provider_id, until),
+            )
+
+    def _disable(self, provider_id: str) -> None:
+        with self._connect_state() as connection:
+            connection.execute(
+                "INSERT INTO provider_state(provider_id, cooldown_until, disabled) "
+                "VALUES (?, 0, 1) ON CONFLICT(provider_id) DO UPDATE SET disabled = 1",
+                (provider_id,),
+            )
 
     def _provider(self, provider_id: str) -> ProviderConfig | None:
         env = self.environ
@@ -112,12 +155,10 @@ class FreeOnlyRouter:
             )
 
         last_error = "Nessun provider gratuito disponibile."
-        now = time.monotonic()
         attempted = False
         for provider in providers:
-            if provider.provider_id in self._disabled:
-                continue
-            if self._cooldowns.get(provider.provider_id, 0.0) > now:
+            cooldown_until, disabled = self._state(provider.provider_id)
+            if disabled or cooldown_until > time.time():
                 continue
             attempted = True
             try:
@@ -137,20 +178,18 @@ class FreeOnlyRouter:
                         cooldown = float(retry_after)
                     except ValueError:
                         cooldown = 60.0
-                    self._cooldowns[provider.provider_id] = (
-                        time.monotonic() + max(1.0, min(cooldown, 3600.0))
-                    )
+                    self._set_cooldown(provider.provider_id, cooldown)
                     last_error = f"{provider.provider_id}: quota o limite temporaneo raggiunto."
                     continue
                 if response.status_code in (401, 402, 403):
-                    self._disabled.add(provider.provider_id)
+                    self._disable(provider.provider_id)
                     last_error = (
                         f"{provider.provider_id}: credenziali, billing o permessi non compatibili "
                         "con il profilo gratuito; provider disabilitato."
                     )
                     continue
                 if response.status_code == 408 or response.status_code >= 500:
-                    self._cooldowns[provider.provider_id] = time.monotonic() + 15.0
+                    self._set_cooldown(provider.provider_id, 15.0)
                     last_error = f"{provider.provider_id}: servizio temporaneamente non disponibile."
                     continue
                 response.raise_for_status()
@@ -161,7 +200,7 @@ class FreeOnlyRouter:
                     continue
                 return {"content": content, "model": provider.model, "provider": provider.provider_id}
             except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
-                self._cooldowns[provider.provider_id] = time.monotonic() + 15.0
+                self._set_cooldown(provider.provider_id, 15.0)
                 last_error = f"{provider.provider_id}: errore di rete o risposta non valida ({type(exc).__name__})."
                 continue
 
