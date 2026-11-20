@@ -1,6 +1,6 @@
 # SuperIA Privata
 
-Assistente AI personale, modulare e con priorità all'esecuzione locale. Questo repository è indipendente da **Editore Foto e Video IA**.
+Assistente AI personale e modulare, con direzione di prodotto **online-only e free-only**. Questo repository è indipendente da **Editore Foto e Video IA**.
 
 ## Obiettivo
 Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella ricognizione iniziale, usando alternative open source/gratuite e rispettando licenze e requisiti. Non si clonano codice, pesi o servizi proprietari.
@@ -8,12 +8,12 @@ Riordinare in un'unica piattaforma le capacità delle 182 IA individuate nella r
 ## Vincoli del progetto
 - Uso personale e riservato; repository e dati separati da Editore Foto e Video IA.
 - Nessun abbonamento o API a pagamento obbligatori.
-- Modelli locali e funzionamento offline dove possibile; Internet solo per funzioni che lo richiedono.
+- Inferenza finale online tramite provider verificati a costo zero; nessun fallback locale o a pagamento nella modalità di prodotto. I componenti locali già presenti restano legacy finché il nuovo percorso online non è collaudato.
 - Destinazione esclusiva Android (smartphone e tablet); nessun client PC previsto.
 - Moduli progressivi, privacy e controllo dell'utente.
 
 ## Stato attuale
-- Backend prototipo FastAPI: router online free-only con allowlist fail-closed (provider disabilitati per default, nessun fallback a pagamento); non è ancora pubblicato né collegato all'app Android. La verifica dei fornitori è in [docs/FREE_PROVIDER_BILLING_AUDIT.md](docs/FREE_PROVIDER_BILLING_AUDIT.md) e la configurazione è in [docs/ONLINE_BACKEND_IMPLEMENTATION.md](docs/ONLINE_BACKEND_IMPLEMENTATION.md).
+- Backend prototipo FastAPI: router online free-only con allowlist fail-closed (provider disabilitati per default, nessun fallback a pagamento); non è ancora pubblicato né collegato all'app Android. La chat Android attuale usa ancora il runtime locale legacy e non è stata ancora convertita all'API online. La verifica dei fornitori è in [docs/FREE_PROVIDER_BILLING_AUDIT.md](docs/FREE_PROVIDER_BILLING_AUDIT.md) e la configurazione è in [docs/ONLINE_BACKEND_IMPLEMENTATION.md](docs/ONLINE_BACKEND_IMPLEMENTATION.md).
 - App Android nativa: Kotlin/Jetpack Compose, rilevamento dispositivo, adapter LiteRT-LM 0.16.1 CPU, catalogo Gemma 3 1B IT INT4, importazione locale del modello con consenso licenza, cronologia chat e archivio documentale cifrati AES-GCM tramite Android Keystore.
 - Continuità chat: il contesto recente viene ricostruito dalla cronologia cifrata (fino a 12 messaggi e 6.000 caratteri) quando il runtime viene ricreato.
 - Ultima build Android verificata: run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari e `assembleDebug` superati; APK debug caricato come artefatto `superia-privata-debug` (ID `14235164539`, 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027). Al controllo del 16 novembre 2026 i test strumentali Keystore erano ancora in esecuzione; non sono quindi dichiarati superati su questa revisione.
