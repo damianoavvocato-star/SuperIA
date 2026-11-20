@@ -42,6 +42,7 @@ async def capabilities(provider: FreeOnlyRouter = Depends(get_provider)) -> dict
             "research": "planned",
             "agents": "planned",
         },
+        "external_providers_enabled_by_default": False,
         "paid_fallback": False,
         "payment_methods_allowed": False,
         "configured_free_providers": len(configured),
