@@ -131,3 +131,39 @@ def test_auth_or_billing_error_persistently_disables_provider(tmp_path):
         with pytest.raises(NoFreeProviderAvailable):
             await second.chat([{"role": "user", "content": "Ancora ciao"}])
     asyncio.run(run())
+
+
+
+def test_requested_model_is_honored_without_silent_fallback(tmp_path):
+    async def run():
+        env = free_env("groq")
+        env.update(free_env("openrouter", "example/free-model:free"))
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": request.url.host}}]},
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "router-state.sqlite3"),
+        )
+        result = await router.chat(
+            [{"role": "user", "content": "Ciao"}],
+            model="openrouter:example/free-model:free",
+        )
+        assert result["provider"] == "openrouter"
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat(
+                [{"role": "user", "content": "Ciao"}],
+                model="provider:model-not-configured",
+            )
+
+    asyncio.run(run())
