@@ -20,6 +20,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -179,14 +185,26 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         modifier = modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Chat", style = MaterialTheme.typography.titleLarge)
-                OutlinedButton(onClick = { showSettings = !showSettings }) {
-                    Text(if (showSettings) "Nascondi opzioni" else "Impostazioni")
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    if (messages.isNotEmpty()) {
+                        TextButton(
+                            enabled = !generating,
+                            onClick = {
+                                runCatching { historyStore.clear() }
+                                    .onSuccess { messages.clear(); storageError = null }
+                                    .onFailure { storageError = it.message ?: "Errore nella cancellazione" }
+                            }
+                        ) { Text("Svuota") }
+                    }
+                    OutlinedButton(onClick = { showSettings = !showSettings }) {
+                        Text(if (showSettings) "Chiudi" else "Impostazioni")
+                    }
                 }
             }
             if (showSettings) {
@@ -349,7 +367,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 LazyColumn(
                     state = messageListState,
                     modifier = Modifier.fillMaxWidth().weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     items(messages, key = { it.id }) { line ->
                         Surface(
@@ -359,15 +377,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(Modifier.padding(12.dp)) {
+                            Column(Modifier.padding(horizontal = 12.dp, vertical = 9.dp)) {
                                 Text(
                                     if (line.role == "assistant") "SuperIA" else "Tu",
                                     style = MaterialTheme.typography.labelMedium
                                 )
                                 val expanded = remember(line.id) { mutableStateOf(false) }
-                                Text(
-                                    line.text,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                MarkdownMessageText(
+                                    markdown = line.text,
                                     maxLines = if (expanded.value) Int.MAX_VALUE else 16,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.clickable { expanded.value = !expanded.value }
@@ -376,18 +393,6 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         }
                     }
                 }
-                OutlinedButton(
-                    enabled = !generating,
-                    onClick = {
-                        runCatching { historyStore.clear() }
-                            .onSuccess {
-                                messages.clear()
-                                storageError = null
-                            }
-                            .onFailure { storageError = it.message ?: "Errore nella cancellazione" }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Cancella cronologia") }
             } else {
                 Column(
                     modifier = Modifier.fillMaxWidth().weight(1f),
@@ -402,26 +407,27 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             attachmentStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                IconButton(
                     enabled = !importingDocument && !generating,
                     onClick = { documentPicker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) }
-                ) { Text(if (importingDocument) "…" else "+") }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Allega documento")
+                }
                 OutlinedTextField(
                     value = draft,
                     onValueChange = { draft = it },
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Scrivi a SuperIA…") },
-                    singleLine = true
+                    maxLines = 3
                 )
-                Button(
+                IconButton(
                     enabled = draft.isNotBlank() && availability.isReady && licenseAccepted && !generating && messages.none { it.pending },
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
-                            // Capture history before appending the new pending user turn.
                             val contextHistory = messages.toList()
                             val userLine = ChatLine(System.nanoTime(), request, "user", pending = true)
                             messages.add(userLine)
@@ -429,20 +435,15 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                             if (saved.isFailure) {
                                 messages.remove(userLine)
                                 storageError = saved.exceptionOrNull()?.message ?: "Errore nel salvataggio"
-                                return@Button
+                                return@IconButton
                             }
                             storageError = null
                             draft = ""
-
                             scope.launch {
                                 generating = true
                                 generationError = null
                                 try {
-                                    val promptWithHistory = buildRequestPrompt(
-                                        contextHistory,
-                                        request,
-                                        documentContext
-                                    )
+                                    val promptWithHistory = buildRequestPrompt(contextHistory, request, documentContext)
                                     val streamingId = Long.MIN_VALUE
                                     messages.removeAll { it.id == streamingId }
                                     messages.add(ChatLine(streamingId, "", "assistant"))
@@ -477,7 +478,9 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                             }
                         }
                     }
-                ) { Text(if (generating) "Sto pensando…" else "Invia") }
+                ) {
+                    Icon(Icons.Default.Send, contentDescription = "Invia messaggio")
+                }
             }
             storageError?.let {
                 Text("Problema con la cronologia protetta: $it", color = MaterialTheme.colorScheme.error)
@@ -485,15 +488,16 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             generationError?.let {
                 Text("Errore AI: $it", color = MaterialTheme.colorScheme.error)
             }
-            Text(
-                when {
-                    !licenseAccepted -> "Per inviare, accetta prima i termini della licenza del modello nelle Impostazioni."
-                    !availability.isReady -> availability.detail
-                    else -> "Inferenza locale tramite LiteRT-LM su CPU. Nessun fallback cloud. Le prestazioni dipendono dal modello, dalla RAM disponibile e dalla temperatura del dispositivo."
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (!licenseAccepted || !availability.isReady) {
+                Text(
+                    if (!licenseAccepted) "Per iniziare, accetta la licenza del modello nelle Impostazioni."
+                    else availability.detail,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
