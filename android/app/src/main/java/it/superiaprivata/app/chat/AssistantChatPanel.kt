@@ -252,7 +252,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         Text("Richiesta non completata", style = MaterialTheme.typography.titleSmall)
                         Text("L'app è stata chiusa o la richiesta online si è interrotta prima della risposta. Puoi riprovare senza reinserire il messaggio.")
                         OutlinedButton(
-                            enabled = onlineConfigured && !generating,
+                            enabled = onlineConfigured && initialHistory.isSuccess && !generating,
                             onClick = {
                                 val contextHistory = messages.filterNot { it.pending }
                                 scope.launch {
@@ -352,7 +352,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     maxLines = 3
                 )
                 IconButton(
-                    enabled = draft.isNotBlank() && onlineConfigured && !generating && messages.none { it.pending },
+                    enabled = draft.isNotBlank() && onlineConfigured && initialHistory.isSuccess && !generating && messages.none { it.pending },
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
