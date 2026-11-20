@@ -20,24 +20,24 @@ def free_env(provider_id="groq", model="openai/gpt-oss-120b"):
     }
 
 
-def test_router_is_disabled_by_default():
+def test_router_is_disabled_by_default(tmp_path):
     async def run():
-        router = FreeOnlyRouter(environ={})
+        router = FreeOnlyRouter(environ={}, state_db_path=str(tmp_path / 'router-state.sqlite3'))
         assert await router.list_models() == []
         with pytest.raises(NoFreeProviderAvailable):
             await router.chat([{"role": "user", "content": "Ciao"}])
     asyncio.run(run())
 
 
-def test_openrouter_rejects_paid_model():
+def test_openrouter_rejects_paid_model(tmp_path):
     async def run():
         env = free_env("openrouter", "some-model")
-        router = FreeOnlyRouter(environ=env)
+        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state.sqlite3'))
         assert await router.list_models() == []
     asyncio.run(run())
 
 
-def test_router_fails_over_on_rate_limit_without_paid_fallback():
+def test_router_fails_over_on_rate_limit_without_paid_fallback(tmp_path):
     async def run():
         env = free_env("groq")
         env.update(free_env("openrouter", "example/free-model:free"))
@@ -55,7 +55,7 @@ def test_router_fails_over_on_rate_limit_without_paid_fallback():
         def client_factory(**kwargs):
             return httpx.AsyncClient(transport=transport, **kwargs)
 
-        router = FreeOnlyRouter(environ=env, client_factory=client_factory)
+        router = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=str(tmp_path / 'router-state.sqlite3'))
         result = await router.chat([{"role": "user", "content": "Ciao"}])
         assert result["content"] == "Risposta gratuita"
         assert result["provider"] == "openrouter"
@@ -63,11 +63,11 @@ def test_router_fails_over_on_rate_limit_without_paid_fallback():
     asyncio.run(run())
 
 
-def test_payment_method_and_no_fiat_billing_flags_are_mandatory():
+def test_payment_method_and_no_fiat_billing_flags_are_mandatory(tmp_path):
     async def run():
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD"] = "false"
-        router = FreeOnlyRouter(environ=env)
+        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state-2.sqlite3'))
         assert await router.list_models() == []
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING"] = "false"
