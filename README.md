@@ -48,10 +48,8 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 Interfaccia: http://127.0.0.1:8000 — API docs: http://127.0.0.1:8000/docs
 
-## Modello locale
-Installa Ollama, avvialo e scarica un modello compatibile, ad esempio `ollama pull llama3.2:3b`.
-Variabili: `OLLAMA_MODEL` (predefinito `llama3.2:3b`) e `OLLAMA_BASE_URL` (predefinito `http://127.0.0.1:11434`).
-Senza Ollama, le richieste AI restituiscono un errore esplicito. Nessun fallback cloud.
+## Modello locale legacy
+La versione finale della chat è online-only. Il runtime Gemma locale appartiene esclusivamente alla build di transizione e va mantenuto sul dispositivo finché la nuova chat online non è stata collegata, installata e collaudata end-to-end. Non installare Ollama per la versione finale e non eliminare Gemma dalla build legacy prima del superamento del gate di migrazione.
 
 ## Privacy
 Nell'app Android la cronologia chat e il testo estratto dai documenti sono cifrati AES-GCM con chiavi non esportabili in Android Keystore. Il prototipo web/backend separato conserva cronologia e annotazioni nel localStorage del browser sul dispositivo corrente e non le cifra: non inserire dati altamente riservati in quel prototipo. Non inserire dati altamente riservati su dispositivi condivisi. Dettagli: [docs/PRIVACY.md](docs/PRIVACY.md).
