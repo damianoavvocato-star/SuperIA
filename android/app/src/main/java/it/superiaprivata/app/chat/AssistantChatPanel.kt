@@ -252,26 +252,21 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             pendingLine.text,
                                             documentContext
                                         )
-                                        val streamingId = Long.MIN_VALUE
-                                        messages.removeAll { it.id == streamingId }
-                                        messages.add(ChatLine(streamingId, "", "assistant"))
                                         val result = OnlineAssistantClient.send(
                                             OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                             retryPrompt
                                         )
-                                        messages.removeAll { it.id == streamingId }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
                                         messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                         historyStore.save(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
-                                        messages.removeAll { it.id == Long.MIN_VALUE }
+                                        
                                         throw error
                                     } catch (error: OutOfMemoryError) {
                                         messages.removeAll { it.id == Long.MIN_VALUE }
-                                        runCatching { engine.close() }
-                                        generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
+                                            generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                     } catch (error: Exception) {
                                         messages.removeAll { it.id == Long.MIN_VALUE }
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
@@ -367,24 +362,19 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 generationError = null
                                 try {
                                     val promptWithHistory = buildRequestPrompt(contextHistory, request, documentContext)
-                                    val streamingId = Long.MIN_VALUE
-                                    messages.removeAll { it.id == streamingId }
-                                    messages.add(ChatLine(streamingId, "", "assistant"))
                                     val result = OnlineAssistantClient.send(
                                         OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                         promptWithHistory
                                     )
-                                    messages.removeAll { it.id == streamingId }
                                     val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
-                                    messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
+                                    messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                     historyStore.save(messages.toList())
                                 } catch (error: CancellationException) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
                                     throw error
                                 } catch (error: OutOfMemoryError) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
-                                    runCatching { engine.close() }
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                 } catch (error: Exception) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
@@ -413,6 +403,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-            }        }
+            }
+        }
     }
 }
