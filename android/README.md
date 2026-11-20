@@ -1,5 +1,14 @@
 # SuperIA Privata — Android
 
+## Stato della migrazione online (20 novembre 2026)
+
+La schermata chat è stata collegata al client HTTP del backend SuperIA: invia il prompt ricostruito localmente a `POST /api/v1/chat`, usa HTTPS obbligatorio e richiede il Bearer token del backend. L'indirizzo e il token si configurano in **Chat → Impostazioni**; il token è cifrato con AES-GCM e una chiave non esportabile Android Keystore. Il manifest dichiara INTERNET e disabilita il traffico in chiaro.
+
+La chat non richiama più il motore Gemma locale. Gemma e LiteRT-LM restano nel codice/build legacy finché il percorso online non è compilato, pubblicato, installato e collaudato end-to-end. Non cancellare il modello Gemma già presente sul telefono in questa fase.
+
+**Non è ancora pronta all'uso autonomo:** manca un backend pubblico HTTPS, un token individuale sicuro ottenuto tramite pairing, la configurazione dei provider gratuiti verificati e il collaudo CI della nuova revisione. Non inserire token dei provider nell'app. Il client attuale usa una richiesta non-streaming e invia il prompt assemblato come un singolo messaggio; il limite server attuale è 12.000 caratteri per messaggio.
+
+
 Prima base nativa Kotlin + Jetpack Compose.
 
 ## Requisiti di build
@@ -25,7 +34,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - La RAM totale letta da `ActivityManager.MemoryInfo` è quella esposta dal sistema; il valore può differire dalla RAM commerciale dichiarata e non identifica separatamente la RAM virtuale del produttore.
 - Non legge IMEI, seriali, account o identificatori persistenti.
 - Non misura ancora CPU/GPU/NPU, prestazioni LLM, consumo batteria o throttling nel tempo.
-- La chat Android non è ancora collegata a un runtime AI: l'invio memorizza il testo, non genera risposte.
+- La chat Android ora dispone di un client per il backend HTTPS free-only; il collegamento reale dipende dalla configurazione server/token e non è ancora collaudato end-to-end.
 - Non contiene ancora pairing completo, GitHub OAuth o runtime AI locale integrato.
 - La cronologia è cifrata a riposo; non è sincronizzata tra telefoni e non sostituisce un backup cifrato.
 - Nessuna autorizzazione generale di archiviazione è richiesta: l'accesso ai file usa il selettore documenti Android.
@@ -33,7 +42,7 @@ Aprire questa cartella (`android/`) in Android Studio e attendere la sincronizza
 - I file originali non vengono copiati nell'archivio: viene conservato il solo testo estratto, cifrato AES-GCM nell'area privata dell'app con chiave dedicata in Android Keystore.
 
 ## Prossimi incrementi
-embeddings/ricerca semantica e riferimenti a pagina/paragrafo, test strumentali, benchmark e completamento del pairing sicuro.
+Pubblicazione backend su hosting verificato gratuito, pairing sicuro con token individuali e revocabili, rate limiting/quote, test CI della connessione e collaudo end-to-end sui telefoni. Successivamente embeddings/ricerca semantica e riferimenti a pagina/paragrafo.
 
 
 ## Contratto del motore AI Android
