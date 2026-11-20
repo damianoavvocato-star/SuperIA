@@ -20,16 +20,16 @@ La versione finale di SuperIA Privata esegue l'inferenza esclusivamente online. 
 - Esiste un prototipo FastAPI con router fail-closed per Gemini, Groq, OpenRouter, Cloudflare Workers AI e SambaNova.
 - Il router richiede attestazioni esplicite per gratuità, assenza di metodo di pagamento, hard-stop e assenza di billing in valuta.
 - OpenRouter accetta solo ID modello con suffisso `:free`.
-- Sono presenti test unitari per provider disabilitati per default, rifiuto di modelli OpenRouter non gratuiti, failover su 429 e controlli di billing.
+- Sono presenti test unitari per provider disabilitati per default, rifiuto di modelli OpenRouter non gratuiti, failover su 429, controlli di billing e persistenza SQLite di cooldown/disabilitazioni tra istanze del router.
 - Il backend non è pubblicato e non è collegato all'app Android.
-- Il router conserva cooldown e provider disabilitati solo in memoria del processo: serve persistenza prima di un servizio affidabile.
+- Il router ora salva cooldown e disabilitazioni in SQLite, così sopravvivono alla ricreazione dell'oggetto e al riavvio del processo se il file DB risiede su storage persistente. Il default `/tmp/superia-router-state.sqlite3` è adatto ai test, non a un hosting effimero: in produzione va impostato `SUPERIA_ROUTER_STATE_DB` su un volume persistente.
 - Il prototipo non fornisce ancora autenticazione, quote per utente o protezioni anti-abuso.
 - Il controllo combinato CI per il commit documentale più recente non ha restituito status checks: non viene dichiarato un nuovo esito CI.
 
 ## Fasi e criteri di completamento
 
 1. **Rendere coerenti architettura e documentazione** — in corso. Il README ora distingue la build locale legacy dal prodotto finale online-only.
-2. **Rendere robusto il router** — aggiungere stato persistente dei cooldown, gestione quota e test di errore; nessun fallback a pagamento.
+2. **Rendere robusto il router** — persistenza SQLite dei cooldown e dei provider disabilitati implementata con test dedicati; restano gestione quota più precisa, rate limit per utente, telemetria minima e test d'integrazione. In hosting il DB deve stare su volume persistente.
 3. **Verificare i provider** — audit ufficiale aggiornato, modello per modello e account per account. I crediti gratuiti non monetari sono ammessi; i servizi con ricariche/addebiti in valuta sono esclusi.
 4. **Preparare backend sicuro** — autenticazione, rate limit, protezione segreti, minimizzazione log e retention. Non pubblicare finché hosting e database non sono verificati a costo zero senza carta né billing automatico.
 5. **Collegare Android** — client HTTPS verso il backend, chiavi provider solo sul server, cronologia cifrata mantenuta sul dispositivo e contesto inviato a ogni richiesta.
