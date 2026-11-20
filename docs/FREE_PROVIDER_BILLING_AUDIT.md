@@ -4,9 +4,9 @@ Data della verifica documentale: **20 novembre 2026**.
 
 ## Regola di ammissione
 
-Un servizio entra nella rotazione di produzione solo se offre un'API realmente utilizzabile con una quota d'uso gratuita autentica, prezzo zero, nessuna carta/metodo di pagamento, nessun acquisto, ricarica, credito monetario regalato/promozionale, deposito, prova a credito o passaggio automatico a pagamento. Deve fermarsi a quota esaurita e consentire l'uso previsto in Italia/UE. **Sono esclusi anche i servizi che regalano denaro o crediti convertibili in denaro/consumo a pagamento**, persino se non chiedono carta. Sono ammesse soltanto quote gratuite native del servizio (richieste/token/minuti/compute) senza valore monetario, senza pagamento e senza top-up. Non si usano account multipli o chiavi multiple per aggirare quote e termini.
+Un servizio entra nella rotazione di produzione solo se offre un'API realmente utilizzabile con una quota d'uso gratuita autentica, prezzo zero, nessuna carta/metodo di pagamento, nessun acquisto, ricarica in valuta (euro, dollari, dinari o altra moneta), deposito, addebito o passaggio automatico a pagamento. I crediti gratuiti interni al servizio (crediti, token, punti o unità di utilizzo non convertibili in denaro) sono ammessi e vanno consumati prima di passare al provider successivo. Deve fermarsi a quota esaurita e consentire l'uso previsto in Italia/UE. **Sono esclusi i servizi che richiedono o consentono ricariche/addebiti in valuta o che possono generare spese automatiche.** Non si escludono i crediti gratuiti interni non convertibili in denaro: si consumano fino a esaurimento e poi si passa al provider gratuito successivo. Non si usano account multipli o chiavi multiple per aggirare quote e termini.
 
-**Stati:** CANDIDATO = piano gratuito documentato ma da collaudare; CONDIZIONATO = gratuito con restrizioni o modelli a pagamento da escludere; SOLO PROVA = credito iniziale non ricorrente; ESCLUSO = API a pagamento/non adatta; NON VERIFICATO = documentazione ufficiale insufficiente. Tutti gli stati diversi da CANDIDATO restano disabilitati.
+**Stati:** CANDIDATO = piano gratuito documentato ma da collaudare; CONDIZIONATO = gratuito con restrizioni o modelli a pagamento da escludere; CREDITI GRATUITI = crediti interni non monetari utilizzabili fino a esaurimento; ESCLUSO = API a pagamento/non adatta; NON VERIFICATO = documentazione ufficiale insufficiente. Tutti gli stati diversi da CANDIDATO restano disabilitati.
 
 ## Verifica dei 75 nomi della lista iniziale
 
@@ -18,7 +18,7 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 | 4 | Mistral La Plateforme | Free mode per Vibe/Studio; chiavi e uso API richiedono attivazione billing e pay-as-you-go. | ESCLUSO dall'API gratuita. |
 | 5 | SambaNova Cloud | Uso gratuito dei modelli ospitati finché non viene collegato un metodo di pagamento. | CONDIZIONATO, mai collegare il metodo; verificare uso produzione. |
 | 6 | NVIDIA NIM / Build | Accesso sviluppatori/prototipazione documentato; non è stata chiarita ufficialmente per tutti i modelli l'assenza di carta e billing. | NON VERIFICATO. |
-| 7 | Cohere | Chiave Trial gratuita e limitata; chiavi Production e uso live hanno condizioni differenti. | SOLO PROVA finché non viene confermata l'idoneità per produzione. |
+| 7 | Cohere | Chiave Trial gratuita e limitata; chiavi Production e uso live hanno condizioni differenti. | CREDITI GRATUITI finché non viene confermata l'idoneità per produzione. |
 | 8 | OpenRouter modelli :free | Modelli gratuiti senza acquisto crediti; piano Free con 50 richieste/giorno. Limiti più alti legati all'acquisto di crediti. | CANDIDATO, solo modelli :free, niente acquisto crediti. |
 | 9 | Z.AI / Zhipu AI | Listino con prezzi per token; voci promozionali non dimostrano inferenza API gratuita ricorrente. | ESCLUSO per ora. |
 | 10 | Ollama Cloud | Pay-as-you-go a pagamento per token; Pro/Max/Team a pagamento. | ESCLUSO dall'inferenza cloud gratuita. |
@@ -68,8 +68,8 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 | 54 | Devin Free | Agente sviluppo; non endpoint general-purpose per SuperIA. | ESCLUSO. |
 | 55 | Amazon Kiro | IDE/strumento sviluppo; non API inferenza gratuita per SuperIA. | ESCLUSO. |
 | 56 | Trae | IDE AI; non provider API pubblico per chat. | ESCLUSO. |
-| 57 | Bolt.new | Builder con crediti/limiti propri; non endpoint API general-purpose. | ESCLUSO. |
-| 58 | Lovable | Piano Free del builder; non API inferenza per SuperIA. | ESCLUSO. |
+| 57 | Bolt.new | Crediti/limiti interni del builder: ammessi per le funzioni integrate se gratuiti e senza addebiti; non è un endpoint chat generico. | NON PROVIDER CHAT; non escluso come strumento. |
+| 58 | Lovable | Crediti/limiti interni del builder: ammessi per usare le funzioni Lovable integrate, se disponibili senza pagamenti; non è un endpoint chat generico. | NON PROVIDER CHAT; non escluso come strumento. |
 | 59 | Vercel v0 | Generatore UI/app; non endpoint chat gratuito. | ESCLUSO. |
 | 60 | Replit Starter | Ambiente sviluppo con quote proprie; non API general-purpose. | ESCLUSO. |
 | 61 | Qoder | IDE coding; non API inferenza gratuita per SuperIA. | ESCLUSO. |
@@ -111,10 +111,10 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 
 ## Regole obbligatorie nel codice
 
-- Provider attivo solo con quota gratuita nativa (non credito monetario), piano e modello a prezzo zero verificati, carta non richiesta, nessun pagamento/top-up, hard-stop quota attivo e termini approvati.
-- Non salvare metodi di pagamento; non fare top-up, upgrade, depositi, acquisti crediti o uso di crediti regalati/promozionali.
+- Provider attivo solo con crediti/quote gratuiti interni non convertibili in valuta, nessuna carta, nessun addebito/ricarica in valuta, hard-stop a zero e termini approvati.
+- Non salvare metodi di pagamento; non fare top-up, upgrade, depositi o acquisti in valuta. I crediti gratuiti interni sono invece ammessi e vanno consumati.
 - Non chiamare modelli/endpoint a pagamento.
-- Qualsiasi credito monetario regalato, promozionale, di prova o acquistato comporta esclusione totale del provider; non si usa neppure per i test.
+- Escludere i provider che richiedono ricariche o addebiti espressi in euro, dollari, dinari o altra valuta; non escludere i crediti gratuiti interni non monetari.
 - Stato non verificato = provider disabilitato.
 - 402, errori billing, quota esaurita o richiesta upgrade = stop; mai tentare pagamenti.
 - Rispettare rate limit e condizioni; non aggirare quote con account multipli.
