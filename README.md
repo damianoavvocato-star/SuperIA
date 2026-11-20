@@ -31,6 +31,9 @@ Il progetto Kotlin/Jetpack Compose è in [android/](android/README.md). Include 
 
 La nuova integrazione HTTPS Android deve ancora superare CI e collaudo end-to-end: il backend non è pubblicato e non è stato fornito un endpoint/token. La vecchia build locale resta da conservare finché la nuova build online non è validata. Vedi [stato Fase 2](docs/PHASE2_STATUS.md) e [validazione runtime](docs/ANDROID_RUNTIME_VALIDATION.md).
 
+## Audit hosting e costi
+La valutazione dei servizi hosting compatibili con il vincolo senza carta e senza addebiti è in [docs/FREE_HOSTING_AUDIT.md](docs/FREE_HOSTING_AUDIT.md). Cloudflare Workers Free è soltanto un candidato tecnico da verificare; nessun hosting è stato attivato.
+
 ## Destinazione Android
 L'app finale è esclusivamente Android, ma la generazione delle risposte IA avverrà online tramite il backend SuperIA e i provider gratuiti approvati. Il backend sarà quindi necessario per la chat online. L'app manterrà localmente la cronologia cifrata e invierà al backend il contesto necessario, così il cambio di provider non interromperà la conversazione.
 
