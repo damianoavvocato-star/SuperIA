@@ -27,11 +27,12 @@ data class ChatLine(val id: Long, val text: String, val role: String = "user", v
  * archive if the process is interrupted during a write.
  */
 class ChatHistoryStore(context: Context) {
-    private val preferences = context.applicationContext.getSharedPreferences(
+    private val appContext = context.applicationContext
+    private val preferences = appContext.getSharedPreferences(
         "superia_private_chat", Context.MODE_PRIVATE
     )
-    private val archive = AtomicFile(File(context.applicationContext.filesDir, "conversation_history.enc"))
-    private val memoryArchive = AtomicFile(File(context.applicationContext.filesDir, "project_memory.enc"))
+    private val archive = AtomicFile(File(appContext.filesDir, "conversation_history.enc"))
+    private val memoryArchive = AtomicFile(File(appContext.filesDir, "project_memory.enc"))
 
     /**
      * One-time migration: discard conversations produced by the retired on-device model.
@@ -40,6 +41,14 @@ class ChatHistoryStore(context: Context) {
     fun clearLegacyLocalHistoryOnce() {
         if (preferences.getBoolean(ONLINE_ONLY_MIGRATION_KEY, false)) return
         archive.delete()
+        val legacyModels = File(appContext.filesDir, "models")
+        check(!legacyModels.exists() || legacyModels.deleteRecursively()) {
+            "Impossibile rimuovere i file del vecchio modello locale."
+        }
+        val legacyRuntimeCache = File(appContext.cacheDir, "litert-lm")
+        check(!legacyRuntimeCache.exists() || legacyRuntimeCache.deleteRecursively()) {
+            "Impossibile rimuovere la cache del vecchio runtime locale."
+        }
         check(
             preferences.edit()
                 .remove(HISTORY_KEY)
