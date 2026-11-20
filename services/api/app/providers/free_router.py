@@ -1,4 +1,5 @@
 import os
+import time
 from dataclasses import dataclass
 from typing import Callable
 
@@ -34,6 +35,8 @@ class FreeOnlyRouter:
     ) -> None:
         self.environ = os.environ if environ is None else environ
         self.client_factory = client_factory
+        self._cooldowns: dict[str, float] = {}
+        self._disabled: set[str] = set()
 
     def _provider(self, provider_id: str) -> ProviderConfig | None:
         env = self.environ
@@ -107,8 +110,14 @@ class FreeOnlyRouter:
             )
 
         last_error = "Nessun provider gratuito disponibile."
+        now = time.monotonic()
+        attempted = False
         for provider in providers:
-            # Client requests are bounded; no paid endpoint or paid fallback exists.
+            if provider.provider_id in self._disabled:
+                continue
+            if self._cooldowns.get(provider.provider_id, 0.0) > now:
+                continue
+            attempted = True
             try:
                 async with self.client_factory(timeout=httpx.Timeout(45.0, connect=10.0)) as client:
                     response = await client.post(
@@ -121,12 +130,25 @@ class FreeOnlyRouter:
                         },
                     )
                 if response.status_code == 429:
+                    retry_after = response.headers.get("Retry-After", "60")
+                    try:
+                        cooldown = float(retry_after)
+                    except ValueError:
+                        cooldown = 60.0
+                    self._cooldowns[provider.provider_id] = (
+                        time.monotonic() + max(1.0, min(cooldown, 3600.0))
+                    )
                     last_error = f"{provider.provider_id}: quota o limite temporaneo raggiunto."
                     continue
-                if response.status_code in (402, 403):
-                    last_error = f"{provider.provider_id}: billing/permessi non compatibili con il profilo gratuito; provider saltato."
+                if response.status_code in (401, 402, 403):
+                    self._disabled.add(provider.provider_id)
+                    last_error = (
+                        f"{provider.provider_id}: credenziali, billing o permessi non compatibili "
+                        "con il profilo gratuito; provider disabilitato."
+                    )
                     continue
-                if response.status_code in (401, 408) or response.status_code >= 500:
+                if response.status_code == 408 or response.status_code >= 500:
+                    self._cooldowns[provider.provider_id] = time.monotonic() + 15.0
                     last_error = f"{provider.provider_id}: servizio temporaneamente non disponibile."
                     continue
                 response.raise_for_status()
@@ -137,9 +159,12 @@ class FreeOnlyRouter:
                     continue
                 return {"content": content, "model": provider.model, "provider": provider.provider_id}
             except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
+                self._cooldowns[provider.provider_id] = time.monotonic() + 15.0
                 last_error = f"{provider.provider_id}: errore di rete o risposta non valida ({type(exc).__name__})."
                 continue
 
+        if not attempted:
+            last_error = "Tutti i provider configurati sono in cooldown o disabilitati."
         raise NoFreeProviderAvailable(
             "Nessun provider gratuito disponibile. La conversazione resta salvata; " + last_error
         )
