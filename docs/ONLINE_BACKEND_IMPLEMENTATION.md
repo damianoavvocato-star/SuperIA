@@ -14,11 +14,11 @@ Il backend FastAPI usa ora il router FreeOnlyRouter. Il vecchio adapter Ollama r
 
 ## Variabili server
 
-Impostare SUPERIA_FREE_ONLY=true solo dopo aver controllato manualmente il profilo account di ciascun provider. Per ogni provider abilitato occorrono tutte queste attestazioni. In aggiunta è obbligatoria la conferma che il servizio usa una quota gratuita nativa e non denaro/crediti monetari regalati o promozionali:
+Impostare SUPERIA_FREE_ONLY=true solo dopo aver controllato manualmente il profilo account di ciascun provider. Per ogni provider abilitato occorrono tutte queste attestazioni. In aggiunta è obbligatoria la conferma che il servizio non può effettuare addebiti o ricariche in valuta. I crediti gratuiti interni (token, punti, unità) sono ammessi se non convertibili in denaro e con hard-stop a zero:
 
 - SUPERIA_PROVIDER_GROQ_APPROVED_FREE=true
 - SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD=true
-- SUPERIA_PROVIDER_GROQ_HARD_STOP=true\nSUPERIA_PROVIDER_GROQ_NO_MONETARY_CREDITS=true\n- SUPERIA_PROVIDER_GROQ_NO_MONETARY_CREDITS=true
+- SUPERIA_PROVIDER_GROQ_HARD_STOP=true\nSUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING=true\n- SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING=true
 - SUPERIA_PROVIDER_GROQ_API_KEY=<segreto server>
 - SUPERIA_PROVIDER_GROQ_MODEL=<ID modello verificato gratuito>
 - SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS=<lista esatta di ID gratuiti separati da virgola>
@@ -27,7 +27,7 @@ Per OpenRouter usare lo stesso schema OPENROUTER e selezionare esclusivamente un
 
 Per Gemini, Cloudflare e SambaNova usare i prefissi GEMINI, CLOUDFLARE e SAMBANOVA. Cloudflare richiede inoltre SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID.
 
-La variabile NO_MONETARY_CREDITS deve essere vera solo se il piano offre direttamente richieste/token/minuti gratuiti, senza crediti monetari, depositi, trial monetari o top-up. Se il servizio regala crediti in denaro/consumo a pagamento, è escluso anche quando non richiede carta.\n\nQueste variabili non verificano da sole il conto provider: sono una conferma amministrativa che l'account non ha metodo di pagamento collegato, che il modello ha prezzo zero e che la quota esaurita causa un blocco. Se una di queste condizioni non è vera, non impostare le attestazioni e lasciare il provider disabilitato.
+La variabile NO_FIAT_BILLING deve essere vera solo se l'account non può generare addebiti, ricariche o acquisti in euro, dollari, dinari o altra valuta. Sono ammessi crediti gratuiti interni al servizio (token, punti, crediti di utilizzo) se non convertibili in denaro, senza carta e con blocco automatico a zero.\n\nQueste variabili non verificano da sole il conto provider: sono una conferma amministrativa che l'account non ha metodo di pagamento collegato, che il modello ha prezzo zero e che la quota esaurita causa un blocco. Se una di queste condizioni non è vera, non impostare le attestazioni e lasciare il provider disabilitato.
 
 ## API disponibili
 
