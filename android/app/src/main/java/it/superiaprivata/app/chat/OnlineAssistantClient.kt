@@ -86,7 +86,9 @@ object OnlineAssistantClient {
         require(base.protocol.equals("https", ignoreCase = true)) {
             "Per proteggere la conversazione è consentito soltanto un indirizzo HTTPS."
         }
-        require(base.host.isNotBlank() && base.userInfo == null) { "Indirizzo backend non valido." }
+        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
+            "Indirizzo backend non valido: non usare credenziali, parametri o frammenti nell'URL."
+        }
         val chatUrl = URL("$endpoint/api/v1/chat")
         val connection = (chatUrl.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
