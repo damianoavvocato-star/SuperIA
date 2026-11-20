@@ -23,7 +23,7 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 | 9 | Z.AI / Zhipu AI | Listino con prezzi per token; voci promozionali non dimostrano inferenza API gratuita ricorrente. | ESCLUSO per ora. |
 | 10 | Ollama Cloud | Pay-as-you-go a pagamento per token; Pro/Max/Team a pagamento. | ESCLUSO dall'inferenza cloud gratuita. |
 | 11 | OVHcloud AI Endpoints | Crediti/trial cloud temporanei; risorse cloud attivabili con billing. Nessuna quota API ricorrente senza billing verificata. | ESCLUSO dalla rotazione stabile. |
-| 12 | Novita AI | Crediti Sandbox promozionali iniziali senza carta; non è una quota API ricorrente. | SOLO PROVA. |
+| 12 | Novita AI | Crediti di utilizzo gratuiti interni al servizio; ammessi solo senza carta, ricariche o addebiti e con blocco a zero. | AMMESSO CON HARD-STOP, da verificare. |
 | 13 | SenseNova Token Plan | Piano gratuito riportato da directory secondarie; carta, overage e uso commerciale non verificati su documentazione ufficiale. | NON VERIFICATO. |
 | 14 | Synap / Linkrra | Nessuna documentazione ufficiale sufficiente su API gratuita, carta e billing. | NON VERIFICATO. |
 | 15 | Liquid AI | Modelli/pesi open source non equivalgono a endpoint cloud gratuito del fornitore. | ESCLUSO come API cloud; modelli valutabili separatamente. |
@@ -48,13 +48,13 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 | 34 | OpenCode Zen | Gateway/catalogo; quota inferenza gratuita permanente senza billing non confermata. | NON VERIFICATO. |
 | 35 | Nous Research | Modelli/pesi aperti non equivalgono a endpoint cloud gratuito gestito. | ESCLUSO come API cloud per ora. |
 | 36 | DeepInfra | Inferenza a consumo; nessuna quota gratuita ricorrente verificata. | ESCLUSO. |
-| 37 | Together AI | Crediti promozionali non equivalgono a piano gratuito ricorrente. | SOLO PROVA, non produzione. |
-| 38 | Fireworks AI | Crediti iniziali non equivalgono a quota gratuita ricorrente; uso a pagamento oltre i crediti. | SOLO PROVA, non produzione. |
+| 37 | Together AI | Crediti gratuiti interni al servizio; ammessi solo se non sono convertibili in valuta e non possono generare addebiti. | AMMESSO CON HARD-STOP, da verificare. |
+| 38 | Fireworks AI | Crediti di utilizzo iniziali; ammessi solo se l'account si blocca a zero senza ricarica o addebito in valuta. | CONDIZIONATO, hard-stop da verificare. |
 | 39 | Cerebras | Trial di durata limitata con metodo di pagamento richiesto. | ESCLUSO per vincolo no-card/no-charge. |
 | 40 | Hyperbolic | Crediti promozionali non dimostrano quota API ricorrente senza carta. | NON VERIFICATO. |
 | 41 | Baseten | Deployment/inferenza a consumo; nessun piano gratuito ricorrente verificato. | ESCLUSO. |
 | 42 | Replicate | API a consumo; nessuna quota gratuita ricorrente verificata. | ESCLUSO. |
-| 43 | Modal | Crediti/compute per sviluppatori non costituiscono API LLM gratuita permanente. | SOLO PROVA per test. |
+| 43 | Modal | Crediti/compute gratuiti interni; non sono un endpoint chat general-purpose. | AMMESSO per funzioni compatibili, hard-stop da verificare. |
 | 44 | AMD Developer Cloud | Risorse/programmi sviluppatori; API inferenza gratuita pubblica non verificata. | NON VERIFICATO. |
 | 45 | Kaggle | Notebook e compute con quote; non endpoint API gestito per utenti app. | ESCLUSO dalla rotazione API. |
 | 46 | Google Colab | Notebook/compute gratuito limitato; non servizio API di inferenza produzione. | ESCLUSO dalla rotazione API. |
@@ -77,8 +77,8 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 | 63 | Canva Free | Applicazione grafica; non API inferenza per SuperIA. | ESCLUSO. |
 | 64 | Figma Starter | Strumento progettazione; non API inferenza per SuperIA. | ESCLUSO. |
 | 65 | Framer Free | Website builder; non API inferenza per SuperIA. | ESCLUSO. |
-| 66 | Deepgram | $200 credito iniziale senza carta e senza scadenza dichiarata; poi pay-as-you-go. Non è quota ricorrente. | SOLO PROVA, hard-stop a credito zero, nessuna carta. |
-| 67 | AssemblyAI | Trial fino a $50 senza carta; a credito esaurito le chiamate falliscono finché non si effettua upgrade. Autopay da non attivare. | SOLO PROVA, nessuna carta/upgrade, stop a zero. |
+| 66 | Deepgram | Credito iniziale espresso in dollari e successivo pay-as-you-go. | ESCLUSO: credito/consumo denominato in valuta. |
+| 67 | AssemblyAI | Trial espresso in dollari; a esaurimento propone upgrade. | ESCLUSO: credito/consumo denominato in valuta. |
 | 68 | Google Cloud Speech-to-Text | Quote e condizioni dipendono dal prodotto/periodo; modalità stabile senza billing account non verificata. | NON VERIFICATO; non confondere con Gemini AI Studio. |
 | 69 | Groq Whisper | Modello audio dello stesso account Groq n. 2; usa il medesimo piano/quote account. | CANDIDATO come funzione audio di Groq, non provider aggiuntivo. |
 | 70 | Cloudflare audio | Modello audio nello stesso budget Workers AI n. 3; consuma le stesse Neurons giornaliere. | CONDIZIONATO, non capacità aggiuntiva. |
@@ -107,7 +107,7 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 6. NVIDIA NIM: solo dopo prova documentata no-card/no-billing.
 7. Cohere: solo test finché non viene confermata idoneità produzione.
 8. Cartesia: solo se il piano Free autorizza l'uso previsto.
-9. Deepgram e AssemblyAI: esclusi perché l'offerta si basa su crediti monetari iniziali.
+9. Deepgram e AssemblyAI: esclusi perché il saldo promozionale è espresso in valuta (dollari).
 
 ## Regole obbligatorie nel codice
 
