@@ -41,6 +41,8 @@ Sono ammessi crediti gratuiti interni al servizio (token, punti o crediti), anch
 
 ## API
 
+Il contenuto di ogni messaggio è limitato a 32.000 caratteri; la schermata Android applica lo stesso limite prima dell'invio.
+
 - `GET /health` — pubblico, solo stato del servizio.
 - `GET /api/v1/capabilities` — Bearer richiesto.
 - `GET /api/v1/providers` — Bearer richiesto.
