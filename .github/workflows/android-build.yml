@@ -83,6 +83,8 @@ jobs:
           if-no-files-found: error
       - name: Run Android Keystore instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          ANDROID_I_WANT_MY_TCG: "yes"
         with:
           api-level: 34
           target: google_apis
