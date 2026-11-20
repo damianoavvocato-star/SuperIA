@@ -255,7 +255,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 ) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Richiesta non completata", style = MaterialTheme.typography.titleSmall)
-                        Text("L'app è stata chiusa o l'inferenza si è interrotta prima della risposta. Puoi riprovare senza reinserire il messaggio.")
+                        Text("L'app è stata chiusa o la richiesta online si è interrotta prima della risposta. Puoi riprovare senza reinserire il messaggio.")
                         OutlinedButton(
                             enabled = onlineConfigured && !generating,
                             onClick = {
@@ -282,7 +282,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         
                                         throw error
                                     } catch (error: OutOfMemoryError) {
-                                            generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
+                                            generationError = "Memoria insufficiente durante la preparazione della richiesta. Riprova."
                                     } catch (error: Exception) {
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
                                     } finally {
