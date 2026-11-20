@@ -97,3 +97,61 @@ Rimuovere immediatamente dalla allowlist ogni endpoint che richieda pagamento, c
 8. Revisione privacy, segreti, rate limiting anti-abuso e test di carico.
 
 Non dichiarare completata la funzione finché i test reali dimostrano fallback, continuità della stessa chat, ripresa dopo interruzione e assenza di addebiti. Non sostituire il motore Android funzionante prima che il percorso cloud sia collaudato.
+
+
+## Catalogo esteso dei fornitori gratuiti (20 novembre 2026)
+
+Il catalogo deve essere **estensibile**: aggiungere ogni fornitore legittimo che offra un endpoint API utilizzabile senza addebito ricorrente, senza confondere un piano gratuito continuativo con una prova temporanea, crediti promozionali o accesso solo al playground. L'elenco seguente è una lista iniziale di candidati da verificare prima dell'attivazione; non è una garanzia di disponibilità o di idoneità commerciale.
+
+### Candidati con tier gratuito continuativo o modalità gratuita documentata
+
+| Fornitore | Tipo di accesso gratuito rilevato | Trattamento nel router |
+|---|---|---|
+| Google Gemini API / AI Studio | Modelli selezionati con quote e limiti per account/modello | Candidato prioritario; verificare termini EEA, privacy e modello gratuito effettivo |
+| GroqCloud | Piano Free con rate limit per modello | Candidato prioritario; rimanere sul piano Free e non attivare Developer/billing |
+| Cloudflare Workers AI | Quota gratuita giornaliera in Neurons | Candidato; monitorare consumo condiviso e costi di Workers/hosting |
+| Mistral La Plateforme | Modalità gratuita per test/prototipazione con limiti visibili in console | Candidato condizionato; controllare termini e uso consentito prima di produzione |
+| SambaNova Cloud | Accesso gratuito limitato per modello/account secondo il tier corrente | Candidato condizionato; mai collegare metodo di pagamento |
+| NVIDIA NIM / Build | Catalogo per sviluppatori e quote/limiti variabili | Candidato condizionato; verificare se l'endpoint API selezionato è gratuito e senza carta |
+| Cohere | Chiavi trial con numero limitato di chiamate e restrizioni d'uso | Solo ambiente di prova finché non è verificato un tier continuativo e idoneo al prodotto |
+| OpenRouter modelli `:free` | Modelli gratuiti con limiti aggregati di richieste e disponibilità variabile | Candidato condizionato; filtrare esclusivamente modelli a costo zero e provider sottostanti compatibili con privacy |
+| Vercel AI Gateway | Eventuali crediti/quote gratuite dipendenti dal piano e dalle condizioni correnti | Non attivare finché non è dimostrato costo zero ricorrente senza billing |
+| LLM7.io e altri endpoint comunitari | Offerte gratuite pubbliche che possono cambiare rapidamente | Sperimentale; isolamento, privacy e stabilità da verificare prima di qualunque uso reale |
+
+### Accessi che NON vanno contati come capacità gratuita permanente
+
+- Crediti una tantum di prova o promozionali (ad esempio trial a tempo o credito iniziale): non sono quota gratuita ricorrente e non entrano nel pool di produzione.
+- Hugging Face Inference Providers quando l'account dispone soltanto di crediti mensili limitati: non considerarlo capacità illimitata; verificare il piano gratuito effettivo.
+- Cerebras, Fireworks, Together AI, DeepInfra, Amazon Bedrock e altri servizi con crediti promozionali o tariffazione dopo il trial: esclusi dal router gratuito, salvo futura introduzione di un vero tier continuativo senza carta e senza billing.
+- GitHub Models: non considerarlo provider API disponibile; la disponibilità del servizio può essere ritirata o cambiare. La connessione GitHub per repository, issue e workflow è una funzione distinta dall'inferenza AI.
+- Non usare account personali o credenziali condivise, account multipli creati per eludere le quote, proxy o rotazione di chiavi per aggirare i termini. La rotazione deve rispettare le quote permesse da ciascun fornitore.
+
+### Verifica obbligatoria e manutenzione del catalogo
+
+Per ogni provider e modello registrare:
+- URL ufficiale di pricing, rate limits, terms, privacy e acceptable use;
+- data/ora dell'ultima verifica, paese/area geografica e requisiti account;
+- se serve carta, se il billing può attivarsi automaticamente e come disabilitarlo;
+- limiti per minuto/giorno/mese, token, concorrenza, contesto e modalità;
+- uso commerciale/produzione consentito o vietato;
+- conservazione, uso per training, revisione umana e localizzazione dei dati;
+- supporto effettivo per italiano, streaming, tool calling, JSON, immagini, audio e file;
+- stato: `approved-free`, `trial-only`, `needs-review`, `disabled`.
+
+Un controllo automatico periodico deve segnalare modifiche; la verifica delle condizioni ufficiali va ripetuta prima di ogni release. Se la pagina ufficiale è ambigua o richiede carta/billing per la specifica API, lo stato resta `needs-review` o `disabled`. Mai dedurre la gratuità da un articolo di terzi soltanto.
+
+### GitHub e servizi esterni scelti dall'utente
+
+La connessione GitHub è opzionale e serve a collegare repository, issue, pull request e workflow; non costituisce un motore AI gratuito né una fonte di quote AI. SuperIA resta gratuita e utilizzabile senza GitHub.
+
+Se in futuro l'utente sceglie volontariamente di collegare un proprio account o una propria chiave API di un servizio esterno, tale integrazione è separata e facoltativa:
+- SuperIA non vende, attiva o fattura abbonamenti esterni;
+- nessun abbonamento esterno è richiesto per le funzioni native gratuite di SuperIA;
+- non utilizzare mai una credenziale personale per generare costi senza consenso esplicito e una chiara indicazione che il servizio è esterno;
+- la modalità predefinita rimane `free-only`, con budget monetario pari a zero;
+- l'utente può scollegare l'integrazione e continuare a usare tutte le funzioni SuperIA che non dipendono da quel servizio;
+- non mostrare paywall, upsell o richieste di pagamento SuperIA.
+
+### Principio di rotazione equa
+
+La rotazione non deve essere usata per aggirare rate limits, quote giornaliere, limiti per account o termini dei provider. Ogni fornitore ha il proprio account e la propria quota legittima. Quando una quota è esaurita, marcarla in cooldown fino al rinnovo e provare un altro fornitore soltanto se il suo uso è consentito. Se tutte le quote sono esaurite, conservare la richiesta e riprenderla in seguito, senza passare a endpoint a pagamento.
