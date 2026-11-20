@@ -1,3 +1,5 @@
+import asyncio
+
 import httpx
 import pytest
 
@@ -17,49 +19,53 @@ def free_env(provider_id="groq", model="openai/gpt-oss-120b"):
     }
 
 
-@pytest.mark.asyncio
-async def test_router_is_disabled_by_default():
-    router = FreeOnlyRouter(environ={})
-    assert await router.list_models() == []
-    with pytest.raises(NoFreeProviderAvailable):
-        await router.chat([{"role": "user", "content": "Ciao"}])
+def test_router_is_disabled_by_default():
+    async def run():
+        router = FreeOnlyRouter(environ={})
+        assert await router.list_models() == []
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Ciao"}])
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_openrouter_rejects_paid_model():
-    env = free_env("openrouter", "some-model")
-    router = FreeOnlyRouter(environ=env)
-    assert await router.list_models() == []
+def test_openrouter_rejects_paid_model():
+    async def run():
+        env = free_env("openrouter", "some-model")
+        router = FreeOnlyRouter(environ=env)
+        assert await router.list_models() == []
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_router_fails_over_on_rate_limit_without_paid_fallback():
-    env = free_env("groq")
-    env.update(free_env("openrouter", "example/free-model:free"))
+def test_router_fails_over_on_rate_limit_without_paid_fallback():
+    async def run():
+        env = free_env("groq")
+        env.update(free_env("openrouter", "example/free-model:free"))
 
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.host == "api.groq.com":
-            return httpx.Response(429, json={"error": "rate limit"})
-        return httpx.Response(
-            200,
-            json={"choices": [{"message": {"content": "Risposta gratuita"}}]},
-        )
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.host == "api.groq.com":
+                return httpx.Response(429, json={"error": "rate limit"})
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": "Risposta gratuita"}}]},
+            )
 
-    transport = httpx.MockTransport(handler)
+        transport = httpx.MockTransport(handler)
 
-    def client_factory(**kwargs):
-        return httpx.AsyncClient(transport=transport, **kwargs)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
 
-    router = FreeOnlyRouter(environ=env, client_factory=client_factory)
-    result = await router.chat([{"role": "user", "content": "Ciao"}])
-    assert result["content"] == "Risposta gratuita"
-    assert result["provider"] == "openrouter"
-    assert result["model"].endswith(":free")
+        router = FreeOnlyRouter(environ=env, client_factory=client_factory)
+        result = await router.chat([{"role": "user", "content": "Ciao"}])
+        assert result["content"] == "Risposta gratuita"
+        assert result["provider"] == "openrouter"
+        assert result["model"].endswith(":free")
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_payment_method_flag_is_mandatory():
-    env = free_env("groq")
-    env["SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD"] = "false"
-    router = FreeOnlyRouter(environ=env)
-    assert await router.list_models() == []
+def test_payment_method_flag_is_mandatory():
+    async def run():
+        env = free_env("groq")
+        env["SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD"] = "false"
+        router = FreeOnlyRouter(environ=env)
+        assert await router.list_models() == []
+    asyncio.run(run())
