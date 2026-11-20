@@ -44,18 +44,22 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     if (showMore) "SuperIA · Funzioni" else "SuperIA",
-                                    style = MaterialTheme.typography.headlineSmall
+                                    style = MaterialTheme.typography.titleLarge,
+                                    maxLines = 1
                                 )
                                 Text(
                                     if (showMore) "Gestione documenti, dispositivo e strumenti"
-                                    else "La tua intelligenza artificiale privata"
+                                    else "La tua intelligenza artificiale privata",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                             }
                             OutlinedButton(onClick = { showMore = !showMore }) {
