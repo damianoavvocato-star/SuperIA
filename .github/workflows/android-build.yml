@@ -99,5 +99,5 @@ jobs:
             adb shell getprop sys.boot_completed
             adb shell df -h /data
             adb shell pm list packages | head -n 20
-            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            adb install --no-streaming -r android/app/build/outputs/apk/debug/app-debug.apk
             gradle --no-daemon -p android connectedDebugAndroidTest
