@@ -77,6 +77,37 @@ class OnlineConnectionStore(context: Context) {
 }
 
 object OnlineAssistantClient {
+    suspend fun checkHealth(endpointValue: String): String = withContext(Dispatchers.IO) {
+        val endpoint = endpointValue.trim().trimEnd('/')
+        val base = URL(endpoint)
+        require(base.protocol.equals("https", ignoreCase = true)) {
+            "Per proteggere la connessione è consentito soltanto HTTPS."
+        }
+        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
+            "Indirizzo backend non valido."
+        }
+        val connection = (URL("$endpoint/health").openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 10_000
+            readTimeout = 10_000
+            setRequestProperty("Accept", "application/json")
+        }
+        try {
+            val status = connection.responseCode
+            val raw = if (status in 200..299) {
+                connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            } else {
+                connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+            }
+            require(status in 200..299) { "Backend non raggiungibile (HTTP $status)." }
+            val health = JSONObject(raw)
+            require(health.optString("status") == "ok") { "Il servizio non segnala uno stato operativo." }
+            "Backend raggiungibile. La verifica non controlla ancora token o provider."
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     suspend fun send(config: OnlineConnectionConfig, prompt: String): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend nelle Impostazioni." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
