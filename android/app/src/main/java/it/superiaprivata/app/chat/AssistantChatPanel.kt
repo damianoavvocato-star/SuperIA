@@ -53,7 +53,12 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val historyStore = remember(context) { ChatHistoryStore(context) }
-    val initialHistory = remember(historyStore) { runCatching { historyStore.load() } }
+    val initialHistory = remember(historyStore) {
+        runCatching {
+            historyStore.clearLegacyLocalHistoryOnce()
+            historyStore.load()
+        }
+    }
     val messages = remember(initialHistory) {
         mutableStateListOf<ChatLine>().apply {
             addAll(initialHistory.getOrDefault(emptyList()))
