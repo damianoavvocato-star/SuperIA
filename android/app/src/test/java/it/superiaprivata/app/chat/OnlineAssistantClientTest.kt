@@ -41,3 +41,12 @@ class OnlineAssistantClientTest {
         }
     }
 }
+
+    @Test
+    fun healthCheckAlsoRejectsPlainHttp() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.checkHealth("http://example.test")
+            }
+        }
+    }
