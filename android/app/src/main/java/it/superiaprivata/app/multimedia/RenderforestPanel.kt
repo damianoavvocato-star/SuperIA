@@ -26,6 +26,8 @@ fun RenderforestPanel() {
     val home = "https://www.renderforest.com/it/"
     val video = "https://www.renderforest.com/it/ai-video-generator"
     val tools = "https://www.renderforest.com/it/branding-tools"
+    val editor = "https://www.renderforest.com/it/ai-video-editor"
+    val websites = "https://www.renderforest.com/it/personal-websites"
 
     fun open(url: String) {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -81,8 +83,14 @@ fun RenderforestPanel() {
             Text("• Ridimensionamento per YouTube, TikTok, Reels e Shorts")
             Text("• Anteprima, cronologia delle generazioni, download e condivisione")
 
+            OutlinedButton(onClick = { open(editor) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Apri editor video AI")
+            }
             OutlinedButton(onClick = { open(tools) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Apri tutti gli strumenti Renderforest")
+                Text("Apri strumenti di branding")
+            }
+            OutlinedButton(onClick = { open(websites) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Apri creatore di siti web")
             }
             Text(
                 "Nota: questa sezione raccoglie e organizza gli accessi alle funzioni ufficiali. Non include ancora un collegamento API diretto, né rende disponibili offline i motori Renderforest. Disponibilità, modelli, limiti, prezzi, crediti e watermark dipendono dal servizio e dal piano attivo.",
