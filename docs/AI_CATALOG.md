@@ -271,3 +271,7 @@ La Fase 0 sarà completata soltanto quando:
 - sarà approvata una matrice di integrazione per le fasi successive.
 
 **Avanzamento nominativo:** 182 nomi su 182 (100%). La mappatura funzionale preliminare è presente per 182/182. La verifica puntuale dei servizi, dei piani gratuiti, delle licenze e dei requisiti hardware non è completata: consultare AI_182_AUDIT.json e PHASE0_DECISIONS.md.
+
+## 7. Piattaforme esterne aggiunte successivamente all'inventario iniziale
+
+**Renderforest** — piattaforma creativa online per generazione e montaggio video, immagini, audio/voice-over, avatar parlanti, animazioni, loghi, grafiche, mockup, presentazioni e siti web. La sua scheda di integrazione e lo stato effettivo sono documentati in [RENDERFOREST_INTEGRATION.md](RENDERFOREST_INTEGRATION.md). È un servizio proprietario esterno: non è un modello locale e non viene conteggiato tra le 182 voci originarie dell'inventario.
