@@ -8,7 +8,7 @@ Il prodotto client è destinato esclusivamente ad Android (smartphone e tablet):
 
 ## Obiettivo
 
-Una sola applicazione Android, in italiano, modulare e utilizzabile senza abbonamenti o API a pagamento obbligatorie. Deve riunire le capacità delle 182 IA in moduli coerenti, senza copiare prodotti, codice, pesi o servizi proprietari. L'app deve privilegiare l'elaborazione on-device; Internet sarà richiesto solo per funzioni che per natura necessitano di fonti o servizi online, e sempre con indicazione e consenso.
+Una sola applicazione Android, in italiano, modulare e utilizzabile senza abbonamenti o API a pagamento obbligatorie. Deve riunire le capacità delle 182 IA in moduli coerenti, senza copiare prodotti, codice, pesi o servizi proprietari. La generazione delle risposte IA nella versione finale è online-only. Le elaborazioni locali restano utilizzabili per file, OCR e funzioni specialistiche compatibili; ogni invio di contenuti al backend richiede trasparenza e controllo dell'utente.
 
 ## Stack Android candidato
 
@@ -29,17 +29,16 @@ MediaPipe LLM Inference non va scelto per nuove integrazioni: la documentazione 
 
 ## Strategia prestazioni
 
-1. Rilevare all'avvio RAM disponibile, ABI, Android API level, spazio libero e acceleratori realmente supportati.
-2. Eseguire un breve benchmark locale e scegliere il profilo più veloce stabile: NPU/GPU solo se supportate e verificate; altrimenti CPU.
-3. Fornire profili modello: leggero, bilanciato e qualità massima compatibile. La scelta automatica non deve superare i limiti termici o di memoria.
-4. Scaricare i modelli separatamente dall'APK, su richiesta, mostrando dimensione, licenza, spazio richiesto e checksum.
-5. Gestire memoria e contesto, streaming, interruzione generazione, quantizzazione e fallback; evitare di tenere più modelli grandi in RAM contemporaneamente.
-6. Monitorare temperatura, crash, memoria e batteria; ridurre carico e notificare l'utente quando necessario.
-7. Non promettere che ogni funzione avanzata (video generativo, grandi LLM, modelli diffusion) sia eseguibile offline su ogni smartphone. Se non sostenibile sul dispositivo, mostrare chiaramente il limite e offrire solo un'elaborazione online facoltativa e gratuita quando realmente disponibile, senza API a pagamento obbligatorie.
+1. Rilevare all'avvio RAM disponibile, ABI, Android API level, spazio libero e connettività.
+2. La chat invia richieste HTTPS al backend; nessuna chiave dei provider è inclusa nell'APK.
+3. Il backend seleziona soltanto provider con crediti realmente gratuiti e senza carta, ricariche, addebiti o fallback a pagamento.
+4. Se i crediti gratuiti terminano o non esiste un provider idoneo, la richiesta si arresta senza addebiti; la cronologia resta sul dispositivo.
+5. Le operazioni locali (OCR, lettura documenti, media) devono rispettare memoria, temperatura, batteria e compatibilità hardware.
+6. I modelli locali legacy non sono un fallback della chat finale e non vanno rimossi finché la sostituzione online non supera il collaudo end-to-end.
 
 ## Moduli funzionali previsti
 
-- Assistente e ragionamento: chat, modelli selezionabili, prompt, conversazioni e memoria controllata dall'utente.
+- Assistente e ragionamento: chat, selezione tra i modelli online gratuiti realmente disponibili, prompt, conversazioni e memoria controllata dall'utente.
 - Documenti: PDF, DOCX, TXT, immagini, OCR, riassunti, ricerca locale e risposte con riferimenti alle pagine.
 - Ricerca e traduzione: ricerca web opt-in, estrazione di link accessibili, traduzione locale quando il modello è disponibile.
 - Immagini: analisi, OCR, modifica e generazione; generazione locale solo su dispositivi che superano il benchmark.
