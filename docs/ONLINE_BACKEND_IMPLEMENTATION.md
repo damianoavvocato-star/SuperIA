@@ -1,66 +1,81 @@
 # Backend online — configurazione free-only
 
-Il backend FastAPI usa ora il router FreeOnlyRouter. Il vecchio adapter Ollama resta nel repository per riferimento, ma non viene più selezionato dall'endpoint chat.
+Il backend FastAPI usa il router `FreeOnlyRouter`. La versione finale della chat è online-only e free-only; nessun fallback locale o a pagamento è consentito.
 
 ## Stato attuale
 
-- Modalità richiesta: online e solo gratuita.
-- Nessun fallback locale o a pagamento.
 - Provider disabilitati per impostazione predefinita.
-- Chat accetta la cronologia inviata dall'app e prova un provider alla volta.
-- Su 429, 402, 403, 401, 408 o errore 5xx passa al provider gratuito successivo; non tenta upgrade, acquisti o top-up.
-- Se non esiste un provider configurato, restituisce HTTP 503 e conserva la cronologia lato app.
-- Le chiavi API sono lette solo dall'ambiente server e non devono essere incluse nell'APK, nei file versionati o nei log.
+- Il router prova un provider gratuito verificato alla volta.
+- Su quota/limite temporaneo (429) applica un cooldown; su credenziali, billing o permessi incompatibili (401/402/403) disabilita il provider.
+- Se non esiste un provider idoneo, restituisce HTTP 503 senza tentare acquisti, upgrade o top-up.
+- Le chiavi provider restano esclusivamente nell'ambiente server.
+- Le API applicative richiedono ora un token Bearer server-side. `/health` resta pubblico per il controllo di disponibilità.
 
-## Variabili server
+## Autenticazione API
 
-Impostare SUPERIA_FREE_ONLY=true solo dopo aver controllato manualmente il profilo account di ciascun provider. Per ogni provider abilitato occorrono tutte queste attestazioni. In aggiunta è obbligatoria la conferma che il servizio non può effettuare addebiti o ricariche in valuta. I crediti gratuiti interni (token, punti, unità) sono ammessi se non convertibili in denaro e con hard-stop a zero:
+Prima di esporre il backend, impostare un segreto lungo e casuale nell'ambiente server:
 
-- SUPERIA_PROVIDER_GROQ_APPROVED_FREE=true
-- SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD=true
-- SUPERIA_PROVIDER_GROQ_HARD_STOP=true\nSUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING=true\n- SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING=true
-- SUPERIA_PROVIDER_GROQ_API_KEY=<segreto server>
-- SUPERIA_PROVIDER_GROQ_MODEL=<ID modello verificato gratuito>
-- SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS=<lista esatta di ID gratuiti separati da virgola>
+```bash
+SUPERIA_API_ACCESS_TOKEN=<segreto-casuale-lungo>
+```
 
-Per OpenRouter usare lo stesso schema OPENROUTER e selezionare esclusivamente un modello con suffisso :free. Il codice rifiuta qualsiasi modello OpenRouter senza tale suffisso.
+Le rotte `/api/v1/capabilities`, `/api/v1/providers`, `/api/v1/models` e `/api/v1/chat` rifiutano richieste senza token valido. Se il token server non è configurato, le rotte falliscono in modo chiuso con HTTP 503. Non inserire il token nel repository, nell'APK o nei log. L'app Android dovrà riceverlo tramite un flusso di pairing/autenticazione sicuro e conservarlo in modo protetto; questo flusso non è ancora implementato.
 
-Per Gemini, Cloudflare e SambaNova usare i prefissi GEMINI, CLOUDFLARE e SAMBANOVA. Cloudflare richiede inoltre SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID.
+Questa autenticazione a token singolo è una protezione iniziale per un backend privato, non sostituisce account per utente, revoca/rotazione dei token, rate limiting, quote per utente o protezione DDoS.
 
-La variabile NO_FIAT_BILLING deve essere vera solo se l'account non può generare addebiti, ricariche o acquisti in euro, dollari, dinari o altra valuta. Sono ammessi crediti gratuiti interni al servizio (token, punti, crediti di utilizzo) se non convertibili in denaro, senza carta e con blocco automatico a zero.\n\nQueste variabili non verificano da sole il conto provider: sono una conferma amministrativa che l'account non ha metodo di pagamento collegato, che il modello ha prezzo zero e che la quota esaurita causa un blocco. Se una di queste condizioni non è vera, non impostare le attestazioni e lasciare il provider disabilitato.
+## Variabili provider
 
-## API disponibili
+Impostare `SUPERIA_FREE_ONLY=true) solo dopo aver verificato manualmente le condizioni dell'account. Per ogni provider occorrono tutte le attestazioni:
 
-- GET /health
-- GET /api/v1/capabilities
-- GET /api/v1/providers
-- GET /api/v1/models
-- POST /api/v1/chat
+- `SUPERIA_PROVIDER_GROQ_APPROVED_FREE=true`
+- `SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD=true`
+- `SUPERIA_PROVIDER_GROQ_HARD_STOP=true`
+- `SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING=true`
+- `SUPERIA_PROVIDER_GROQ_API_KEY=<segreto server>`
+- `SUPERIA_PROVIDER_GROQ_MODEL=<ID modello verificato gratuito>`
+- `SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS=<ID esatti separati da virgola>`
 
-## Esempio richiesta chat
+Per OpenRouter usare il prefisso `OPENROUTER) e solo modelli con suffisso `:free). Per Gemini, Cloudflare e SambaNova usare i rispettivi prefissi. Cloudflare richiede anche `SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID`.
 
+Sono ammessi crediti gratuiti interni al servizio (token, punti o crediti), anche se espressi con unità nominali; sono esclusi carta/metodo di pagamento, denaro reale, ricariche, acquisti, addebiti automatici e conversioni a piani a pagamento. La quota deve arrestarsi a zero. Le attestazioni ambientali non verificano da sole il conto: un amministratore deve controllare le condizioni reali e lasciare il provider disabilitato in caso di dubbio.
+
+## API
+
+- `GET /health) — pubblico, solo stato del servizio.
+- `GET /api/v1/capabilities) — Bearer richiesto.
+- `GET /api/v1/providers) — Bearer richiesto.
+- `GET /api/v1/models) — Bearer richiesto.
+- `POST /api/v1/chat) — Bearer richiesto.
+
+Esempio di richiesta autenticata:
+
+```http
+Authorization: Bearer <SUPERIA_API_ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+```json
 {
   "messages": [
     {"role": "user", "content": "Ciao"}
   ]
 }
+```
 
-La risposta include content, model e provider. La conversazione resta indipendente dal provider: l'app deve continuare a inviare il contesto dalla propria cronologia cifrata, mantenendo lo stesso thread anche quando il router cambia fornitore.
+La risposta include `content`, `model) e `provider). La conversazione resta indipendente dal provider: l'app invierà il contesto necessario ricostruito dalla cronologia cifrata locale.
 
-## Limiti ancora aperti prima del rilascio
+## Blocchi prima del rilascio
 
-1. La allowlist è un insieme di candidati, non un'autorizzazione legale automatica: vanno verificati termini d'uso per app pubbliche/multiutente, privacy, retention e training.
-2. Il piano gratuito di Google può usare i contenuti per migliorare i prodotti: non inviare documenti riservati finché non si approva questo rischio.
-3. La registrazione di un account e l'assenza di carta devono essere provate manualmente per ogni fornitore; il backend non può interrogare in modo affidabile la dashboard di billing.
-4. Il router non sostituisce un quota manager persistente: per ora si affida ai limiti/risposte del provider e applica fallback senza retry automatici ripetuti.
-5. Il backend non è ancora pubblicato su un host. Non è stato collegato all'app Android e non esiste ancora un URL pubblico di servizio.
-6. Prima del rilascio occorre aggiungere autenticazione app-server, limiti anti-abuso per utente, protezione DDoS, retention minima e una politica di gestione dei segreti.
-7. L'hosting, il database, lo storage, il traffico e il dominio devono essere verificati come gratuiti; non attivare servizi con billing automatico.
+1. Verificare per ogni provider termini, privacy, retention, uso dei dati e idoneità per il caso d'uso.
+2. Confermare manualmente assenza di carta e possibilità di hard-stop per ogni account.
+3. Implementare pairing/app authentication con token individuali, revoca e rotazione.
+4. Aggiungere rate limiting e quote per utente, limiti di dimensione e protezione anti-abuso.
+5. Scegliere hosting e storage solo dopo aver verificato che siano gratuiti senza carta, billing automatico o rischio di addebiti.
+6. Pubblicare il backend su HTTPS e completare il collegamento Android; non esiste ancora un endpoint pubblico configurato.
+7. Eseguire test backend e collaudo end-to-end su dispositivi Android reali.
 
-## Verifiche automatiche
+Il piano gratuito di alcuni provider può prevedere trattamento dei prompt per migliorare i prodotti: non inviare dati riservati finché la relativa policy non è stata verificata e approvata.
 
-I test unitari del router controllano:
-- provider disabilitato per default;
-- rifiuto di modelli OpenRouter a pagamento;
-- blocco se manca l'attestazione no-payment-method;
-- passaggio da un provider che risponde 429 a un altro provider gratuito, senza fallback a pagamento.
+## Test automatici
+
+I test coprono provider disabilitati per default, rifiuto di modelli OpenRouter non free, attestazioni di pagamento obbligatorie, failover su 429, persistenza del cooldown/disabilitazione e autenticazione Bearer delle API.
