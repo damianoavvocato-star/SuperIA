@@ -74,3 +74,60 @@ def test_payment_method_and_no_fiat_billing_flags_are_mandatory():
         router = FreeOnlyRouter(environ=env)
         assert await router.list_models() == []
     asyncio.run(run())
+
+
+def test_cooldown_survives_router_recreation(tmp_path):
+    async def run():
+        env = free_env("groq")
+        env.update(free_env("openrouter", "example/free-model:free"))
+        state_db = str(tmp_path / "router-state.sqlite3")
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            if request.url.host == "api.groq.com":
+                return httpx.Response(429, headers={"Retry-After": "120"})
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": "Risposta gratuita"}}]},
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        first = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=state_db)
+        result = await first.chat([{"role": "user", "content": "Ciao"}])
+        assert result["provider"] == "openrouter"
+        assert "api.groq.com" in calls
+
+        calls.clear()
+        second = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=state_db)
+        result = await second.chat([{"role": "user", "content": "Ancora ciao"}])
+        assert result["provider"] == "openrouter"
+        assert "api.groq.com" not in calls
+    asyncio.run(run())
+
+
+def test_auth_or_billing_error_persistently_disables_provider(tmp_path):
+    async def run():
+        env = free_env("groq")
+        state_db = str(tmp_path / "router-state.sqlite3")
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(402, json={"error": "payment required"})
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        first = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=state_db)
+        with pytest.raises(NoFreeProviderAvailable):
+            await first.chat([{"role": "user", "content": "Ciao"}])
+
+        second = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=state_db)
+        with pytest.raises(NoFreeProviderAvailable):
+            await second.chat([{"role": "user", "content": "Ancora ciao"}])
+    asyncio.run(run())
