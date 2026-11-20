@@ -33,6 +33,21 @@ class ChatHistoryStore(context: Context) {
     private val archive = AtomicFile(File(context.applicationContext.filesDir, "conversation_history.enc"))
     private val memoryArchive = AtomicFile(File(context.applicationContext.filesDir, "project_memory.enc"))
 
+    /**
+     * One-time migration: discard conversations produced by the retired on-device model.
+     * The encrypted archive remains available for new online conversations.
+     */
+    fun clearLegacyLocalHistoryOnce() {
+        if (preferences.getBoolean(ONLINE_ONLY_MIGRATION_KEY, false)) return
+        archive.delete()
+        check(
+            preferences.edit()
+                .remove(HISTORY_KEY)
+                .putBoolean(ONLINE_ONLY_MIGRATION_KEY, true)
+                .commit()
+        ) { "Impossibile completare la migrazione della cronologia online." }
+    }
+
     fun load(): List<ChatLine> {
         if (archive.baseFile.exists()) {
             val packed = archive.openRead().use { it.readBytes() }
@@ -145,6 +160,7 @@ class ChatHistoryStore(context: Context) {
         const val ANDROID_KEY_STORE = "AndroidKeyStore"
         const val KEY_ALIAS = "superia_chat_history_aes"
         const val HISTORY_KEY = "encrypted_history"
+        const val ONLINE_ONLY_MIGRATION_KEY = "online_only_history_migration_v1"
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val GCM_IV_BYTES = 12
         const val GCM_TAG_BITS = 128
