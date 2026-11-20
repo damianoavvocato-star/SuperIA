@@ -1,3 +1,5 @@
+import os
+import pytest
 from fastapi.testclient import TestClient
 from app.main import app, get_provider
 
@@ -8,7 +10,8 @@ class FakeProvider:
         return ["fake-local"]
 
 app.dependency_overrides[get_provider] = lambda: FakeProvider()
-client = TestClient(app)
+os.environ["SUPERIA_API_ACCESS_TOKEN"] = "test-access-token"
+client = TestClient(app, headers={"Authorization": "Bearer test-access-token"})
 
 def test_health():
     r = client.get("/health")
@@ -46,3 +49,17 @@ def test_home_page():
     assert "Nuova conversazione" in r.text
     assert "Memoria personale locale" in r.text
     assert "MEMORY_KEY" in r.text
+
+
+def test_api_routes_reject_missing_or_invalid_token(monkeypatch):
+    monkeypatch.setenv("SUPERIA_API_ACCESS_TOKEN", "expected-secret")
+    no_token_client = TestClient(app)
+    bad_token_client = TestClient(app, headers={"Authorization": "Bearer wrong-secret"})
+    assert no_token_client.get("/api/v1/models").status_code == 401
+    assert bad_token_client.get("/api/v1/models").status_code == 401
+
+
+def test_api_routes_fail_closed_when_server_token_is_unset(monkeypatch):
+    monkeypatch.delenv("SUPERIA_API_ACCESS_TOKEN", raising=False)
+    no_token_client = TestClient(app, headers={"Authorization": "Bearer test-access-token"})
+    assert no_token_client.get("/api/v1/models").status_code == 503
