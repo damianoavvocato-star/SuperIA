@@ -49,6 +49,8 @@ class FreeOnlyRouter:
             return None
         if env.get(prefix + "HARD_STOP", "").lower() != "true":
             return None
+        if env.get(prefix + "NO_MONETARY_CREDITS", "").lower() != "true":
+            return None
 
         api_key = env.get(prefix + "API_KEY", "").strip()
         model = env.get(prefix + "MODEL", "").strip()
