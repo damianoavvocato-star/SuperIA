@@ -70,7 +70,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("com.google.zxing:core:3.5.3")
-    implementation("com.google.ai.edge.litertlm:litertlm-android:0.15.0")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation("com.github.adaptech-cz.Tesseract4Android:tesseract4android:4.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
