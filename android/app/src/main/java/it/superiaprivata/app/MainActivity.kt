@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
                                     ElevatedCard {
                                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Text("Moduli", style = MaterialTheme.typography.titleLarge)
-                                            Text("Assistente AI · Chat locale LiteRT-LM (richiede un modello installato)")
+                                            Text("Assistente AI · Chat online tramite backend HTTPS gratuito")
                                             Text("Documenti · Importazione ed estrazione locale PDF/DOCX/TXT/CSV")
                                             Text("Immagini e video · In preparazione")
                                             Text("Audio e voce · In preparazione")
@@ -176,7 +176,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 item {
                                     Text(
-                                        "La chat AI locale richiede l'importazione di un modello compatibile e l'accettazione della relativa licenza. Il QR è ancora un invito dimostrativo: non crea una connessione tra telefoni.",
+                                        "La chat AI usa il backend online configurato nelle Impostazioni. La cronologia resta cifrata sul dispositivo; il QR è ancora un invito dimostrativo e non crea una connessione tra telefoni.",
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }
