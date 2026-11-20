@@ -69,49 +69,29 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             addAll(initialHistory.getOrDefault(emptyList()))
         }
     }
-    val artifact = LocalModelCatalog.gemma3_1b_it_int4
-    val modelFile = remember(context) { LocalModelCatalog.modelFile(context, artifact) }
-    val installer = remember(context) { LocalModelInstaller(context) }
-    val deviceProfile = remember(context) { DeviceProfileReader(context).read() }
+    val connectionStore = remember(context) { OnlineConnectionStore(context) }
+    val savedConnection = remember(connectionStore) { connectionStore.load() }
+    var backendEndpoint by remember { mutableStateOf(savedConnection.endpoint) }
+    var backendToken by remember { mutableStateOf(savedConnection.token) }
+    var connectionStatus by remember { mutableStateOf(if (savedConnection.isConfigured) "Configurazione backend caricata in modo protetto." else "Collega un backend HTTPS per iniziare.") }
     var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
-    var licenseAccepted by remember(context) {
-        mutableStateOf(context.getSharedPreferences("superia_model_consent", 0)
-            .getBoolean(artifact.spec.licenseId, false))
-    }
-    var modelInstalled by remember(modelFile) { mutableStateOf(modelFile.isFile && modelFile.length() > 0L) }
-    var importing by remember { mutableStateOf(false) }
     var generating by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
     var projectMemory by remember(historyStore) { mutableStateOf(runCatching { historyStore.loadProjectMemory() }.getOrDefault("")) }
     var memorySaved by remember { mutableStateOf(false) }
     var memoryError by remember { mutableStateOf<String?>(null) }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
-    var modelMessage by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
     var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
     var attachmentStatus by remember { mutableStateOf<String?>(null) }
     var importingDocument by remember { mutableStateOf(false) }
+    val onlineConfigured = backendEndpoint.isNotBlank() && backendToken.isNotBlank()
     val messageListState = rememberLazyListState()
 
     LaunchedEffect(messages.size, messages.lastOrNull()?.text) {
         if (messages.isNotEmpty()) messageListState.animateScrollToItem(messages.lastIndex)
     }
-
-    val engine = remember(context) {
-        LiteRtLmInferenceEngine(
-            context = context,
-            modelFile = { requested ->
-                if (requested.id == artifact.spec.id) modelFile else null
-            },
-            isLicenseApproved = { licenseAccepted }
-        )
-    }
-    DisposableEffect(engine) {
-        onDispose { engine.close() }
-    }
-
-    val availability = engine.checkAvailability(deviceProfile, artifact.spec)
 
     suspend fun buildRequestPrompt(
         history: List<ChatLine>,
@@ -158,28 +138,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         }
     }
 
-    val modelPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch {
-                importing = true
-                modelMessage = "Importazione del modello in corso…"
-                try {
-                    val result = installer.importModel(uri, artifact)
-                    modelInstalled = true
-                    modelMessage = "Modello importato: ${result.sizeBytes / (1024 * 1024)} MB · SHA-256 ${result.sha256.take(16)}…"
-                    generationError = null
-                } catch (error: CancellationException) {
-                    throw error
-                } catch (error: Exception) {
-                    modelMessage = error.message ?: "Importazione non riuscita."
-                } finally {
-                    importing = false
-                }
-            }
-        }
-    }
+
 
     Card(
         modifier = modifier.fillMaxSize(),
@@ -220,86 +179,56 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             }
             }
             if (showSettings) {
-            Text("Una conversazione persistente: la cronologia viene conservata sul dispositivo anche quando chiudi l'app.", style = MaterialTheme.typography.bodyMedium)
+            Text("Una conversazione persistente: la cronologia resta cifrata sul dispositivo. Per rispondere, la richiesta viene inviata al backend HTTPS configurato.", style = MaterialTheme.typography.bodyMedium)
             OutlinedTextField(
-                value = projectMemory,
-                onValueChange = { projectMemory = it; memorySaved = false },
+                value = backendEndpoint,
+                onValueChange = { backendEndpoint = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Memoria del progetto") },
-                placeholder = { Text("Decisioni, obiettivi e informazioni da ricordare nelle prossime sessioni…") },
-                minLines = 2,
-                maxLines = 5
+                label = { Text("Indirizzo backend HTTPS") },
+                placeholder = { Text("https://tuo-backend.example") },
+                singleLine = true
             )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                OutlinedButton(onClick = {
-                    runCatching { historyStore.saveProjectMemory(projectMemory) }
-                        .onSuccess { memorySaved = true; memoryError = null }
-                        .onFailure { memoryError = it.message ?: "Impossibile salvare la memoria." }
-                }) { Text(if (memorySaved) "Memoria salvata" else "Salva memoria") }
-            }
-            memoryError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Text(
-                "Assistente locale sul telefono. Il modello non è incluso nell'APK: va scaricato e importato una sola volta.",
-                style = MaterialTheme.typography.bodyMedium
+            OutlinedTextField(
+                value = backendToken,
+                onValueChange = { backendToken = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Token di accesso backend") },
+                placeholder = { Text("Token fornito dall'amministratore del backend") },
+                singleLine = true,
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
-
-            Card {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(artifact.spec.displayName, style = MaterialTheme.typography.titleMedium)
-                    Text("File richiesto: ${artifact.fileName}")
-                    Text("Dimensione indicativa: circa 584 MB. Richiede almeno 2 GB di RAM disponibile secondo la soglia iniziale.")
-                    OutlinedButton(
-                        onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(artifact.sourceUrl))
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Apri pagina ufficiale del modello") }
-                    OutlinedButton(
-                        onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(artifact.licenseUrl))
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Leggi i termini di licenza Gemma") }
-                    Row {
-                        Checkbox(
-                            checked = licenseAccepted,
-                            onCheckedChange = {
-                                licenseAccepted = it
-                                context.getSharedPreferences("superia_model_consent", 0).edit()
-                                    .putBoolean(artifact.spec.licenseId, it).apply()
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    enabled = !generating && backendEndpoint.startsWith("https://") && backendToken.isNotBlank(),
+                    onClick = {
+                        runCatching {
+                            connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), backendToken))
+                        }.onSuccess {
+                            connectionStatus = "Configurazione salvata cifrata sul dispositivo."
+                            generationError = null
+                        }.onFailure {
+                            connectionStatus = it.message ?: "Salvataggio non riuscito."
+                        }
+                    }
+                ) { Text("Salva collegamento") }
+                TextButton(
+                    enabled = !generating,
+                    onClick = {
+                        runCatching { connectionStore.clear() }
+                            .onSuccess {
+                                backendEndpoint = ""
+                                backendToken = ""
+                                connectionStatus = "Collegamento rimosso."
                             }
-                        )
-                        Text(
-                            "Ho letto e accetto i termini Gemma per questo modello.",
-                            modifier = Modifier.padding(top = 12.dp)
-                        )
+                            .onFailure { connectionStatus = it.message ?: "Rimozione non riuscita." }
                     }
-                    OutlinedButton(
-                        enabled = licenseAccepted && !importing && !generating,
-                        onClick = { modelPicker.launch(arrayOf("*/*")) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(if (importing) "Importazione…" else "Importa modello dal telefono")
-                    }
-                    Text(
-                        when {
-                            !licenseAccepted -> "Prima di importare o usare il modello, leggi e accetta i termini."
-                            modelInstalled && availability.isReady -> "Modello installato e pronto per l'inferenza locale."
-                            modelInstalled -> availability.detail
-                            else -> "Modello non ancora installato. Scaricalo dalla pagina ufficiale dopo aver accettato le condizioni su Hugging Face."
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (licenseAccepted && modelInstalled && availability.isReady)
-                            MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    modelMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-                }
+                ) { Text("Rimuovi") }
             }
+            Text(connectionStatus, style = MaterialTheme.typography.bodySmall)
+            Text(
+                "La chiave viene conservata cifrata con Android Keystore. Usa soltanto un backend HTTPS fidato. Non inserire qui le chiavi dei fornitori IA: sono segreti che devono restare sul server.",
+                style = MaterialTheme.typography.bodySmall
+            )
 
             }
 
@@ -311,7 +240,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         Text("Richiesta non completata", style = MaterialTheme.typography.titleSmall)
                         Text("L'app è stata chiusa o l'inferenza si è interrotta prima della risposta. Puoi riprovare senza reinserire il messaggio.")
                         OutlinedButton(
-                            enabled = availability.isReady && licenseAccepted && !generating,
+                            enabled = onlineConfigured && !generating,
                             onClick = {
                                 val contextHistory = messages.filterNot { it.pending }
                                 scope.launch {
@@ -326,20 +255,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         val streamingId = Long.MIN_VALUE
                                         messages.removeAll { it.id == streamingId }
                                         messages.add(ChatLine(streamingId, "", "assistant"))
-                                        val result = engine.generate(
-                                            artifact.spec,
-                                            InferenceRequest(prompt = retryPrompt),
-                                            onPartialText = { partial ->
-                                                val streamingIndex = messages.indexOfFirst { it.id == streamingId }
-                                                if (streamingIndex >= 0) {
-                                                    messages[streamingIndex] = ChatLine(streamingId, partial, "assistant")
-                                                }
-                                            }
+                                        val result = OnlineAssistantClient.send(
+                                            OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
+                                            retryPrompt
                                         )
                                         messages.removeAll { it.id == streamingId }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
-                                        messages.add(ChatLine(System.nanoTime(), result.text, "assistant"))
+                                        messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                         historyStore.save(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
@@ -424,7 +347,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     maxLines = 3
                 )
                 IconButton(
-                    enabled = draft.isNotBlank() && availability.isReady && licenseAccepted && !generating && messages.none { it.pending },
+                    enabled = draft.isNotBlank() && onlineConfigured && !generating && messages.none { it.pending },
                     onClick = {
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
@@ -447,15 +370,9 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     val streamingId = Long.MIN_VALUE
                                     messages.removeAll { it.id == streamingId }
                                     messages.add(ChatLine(streamingId, "", "assistant"))
-                                    val result = engine.generate(
-                                        artifact.spec,
-                                        InferenceRequest(prompt = promptWithHistory),
-                                        onPartialText = { partial ->
-                                            val streamingIndex = messages.indexOfFirst { it.id == streamingId }
-                                            if (streamingIndex >= 0) {
-                                                messages[streamingIndex] = ChatLine(streamingId, partial, "assistant")
-                                            }
-                                        }
+                                    val result = OnlineAssistantClient.send(
+                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
+                                        promptWithHistory
                                     )
                                     messages.removeAll { it.id == streamingId }
                                     val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
@@ -471,7 +388,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
                                 } catch (error: Exception) {
                                     messages.removeAll { it.id == Long.MIN_VALUE }
-                                    generationError = error.message ?: "Errore durante l'inferenza locale."
+                                    generationError = error.message ?: "Errore durante la richiesta online."
                                 } finally {
                                     generating = false
                                 }
@@ -488,16 +405,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             generationError?.let {
                 Text("Errore AI: $it", color = MaterialTheme.colorScheme.error)
             }
-            if (!licenseAccepted || !availability.isReady) {
+            if (!onlineConfigured) {
                 Text(
-                    if (!licenseAccepted) "Per iniziare, accetta la licenza del modello nelle Impostazioni."
-                    else availability.detail,
+                    "Configura un backend HTTPS e il token nelle Impostazioni per usare la chat online.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-        }
+            }        }
     }
 }
