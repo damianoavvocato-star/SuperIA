@@ -88,6 +88,7 @@ object OnlineAssistantClient {
         }
         val connection = (URL("$endpoint/health").openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
+            instanceFollowRedirects = false
             connectTimeout = 10_000
             readTimeout = 10_000
             setRequestProperty("Accept", "application/json")
@@ -111,6 +112,7 @@ object OnlineAssistantClient {
     suspend fun send(config: OnlineConnectionConfig, prompt: String): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend nelle Impostazioni." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
+        require(prompt.length <= 32_000) { "La richiesta supera il limite di 32.000 caratteri. Riduci il testo o il contesto documentale." }
 
         val endpoint = config.endpoint.trim().trimEnd('/')
         val base = URL(endpoint)
@@ -123,6 +125,7 @@ object OnlineAssistantClient {
         val chatUrl = URL("$endpoint/api/v1/chat")
         val connection = (chatUrl.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
+            instanceFollowRedirects = false
             connectTimeout = 15_000
             readTimeout = 120_000
             doOutput = true
