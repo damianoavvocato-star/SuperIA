@@ -40,7 +40,6 @@ class OnlineAssistantClientTest {
             }
         }
     }
-}
 
     @Test
     fun healthCheckAlsoRejectsPlainHttp() {
@@ -50,3 +49,4 @@ class OnlineAssistantClientTest {
             }
         }
     }
+}
