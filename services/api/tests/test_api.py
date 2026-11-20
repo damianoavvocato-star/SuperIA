@@ -39,7 +39,7 @@ def test_chat_rejects_unknown_role():
     assert r.status_code == 422
 
 def test_chat_rejects_oversized_message():
-    r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "x" * 12001}]})
+    r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "x" * 32001}]})
     assert r.status_code == 422
 
 def test_home_page():
