@@ -13,6 +13,7 @@ def free_env(provider_id="groq", model="openai/gpt-oss-120b"):
         prefix + "APPROVED_FREE": "true",
         prefix + "NO_PAYMENT_METHOD": "true",
         prefix + "HARD_STOP": "true",
+        prefix + "NO_MONETARY_CREDITS": "true",
         prefix + "API_KEY": "test-secret",
         prefix + "MODEL": model,
         prefix + "FREE_MODEL_IDS": model,
@@ -62,10 +63,14 @@ def test_router_fails_over_on_rate_limit_without_paid_fallback():
     asyncio.run(run())
 
 
-def test_payment_method_flag_is_mandatory():
+def test_payment_method_and_no_monetary_credits_flags_are_mandatory():
     async def run():
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD"] = "false"
+        router = FreeOnlyRouter(environ=env)
+        assert await router.list_models() == []
+        env = free_env("groq")
+        env["SUPERIA_PROVIDER_GROQ_NO_MONETARY_CREDITS"] = "false"
         router = FreeOnlyRouter(environ=env)
         assert await router.list_models() == []
     asyncio.run(run())
