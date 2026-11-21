@@ -1,46 +1,68 @@
 import os
-import pytest
+
 from fastapi.testclient import TestClient
-from app.main import app, get_provider
+
+from app.main import MAX_API_BODY_BYTES, app, get_provider
+
 
 class FakeProvider:
     async def chat(self, messages, model=None):
         return {"content": "Risposta di prova", "model": model or "fake-local"}
+
     async def list_models(self):
         return ["fake-local"]
+
 
 app.dependency_overrides[get_provider] = lambda: FakeProvider()
 os.environ["SUPERIA_API_ACCESS_TOKEN"] = "test-access-token"
 client = TestClient(app, headers={"Authorization": "Bearer test-access-token"})
 
+
 def test_health():
     r = client.get("/health")
     assert r.status_code == 200 and r.json()["status"] == "ok"
+
 
 def test_capabilities_keep_cloud_disabled():
     r = client.get("/api/v1/capabilities")
     assert r.status_code == 200
     assert r.json()["external_providers_enabled_by_default"] is False
 
+
 def test_models():
     r = client.get("/api/v1/models")
     assert r.status_code == 200 and r.json()["models"] == ["fake-local"]
+
 
 def test_chat():
     r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]})
     assert r.status_code == 200 and r.json()["content"] == "Risposta di prova"
 
+
 def test_chat_rejects_empty_messages():
     r = client.post("/api/v1/chat", json={"messages": []})
     assert r.status_code == 422
+
 
 def test_chat_rejects_unknown_role():
     r = client.post("/api/v1/chat", json={"messages": [{"role": "tool", "content": "Ciao"}]})
     assert r.status_code == 422
 
+
 def test_chat_rejects_oversized_message():
     r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "x" * 32001}]})
     assert r.status_code == 422
+
+
+def test_api_rejects_body_over_hard_limit():
+    response = client.post(
+        "/api/v1/chat",
+        content=b"x" * (MAX_API_BODY_BYTES + 1),
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 413
+    assert response.json()["detail"] == "Richiesta troppo grande."
+
 
 def test_home_page():
     r = client.get("/")
