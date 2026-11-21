@@ -71,6 +71,36 @@ Il database di autenticazione non può usare SQLite in /tmp su un hosting server
 - Nessun account o database è stato creato. La selezione resta candidata fino a verifica manuale dell'account e implementazione/test del driver.
 - Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https://aiven.io/free-postgresql-database ; https://turso.tech/pricing
 
+## Rotazione dei database gratuiti (policy proposta)
+
+I database gratuiti entrano in un pool di candidati, ma non si effettua un failover cieco tra database indipendenti. I provider non condividono automaticamente le stesse tabelle: cambiare URL senza migrazione può perdere associazioni, revoche e stato. La rotazione è autorizzata solo dopo aver verificato che il database di destinazione contenga una copia coerente e aggiornata.
+
+### Pool candidati
+- **Prisma Postgres Free** — primario candidato: 2 GB e 200.000 operazioni al mese; quando il limite viene raggiunto le query si fermano fino al reset mensile o a un upgrade. Nessun backup automatico incluso. Nessun account creato.
+- **Aiven PostgreSQL Free** — standby candidato: 1 GB disco, 1 GB RAM, 1 CPU, backup inclusi e nessuna carta per il piano Free; il servizio può essere spento per inattività e richiedere riattivazione. Nessun account creato.
+- **Neon Free** — standby candidato da verificare: la documentazione aggiornata indica 1 GB per progetto, 100 progetti e 100 CU-hours mensili per progetto; al superamento delle quote il compute viene sospeso e le operazioni che aumenterebbero lo storage oltre il limite vengono rifiutate. Prima di approvarlo bisogna verificare in modo esplicito registrazione senza carta, assenza di metodo di pagamento e impossibilità di overage/addebiti.
+- **Turso** resta escluso dalla rotazione finché non è provato che ogni opzione di overage fatturabile sia disattivata e non attivabile accidentalmente.
+
+### Regole di failover obbligatorie
+1. Monitorare in anticipo query/operazioni, spazio, compute e stato del provider; avviso interno a soglie conservative (es. 70% e 85%). Le soglie sono allarmi, non autorizzazioni a superare il piano.
+2. Prima di raggiungere il limite, bloccare nuove scritture durante la migrazione; mantenere l'app in modalità protetta e non perdere le richieste in attesa.
+3. Esportare il database sorgente, trasferire i dati al candidato, applicare schema/migrazioni e verificare conteggi, vincoli e controlli di integrità. Per token dispositivo verificare in particolare hash, device_id, expires_at e revoked_at.
+4. Solo dopo una verifica positiva, aggiornare atomicamente la configurazione del database attivo e verificare pairing, autenticazione e revoca. Non accettare scritture concorrenti su due database indipendenti e non consentire split-brain.
+5. Se il provider si blocca prima che la copia sia aggiornata, non tentare un cambio automatico non verificato: sospendere pairing/revoche e tutte le scritture, mantenere i dati locali cifrati nell'app e mostrare un avviso. L'accesso non deve essere concesso sulla base di uno stato di revoca incerto.
+6. Non cancellare il database precedente finché la nuova istanza non ha superato i test e non esiste un export cifrato verificato. Non usare account multipli per moltiplicare quote o aggirare i limiti.
+7. Se tutti i database gratuiti sono pieni, sospendere le operazioni server che richiedono persistenza e attendere il reset/riattivazione o un intervento manuale. Nessun upgrade, carta, pagamento o provider a consumo.
+
+### Stato implementativo
+- Questa è la policy di progettazione e il pool di candidati; la rotazione automatica non è ancora implementata nel backend.
+- L'attuale `device_auth.py` e il router provider usano SQLite; non collegare un database PostgreSQL finché non esiste un livello storage astratto testato e una migrazione completa.
+- Il database auth deve essere persistente e condiviso tra tutte le istanze. SQLite in `/tmp` su serverless non è idoneo.
+- Prima del rilascio: testare failover, rollback, database indisponibile, quota esaurita, token revocato e recupero dopo ripristino. La sicurezza ha priorità sulla continuità apparente.
+
+### Fonti ufficiali database
+- Prisma Postgres Free e limiti: https://www.prisma.io/postgres/free-postgresql-hosting ; https://www.prisma.io/docs/postgres/faq
+- Aiven Free PostgreSQL: https://aiven.io/free-postgresql-database ; https://aiven.io/docs/products/postgresql/concepts/pg-free-tier
+- Neon Free e comportamento dei limiti: https://neon.com/pricing ; https://neon.com/docs/introduction/pro-plan
+- Turso pricing: https://turso.tech/pricing
 ## Gate di approvazione
 
 1. Verifica manuale dell'account: registrazione e uso Free senza carta, PayPal, wallet o altro metodo di pagamento richiesto/collegato.
