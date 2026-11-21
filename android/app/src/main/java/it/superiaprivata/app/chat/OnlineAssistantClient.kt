@@ -154,6 +154,48 @@ object OnlineAssistantClient {
         }
     }
 
+    suspend fun checkOnlineReadiness(config: OnlineConnectionConfig): String = withContext(Dispatchers.IO) {
+        require(config.isConfigured) { "Associa prima questo dispositivo al backend." }
+        val endpoint = config.endpoint.trim().trimEnd('/')
+        val base = URL(endpoint)
+        require(base.protocol.equals("https", ignoreCase = true)) {
+            "Per proteggere la connessione è consentito soltanto HTTPS."
+        }
+        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
+            "Indirizzo backend non valido."
+        }
+        val connection = (URL("$endpoint/api/v1/providers").openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            instanceFollowRedirects = false
+            connectTimeout = 10_000
+            readTimeout = 15_000
+            setRequestProperty("Authorization", "Bearer ${config.token}")
+            setRequestProperty("Accept", "application/json")
+        }
+        try {
+            val status = connection.responseCode
+            val raw = if (status in 200..299) {
+                connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            } else {
+                connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+            }
+            if (status == 401) throw IllegalStateException("Token dispositivo non valido o scaduto: associa nuovamente il dispositivo.")
+            if (status !in 200..299) throw IllegalStateException("Verifica online non riuscita (HTTP $status).")
+            val payload = JSONObject(raw)
+            val providers = payload.optJSONArray("providers") ?: JSONArray()
+            val enabled = (0 until providers.length()).mapNotNull { index ->
+                providers.optJSONObject(index)?.takeIf { it.optBoolean("enabled", false) }?.optString("id")
+            }.filter { it.isNotBlank() }
+            if (enabled.isEmpty()) {
+                "Backend raggiungibile e token valido, ma nessun provider gratuito è ancora configurato e abilitato."
+            } else {
+                "Collegamento autenticato operativo. Provider gratuiti configurati: ${enabled.joinToString(", ")}. La verifica non garantisce ancora una risposta positiva dal servizio IA."
+            }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     suspend fun send(config: OnlineConnectionConfig, prompt: String): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend nelle Impostazioni." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
