@@ -224,3 +224,49 @@ def test_configured_postgres_outage_fails_closed_without_sqlite_fallback(monkeyp
             environ={"SUPERIA_DATABASE_URL": "postgresql://unavailable.invalid/superia"},
         )
 
+def test_provider_recovers_after_temporary_service_outage(tmp_path, monkeypatch):
+    import app.providers.free_router as free_router_module
+
+    now = [1_000.0]
+    monkeypatch.setattr(free_router_module.time, "time", lambda: now[0])
+    env = free_env("groq")
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.host)
+        if len(calls) == 1:
+            return httpx.Response(503, json={"error": "temporarily unavailable"})
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "Servizio ripristinato"}}]},
+        )
+
+    transport = httpx.MockTransport(handler)
+
+    def client_factory(**kwargs):
+        return httpx.AsyncClient(transport=transport, **kwargs)
+
+    router = FreeOnlyRouter(
+        environ=env,
+        client_factory=client_factory,
+        state_db_path=str(tmp_path / "router-recovery.sqlite3"),
+    )
+
+    async def run():
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Prima richiesta"}])
+
+        # A retry during cooldown must not contact the unavailable provider.
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Retry anticipato"}])
+        assert len(calls) == 1
+
+        # Once the bounded cooldown expires, the same free provider can recover.
+        now[0] += 16
+        result = await router.chat([{"role": "user", "content": "Riprovo"}])
+        assert result["content"] == "Servizio ripristinato"
+        assert result["provider"] == "groq"
+        assert len(calls) == 2
+
+    asyncio.run(run())
+
