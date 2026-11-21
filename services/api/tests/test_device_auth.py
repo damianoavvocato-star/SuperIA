@@ -25,3 +25,22 @@ def test_token_storage_keeps_only_hash(tmp_path):
         connection.close()
     assert stored != issued["access_token"]
     assert len(stored) == 64
+
+
+def test_postgres_device_token_lifecycle():
+    import os
+
+    import pytest
+
+    database_url = os.environ.get("SUPERIA_TEST_POSTGRES_URL")
+    if not database_url:
+        pytest.skip("PostgreSQL integration service is not configured")
+
+    issued = issue_device_token(database_url, "postgres-test-phone")
+    try:
+        assert validate_device_token(database_url, issued["access_token"])
+        assert revoke_device_token(database_url, issued["device_id"])
+        assert not validate_device_token(database_url, issued["access_token"])
+    finally:
+        # Revocation is idempotent; ensure no active test credential remains.
+        revoke_device_token(database_url, issued["device_id"])
