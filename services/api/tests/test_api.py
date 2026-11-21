@@ -160,3 +160,40 @@ def test_chat_returns_service_unavailable_when_all_free_providers_are_exhausted(
     finally:
         app.dependency_overrides[get_provider] = lambda: FakeProvider()
 
+
+def test_provider_endpoint_reports_safe_operational_state(auth_environment, tmp_path):
+    from app.providers.free_router import FreeOnlyRouter
+
+    _, token_data = auth_environment
+    env = {
+        "SUPERIA_FREE_ONLY": "true",
+        "SUPERIA_PROVIDER_GROQ_APPROVED_FREE": "true",
+        "SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD": "true",
+        "SUPERIA_PROVIDER_GROQ_HARD_STOP": "true",
+        "SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING": "true",
+        "SUPERIA_PROVIDER_GROQ_API_KEY": "must-never-be-returned",
+        "SUPERIA_PROVIDER_GROQ_MODEL": "openai/gpt-oss-120b",
+        "SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS": "openai/gpt-oss-120b",
+    }
+    router = FreeOnlyRouter(
+        environ=env,
+        state_db_path=str(tmp_path / "provider-status.sqlite3"),
+    )
+    app.dependency_overrides[get_provider] = lambda: router
+    try:
+        client = TestClient(
+            app,
+            headers={"Authorization": "Bearer " + token_data["access_token"]},
+        )
+        response = client.get("/api/v1/providers")
+        assert response.status_code == 200
+        payload = response.json()
+        groq = next(item for item in payload["providers"] if item["id"] == "groq")
+        assert groq["enabled"] is True
+        assert groq["available"] is True
+        assert groq["state"] == "ready"
+        assert "must-never-be-returned" not in response.text
+        assert payload["paid_fallback"] is False
+    finally:
+        app.dependency_overrides[get_provider] = lambda: FakeProvider()
+
