@@ -45,3 +45,46 @@ def test_migration_requires_device_tokens_table(tmp_path):
     sqlite3.connect(source).close()
     with pytest.raises(ValueError, match="device_tokens"):
         migrate_sqlite_to_database(str(source), str(tmp_path / "destination.sqlite3"))
+
+def test_migration_to_postgres_preserves_tokens_and_provider_state(tmp_path):
+    import os
+    import uuid
+    from urllib.parse import quote
+
+    database_url = os.environ.get("SUPERIA_TEST_POSTGRES_URL")
+    if not database_url:
+        pytest.skip("PostgreSQL integration service is not configured")
+
+    import psycopg
+
+    schema = "migration_" + uuid.uuid4().hex
+    with psycopg.connect(database_url, autocommit=True) as admin:
+        admin.execute(f'CREATE SCHEMA "{schema}"')
+
+    # Isolate this integration test from the other PostgreSQL tests.
+    separator = "&" if "?" in database_url else "?"
+    scoped_url = database_url + separator + "options=" + quote(f"-csearch_path={schema}")
+
+    source = tmp_path / "source-postgres.sqlite3"
+    issued = issue_device_token(str(source), "postgres-migration-test")
+    with sqlite3.connect(source) as connection:
+        connection.execute(
+            "CREATE TABLE provider_state (provider_id TEXT PRIMARY KEY, "
+            "cooldown_until REAL NOT NULL DEFAULT 0, disabled INTEGER NOT NULL DEFAULT 0)"
+        )
+        connection.execute(
+            "INSERT INTO provider_state(provider_id, cooldown_until, disabled) VALUES (?, ?, ?)",
+            ("groq", 1234.5, 1),
+        )
+
+    try:
+        result = migrate_sqlite_to_database(str(source), scoped_url)
+        assert result["device_tokens"] == 1
+        assert result["provider_state"] == 1
+        assert len(result["device_tokens_sha256"]) == 64
+        assert len(result["provider_state_sha256"]) == 64
+        assert validate_device_token(scoped_url, issued["access_token"])
+    finally:
+        with psycopg.connect(database_url, autocommit=True) as admin:
+            admin.execute(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE')
+
