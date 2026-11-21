@@ -11,8 +11,8 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 | Render Free | Non approvato | Il piano gratuito esiste e non richiede carta, ma non è ancora verificato un hard-stop completo per tutte le risorse e gli eventuali servizi accessori. Il Postgres gratuito scade dopo 30 giorni. |
 | Cloudflare Workers Free + Python Workers | Candidato tecnico, non approvato per produzione | Workers Free è disponibile per impostazione predefinita; 100.000 richieste/giorno, 10 ms CPU per richiesta, 128 MB memoria e 50 subrequests. Il superamento della quota giornaliera produce Error 1027; va verificata e impostata la modalità fail-closed. Il limite CPU può essere troppo stretto per FastAPI e parsing/autenticazione. |
 | FastAPI Cloud Hobby | Non approvato | No carta richiesta; 3 app, 0,1 CPU/500 MiB per replica, scale-to-zero, 180 replica-ore, 5 GB outbound e 500 minuti build. La documentazione descrive addebiti Pro per overage, ma non chiarisce con sufficiente precisione il comportamento di blocco quando un account Hobby esaurisce le quote. Non attivare Pro. |
-| EthioDeploy Free | Candidato da verificare | Dichiara nessuna carta, un progetto, 256 MB/mezzo core e database da 512 MB; sospende il servizio dopo 30 minuti senza traffico. Il piano Pro è separato, ma manca ancora una conferma contrattuale chiara sul blocco automatico e sull'assenza di addebiti dopo l'esaurimento delle quote. |
-| Enzonic Python Free / Deploy | Candidato da verificare | Dichiara un server Python gratuito da 512 MB, 50% CPU, 10 GB e senza carta; la sezione Deploy dichiara inoltre risorse gratuite e deploy FastAPI. È necessario verificare condizioni, limiti effettivi, stabilità e comportamento all'esaurimento prima di affidargli dati o backend. |
+| EthioDeploy Free | Escluso | I termini ufficiali dicono che il servizio è fatturato in Birr etiope (ETB), prevede acquisti e ricariche del wallet e addebita gli overage al saldo quando applicabile. Anche se il piano Free dichiara nessuna carta, non rispetta il criterio economico richiesto. |
+| Enzonic Python Free / Deploy | Non approvato | Dichiara risorse Python gratuite senza carta, ma i termini consultati sono specifici per game hosting e non chiariscono le condizioni del prodotto Python Deploy. Mancano quindi conferme legali e tecniche su quote, privacy e hard-stop. |
 | Waifly | Escluso | Anche se dichiara hosting gratuito senza carta, i termini prevedono una possibile commissione amministrativa di 1 € per recupero/verifica account: non rispetta il criterio di escludere servizi che introducono importi in euro. |
 
 ## Verifiche ufficiali Cloudflare aggiornate al 21 novembre 2026
@@ -32,16 +32,14 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 - Il piano Hobby include anche 5 GB di dati in uscita e 500 minuti di build.
 - La documentazione distingue Hobby e Pro e descrive addebiti di overage per Pro. Non è stata trovata una garanzia sufficiente che l'account Hobby blocchi ogni risorsa all'esaurimento; resta non approvato finché questo punto non è verificato.
 
-### EthioDeploy
-- Free: un progetto, 256 MB, mezzo core, database da 512 MB; nessuna carta dichiarata.
-- Il servizio si addormenta dopo 30 minuti senza traffico e si riavvia alla richiesta successiva.
-- Il disco viene cancellato a ogni deploy: usare database persistente, non file locali.
-- Pro è un piano separato; non passare a Pro né aggiungere risorse a pagamento. Prima dell'uso va provato che il piano Free si arresti senza fatturazione.
+### EthioDeploy — escluso
+- Sebbene il piano Free dichiari nessuna carta, i termini ufficiali specificano che il servizio è fatturato in Birr etiope (ETB), permette ricariche wallet e applica addebiti per overage al saldo quando applicabile.
+- La policy non soddisfa il vincolo di non avere servizi che introducano pagamenti/ricariche in valuta; non collegare GitHub e non creare progetti.
 
-### Enzonic
+### Enzonic — non approvato
 - La pagina Python dichiara un server gratuito per account, 512 MB RAM, 50% CPU, 10 GB storage e nessuna carta.
-- La pagina Deploy dichiara FastAPI/Flask e risorse gratuite; va verificato se la quota Deploy e quella del server Python sono prodotti distinti.
-- Prima dell'uso controllare termini, conservazione dei dati, localizzazione dei server, politica di sospensione, limiti e comportamento quando si raggiunge la quota. Nessuna credenziale o progetto è stato creato.
+- La pagina Deploy dichiara FastAPI/Flask e risorse gratuite, ma i termini consultati riguardano esplicitamente il game server e non disciplinano con chiarezza il prodotto Python Deploy.
+- Non usare finché non sono disponibili termini applicabili al servizio Python, policy privacy, localizzazione dati, limiti e comportamento a quota esaurita. Nessuna credenziale o progetto è stato creato.
 
 ### Waifly
 - I termini prevedono sospensione per inattività e possibili sospensioni/cancellazioni per superamento risorse.
@@ -58,7 +56,7 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 
 ## Decisione
 
-Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free, EthioDeploy ed Enzonic sono i candidati da verificare ulteriormente; FastAPI Cloud resta sospeso finché non è dimostrato l'hard-stop delle quote Hobby. Waifly è escluso. Nessun account, carta, abbonamento o credenziale è stato creato o inserito.
+Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free resta il candidato tecnico principale ma con rischio CPU; FastAPI Cloud Hobby resta sospeso finché non è dimostrato l'hard-stop delle quote. EthioDeploy e Waifly sono esclusi per riferimenti espliciti a valuta/ricariche o commissioni. Enzonic non è approvato perché mancano termini chiari applicabili al suo servizio Python. Nessun account, carta, abbonamento o credenziale è stato creato o inserito.
 
 ## Fonti
 
@@ -70,7 +68,9 @@ Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free, EthioDep
 - FastAPI Cloud usage/billing: https://fastapicloud.com/docs/team-management/billing/usage-based-billing/
 - EthioDeploy free backend: https://ethiodeploy.com/free-backend-hosting
 - EthioDeploy FastAPI guide: https://ethiodeploy.com/deploy/fastapi
+- EthioDeploy terms (ETB and wallet overage): https://ethiodeploy.com/terms
 - Enzonic Python hosting: https://enzonic.com/python
+- Enzonic terms: https://enzonic.com/legal/terms
 - Enzonic pricing: https://enzonic.com/pricing
 - Waifly free Python hosting: https://waifly.com/guides/free-python-hosting
 - Waifly terms: https://waifly.com/cgu
