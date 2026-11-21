@@ -1,7 +1,7 @@
 # Acquisizione, replica e integrazione delle funzioni AI
 
 ## Obiettivo
-SuperIA Privata è un'app Android personale, non commerciale, per un solo utente. L'obiettivo è offrire in un unico ambiente il maggior numero possibile di capacità presenti nei 182 sistemi del catalogo, includendo funzioni nuove che l'utente potrà chiedere di aggiungere.
+SuperIA è un'app Android personale, non commerciale, per un solo utente. L'obiettivo è offrire in un unico ambiente il maggior numero possibile di capacità presenti nei 182 sistemi del catalogo, includendo funzioni nuove che l'utente potrà chiedere di aggiungere.
 
 L'uso personale/non commerciale è un requisito di prodotto, ma non annulla automaticamente copyright, licenze software, termini dei servizi, diritti sui dataset o restrizioni sui pesi dei modelli. Non si deve quindi copiare indiscriminatamente codice proprietario, APK, chiavi, pesi riservati, contenuti protetti o aggirare accessi e pagamenti.
 
