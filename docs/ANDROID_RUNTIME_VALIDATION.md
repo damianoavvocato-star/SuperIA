@@ -1,4 +1,6 @@
-# Validazione runtime Android LiteRT-LM — 15 novembre 2026
+# Archivio storico — validazione runtime Android LiteRT-LM
+
+> **Documento storico — superato al 21 novembre 2026.** Questa validazione riguarda una build precedente con LiteRT-LM/Gemma e APK generati prima del blocco APK. Il runtime Gemma/LiteRT-LM è stato successivamente rimosso dal progetto Android. Questi risultati non attestano il funzionamento della chat online e non autorizzano nuove build. La direzione attuale, i test e i gate sono descritti in [PHASE2_STATUS.md](PHASE2_STATUS.md), [ONLINE_ONLY_MIGRATION_PLAN.md](ONLINE_ONLY_MIGRATION_PLAN.md) e [PHASE_TRACKER.md](PHASE_TRACKER.md). Non seguire le vecchie istruzioni di installazione/importazione Gemma contenute più avanti.
 
 ## Esito CI verificato
 
