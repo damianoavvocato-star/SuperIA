@@ -1,4 +1,4 @@
-# Registro tecnico dei componenti — SuperIA Privata
+# Registro tecnico dei componenti — SuperIA
 
 > Fase 0 — registro iniziale, revisione 1  
 > Data di controllo documentale: 15 novembre 2026  
