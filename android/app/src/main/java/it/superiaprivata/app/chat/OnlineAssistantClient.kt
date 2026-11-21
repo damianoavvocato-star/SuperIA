@@ -14,7 +14,7 @@ import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-data class OnlineConnectionConfig(val endpoint: String, val token: String) {
+data class OnlineConnectionConfig(val endpoint: String, val token: String, val deviceId: String = "") {
     val isConfigured: Boolean get() = endpoint.isNotBlank() && token.isNotBlank()
 }
 
@@ -30,12 +30,12 @@ class OnlineConnectionStore(context: Context) {
             cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(TAG_BITS, packed.copyOfRange(0, IV_BYTES)))
             val clear = cipher.doFinal(packed.copyOfRange(IV_BYTES, packed.size))
             val json = JSONObject(String(clear, Charsets.UTF_8))
-            OnlineConnectionConfig(json.optString("endpoint"), json.optString("token"))
+            OnlineConnectionConfig(json.optString("endpoint"), json.optString("token"), json.optString("deviceId"))
         }.getOrDefault(OnlineConnectionConfig("", ""))
     }
 
     fun save(config: OnlineConnectionConfig) {
-        val json = JSONObject().put("endpoint", config.endpoint.trim()).put("token", config.token)
+        val json = JSONObject().put("endpoint", config.endpoint.trim()).put("token", config.token).put("deviceId", config.deviceId)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key())
         val packed = cipher.iv + cipher.doFinal(json.toString().toByteArray(Charsets.UTF_8))
