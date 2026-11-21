@@ -276,3 +276,33 @@ def test_provider_recovers_after_temporary_service_outage(tmp_path, monkeypatch)
 
     asyncio.run(run())
 
+
+def test_provider_status_distinguishes_unconfigured_ready_cooldown_and_disabled(tmp_path):
+    env = free_env("groq")
+    env.update(free_env("openrouter", "example/free-model:free"))
+    state_db = str(tmp_path / "provider-status.sqlite3")
+    router = FreeOnlyRouter(environ=env, state_db_path=state_db)
+
+    router._set_cooldown("groq", 120)
+    router._disable("openrouter")
+    status = {item["id"]: item for item in router.provider_status()}
+
+    assert status["gemini"]["state"] == "not_configured"
+    assert status["gemini"]["available"] is False
+    assert status["groq"]["state"] == "cooldown"
+    assert status["groq"]["available"] is False
+    assert status["groq"]["cooldown_seconds"] > 0
+    assert status["openrouter"]["state"] == "disabled"
+    assert status["openrouter"]["available"] is False
+
+
+def test_provider_status_marks_approved_provider_ready(tmp_path):
+    router = FreeOnlyRouter(
+        environ=free_env("groq"),
+        state_db_path=str(tmp_path / "provider-ready.sqlite3"),
+    )
+    status = {item["id"]: item for item in router.provider_status()}
+    assert status["groq"]["enabled"] is True
+    assert status["groq"]["available"] is True
+    assert status["groq"]["state"] == "ready"
+
