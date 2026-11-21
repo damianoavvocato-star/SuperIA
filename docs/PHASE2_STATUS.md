@@ -24,8 +24,8 @@ La base Android dell'assistente locale è implementata e compilata. La Fase 2 re
 
 Commit: `8ba080ad4f43690f25c63f74d2ff7c3941944b5a`
 
-- [Android debug build e unit test — run 43758098267](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098267): SUCCESS.
-- [Backend tests — run 43758098112](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098112): SUCCESS.
+- [Android debug build e unit test — run 43758098267](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098267): SUCCESS.
+- [Backend tests — run 43758098112](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098112): SUCCESS.
 - APK debug artefact: `superia-privata-debug`, ID `14178604470`.
 - Dimensione archivio: 38.276.044 byte.
 - SHA-256 archivio: `ff54a42a7fdcb49b986e9da31c0fdfe6939b49322241b49d9d6450fb6dbefda4`.
@@ -69,17 +69,17 @@ Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e
 
 ## Aggiornamento CI — 16 novembre 2026 (run 43890341130)
 
-- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android SUCCESS, build APK debug SUCCESS e upload SUCCESS.
+- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android SUCCESS, build APK debug SUCCESS e upload SUCCESS.
 - Artifact `superia-privata-debug`, ID `14235164539`, 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
 - Al controllo delle 15:54 CET, i test strumentali Android Keystore risultavano ancora IN_PROGRESS; non si dichiara la run Android completa né la suite strumentale superata su questo commit.
-- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518): SUCCESS.
+- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890360518): SUCCESS.
 
 **Stato Fase 2 invariato:** compilazione e test unitari della revisione verificati; test strumentali in corso; inferenza Gemma reale e collaudo sui due telefoni ancora da eseguire.
 
 
 ## Aggiornamento CI — 16 novembre 2026 (run 43890341130)
 
-- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
+- [Android run 43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
 - Test unitari Android, build APK Debug e upload dell'artefatto: **SUCCESS**.
 - Test strumentali Android Keystore: **6 test avviati e 6 terminati** su emulatore API 34; `connectedDebugAndroidTest` e Gradle **BUILD SUCCESSFUL**.
 - Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte; SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`; scadenza 14 febbraio 2027.
@@ -90,7 +90,7 @@ Restano obbligatori i test con modello Gemma realmente importato su Realme C75 e
 
 ## Prossimo gate operativo — 16 novembre 2026
 
-La CI Android [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130) è SUCCESS: unit tests, APK Debug e 6 test strumentali Keystore su emulatore API 34 completati. Tre controlli backend dei commit documentali precedenti sono anch'essi SUCCESS.
+La CI Android [43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130) è SUCCESS: unit tests, APK Debug e 6 test strumentali Keystore su emulatore API 34 completati. Tre controlli backend dei commit documentali precedenti sono anch'essi SUCCESS.
 
 Il prossimo gate non è un altro test emulato: è la prova end-to-end con il modello Gemma importato sui dispositivi fisici. Procedura e scheda di misurazione: [DEVICE_SMOKE_TEST.md](DEVICE_SMOKE_TEST.md).
 
