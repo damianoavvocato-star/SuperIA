@@ -68,3 +68,15 @@ def test_concurrent_validation_then_committed_revocation_is_fail_closed(tmp_path
         ))
     assert not any(after_revoke)
 
+def test_postgres_auth_database_outage_does_not_fall_back_to_sqlite(monkeypatch):
+    import pytest
+    import app.device_auth as device_auth
+
+    def unavailable(_database_url):
+        raise OSError("PostgreSQL unavailable")
+
+    monkeypatch.setattr(device_auth, "connect_database", unavailable)
+    with pytest.raises(OSError, match="PostgreSQL unavailable"):
+        device_auth.validate_device_token(
+            "postgresql://unreachable.invalid/superia", "any-token"
+        )
