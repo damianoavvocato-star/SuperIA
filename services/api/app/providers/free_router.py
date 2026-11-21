@@ -189,6 +189,104 @@ class FreeOnlyRouter:
     async def list_models(self) -> list[str]:
         return [f"{p.provider_id}:{p.model}" for p in self.configured_providers()]
 
+    async def stream_chat(self, messages: list[dict[str, str]], model: str | None = None):
+        """Yield text deltas; fail over only before the first user-visible token."""
+        import json
+
+        providers = self.configured_providers()
+        if model is not None:
+            providers = [
+                provider for provider in providers
+                if f"{provider.provider_id}:{provider.model}" == model
+            ]
+            if not providers:
+                raise NoFreeProviderAvailable(
+                    "Il modello richiesto non è tra quelli gratuiti attualmente configurati."
+                )
+        if not providers:
+            raise NoFreeProviderAvailable(
+                "Nessun provider gratuito verificato è configurato. La richiesta è stata conservata; riprova più tardi."
+            )
+
+        last_error = "Nessun provider gratuito disponibile."
+        attempted = False
+        for provider in providers:
+            cooldown_until, disabled = self._state(provider.provider_id)
+            if disabled or cooldown_until > time.time():
+                continue
+            attempted = True
+            emitted = False
+            try:
+                timeout = httpx.Timeout(90.0, connect=10.0, read=90.0)
+                async with self.client_factory(timeout=timeout) as client:
+                    async with client.stream(
+                        "POST",
+                        provider.endpoint,
+                        headers={**provider.headers, "Content-Type": "application/json", "Accept": "text/event-stream"},
+                        json={"model": provider.model, "messages": messages, "stream": True},
+                    ) as response:
+                        if response.status_code == 429:
+                            retry_after = response.headers.get("Retry-After", "60")
+                            try:
+                                cooldown = float(retry_after)
+                            except ValueError:
+                                cooldown = 60.0
+                            self._set_cooldown(provider.provider_id, cooldown)
+                            last_error = f"{provider.provider_id}: quota o limite temporaneo raggiunto."
+                            continue
+                        if response.status_code in (401, 402, 403):
+                            self._disable(provider.provider_id)
+                            last_error = f"{provider.provider_id}: credenziali, billing o permessi non compatibili con il profilo gratuito; provider disabilitato."
+                            continue
+                        if response.status_code == 408 or response.status_code >= 500:
+                            self._set_cooldown(provider.provider_id, 15.0)
+                            last_error = f"{provider.provider_id}: servizio temporaneamente non disponibile."
+                            continue
+                        if response.status_code < 200 or response.status_code >= 300:
+                            last_error = f"{provider.provider_id}: errore HTTP {response.status_code}."
+                            continue
+
+                        async for line in response.aiter_lines():
+                            if not line.startswith("data:"):
+                                continue
+                            data = line[5:].strip()
+                            if not data:
+                                continue
+                            if data == "[DONE]":
+                                break
+                            try:
+                                payload = json.loads(data)
+                                choices = payload.get("choices") or []
+                                delta = choices[0].get("delta", {}) if choices else {}
+                                piece = delta.get("content")
+                                if isinstance(piece, list):
+                                    piece = "".join(
+                                        item.get("text", "") for item in piece
+                                        if isinstance(item, dict) and isinstance(item.get("text", ""), str)
+                                    )
+                            except (ValueError, TypeError, IndexError, AttributeError):
+                                continue
+                            if isinstance(piece, str) and piece:
+                                emitted = True
+                                yield {"event": "delta", "text": piece, "provider": provider.provider_id, "model": provider.model}
+
+                if emitted:
+                    yield {"event": "done", "provider": provider.provider_id, "model": provider.model}
+                    return
+                last_error = f"{provider.provider_id}: il flusso non ha prodotto testo."
+            except (httpx.HTTPError, OSError) as exc:
+                self._set_cooldown(provider.provider_id, 15.0)
+                last_error = f"{provider.provider_id}: errore di rete ({type(exc).__name__})."
+                if emitted:
+                    raise RuntimeError("Flusso interrotto dopo l'inizio della risposta; riprova solo dopo aver verificato il testo già ricevuto.") from exc
+                continue
+
+        if not attempted:
+            last_error = "Tutti i provider configurati sono in cooldown o disabilitati."
+        raise NoFreeProviderAvailable(
+            "Nessun provider gratuito disponibile. La conversazione resta salvata; " + last_error
+        )
+
     async def chat(
         self,
         messages: list[dict[str, str]],
