@@ -54,6 +54,23 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 - I termini prevedono sospensione per inattività e possibili sospensioni/cancellazioni per superamento risorse.
 - La sezione 6 prevede una possibile commissione amministrativa di 1 € per verifica/recupero account: escluso in base al criterio economico richiesto.
 
+## Database persistente: nuova valutazione
+
+Il database di autenticazione non può usare SQLite in /tmp su un hosting serverless: token revocati, scadenze e stato di sicurezza devono sopravvivere ai riavvii ed essere condivisi tra istanze.
+
+| Database | Esito | Evidenza e limiti |
+|---|---|---|
+| Prisma Postgres Free | Candidato prioritario, non attivato | La pagina ufficiale dichiara 2 GB, 200.000 operazioni/mese, fino a 50 database, nessuna carta e nessuna scadenza. Al limite mensile le query si fermano fino al reset o a un upgrade: comportamento coerente con il fail-closed e senza overage sul piano Free. Non include backup nel piano Free. Richiede migrare lo storage auth/router da SQLite a PostgreSQL e testare la compatibilità. |
+| Aiven PostgreSQL Free | Candidato alternativo, non attivato | La pagina ufficiale dichiara 1 GB storage, 1 GB RAM, 1 CPU, nessuna carta e nessun limite temporale; il servizio viene spento dopo inattività e può essere riavviato. È dichiarato senza costi inattesi, ma prima dell'uso va verificato nel pannello che non sia associato alcun metodo di pagamento e che il passaggio a Paid richieda sempre un'azione esplicita. |
+| Turso Free | Non approvato finché gli overage non sono esclusi | La pagina ufficiale conferma Free senza carta e 5 GB, ma indica che gli overage per storage/letture/scritture/sync vengono fatturati automaticamente una volta abilitati. Non è quindi un'opzione sicura senza una verifica inequivocabile che gli overage restino disabilitati e non sia possibile abilitarli accidentalmente. |
+
+### Decisione provvisoria sul database
+- Preferire Prisma Postgres Free per la prima integrazione: il blocco delle query a 200.000 operazioni/mese è esplicito e non richiede carta; non attivare upgrade o piani a pagamento.
+- Il database gratuito non sostituisce un backup: prima di salvare credenziali reali, predisporre un export cifrato e test di ripristino. Non inserire segreti provider nella tabella auth.
+- Migrare device_tokens e lo stato router in PostgreSQL con transazioni e indici; verificare che revoca e scadenza funzionino su più istanze.
+- Nessun account o database è stato creato. La selezione resta candidata fino a verifica manuale dell'account e implementazione/test del driver.
+- Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https://aiven.io/free-postgresql-database ; https://turso.tech/pricing
+
 ## Gate di approvazione
 
 1. Verifica manuale dell'account: registrazione e uso Free senza carta, PayPal, wallet o altro metodo di pagamento richiesto/collegato.
