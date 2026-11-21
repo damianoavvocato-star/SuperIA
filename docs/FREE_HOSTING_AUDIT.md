@@ -1,4 +1,4 @@
-# Audit hosting gratuito per SuperIA Privata
+# Audit hosting gratuito per SuperIA
 
 Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/metodo di pagamento, senza addebiti, ricariche, upgrade automatici o overage fatturabili. I crediti gratuiti sono ammessi anche quando il provider li esprime in unità monetarie: non devono però richiedere un pagamento reale. Quando una quota gratuita finisce, il servizio deve fermarsi senza addebiti e senza passare a un piano a pagamento.
 
