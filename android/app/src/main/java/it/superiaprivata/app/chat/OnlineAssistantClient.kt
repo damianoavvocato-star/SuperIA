@@ -183,13 +183,27 @@ object OnlineAssistantClient {
             if (status !in 200..299) throw IllegalStateException("Verifica online non riuscita (HTTP $status).")
             val payload = JSONObject(raw)
             val providers = payload.optJSONArray("providers") ?: JSONArray()
-            val enabled = (0 until providers.length()).mapNotNull { index ->
-                providers.optJSONObject(index)?.takeIf { it.optBoolean("enabled", false) }?.optString("id")
-            }.filter { it.isNotBlank() }
-            if (enabled.isEmpty()) {
-                "Backend raggiungibile e token valido, ma nessun provider gratuito è ancora configurato e abilitato."
-            } else {
-                "Collegamento autenticato operativo. Provider gratuiti configurati: ${enabled.joinToString(", ")}. La verifica non garantisce ancora una risposta positiva dal servizio IA."
+            val configured = mutableListOf<String>()
+            val available = mutableListOf<String>()
+            val waiting = mutableListOf<String>()
+            for (index in 0 until providers.length()) {
+                val item = providers.optJSONObject(index) ?: continue
+                val id = item.optString("id").takeIf { it.isNotBlank() } ?: continue
+                if (item.optBoolean("enabled", false)) configured += id
+                if (item.optBoolean("available", false)) available += id
+                if (item.optString("state") == "cooldown") {
+                    waiting += "$id (${item.optInt("cooldown_seconds")} s)"
+                }
+            }
+            when {
+                available.isNotEmpty() ->
+                    "Backend autenticato. Provider gratuiti disponibili: ${available.joinToString(", ")}. Configurati: ${configured.joinToString(", ")}. La risposta IA verrà comunque verificata al primo invio."
+                configured.isEmpty() ->
+                    "Backend raggiungibile e token valido, ma nessun provider gratuito è configurato."
+                waiting.isNotEmpty() ->
+                    "Backend autenticato, ma i provider gratuiti sono temporaneamente in pausa: ${waiting.joinToString(", ")}."
+                else ->
+                    "Backend autenticato, ma i provider configurati risultano disabilitati. Nessun fallback a pagamento verrà usato."
             }
         } finally {
             connection.disconnect()
