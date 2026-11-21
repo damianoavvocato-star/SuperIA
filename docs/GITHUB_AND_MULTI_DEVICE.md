@@ -2,7 +2,7 @@
 
 ## Obiettivo
 
-GitHub è un'integrazione di prima classe di SuperIA Privata: l'utente deve poter gestire repository e progetti software direttamente dall'app Android, chiedendo all'assistente di analizzare, pianificare, modificare e verificare lavori complessi. Il collegamento è facoltativo e revocabile; non rende pubblici i repository privati.
+GitHub è un'integrazione di prima classe di SuperIA: l'utente deve poter gestire repository e progetti software direttamente dall'app Android, chiedendo all'assistente di analizzare, pianificare, modificare e verificare lavori complessi. Il collegamento è facoltativo e revocabile; non rende pubblici i repository privati.
 
 ## Collegamento account e sicurezza
 
@@ -42,7 +42,7 @@ Pipeline proposta:
 7. Legge log, corregge gli errori e ripete entro un limite configurabile.
 8. Presenta riepilogo, commit e pull request; merge e deploy restano sotto controllo dell'utente.
 
-Le GitHub Actions usano runner GitHub e sono soggette a quote, limiti e condizioni del piano. Non sono inferenza illimitata né una garanzia di calcolo gratuito. Funzioni come Copilot, Codespaces, Actions minutes e storage possono richiedere piani o quote specifiche: non sono dipendenze obbligatorie di SuperIA Privata.
+Le GitHub Actions usano runner GitHub e sono soggette a quote, limiti e condizioni del piano. Non sono inferenza illimitata né una garanzia di calcolo gratuito. Funzioni come Copilot, Codespaces, Actions minutes e storage possono richiedere piani o quote specifiche: non sono dipendenze obbligatorie di SuperIA.
 
 ## Collegamento tra più telefoni Android
 
