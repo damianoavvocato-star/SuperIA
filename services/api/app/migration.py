@@ -5,12 +5,17 @@ empty; this prevents accidental merges or overwriting a live auth database.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any
-
 from app.database import connect_database
+
+
+def _rows_digest(rows: list[tuple[object, ...]]) -> str:
+    canonical = json.dumps(rows, ensure_ascii=False, separators=(",", ":"), default=str)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[str, int]:
@@ -61,12 +66,17 @@ def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[s
             if int(existing["count"]) != 0:
                 raise ValueError(f"Destination table {table} is not empty")
 
+        token_columns = (
+            "token_hash", "device_id", "device_name", "created_at", "expires_at", "revoked_at"
+        )
         token_rows = source.execute(
             """
             SELECT token_hash, device_id, device_name, created_at, expires_at, revoked_at
             FROM device_tokens
+            ORDER BY token_hash
             """
         ).fetchall()
+        source_token_values = [tuple(row[column] for column in token_columns) for row in token_rows]
         for row in token_rows:
             destination.execute(
                 """
@@ -80,8 +90,12 @@ def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[s
         provider_count = 0
         if "provider_state" in source_tables:
             provider_rows = source.execute(
-                "SELECT provider_id, cooldown_until, disabled FROM provider_state"
+                "SELECT provider_id, cooldown_until, disabled FROM provider_state ORDER BY provider_id"
             ).fetchall()
+            source_provider_values = [
+                (row["provider_id"], row["cooldown_until"], row["disabled"])
+                for row in provider_rows
+            ]
             for row in provider_rows:
                 destination.execute(
                     """
@@ -91,19 +105,44 @@ def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[s
                     tuple(row),
                 )
             provider_count = len(provider_rows)
+        else:
+            source_provider_values = []
 
-        copied_tokens = destination.execute(
-            "SELECT COUNT(*) AS count FROM device_tokens"
-        ).fetchone()
-        copied_providers = destination.execute(
-            "SELECT COUNT(*) AS count FROM provider_state"
-        ).fetchone()
+        copied_token_rows = destination.execute(
+            """
+            SELECT token_hash, device_id, device_name, created_at, expires_at, revoked_at
+            FROM device_tokens ORDER BY token_hash
+            """
+        ).fetchall()
+        copied_provider_rows = destination.execute(
+            """
+            SELECT provider_id, cooldown_until, disabled
+            FROM provider_state ORDER BY provider_id
+            """
+        ).fetchall()
+        copied_token_values = [
+            tuple(row[column] for column in token_columns) for row in copied_token_rows
+        ]
+        copied_provider_values = [
+            (row["provider_id"], row["cooldown_until"], row["disabled"])
+            for row in copied_provider_rows
+        ]
         result = {
-            "device_tokens": int(copied_tokens["count"]),
-            "provider_state": int(copied_providers["count"]),
+            "device_tokens": len(copied_token_values),
+            "provider_state": len(copied_provider_values),
         }
-        if result["device_tokens"] != len(token_rows) or result["provider_state"] != provider_count:
-            raise RuntimeError("Post-migration row counts do not match source")
+        if result["device_tokens"] != len(source_token_values):
+            raise RuntimeError("Post-migration device token row count does not match source")
+        if result["provider_state"] != provider_count:
+            raise RuntimeError("Post-migration provider state row count does not match source")
+        token_digest = _rows_digest(source_token_values)
+        if token_digest != _rows_digest(copied_token_values):
+            raise RuntimeError("Post-migration device token integrity check failed")
+        provider_digest = _rows_digest(source_provider_values)
+        if provider_digest != _rows_digest(copied_provider_values):
+            raise RuntimeError("Post-migration provider state integrity check failed")
+        result["device_tokens_sha256"] = token_digest
+        result["provider_state_sha256"] = provider_digest
         destination.commit()
         return result
     except Exception:
