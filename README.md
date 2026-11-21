@@ -62,3 +62,5 @@ La cronologia Android e i testi estratti dai documenti sono cifrati AES-GCM con 
 - Il client Android legge gli eventi SSE e aggiorna progressivamente il messaggio nella chat Compose; il testo parziale viene salvato in caso di errore/cancellazione.
 - Aggiunti test backend per delta, failover pre-token e autenticazione SSE e test Android per le validazioni del nuovo client.
 - Stato: implementazione iniziale presente, ma CI non ha ancora restituito esiti verificabili e il test end-to-end con provider reale non è stato eseguito. Non considerare la chat online pronta per produzione.
+
+- Il client Android interrompe anche la connessione HTTP sottostante quando la coroutine viene cancellata, evitando di lasciare una lettura SSE bloccata fino al timeout.
