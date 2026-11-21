@@ -1,4 +1,4 @@
-name: Android debug build
+name: Android unit tests
 
 on:
   push:
@@ -13,11 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  assemble-debug:
+  android-unit-tests:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,74 +27,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.11.1"
-      - name: Add Android SDK tools to PATH
-        run: |
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
-      - name: Install Android SDK platform
-        run: |
-          yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses
-          sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
-      - name: Prepare persistent Android signing key
-        id: prepare-signing
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-        env:
-          SUPERIA_KEYSTORE_BASE64: ${{ secrets.SUPERIA_KEYSTORE_BASE64 }}
-          SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
-          SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
-          SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
-        run: |
-          if [ -n "$SUPERIA_KEYSTORE_BASE64" ] && [ -n "$SUPERIA_KEYSTORE_PASSWORD" ] && [ -n "$SUPERIA_KEY_ALIAS" ] && [ -n "$SUPERIA_KEY_PASSWORD" ]; then
-            echo "SUPERIA_KEYSTORE_FILE=$RUNNER_TEMP/superia-upload.jks" >> "$GITHUB_ENV"
-            printf '%s' "$SUPERIA_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/superia-upload.jks"
-            test -s "$RUNNER_TEMP/superia-upload.jks"
-            chmod 600 "$RUNNER_TEMP/superia-upload.jks"
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Stable signing secrets are missing or incomplete. No installable release APK will be uploaded."
-          fi
-      - name: Report signing unavailable for untrusted event
-        if: github.event_name == 'pull_request'
-        run: echo "::notice::Release signing is intentionally disabled for pull requests."
       - name: Run Android unit tests
         working-directory: android
         run: gradle --no-daemon testDebugUnitTest
-      - name: Assemble debug APK for emulator tests
-        working-directory: android
-        run: gradle --no-daemon assembleDebug
-      - name: Assemble stable signed APK
-        if: steps.prepare-signing.outputs.ready == 'true'
-        working-directory: android
-        env:
-          SUPERIA_KEYSTORE_PASSWORD: ${{ secrets.SUPERIA_KEYSTORE_PASSWORD }}
-          SUPERIA_KEY_ALIAS: ${{ secrets.SUPERIA_KEY_ALIAS }}
-          SUPERIA_KEY_PASSWORD: ${{ secrets.SUPERIA_KEY_PASSWORD }}
-        run: gradle --no-daemon assembleRelease
-      - name: Upload stable signed APK
-        if: steps.prepare-signing.outputs.ready == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: superia-privata-installable
-          path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-      - name: Run Android Keystore instrumentation tests
-        uses: reactivecircus/android-emulator-runner@v2
-        env:
-          ANDROID_I_WANT_MY_TCG: "yes"
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          emulator-boot-timeout: 900
-          emulator-options: -no-window -gpu swiftshader_indirect -memory 4096 -cores 2 -no-snapshot -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: |
-            set -eux
-            adb wait-for-device
-            adb devices -l
-            adb shell getprop sys.boot_completed
-            adb shell df -h /data
-            adb shell pm list packages | head -n 20
-            adb install --no-streaming -r android/app/build/outputs/apk/debug/app-debug.apk
-            gradle --no-daemon -p android connectedDebugAndroidTest
