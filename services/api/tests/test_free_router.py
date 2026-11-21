@@ -319,9 +319,9 @@ def test_stream_chat_parses_deltas_and_fails_over_before_first_token(tmp_path):
             if request.url.host == "api.groq.com":
                 return httpx.Response(429, headers={"Retry-After": "1"})
             body = (
-                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
-                'data: {"choices":[{"delta":{"content":"mondo"}}]}\\n\\n'
-                'data: [DONE]\\n\\n'
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\n\n'
+                'data: {"choices":[{"delta":{"content":"mondo"}}]}\n\n'
+                'data: [DONE]\n\n'
             )
             return httpx.Response(200, headers={"content-type": "text/event-stream"}, content=body)
 
