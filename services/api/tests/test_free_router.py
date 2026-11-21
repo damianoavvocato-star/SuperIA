@@ -190,3 +190,37 @@ def test_postgres_provider_state_round_trip():
     router._disable(provider_id)
     cooldown_until, disabled = router._state(provider_id)
     assert disabled is True
+
+def test_parallel_provider_state_updates_are_persisted(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    router = FreeOnlyRouter(
+        environ={},
+        state_db_path=str(tmp_path / "router-parallel.sqlite3"),
+    )
+    provider_id = "parallel-provider"
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(
+            lambda seconds: router._set_cooldown(provider_id, seconds),
+            [15, 30, 45, 60, 75, 90, 105, 120],
+        ))
+
+    cooldown_until, disabled = router._state(provider_id)
+    assert cooldown_until > 0
+    assert disabled is False
+
+
+def test_configured_postgres_outage_fails_closed_without_sqlite_fallback(monkeypatch):
+    import pytest
+    import app.providers.free_router as free_router_module
+
+    def unavailable_database(_database_url):
+        raise RuntimeError("PostgreSQL unavailable")
+
+    monkeypatch.setattr(free_router_module, "connect_database", unavailable_database)
+    with pytest.raises(RuntimeError, match="PostgreSQL unavailable"):
+        FreeOnlyRouter(
+            environ={"SUPERIA_DATABASE_URL": "postgresql://unavailable.invalid/superia"},
+        )
+
