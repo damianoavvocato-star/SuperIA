@@ -20,6 +20,7 @@ def auth_environment(tmp_path, monkeypatch):
     database = str(tmp_path / "auth.sqlite3")
     monkeypatch.setenv("SUPERIA_AUTH_DB", database)
     monkeypatch.setenv("SUPERIA_PAIRING_CODE", "pairing-secret-code-123456")
+    monkeypatch.setenv("SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED", "true")
     monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "admin-secret-token-123456")
     app.dependency_overrides[get_provider] = lambda: FakeProvider()
     token_data = issue_device_token(database, "test-device")
@@ -119,3 +120,12 @@ def test_home_page():
     assert "Nuova conversazione" in response.text
     assert "Memoria personale locale" in response.text
     assert "MEMORY_KEY" in response.text
+
+
+def test_pairing_fails_closed_without_confirmed_edge_rate_limit(auth_environment, monkeypatch):
+    monkeypatch.delenv("SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED", raising=False)
+    response = TestClient(app).post("/api/v1/device/pair", json={
+        "pairing_code": "pairing-secret-code-123456",
+        "device_name": "Unprotected",
+    })
+    assert response.status_code == 503
