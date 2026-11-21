@@ -15,7 +15,7 @@ Una sola applicazione Android, in italiano, modulare e utilizzabile senza abbona
 | Livello | Scelta iniziale | Motivo e condizione |
 |---|---|---|
 | App | Kotlin + Jetpack Compose | UI nativa, accessibilità, gestione lifecycle e processi Android |
-| LLM locale | Non previsto nella versione finale | Gemma/LiteRT-LM resta soltanto nella build legacy di transizione; rimozione dopo test end-to-end online superati |
+| Inferenza AI | Backend SuperIA via HTTPS | Online-only; Gemma/LiteRT-LM e runtime LLM locali rimossi dall'app Android |
 | Modelli ML specializzati | LiteRT CompiledModel | Inferenza CPU/GPU e acceleratori supportati; NPU solo se effettivamente disponibile sul dispositivo/runtime |
 | Motore alternativo | llama.cpp Android/NDK | Fallback/benchmark per modelli GGUF, non doppio runtime obbligatorio |
 | Speech-to-text | whisper.cpp Android | Trascrizione locale; modelli e licenze verificati separatamente |
