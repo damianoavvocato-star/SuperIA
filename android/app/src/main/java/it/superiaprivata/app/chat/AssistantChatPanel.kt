@@ -227,7 +227,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                             checkingBackend = true
                             connectionStatus = "Verifica del backend in corso…"
                             try {
-                                connectionStatus = OnlineAssistantClient.checkHealth(backendEndpoint)
+                                connectionStatus = OnlineAssistantClient.checkOnlineReadiness(OnlineConnectionConfig(backendEndpoint.trim(), backendToken))
                             } catch (error: Exception) {
                                 connectionStatus = error.message ?: "Verifica del backend non riuscita."
                             } finally {
