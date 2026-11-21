@@ -111,3 +111,7 @@ Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https:
 - `test_device_auth.py` verifica emissione, validazione e revoca di token su PostgreSQL.
 - I workflow CI associati all'introduzione dei test PostgreSQL sono terminati con esito positivo; il database usato è un servizio effimero di test GitHub Actions, non un account/database esterno.
 - Nessun provider hosting o database gratuito è stato attivato. Nessuna migrazione reale, pubblicazione o configurazione di credenziali è stata eseguita.
+
+
+### Correzione e test dello stato router PostgreSQL
+Durante l'estensione dei test è emersa una differenza reale tra i driver: psycopg restituisce righe nominate (mapping), mentre SQLite consente anche l'accesso posizionale. Il router leggeva lo stato provider per indice e avrebbe potuto fallire con PostgreSQL. La lettura è stata corretta usando i nomi delle colonne e aggiunto un test d'integrazione che verifica cooldown e disabilitazione persistenti su PostgreSQL 16. CI superata nei workflow `44889299678` e `44889307686`.
