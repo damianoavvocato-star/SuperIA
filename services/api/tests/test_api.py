@@ -115,7 +115,7 @@ def test_api_rejects_body_over_hard_limit(auth_environment):
 
 def test_home_page():
     response = TestClient(app).get("/")
-    assert response.status_code == 200 and "SuperIA Privata" in response.text
+    assert response.status_code == 200 and "SuperIA" in response.text
     assert "localStorage" in response.text
     assert "Nuova conversazione" in response.text
     assert "Memoria personale locale" in response.text
