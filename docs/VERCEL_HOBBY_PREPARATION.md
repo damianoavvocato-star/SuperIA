@@ -60,3 +60,35 @@ Le API rifiutano body superiori a 2 MiB, inclusi i body in streaming senza Conte
 
 ## Decisione
 Vercel resta candidato tecnico, non approvato per produzione. Mancano ancora verifica senza carta, storage persistente condiviso e rate limiting gateway. Nessun deploy è stato eseguito.
+
+## Database persistente gratuito: pool candidati e rotazione
+
+La persistenza dell'autenticazione non può usare SQLite su `/tmp`: il filesystem serverless è effimero e non condiviso. Il backend non deve essere pubblicato finché il database auth non è persistente, condiviso tra istanze e testato.
+
+### Candidati da verificare (nessuno è attivo)
+- **Prisma Postgres Free** — prima scelta da verificare: il piano Free dichiara 2 GB e 200.000 operazioni mensili; al raggiungimento della quota le query si fermano. Non include backup automatici. Verificare nuovamente registrazione senza carta e assenza di billing prima dell'uso.
+- **Aiven PostgreSQL Free** — alternativa: 1 GB disco, backup inclusi e piano senza carta; il servizio può sospendersi per inattività e richiedere riattivazione.
+- **Neon Free** — ulteriore alternativa, subordinata alla verifica esplicita di account senza carta e di hard-stop senza overage/addebiti.
+- **Turso** — escluso finché non è dimostrato che gli overage fatturabili siano disabilitati e non attivabili accidentalmente.
+
+Questi sono candidati documentali, non account, database o integrazioni già configurati. Nessun account è stato creato e nessuna credenziale è stata inserita.
+
+### Regole per passaggio a un database alternativo
+1. Monitorare quote e inviare avvisi preventivi (es. 70% e 85%); non attendere l'esaurimento.
+2. Sospendere temporaneamente le scritture, esportare la sorgente e importare la destinazione.
+3. Applicare schema e migrazioni; verificare conteggi, integrità e soprattutto hash token, ID dispositivo, scadenze e revoche.
+4. Cambiare configurazione solo dopo verifica completa, in modo atomico; poi testare pairing, autenticazione e revoca.
+5. Se la sorgente è già bloccata e la copia non è aggiornata, non fare failover cieco: sospendere pairing, revoche e scritture finché lo stato non è verificato.
+6. Conservare sorgente ed export cifrato fino al completamento dei test di ripristino. Non creare account multipli per moltiplicare le quote.
+7. Se tutti i candidati gratuiti sono indisponibili, fermare le operazioni server che richiedono persistenza. Nessun upgrade, carta, acquisto, overage o fallback a pagamento.
+
+### Stato tecnico e gate mancanti
+- `device_auth.py` usa ancora SQLite; il router provider conserva cooldown/disabilitazioni in SQLite locale. L'astrazione PostgreSQL e la migrazione non sono implementate.
+- Prima di collegare un database occorre introdurre un'interfaccia storage, mantenere SQLite solo per test/local dev e implementare PostgreSQL per produzione con transazioni e indici.
+- Occorrono test per migrazione, rollback, concorrenza, revoca su più istanze, quota esaurita e database irraggiungibile.
+- Lo stato del router in `/tmp` è best-effort e non condiviso; non va usato come stato autorevole in produzione.
+- La protezione rate-limit/WAF per pairing e revoca resta obbligatoria prima dell'esposizione pubblica.
+
+La policy di rotazione è documentata, ma la rotazione automatica non è implementata. Non distribuire il backend finché questi gate non sono superati.
+
+Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https://www.prisma.io/docs/postgres/faq ; https://aiven.io/free-postgresql-database ; https://aiven.io/docs/products/postgresql/concepts/pg-free-tier ; https://neon.com/pricing ; https://neon.com/docs/introduction/pro-plan ; https://turso.tech/pricing
