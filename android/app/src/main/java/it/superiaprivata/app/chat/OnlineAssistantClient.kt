@@ -11,7 +11,10 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 
 data class OnlineConnectionConfig(val endpoint: String, val token: String, val deviceId: String = "") {
@@ -238,6 +241,9 @@ object OnlineAssistantClient {
             setRequestProperty("Accept", "text/event-stream")
         }
         val answer = StringBuilder()
+        val cancellationHandle = currentCoroutineContext().job.invokeOnCompletion { cause ->
+            if (cause is CancellationException) connection.disconnect()
+        }
         try {
             val body = JSONObject().put(
                 "messages",
@@ -290,6 +296,7 @@ object OnlineAssistantClient {
             if (answer.isBlank()) throw IllegalStateException("Il backend ha restituito una risposta vuota.")
             answer.toString()
         } finally {
+            cancellationHandle.dispose()
             connection.disconnect()
         }
     }
