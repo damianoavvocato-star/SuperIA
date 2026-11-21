@@ -26,11 +26,11 @@ class ChatPromptBuilderTest {
 
     @Test fun recallsOlderRelevantMessagesFromLongConversation() {
         val history = buildList {
-            add(ChatLine(1L, "Il progetto si chiama SuperIA-Privata e deve restare offline.", "user"))
+            add(ChatLine(1L, "Il progetto si chiama SuperIA e deve restare offline.", "user"))
             repeat(20) { index -> add(ChatLine((index + 2).toLong(), "Discussione generica numero $index", "user")) }
         }
-        val prompt = ChatPromptBuilder.build(history, "Quali erano i requisiti del progetto SuperIA-Privata?")
-        assertTrue(prompt.contains("progetto si chiama SuperIA-Privata"))
+        val prompt = ChatPromptBuilder.build(history, "Quali erano i requisiti del progetto SuperIA?")
+        assertTrue(prompt.contains("progetto si chiama SuperIA"))
         assertTrue(prompt.contains("Discussione generica numero 19"))
     }
 
