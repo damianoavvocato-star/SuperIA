@@ -154,6 +154,38 @@ class FreeOnlyRouter:
             if (config := self._provider(provider_id)) is not None
         ]
 
+    def provider_status(self) -> list[dict[str, object]]:
+        """Return safe operational state without exposing provider credentials."""
+        now = time.time()
+        statuses: list[dict[str, object]] = []
+        for provider_id in self.PROVIDER_ORDER:
+            configured = self._provider(provider_id) is not None
+            if not configured:
+                statuses.append({
+                    "id": provider_id,
+                    "enabled": False,
+                    "available": False,
+                    "state": "not_configured",
+                    "cooldown_seconds": 0,
+                })
+                continue
+            cooldown_until, disabled = self._state(provider_id)
+            remaining = max(0, int(cooldown_until - now + 0.999))
+            if disabled:
+                state = "disabled"
+            elif remaining > 0:
+                state = "cooldown"
+            else:
+                state = "ready"
+            statuses.append({
+                "id": provider_id,
+                "enabled": True,
+                "available": state == "ready",
+                "state": state,
+                "cooldown_seconds": remaining,
+            })
+        return statuses
+
     async def list_models(self) -> list[str]:
         return [f"{p.provider_id}:{p.model}" for p in self.configured_providers()]
 
