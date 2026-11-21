@@ -129,3 +129,34 @@ def test_pairing_fails_closed_without_confirmed_edge_rate_limit(auth_environment
         "device_name": "Unprotected",
     })
     assert response.status_code == 503
+
+def test_chat_returns_service_unavailable_when_all_free_providers_are_exhausted(auth_environment):
+    from app.providers.free_router import NoFreeProviderAvailable
+
+    class UnavailableProvider:
+        async def chat(self, messages, model=None):
+            raise NoFreeProviderAvailable(
+                "Nessun provider gratuito disponibile. La conversazione resta salvata; riprova più tardi."
+            )
+
+        async def list_models(self):
+            return []
+
+    app.dependency_overrides[get_provider] = lambda: UnavailableProvider()
+    try:
+        _, token_data = auth_environment
+        client = TestClient(
+            app,
+            headers={"Authorization": "Bearer " + token_data["access_token"]},
+        )
+        response = client.post(
+            "/api/v1/chat",
+            json={"messages": [{"role": "user", "content": "Riprendi la mia richiesta"}]},
+        )
+
+        assert response.status_code == 503
+        assert "Nessun provider gratuito disponibile" in response.json()["detail"]
+        assert "riprova più tardi" in response.json()["detail"]
+    finally:
+        app.dependency_overrides[get_provider] = lambda: FakeProvider()
+
