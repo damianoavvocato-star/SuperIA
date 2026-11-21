@@ -1,4 +1,4 @@
-# Preparazione Vercel Hobby per SuperIA Privata
+# Preparazione Vercel Hobby per SuperIA
 
 ## Stato
 Preparazione del codice soltanto. **Nessun account creato, nessun progetto importato e nessun deploy eseguito.** Vercel resta candidato non approvato finché non viene verificata la registrazione senza carta e l'uso del solo piano Hobby.
