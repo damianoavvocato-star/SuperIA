@@ -69,7 +69,11 @@ class FreeOnlyRouter:
                 "SELECT cooldown_until, disabled FROM provider_state WHERE provider_id = ?",
                 (provider_id,),
             ).fetchone()
-        return (float(row[0]), bool(row[1])) if row else (0.0, False)
+        return (
+            (float(row["cooldown_until"]), bool(row["disabled"]))
+            if row
+            else (0.0, False)
+        )
 
     def _set_cooldown(self, provider_id: str, seconds: float) -> None:
         until = time.time() + max(1.0, min(seconds, 3600.0))
