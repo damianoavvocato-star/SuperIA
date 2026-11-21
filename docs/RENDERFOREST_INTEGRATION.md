@@ -1,4 +1,4 @@
-# Integrazione Renderforest in SuperIA Privata
+# Integrazione Renderforest in SuperIA
 
 ## Obiettivo
 SuperIA offre nel menu una sezione "Renderforest · Studio creativo AI" che organizza l'accesso alle capacità della piattaforma ufficiale. Non replica codice, modelli o servizi proprietari.
