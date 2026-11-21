@@ -1,12 +1,12 @@
-# Collaudo pratico Android — SuperIA Privata
+# Collaudo pratico Android — SuperIA
 
 Data di preparazione: 16 novembre 2026
 
-Questo protocollo completa la CI: i test su emulatore non sostituiscono le prove sul Realme C75 e sullo Xiaomi Mi 10T. Compilazione e test strumentali CI sono passati sulla run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`.
+Questo protocollo completa la CI: i test su emulatore non sostituiscono le prove sul Realme C75 e sullo Xiaomi Mi 10T. Compilazione e test strumentali CI sono passati sulla run [43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`.
 
 ## 1. Preparazione dell'APK
 
-1. Aprire la [run Android 43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130).
+1. Aprire la [run Android 43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130).
 2. Nella sezione **Artifacts**, scaricare `superia-privata-debug`.
 3. Estrarre lo ZIP e individuare il file APK.
 4. Trasferire/installare l'APK sul telefono. Android potrebbe chiedere di autorizzare temporaneamente l'installazione da quella sorgente.
