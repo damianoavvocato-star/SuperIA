@@ -90,7 +90,8 @@ def _required_secret(name: str) -> str:
 
 
 def _auth_database_path() -> str:
-    return _required_secret("SUPERIA_AUTH_DB")
+    # Shared PostgreSQL URL for production; legacy SQLite path remains for local use.
+    return os.environ.get("SUPERIA_DATABASE_URL", "").strip() or _required_secret("SUPERIA_AUTH_DB")
 
 
 async def require_api_token(
