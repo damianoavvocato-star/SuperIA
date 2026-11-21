@@ -26,14 +26,14 @@ footer{max-width:980px;margin:42px auto 0;padding:18px 0;border-top:1px solid va
  <button class="new" id="newChat">＋ &nbsp; Nuova richiesta</button>
  <div class="side-label">SPAZIO DI LAVORO</div>
  <nav class="nav" aria-label="Sezioni"><button class="active" data-section="home">⌂ &nbsp; Panoramica</button><button data-section="models">◈ &nbsp; Modelli AI</button><button data-section="tools">▦ &nbsp; Strumenti</button><button data-section="privacy">♧ &nbsp; Privacy</button></nav>
- <div class="side-note"><strong>◉ Priorità al dispositivo</strong><p>La direzione del progetto è elaborazione locale, controllo dei dati e nessun servizio a pagamento obbligatorio.</p></div>
+ <div class="side-note"><strong>◉ Chat online gratuita</strong><p>L'inferenza AI avviene tramite backend SuperIA e provider gratuiti approvati. Cronologia e documenti restano cifrati sul dispositivo.</p></div>
 </aside>
 <main>
  <div class="top"><div><div class="eyebrow">ANTEPRIMA INTERATTIVA</div><h1>La tua intelligenza artificiale, in un unico spazio</h1></div><div class="status"><span class="dot"></span> Motore AI non collegato</div></div>
  <section class="hero" id="home">
   <div class="eyebrow">SUPERIA</div>
   <h2>Un solo spazio.<br><span class="gradient">Infinite possibilità.</span></h2>
-  <p>Un assistente modulare pensato per aiutarti con testi, documenti, immagini, traduzioni e attività quotidiane. L'obiettivo è usare modelli locali ogni volta che è possibile.</p>
+  <p>Un assistente modulare pensato per aiutarti con testi, documenti, immagini, traduzioni e attività quotidiane. L'obiettivo è offrire una chat online tramite provider gratuiti verificati, mantenendo cronologia e documenti cifrati sul dispositivo.</p>
  </section>
  <section class="promptbox" aria-label="Compositore di richiesta"><textarea id="prompt" placeholder="Scrivi cosa vuoi fare… ad esempio: riassumi un documento, traduci un testo, aiutami con il codice."></textarea><div class="prompt-actions"><span class="hint">Anteprima grafica · nessun dato viene inviato</span><button class="send" id="send">Prova l'interfaccia ↗</button></div></section>
  <div class="notice" id="notice"><b>Modalità anteprima:</b> questa pagina mostra la futura interfaccia; non esegue ancora richieste AI.</div>
@@ -46,7 +46,7 @@ footer{max-width:980px;margin:42px auto 0;padding:18px 0;border-top:1px solid va
   <article class="card"><div class="ico">⇄</div><strong>Due dispositivi</strong><p>Collaborazione tra telefoni, solo dopo pairing sicuro.</p></article>
  </div></section>
  <section class="section" id="models"><div class="section-head"><h3>Come vuoi iniziare?</h3><span>Scorciatoie dimostrative</span></div><div class="chips"><button class="chip" data-prompt="Aiutami a riassumere un documento">Riassumi un documento</button><button class="chip" data-prompt="Traduci questo testo in italiano">Traduci un testo</button><button class="chip" data-prompt="Spiegami un argomento passo dopo passo">Spiegami un argomento</button><button class="chip" data-prompt="Aiutami a progettare una funzione software">Progetta una funzione</button><button class="chip" data-prompt="Organizza le mie attività in una lista">Organizza le attività</button></div></section>
- <section class="section" id="privacy"><div class="section-head"><h3>Privacy e controllo</h3><span>Principi di progetto</span></div><div class="cards"><article class="card"><div class="ico">⌂</div><strong>Locale prima di tutto</strong><p>Modelli sul dispositivo quando hardware e compatibilità lo consentono.</p></article><article class="card"><div class="ico">◇</div><strong>Nessun cloud obbligatorio</strong><p>Nessun fallback cloud automatico e nessuna API a pagamento obbligatoria.</p></article><article class="card"><div class="ico">✓</div><strong>Azioni sotto controllo</strong><p>Conferma esplicita per operazioni importanti e accesso ai dati.</p></article></div></section>
+ <section class="section" id="privacy"><div class="section-head"><h3>Privacy e controllo</h3><span>Principi di progetto</span></div><div class="cards"><article class="card"><div class="ico">⌂</div><strong>Dati sotto controllo</strong><p>Cronologia e documenti cifrati localmente; al backend viene inviato solo il contesto necessario.</p></article><article class="card"><div class="ico">◇</div><strong>Provider gratuiti approvati</strong><p>Chat tramite backend HTTPS; quando le quote gratuite finiscono, stop o rotazione senza pagamenti.</p></article><article class="card"><div class="ico">✓</div><strong>Azioni sotto controllo</strong><p>Conferma esplicita per operazioni importanti e accesso ai dati.</p></article></div></section>
  <footer><span>SuperIA · progetto Android-first</span><span>Demo UI — non è ancora l'app completa</span></footer>
 </main>
 </div>
@@ -54,7 +54,7 @@ footer{max-width:980px;margin:42px auto 0;padding:18px 0;border-top:1px solid va
 const prompt=document.querySelector('#prompt'),notice=document.querySelector('#notice');
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{prompt.value=b.dataset.prompt;prompt.focus();document.querySelector('#home').scrollIntoView({behavior:'smooth'});}));
 document.querySelector('#newChat').addEventListener('click',()=>{prompt.value='';prompt.focus();notice.innerHTML='<b>Nuova richiesta pronta.</b> Scrivi nel campo qui sopra: in questa anteprima non viene avviata un’elaborazione AI.';});
-document.querySelector('#send').addEventListener('click',()=>{if(!prompt.value.trim()){notice.textContent='Scrivi una richiesta oppure scegli una scorciatoia qui sotto.';prompt.focus();return;}notice.innerHTML='<b>Richiesta acquisita nell’anteprima grafica.</b> Il collegamento al motore AI locale non è attivo in questa pagina: nessuna risposta simulata e nessun dato inviato.';});
+document.querySelector('#send').addEventListener('click',()=>{if(!prompt.value.trim()){notice.textContent='Scrivi una richiesta oppure scegli una scorciatoia qui sotto.';prompt.focus();return;}notice.innerHTML='<b>Richiesta acquisita nell’anteprima grafica.</b> Il collegamento al backend online non è attivo in questa anteprima: nessuna risposta simulata e nessun dato inviato.';});
 document.querySelectorAll('[data-section]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-section]').forEach(x=>x.classList.remove('active'));b.classList.add('active');const target=b.dataset.section;document.getElementById(target)?.scrollIntoView({behavior:'smooth'});}));
 </script>
 </body>
