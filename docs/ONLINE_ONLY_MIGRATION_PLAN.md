@@ -1,10 +1,10 @@
-# Migrazione SuperIA Privata a online-only
+# Migrazione SuperIA a online-only
 
 Aggiornato: 20 novembre 2026
 
 ## Decisione vincolante
 
-La versione finale di SuperIA Privata esegue l'inferenza esclusivamente online. Gemma 3 1B e qualsiasi runtime locale sono componenti legacy di transizione: non vanno cancellati dal telefono né rimossi dalla build stabile finché il nuovo percorso online non è stato verificato end-to-end.
+La versione finale di SuperIA esegue l'inferenza esclusivamente online. Gemma 3 1B e qualsiasi runtime locale sono componenti legacy di transizione: non vanno cancellati dal telefono né rimossi dalla build stabile finché il nuovo percorso online non è stato verificato end-to-end.
 
 ## Regole economiche inderogabili
 
