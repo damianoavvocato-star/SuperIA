@@ -15,8 +15,8 @@ class FakeProvider:
         return ["fake-local"]
 
     async def stream_chat(self, messages, model=None):
-        yield {"event": "delta", "text": "Risposta ", "provider": "fake", "model": "fake-local"}
-        yield {"event": "delta", "text": "in streaming", "provider": "fake", "model": "fake-local"}
+        yield {"event": "delta", "text":"Risposta ", "provider": "fake", "model": "fake-local"}
+        yield {"event": "delta", "text":"in streaming", "provider": "fake", "model": "fake-local"}
         yield {"event": "done", "provider": "fake", "model": "fake-local"}
 
 
@@ -109,8 +109,8 @@ def test_stream_endpoint_emits_sse_deltas_and_done(auth_environment):
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
     assert 'event: delta' in response.text
-    assert '"text": "Risposta "' in response.text
-    assert '"text": "in streaming"' in response.text
+    assert '"text":"Risposta "' in response.text
+    assert '"text":"in streaming"' in response.text
     assert 'event: done' in response.text
 
 
