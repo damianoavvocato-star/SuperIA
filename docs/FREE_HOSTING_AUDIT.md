@@ -11,6 +11,7 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 | Render Free | Non approvato | Il piano gratuito esiste e non richiede carta, ma non è ancora verificato un hard-stop completo per tutte le risorse e gli eventuali servizi accessori. Il Postgres gratuito scade dopo 30 giorni. |
 | Cloudflare Workers Free + Python Workers | Candidato tecnico, non approvato per produzione | Workers Free è disponibile per impostazione predefinita; 100.000 richieste/giorno, 10 ms CPU per richiesta, 128 MB memoria e 50 subrequests. Il superamento della quota giornaliera produce Error 1027; va verificata e impostata la modalità fail-closed. Il limite CPU può essere troppo stretto per FastAPI e parsing/autenticazione. |
 | FastAPI Cloud Hobby | Non approvato | No carta richiesta; 3 app, 0,1 CPU/500 MiB per replica, scale-to-zero, 180 replica-ore, 5 GB outbound e 500 minuti build. La documentazione descrive addebiti Pro per overage, ma non chiarisce con sufficiente precisione il comportamento di blocco quando un account Hobby esaurisce le quote. Non attivare Pro. |
+| Vercel Hobby + Python Functions | Candidato prioritario per uso personale, non ancora approvato | FastAPI è supportato direttamente. Hobby è gratuito, limitato a uso personale/non commerciale e, superate le quote, i progetti Hobby vengono messi in pausa invece di addebitare overage. Va ancora verificato che registrazione e utilizzo siano possibili senza carta e senza avviare trial Pro. Il runtime usa `/tmp` temporaneo, quindi SQLite non garantisce persistenza tra istanze/cold start. |
 | EthioDeploy Free | Escluso | I termini ufficiali dicono che il servizio è fatturato in Birr etiope (ETB), prevede acquisti e ricariche del wallet e addebita gli overage al saldo quando applicabile. Anche se il piano Free dichiara nessuna carta, non rispetta il criterio economico richiesto. |
 | Enzonic Python Free / Deploy | Non approvato | Dichiara risorse Python gratuite senza carta, ma i termini consultati sono specifici per game hosting e non chiariscono le condizioni del prodotto Python Deploy. Mancano quindi conferme legali e tecniche su quote, privacy e hard-stop. |
 | Waifly | Escluso | Anche se dichiara hosting gratuito senza carta, i termini prevedono una possibile commissione amministrativa di 1 € per recupero/verifica account: non rispetta il criterio di escludere servizi che introducono importi in euro. |
@@ -26,6 +27,14 @@ Aggiornato: 21 novembre 2026. Obiettivo inderogabile: backend HTTPS senza carta/
 - Se le quote Free non sono sufficienti, il sistema deve fermarsi: nessun upgrade automatico, nessun prodotto a pagamento e nessun fallback fatturabile.
 
 ## Verifiche e limiti degli altri candidati
+
+### Vercel Hobby — candidato prioritario, non ancora approvato
+- Vercel documenta il deploy diretto di FastAPI tramite Python Functions; il backend esistente può essere esposto con un entrypoint sottile senza riscrivere le route.
+- Il piano Hobby è gratuito e riservato a uso personale/non commerciale. I piani Hobby vengono messi in pausa quando superano le quote gratuite; non è previsto l'acquisto di overage nel piano Hobby.
+- Non è ancora stata verificata con un account reale la registrazione senza carta/metodo di pagamento. Non avviare trial Pro e non collegare alcun metodo di pagamento.
+- Il runtime Python usa filesystem read-only con spazio temporaneo `/tmp`. Il database SQLite del router può funzionare come cache temporanea, ma non garantisce cooldown persistenti tra istanze o cold start.
+- Preparato `services/api/index.py` come entrypoint. Root Directory prevista: `services/api`. Nessun deploy o account creato.
+- Il piano Hobby non è idoneo a un utilizzo commerciale o a distribuire SuperIA come servizio a pagamento.
 
 ### FastAPI Cloud
 - Hobby è dichiarato gratuito e senza carta; 180 replica-ore mensili corrispondono a 7,5 giorni di esecuzione continua per una singola replica, quindi non basta per un servizio sempre acceso.
@@ -77,3 +86,8 @@ Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free resta il 
 - Hugging Face Spaces: https://huggingface.co/docs/hub/spaces-overview
 - Koyeb pricing FAQ: https://www.koyeb.com/docs/faqs/pricing
 - Render free services: https://render.com/docs/free
+- Vercel FastAPI: https://vercel.com/docs/frameworks/backend/fastapi
+- Vercel Hobby plan: https://vercel.com/docs/plans/hobby
+- Vercel plan limits and pause behavior: https://vercel.com/docs/plans
+- Vercel Python runtime/filesystem: https://vercel.com/docs/functions/runtimes
+- Vercel Terms (Hobby personal/non-commercial; fees): https://vercel.com/legal/terms
