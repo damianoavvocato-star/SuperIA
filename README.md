@@ -1,4 +1,4 @@
-# SuperIA Privata
+# SuperIA
 
 Assistente AI personale e modulare, con client Android nativo, inferenza esclusivamente online e selezione di provider gratuiti verificati. Repository indipendente da **Editore Foto e Video IA** e **Imperium_Italia**.
 
@@ -14,7 +14,7 @@ Assistente AI personale e modulare, con client Android nativo, inferenza esclusi
 - La chat Android usa `OnlineAssistantClient` e invia richieste a `POST /api/v1/chat` tramite HTTPS.
 - Il pairing individuale è implementato: il client invia il codice di associazione a `POST /api/v1/device/pair`, riceve token e identificativo dispositivo; il token e il device ID sono conservati cifrati tramite Android Keystore. Il codice di pairing non viene persistito.
 - I token dispositivo sono individuali, memorizzati come hash sul backend, revocabili e con scadenza di 90 giorni.
-- La pipeline Android sul commit `9ce190cd87ed8c0114a5213ebbb534929e066c1c`, run [44925187326](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/44925187326), è terminata **SUCCESS al secondo tentativo**: test unitari, build debug, APK firmato, upload artefatto e test strumentali Android Keystore su emulatore.
+- La pipeline Android sul commit `9ce190cd87ed8c0114a5213ebbb534929e066c1c`, run [44925187326](https://github.com/damianoavvocato-star/SuperIA/actions/runs/44925187326), è terminata **SUCCESS al secondo tentativo**: test unitari, build debug, APK firmato, upload artefatto e test strumentali Android Keystore su emulatore.
 - Artefatto installabile `superia-privata-installable`, ID `14716277709`, circa 31,2 MB, disponibile fino al 19 febbraio 2027 tramite la pagina della run.
 - La pipeline backend associata (run `44925187325`) è **SUCCESS**.
 - La CI non sostituisce il collaudo su telefoni reali e non prova che il servizio online sia già operativo.
