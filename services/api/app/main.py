@@ -66,7 +66,7 @@ class RevokeDeviceRequest(BaseModel):
 
 
 app = FastAPI(
-    title="SuperIA Privata API",
+    title="SuperIA API",
     version="0.4.0",
     description="Router online free-only con associazione dispositivi e token revocabili.",
 )
@@ -119,7 +119,7 @@ async def home() -> str:
 
 @app.get("/health", tags=["system"])
 async def health() -> dict[str, str]:
-    return {"status": "ok", "project": "SuperIA Privata"}
+    return {"status": "ok", "project": "SuperIA"}
 
 
 @app.post("/api/v1/device/pair", tags=["devices"])
@@ -152,7 +152,7 @@ async def capabilities(
 ) -> dict[str, object]:
     configured = await provider.list_models()
     return {
-        "project": "SuperIA Privata",
+        "project": "SuperIA",
         "version": "0.4.0",
         "mode": "online-free-only",
         "modules": {"assistant": "online-free-only", "images": "planned", "video": "planned", "audio": "planned", "coding": "planned", "research": "planned", "agents": "planned"},
