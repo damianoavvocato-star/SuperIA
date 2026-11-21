@@ -20,7 +20,7 @@ Costruire un'unica piattaforma Android personale e non commerciale che riunisca,
 Decisioni da mantenere in tutte le fasi:
 - Uso personale e riservato; progetto completamente separato da **Editore Foto e Video IA** (repository, codice, dati e configurazioni distinti).
 - Gratuità come requisito: nessun abbonamento o servizio/API a pagamento obbligatorio. Eventuali servizi esterni devono essere facoltativi e disattivati per impostazione predefinita.
-- Esecuzione locale e offline dove tecnicamente possibile; le funzioni che richiedono Internet (ricerca web, download, servizi esterni) devono dichiararlo.
+- Inferenza AI esclusivamente online tramite backend SuperIA HTTPS; elaborazioni locali non-LLM (archivio, OCR e gestione file) possono restare sul dispositivo. Le funzioni che richiedono Internet devono dichiararlo.
 - Destinazione esclusiva Android (smartphone e tablet); non sviluppare client PC. Moduli attivabili progressivamente.
 - Priorità alla privacy, controllo dell'utente e approvazione prima di operazioni distruttive o azioni esterne.
 - Ogni modello/strumento deve essere verificato per licenza, requisiti hardware, compatibilità e possibilità di uso commerciale/personale.
@@ -28,7 +28,7 @@ Decisioni da mantenere in tutte le fasi:
 
 ## Decisione Android-only
 
-Il prodotto finale è esclusivamente Android. Lo stack, la strategia prestazioni, i moduli e i gate sono descritti in [docs/ANDROID_ONLY_ARCHITECTURE.md](ANDROID_ONLY_ARCHITECTURE.md). Il backend FastAPI già presente è un prototipo e non deve essere una dipendenza necessaria dell'app. Il piano di rilevamento hardware e benchmark comparativo dei telefoni è in [docs/DEVICE_DETECTION_AND_BENCHMARK_PLAN.md](DEVICE_DETECTION_AND_BENCHMARK_PLAN.md).
+Il prodotto client è esclusivamente Android. Lo stack, la strategia prestazioni, i moduli e i gate sono descritti in [docs/ANDROID_ONLY_ARCHITECTURE.md](ANDROID_ONLY_ARCHITECTURE.md). Per l'inferenza AI il backend FastAPI SuperIA è una dipendenza necessaria; deve essere pubblicato in modo sicuro e gratuito prima dell'uso reale. Il piano di rilevamento hardware e benchmark comparativo dei telefoni è in [docs/DEVICE_DETECTION_AND_BENCHMARK_PLAN.md](DEVICE_DETECTION_AND_BENCHMARK_PLAN.md).
 
 ## Documentazione della Fase 0
 
@@ -42,7 +42,7 @@ Per il quadro operativo aggiornato di tutte le fasi, le attività residue e i ga
 |---|---|---|---|
 | 0 | Inventario delle 182 IA e progettazione funzionale | Catalogo e mappatura 182/182; audit strutturato; decisioni architetturali; candidati e registro licenze | Documentazione consolidata; audit individuale delle 182 voci, licenze, costi, artefatti e compatibilità ancora aperto |
 | 1 | Fondamenta Android e connessioni | Kotlin/Compose; architettura modulare; storage; profilo dispositivo; pairing sicuro tra telefoni; login GitHub; browser repository; build debug | Parziale: app e rilevamento base presenti; QR è solo invito, senza connessione/fiducia; handshake, rete, GitHub e test reali mancanti |
-| 2 | Motore AI centrale e assistente | Chat; scelta e gestione modelli locali; Ollama/provider; streaming; cronologia; memoria controllata dall'utente; prompt; ruoli; gestione errori; interfaccia conversazionale | Implementazione e CI Android/backend verificate anche con cronologia estesa, memoria editabile e ripresa richiesta; inferenza reale sui due telefoni, cambio modello e memoria automatica ancora mancanti |
+| 2 | Motore AI centrale e assistente | Chat online; provider gratuiti; streaming; cronologia cifrata; memoria controllata dall'utente; ricostruzione del contesto; gestione errori e failover | Client Android, pairing, cronologia/memoria e router presenti nel codice; backend pubblico, provider attivi, streaming e test end-to-end ancora mancanti |
 | 3 | Documenti e conoscenza personale | Importazione/estrazione locale PDF, DOCX, TXT e CSV; archivio cifrato; BM25; OCR PDF scansiti via Tesseract | Primo incremento implementato e CI Android superata; retrieval semantico, citazioni precise, OCR immagini autonome, hardening e test pratici mancanti |
 | 4 | Ricerca, navigazione e traduzione | Ricerca web quando richiesta; confronto fonti; verifica date; traduzione; riassunti di pagine; estrazione contenuti da link pubblici; gestione fonti e citazioni | Non implementata nell'app Android |
 | 5 | Immagini e grafica | Generazione da testo; modifica immagini; inpainting/outpainting; rimozione/sostituzione sfondo e oggetti; restauro; upscaling; OCR immagini; grafica, loghi e layout | Non implementata |
@@ -52,10 +52,10 @@ Per il quadro operativo aggiornato di tutte le fasi, le attività residue e i ga
 | 9 | Produttività, dati e strumenti da ufficio | Testi, email e documenti; presentazioni; fogli di calcolo; formule; analisi CSV; grafici; dashboard; pianificazione; gestione attività e basi dati locali | Non implementata |
 | 10 | Agenti e automazioni | Agenti specializzati; pianificazione multi-step; strumenti e plugin; flussi automatici; esecuzioni programmate; collaborazione tra agenti; registro attività; approvazione umana per azioni sensibili | Non implementata; la ripresa dell'ultima richiesta chat non è orchestrazione agentica |
 | 11 | Aree professionali e specialistiche | Supporto giuridico; ricerca sanitaria e scientifica; finanza e contabilità; istruzione; marketing; architettura; CAD/3D; design; cybersecurity difensiva; analisi e simulazioni, con limiti e verifiche specifici | Non implementata |
-| 12 | Ecosistema di modelli e componenti | Registro modelli; installazione/rimozione; versioni; dipendenze; cache; download; licenze; benchmark; selezione automatica del modello adatto; fallback solo locale e configurabile | Registry documentale e import singolo modello presenti; gestione multi-modello e benchmark non implementati |
+| 12 | Ecosistema di modelli e componenti | Registro di provider/API e componenti; versioni; dipendenze; licenze; quote; benchmark; selezione e rotazione dei provider online gratuiti | Registry documentale presente; orchestrazione e gestione operativa multi-provider ancora da completare |
 | 13 | Applicazione unica e interfacce | Dashboard; moduli; progetti; gestione dispositivi associati; selezione nodo AI; sincronizzazione solo se scelta e protetta; accessibilità e UX mobile | Scheletro UI Android presente; dashboard modulare, progetti, dispositivi e sync non implementati |
 | 14 | Privacy, sicurezza e controllo | Modalità offline; cifratura dei dati locali; autenticazione; permessi; backup/esportazione; cancellazione; isolamento moduli; protezione segreti; audit; consenso e conferma delle azioni esterne | Cifratura e consenso parzialmente presenti; hardening, threat model e test sicurezza mancanti |
-| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; uso RAM/GPU; compatibilità modelli; pairing tra telefoni; integrazione GitHub; build APK Android; installazione; aggiornamenti; manuale e rilascio | CI Android/backend presente e superata; collaudo dispositivi, security/performance test e release finale mancanti |
+| 15 | Collaudo, ottimizzazione e distribuzione | Test unitari/integrati; test su dispositivi reali; sicurezza; prestazioni; pairing; verifica online end-to-end; APK definitivo e manuale | Chat online non collaudata end-to-end; workflow Android limitato ai test unitari; APK bloccato fino al completamento di tutte le funzioni chat |
 
 ## Copertura funzionale della ricognizione iniziale
 
