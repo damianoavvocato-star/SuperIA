@@ -21,13 +21,14 @@ Il backend usa token casuali individuali per dispositivo, non un unico token con
 - La connessione deve essere HTTPS. Non inserire pairing code, token amministratore o token dispositivo nel repository, nei log o nell'APK.
 
 ### Variabili server-side richieste
-- SUPERIA_AUTH_DB: percorso del database SQLite persistente che contiene gli hash dei token e lo stato di revoca.
+- SUPERIA_DATABASE_URL: URL PostgreSQL condiviso da usare in produzione per autenticazione e stato router (preferito se presente). La credenziale va conservata solo come segreto server-side.
+- SUPERIA_AUTH_DB: percorso SQLite legacy per sviluppo/test o migrazione; non usare un file locale/\`/tmp\` come archivio auth in produzione.
 - SUPERIA_PAIRING_CODE: segreto di associazione iniziale, lungo e casuale.
 - SUPERIA_ADMIN_TOKEN: segreto amministratore distinto, lungo e casuale, necessario per revocare i dispositivi.
 - SUPERIA_API_ACCESS_TOKEN non è più usato: il vecchio token condiviso è stato rimosso dall'autenticazione.
 
 ### Limite importante per Vercel
-Il database auth è SQLite. Il filesystem /tmp di Vercel è effimero e non condiviso tra istanze: non configurare SUPERIA_AUTH_DB su /tmp in produzione, perché la revoca potrebbe non essere visibile dopo cold start o su istanze diverse. Prima del deploy serve uno storage persistente e condiviso, con piano gratuito verificato senza carta e senza overage; in mancanza, non pubblicare il backend. La conversazione resta salvata cifrata nell'app, non in questo database.
+Il backend ora dispone di un adapter comune SQLite/PostgreSQL (psycopg 3). \`SUPERIA_DATABASE_URL\` abilita PostgreSQL per auth e stato router; in assenza resta il percorso SQLite legacy. Il filesystem /tmp di Vercel è effimero e non condiviso tra istanze: non configurare SQLite su /tmp in produzione, perché revoche e cooldown potrebbero divergere dopo cold start o tra istanze. La migrazione automatica dei dati SQLite esistenti e il failover/rotazione tra database non sono ancora implementati. Prima del deploy serve un PostgreSQL persistente e condiviso, con piano gratuito verificato senza carta e senza overage; in mancanza, non pubblicare il backend. La conversazione resta salvata cifrata nell'app, non in questo database.
 
 La route di pairing richiede inoltre una protezione anti-abuso a livello gateway/WAF (limite richieste per IP). La limitazione in-process non è sufficiente in un ambiente serverless multi-istanza: non esporre pubblicamente il pairing finché non è configurato questo controllo.
 
@@ -92,3 +93,12 @@ Questi sono candidati documentali, non account, database o integrazioni già con
 La policy di rotazione è documentata, ma la rotazione automatica non è implementata. Non distribuire il backend finché questi gate non sono superati.
 
 Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https://www.prisma.io/docs/postgres/faq ; https://aiven.io/free-postgresql-database ; https://aiven.io/docs/products/postgresql/concepts/pg-free-tier ; https://neon.com/pricing ; https://neon.com/docs/introduction/pro-plan ; https://turso.tech/pricing
+
+
+## Stato dell'adapter database (implementazione iniziale)
+- `services/api/app/database.py` introduce un adapter DB-API con SQLite per sviluppo/test e PostgreSQL tramite psycopg 3.
+- `device_auth.py` e il router provider usano l'adapter; il router può condividere `SUPERIA_DATABASE_URL` per conservare cooldown e provider disabilitati tra istanze.
+- La dipendenza `psycopg[binary]` è inclusa nelle requirements backend.
+- I test automatici coprono l'adapter SQLite e il ciclo di vita dei token; non sostituiscono un test d'integrazione con un vero server PostgreSQL.
+- Non è stata ancora eseguita una migrazione dei dati da un file SQLite a PostgreSQL. Prima di cambiare il database attivo bisogna implementare export/import transazionale, verifica dei token/revoche e rollback.
+- La rotazione automatica tra provider DB non è attiva. Non configurare un database reale né pubblicare il backend finché test PostgreSQL, migrazione, rate limit e controlli economici non sono superati.
