@@ -55,3 +55,10 @@ Interfaccia: http://127.0.0.1:8000 — API docs: http://127.0.0.1:8000/docs
 
 ## Privacy e sicurezza
 La cronologia Android e i testi estratti dai documenti sono cifrati AES-GCM con chiavi non esportabili in Android Keystore. Il backend non va usato per dati altamente riservati finché hosting pubblico, hardening, rate limiting, autenticazione, retention e procedure di cancellazione non sono configurati e verificati.
+
+### Aggiornamento tecnico — streaming chat (21 novembre 2026)
+- Implementato il primo percorso SSE autenticato `POST /api/v1/chat/stream`.
+- Il router gratuito legge i delta OpenAI-compatible e può passare al provider gratuito successivo soltanto prima del primo token; dopo l'inizio della risposta non concatena un secondo modello e segnala l'interruzione.
+- Il client Android legge gli eventi SSE e aggiorna progressivamente il messaggio nella chat Compose; il testo parziale viene salvato in caso di errore/cancellazione.
+- Aggiunti test backend per delta, failover pre-token e autenticazione SSE e test Android per le validazioni del nuovo client.
+- Stato: implementazione iniziale presente, ma CI non ha ancora restituito esiti verificabili e il test end-to-end con provider reale non è stato eseguito. Non considerare la chat online pronta per produzione.
