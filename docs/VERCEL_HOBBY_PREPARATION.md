@@ -41,7 +41,7 @@ Le API rifiutano body superiori a 2 MiB, inclusi i body in streaming senza Conte
 4. Configurare i tre segreti server-side e lo storage auth persistente; non usare /tmp.
 5. Configurare rate limit per IP su pairing e revoca.
 6. Eseguire test di pairing, token scaduto, token revocato, database indisponibile, 401/403/429 e provider senza crediti.
-7. Integrare la schermata Android di associazione; il client attuale usa ancora il vecchio campo token manuale e non è ancora compatibile con il nuovo endpoint di pairing.
+7. La schermata Android ora richiede URL HTTPS e codice di associazione, chiama il nuovo endpoint di pairing e salva token e ID dispositivo cifrati tramite Android Keystore. La compatibilità va confermata con build e test Android automatici.
 8. Non collegare l'APK di produzione finché tutti i gate non sono superati.
 
 ## Preparazione tecnica
