@@ -44,3 +44,27 @@ def test_postgres_device_token_lifecycle():
     finally:
         # Revocation is idempotent; ensure no active test credential remains.
         revoke_device_token(database_url, issued["device_id"])
+
+def test_concurrent_validation_then_committed_revocation_is_fail_closed(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    database = str(tmp_path / "auth-concurrent.sqlite3")
+    issued = issue_device_token(database, "parallel-phone")
+
+    # Validations completed before revocation may succeed. Once revocation commits,
+    # every subsequent validation must reject the token.
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(
+            lambda _: validate_device_token(database, issued["access_token"]),
+            range(32),
+        ))
+    assert all(results)
+
+    assert revoke_device_token(database, issued["device_id"])
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        after_revoke = list(pool.map(
+            lambda _: validate_device_token(database, issued["access_token"]),
+            range(32),
+        ))
+    assert not any(after_revoke)
+
