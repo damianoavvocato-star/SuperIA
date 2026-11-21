@@ -14,6 +14,11 @@ class FakeProvider:
     async def list_models(self):
         return ["fake-local"]
 
+    async def stream_chat(self, messages, model=None):
+        yield {"event": "delta", "text": "Risposta ", "provider": "fake", "model": "fake-local"}
+        yield {"event": "delta", "text": "in streaming", "provider": "fake", "model": "fake-local"}
+        yield {"event": "done", "provider": "fake", "model": "fake-local"}
+
 
 @pytest.fixture
 def auth_environment(tmp_path, monkeypatch):
@@ -84,6 +89,29 @@ def test_models_and_chat_require_device_token(auth_environment):
     assert client.get("/api/v1/models").status_code == 200
     response = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]})
     assert response.status_code == 200 and response.json()["content"] == "Risposta di prova"
+
+
+def test_stream_endpoint_requires_device_token():
+    response = TestClient(app).post(
+        "/api/v1/chat/stream",
+        json={"messages": [{"role": "user", "content": "Ciao"}]},
+    )
+    assert response.status_code == 401
+
+
+def test_stream_endpoint_emits_sse_deltas_and_done(auth_environment):
+    _, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post(
+        "/api/v1/chat/stream",
+        json={"messages": [{"role": "user", "content": "Ciao"}]},
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert 'event: delta' in response.text
+    assert '"text": "Risposta "' in response.text
+    assert '"text": "in streaming"' in response.text
+    assert 'event: done' in response.text
 
 
 def test_api_rejects_missing_or_invalid_device_token(auth_environment):
