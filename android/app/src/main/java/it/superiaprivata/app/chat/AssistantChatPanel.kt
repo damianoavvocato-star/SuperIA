@@ -267,20 +267,22 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         OutlinedButton(
                             enabled = onlineConfigured && initialHistory.isSuccess && !generating,
                             onClick = {
-                                val contextHistory = messages.filterNot { it.pending }
                                 scope.launch {
                                     generating = true
                                     generationError = null
                                     try {
+                                        val pendingIndexBefore = messages.indexOfFirst { it.id == pendingLine.id }
+                                        val staleAssistant = messages.drop((pendingIndexBefore + 1).coerceAtLeast(0))
+                                            .lastOrNull { it.role == "assistant" }
+                                        if (staleAssistant?.text.isNullOrBlank()) {
+                                            staleAssistant?.let { messages.remove(it) }
+                                        }
+                                        val contextHistory = messages.filterNot { it.pending || it.id == staleAssistant?.id }
                                         val retryPrompt = buildRequestPrompt(
                                             contextHistory,
                                             pendingLine.text,
                                             documentContext
                                         )
-                                        val pendingIndexBefore = messages.indexOfFirst { it.id == pendingLine.id }
-                                        val staleAssistant = messages.drop((pendingIndexBefore + 1).coerceAtLeast(0))
-                                            .lastOrNull { it.role == "assistant" }
-                                        staleAssistant?.let { messages.remove(it) }
                                         val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
                                         messages.add(assistantLine)
                                         OnlineAssistantClient.stream(
