@@ -306,3 +306,44 @@ def test_provider_status_marks_approved_provider_ready(tmp_path):
     assert status["groq"]["available"] is True
     assert status["groq"]["state"] == "ready"
 
+
+
+
+def test_stream_chat_parses_deltas_and_fails_over_before_first_token(tmp_path):
+    async def run():
+        env = free_env("groq")
+        env.update(free_env("openrouter", "example/free-model:free"))
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            assert request.read()
+            if request.url.host == "api.groq.com":
+                return httpx.Response(429, headers={"Retry-After": "1"})
+            body = (
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
+                'data: {"choices":[{"delta":{"content":"mondo"}}]}\\n\\n'
+                'data: [DONE]\\n\\n'
+            )
+            return httpx.Response(200, headers={"content-type": "text/event-stream"}, content=body)
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "router-stream.sqlite3"),
+        )
+        events = [item async for item in router.stream_chat([{"role": "user", "content": "Ciao"}])]
+        assert [item["text"] for item in events if item["event"] == "delta"] == ["Ciao ", "mondo"]
+        assert events[-1]["event"] == "done"
+        assert events[-1]["provider"] == "openrouter"
+    asyncio.run(run())
+
+
+def test_stream_chat_rejects_unapproved_or_unavailable_models(tmp_path):
+    async def run():
+        router = FreeOnlyRouter(environ={}, state_db_path=str(tmp_path / "router-stream-empty.sqlite3"))
+        with pytest.raises(NoFreeProviderAvailable):
+            _ = [item async for item in router.stream_chat([{"role": "user", "content": "Ciao"}])]
+    asyncio.run(run())
