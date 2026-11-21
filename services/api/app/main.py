@@ -1,9 +1,11 @@
 import hmac
 import os
+from functools import lru_cache
 from pathlib import Path
+
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.schemas import ChatRequest, ChatResponse
@@ -15,7 +17,13 @@ app = FastAPI(
 )
 
 
+@lru_cache(maxsize=1)
 def get_provider() -> FreeOnlyRouter:
+    """Reuse router state within a warm serverless instance.
+
+    Vercel may recycle instances at any time: /tmp SQLite is only a local
+    best-effort cache, never the source of durable conversation history.
+    """
     return FreeOnlyRouter()
 
 
