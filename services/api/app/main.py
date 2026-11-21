@@ -4,17 +4,74 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.schemas import ChatRequest, ChatResponse
+
+MAX_API_BODY_BYTES = 2 * 1024 * 1024
+
+
+class RequestBodyLimitMiddleware:
+    """Hard cap API request bodies, including requests without Content-Length."""
+
+    def __init__(self, app, max_body_bytes: int = MAX_API_BODY_BYTES) -> None:
+        self.app = app
+        self.max_body_bytes = max_body_bytes
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] != "http" or not scope.get("path", "").startswith("/api/v1/"):
+            await self.app(scope, receive, send)
+            return
+
+        headers = dict(scope.get("headers", []))
+        raw_length = headers.get(b"content-length")
+        if raw_length:
+            try:
+                if int(raw_length) > self.max_body_bytes:
+                    await JSONResponse(
+                        status_code=413,
+                        content={"detail": "Richiesta troppo grande."},
+                    )(scope, receive, send)
+                    return
+            except ValueError:
+                await JSONResponse(
+                    status_code=400,
+                    content={"detail": "Header Content-Length non valido."},
+                )(scope, receive, send)
+                return
+
+        received_bytes = 0
+
+        async def limited_receive():
+            nonlocal received_bytes
+            message = await receive()
+            if message["type"] == "http.request":
+                received_bytes += len(message.get("body", b""))
+                if received_bytes > self.max_body_bytes:
+                    raise RequestBodyTooLarge
+            return message
+
+        try:
+            await self.app(scope, limited_receive, send)
+        except RequestBodyTooLarge:
+            await JSONResponse(
+                status_code=413,
+                content={"detail": "Richiesta troppo grande."},
+            )(scope, receive, send)
+
+
+class RequestBodyTooLarge(Exception):
+    """Raised when a streamed API request exceeds the configured body limit."""
+
 
 app = FastAPI(
     title="SuperIA Privata API",
     version="0.3.0",
     description="Router online con vincolo inderogabile free-only e nessun fallback a pagamento.",
 )
+app.add_middleware(RequestBodyLimitMiddleware, max_body_bytes=MAX_API_BODY_BYTES)
 
 
 @lru_cache(maxsize=1)
