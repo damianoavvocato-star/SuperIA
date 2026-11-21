@@ -1,20 +1,21 @@
 import hashlib
 import secrets
-import sqlite3
 import time
 import uuid
 from contextlib import closing
 from pathlib import Path
 
+from app.database import connect_database
+
 DEVICE_TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60
 
 
 def _connect(database_path: str) -> sqlite3.Connection:
+    if database_path.startswith(("postgresql://", "postgres://", "postgresql+psycopg://")):
+        return connect_database(database_path)
     path = Path(database_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(str(path), timeout=10)
-    connection.row_factory = sqlite3.Row
-    return connection
+    return connect_database(str(path))
 
 
 def initialize_auth_store(database_path: str) -> None:
@@ -25,8 +26,8 @@ def initialize_auth_store(database_path: str) -> None:
                 token_hash TEXT PRIMARY KEY,
                 device_id TEXT NOT NULL UNIQUE,
                 device_name TEXT NOT NULL,
-                created_at INTEGER NOT NULL,
-                expires_at INTEGER NOT NULL,
+                created_at BIGINT NOT NULL,
+                expires_at BIGINT NOT NULL,
                 revoked_at INTEGER
             )
             """
