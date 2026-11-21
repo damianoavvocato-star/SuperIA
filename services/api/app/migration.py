@@ -92,7 +92,6 @@ def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[s
                 )
             provider_count = len(provider_rows)
 
-        destination.commit()
         copied_tokens = destination.execute(
             "SELECT COUNT(*) AS count FROM device_tokens"
         ).fetchone()
@@ -105,6 +104,7 @@ def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[s
         }
         if result["device_tokens"] != len(token_rows) or result["provider_state"] != provider_count:
             raise RuntimeError("Post-migration row counts do not match source")
+        destination.commit()
         return result
     except Exception:
         destination.raw.rollback()
