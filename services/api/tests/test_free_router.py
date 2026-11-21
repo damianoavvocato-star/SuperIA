@@ -167,3 +167,26 @@ def test_requested_model_is_honored_without_silent_fallback(tmp_path):
             )
 
     asyncio.run(run())
+
+
+def test_postgres_provider_state_round_trip():
+    import os
+    import uuid
+
+    database_url = os.environ.get("SUPERIA_TEST_POSTGRES_URL")
+    if not database_url:
+        pytest.skip("PostgreSQL integration service is not configured")
+
+    router = FreeOnlyRouter(
+        environ={},
+        state_db_path=database_url,
+    )
+    provider_id = "integration-" + uuid.uuid4().hex
+    router._set_cooldown(provider_id, 90)
+    cooldown_until, disabled = router._state(provider_id)
+    assert cooldown_until > 0
+    assert disabled is False
+
+    router._disable(provider_id)
+    cooldown_until, disabled = router._state(provider_id)
+    assert disabled is True
