@@ -210,6 +210,90 @@ object OnlineAssistantClient {
         }
     }
 
+    suspend fun stream(
+        config: OnlineConnectionConfig,
+        prompt: String,
+        onDelta: suspend (String) -> Unit,
+    ): String = withContext(Dispatchers.IO) {
+        require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
+        require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
+        require(prompt.length <= 32_000) { "La richiesta supera il limite di 32.000 caratteri." }
+
+        val endpoint = config.endpoint.trim().trimEnd('/')
+        val base = URL(endpoint)
+        require(base.protocol.equals("https", ignoreCase = true)) {
+            "Per proteggere la conversazione è consentito soltanto HTTPS."
+        }
+        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
+            "Indirizzo backend non valido: non usare credenziali, parametri o frammenti nell'URL."
+        }
+        val connection = (URL("$endpoint/api/v1/chat/stream").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            instanceFollowRedirects = false
+            connectTimeout = 15_000
+            readTimeout = 120_000
+            doOutput = true
+            setRequestProperty("Authorization", "Bearer ${config.token}")
+            setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            setRequestProperty("Accept", "text/event-stream")
+        }
+        val answer = StringBuilder()
+        try {
+            val body = JSONObject().put(
+                "messages",
+                JSONArray().put(JSONObject().put("role", "user").put("content", prompt))
+            ).toString().toByteArray(Charsets.UTF_8)
+            connection.outputStream.use { it.write(body) }
+            val status = connection.responseCode
+            if (status !in 200..299) {
+                val raw = connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+                val detail = runCatching { JSONObject(raw).optString("detail") }.getOrNull()
+                throw IllegalStateException(detail?.takeIf { it.isNotBlank() } ?: "Errore del backend (HTTP $status).")
+            }
+
+            var eventName = ""
+            var completed = false
+            connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                while (true) {
+                    val line = reader.readLine() ?: break
+                    when {
+                        line.startsWith("event:") -> eventName = line.substringAfter("event:").trim()
+                        line.startsWith("data:") -> {
+                            val data = line.substringAfter("data:").trim()
+                            if (data.isBlank()) continue
+                            val payload = runCatching { JSONObject(data) }.getOrNull() ?: continue
+                            when (eventName) {
+                                "delta" -> {
+                                    val piece = payload.optString("text")
+                                    if (piece.isNotEmpty()) {
+                                        answer.append(piece)
+                                        withContext(kotlinx.coroutines.Dispatchers.Main) { onDelta(piece) }
+                                    }
+                                }
+                                "done" -> {
+                                    completed = true
+                                    break
+                                }
+                                "error" -> throw IllegalStateException(
+                                    payload.optString("message").ifBlank { "Il flusso online si è interrotto." }
+                                )
+                            }
+                            eventName = ""
+                        }
+                    }
+                }
+            }
+            if (!completed) throw IllegalStateException(
+                if (answer.isNotEmpty()) "Connessione interrotta: il testo parziale è stato conservato. Puoi riprendere la richiesta."
+                else "Il backend ha chiuso il flusso senza completare la risposta."
+            )
+            if (answer.isBlank()) throw IllegalStateException("Il backend ha restituito una risposta vuota.")
+            answer.toString()
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     suspend fun send(config: OnlineConnectionConfig, prompt: String): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend nelle Impostazioni." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
