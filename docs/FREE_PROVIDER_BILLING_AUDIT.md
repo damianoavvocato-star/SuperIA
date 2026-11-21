@@ -1,4 +1,4 @@
-# Audit dei fornitori AI gratuiti — SuperIA Privata
+# Audit dei fornitori AI gratuiti — SuperIA
 
 Data della verifica documentale: **20 novembre 2026**.
 
