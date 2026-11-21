@@ -1,4 +1,4 @@
-# Architettura Android-only — SuperIA Privata
+# Architettura Android-only — SuperIA
 
 Data decisione: 15 novembre 2026
 
