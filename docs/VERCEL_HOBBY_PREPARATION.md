@@ -115,3 +115,7 @@ Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https:
 
 ### Correzione e test dello stato router PostgreSQL
 Durante l'estensione dei test è emersa una differenza reale tra i driver: psycopg restituisce righe nominate (mapping), mentre SQLite consente anche l'accesso posizionale. Il router leggeva lo stato provider per indice e avrebbe potuto fallire con PostgreSQL. La lettura è stata corretta usando i nomi delle colonne e aggiunto un test d'integrazione che verifica cooldown e disabilitazione persistenti su PostgreSQL 16. CI superata nei workflow `44889299678` e `44889307686`.
+
+
+### Verifica integrità dati nella migrazione
+La migrazione manuale ora ordina le righe per chiave primaria, confronta i conteggi e calcola impronte SHA-256 canoniche separate per `device_tokens` e `provider_state`. Se anche un solo valore copiato differisce, la transazione viene annullata; le impronte vengono restituite nel riepilogo dell'operazione. I test verificano la presenza delle impronte. Questa procedura è ancora da collaudare su un database reale destinazione prima di migrare dati effettivi.
