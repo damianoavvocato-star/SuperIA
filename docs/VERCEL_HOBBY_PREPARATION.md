@@ -84,9 +84,9 @@ Questi sono candidati documentali, non account, database o integrazioni già con
 7. Se tutti i candidati gratuiti sono indisponibili, fermare le operazioni server che richiedono persistenza. Nessun upgrade, carta, acquisto, overage o fallback a pagamento.
 
 ### Stato tecnico e gate mancanti
-- `device_auth.py` usa ancora SQLite; il router provider conserva cooldown/disabilitazioni in SQLite locale. L'astrazione PostgreSQL e la migrazione non sono implementate.
-- Prima di collegare un database occorre introdurre un'interfaccia storage, mantenere SQLite solo per test/local dev e implementare PostgreSQL per produzione con transazioni e indici.
-- Occorrono test per migrazione, rollback, concorrenza, revoca su più istanze, quota esaurita e database irraggiungibile.
+- `device_auth.py` e il router provider usano l'adapter SQLite/PostgreSQL; la destinazione PostgreSQL è selezionata tramite `SUPERIA_DATABASE_URL`.
+- La CI avvia PostgreSQL 16 e verifica connessione, conversione placeholder, lettura righe nominate e ciclo di vita dei token dispositivo sul database reale di test.
+- Restano da aggiungere test specifici per concorrenza, revoca simultanea su più istanze, quota esaurita e indisponibilità prolungata del database.
 - Lo stato del router in `/tmp` è best-effort e non condiviso; non va usato come stato autorevole in produzione.
 - La protezione rate-limit/WAF per pairing e revoca resta obbligatoria prima dell'esposizione pubblica.
 
@@ -103,3 +103,11 @@ Fonti ufficiali: https://www.prisma.io/postgres/free-postgresql-hosting ; https:
 - È stato aggiunto `services/api/app/migration.py`: migrazione manuale SQLite → database condiviso, che richiede API fermata, sorgente in sola lettura e destinazione vuota; copia token e stato router e verifica i conteggi. Non è stata eseguita alcuna migrazione reale. Prima di cambiare database attivo bisogna provare la procedura su un PostgreSQL di test, verificare token/revoche e collaudare il rollback.
 - Per eseguire la migrazione manuale, con API arrestata e backup cifrato verificato, impostare `SUPERIA_MIGRATION_SOURCE_SQLITE` e `SUPERIA_DATABASE_URL`, quindi eseguire `PYTHONPATH=services/api python -m app.migration`. La destinazione deve essere vuota. Non eseguire su dati reali senza prima una prova completa e un piano di ripristino.
 - La rotazione automatica tra provider DB non è attiva. Non configurare un database reale né pubblicare il backend finché test PostgreSQL, migrazione, rate limit e controlli economici non sono superati.
+
+
+## Aggiornamento verifica PostgreSQL (21 novembre 2026)
+- La pipeline `.github/workflows/backend-tests.yml` avvia un servizio PostgreSQL 16 temporaneo per i test.
+- `test_database.py` prova la connessione PostgreSQL reale, la conversione dei placeholder e le righe nominate.
+- `test_device_auth.py` verifica emissione, validazione e revoca di token su PostgreSQL.
+- I workflow CI associati all'introduzione dei test PostgreSQL sono terminati con esito positivo; il database usato è un servizio effimero di test GitHub Actions, non un account/database esterno.
+- Nessun provider hosting o database gratuito è stato attivato. Nessuna migrazione reale, pubblicazione o configurazione di credenziali è stata eseguita.
