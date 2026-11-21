@@ -68,6 +68,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     val savedConnection = remember(connectionStore) { connectionStore.load() }
     var backendEndpoint by remember { mutableStateOf(savedConnection.endpoint) }
     var backendToken by remember { mutableStateOf(savedConnection.token) }
+    var pairingCode by rememberSaveable { mutableStateOf("") }
     var connectionStatus by remember { mutableStateOf(if (savedConnection.isConfigured) "Configurazione backend caricata in modo protetto." else "Collega un backend HTTPS per iniziare.") }
     var checkingBackend by remember { mutableStateOf(false) }
     var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
@@ -185,28 +186,40 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 singleLine = true
             )
             OutlinedTextField(
-                value = backendToken,
-                onValueChange = { backendToken = it },
+                value = pairingCode,
+                onValueChange = { pairingCode = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Token di accesso backend") },
-                placeholder = { Text("Token fornito dall'amministratore del backend") },
+                label = { Text("Codice temporaneo di associazione") },
+                placeholder = { Text("Codice fornito per collegare questo dispositivo") },
                 singleLine = true,
                 visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
-                    enabled = !generating && backendEndpoint.startsWith("https://") && backendToken.isNotBlank(),
+                    enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://") && pairingCode.length >= 16,
                     onClick = {
-                        runCatching {
-                            connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), backendToken))
-                        }.onSuccess {
-                            connectionStatus = "Configurazione salvata cifrata sul dispositivo."
-                            generationError = null
-                        }.onFailure {
-                            connectionStatus = it.message ?: "Salvataggio non riuscito."
+                        scope.launch {
+                            checkingBackend = true
+                            connectionStatus = "Associazione sicura del dispositivo in corso…"
+                            try {
+                                val paired = OnlineAssistantClient.pair(
+                                    backendEndpoint.trim(),
+                                    pairingCode,
+                                    android.os.Build.MODEL ?: "Dispositivo Android"
+                                )
+                                connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken))
+                                backendToken = paired.accessToken
+                                pairingCode = ""
+                                connectionStatus = "Dispositivo associato. Token individuale salvato cifrato; scadenza tra 90 giorni."
+                                generationError = null
+                            } catch (error: Exception) {
+                                connectionStatus = error.message ?: "Associazione non riuscita."
+                            } finally {
+                                checkingBackend = false
+                            }
                         }
                     }
-                ) { Text("Salva collegamento") }
+                ) { Text(if (checkingBackend) "Associazione…" else "Associa dispositivo") }
                 OutlinedButton(
                     enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
                     onClick = {
@@ -404,7 +417,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             }
             if (!onlineConfigured) {
                 Text(
-                    "Configura un backend HTTPS e il token nelle Impostazioni per usare la chat online.",
+                    "Configura un backend HTTPS e associa questo dispositivo per usare la chat online.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
