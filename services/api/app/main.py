@@ -124,6 +124,10 @@ async def health() -> dict[str, str]:
 
 @app.post("/api/v1/device/pair", tags=["devices"])
 async def pair_device(request: PairDeviceRequest) -> dict[str, object]:
+    # Do not expose pairing until a shared gateway/WAF rate limit is explicitly confirmed.
+    edge_limit = os.environ.get("SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED", "").strip().lower()
+    if edge_limit != "true":
+        raise HTTPException(status_code=503, detail="Associazione temporaneamente disabilitata: protezione anti-abuso non confermata.")
     expected = _required_secret("SUPERIA_PAIRING_CODE")
     if not hmac.compare_digest(request.pairing_code, expected):
         raise HTTPException(status_code=401, detail="Codice di associazione non valido.")
