@@ -189,7 +189,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 value = pairingCode,
                 onValueChange = { pairingCode = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Codice temporaneo di associazione") },
+                label = { Text("Codice di associazione") },
                 placeholder = { Text("Codice fornito per collegare questo dispositivo") },
                 singleLine = true,
                 visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
@@ -207,10 +207,10 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     pairingCode,
                                     android.os.Build.MODEL ?: "Dispositivo Android"
                                 )
-                                connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken))
+                                connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken, paired.deviceId))
                                 backendToken = paired.accessToken
                                 pairingCode = ""
-                                connectionStatus = "Dispositivo associato. Token individuale salvato cifrato; scadenza tra 90 giorni."
+                                connectionStatus = "Dispositivo associato (ID ${paired.deviceId}). Token individuale salvato cifrato; scadenza tra 90 giorni."
                                 generationError = null
                             } catch (error: Exception) {
                                 connectionStatus = error.message ?: "Associazione non riuscita."
