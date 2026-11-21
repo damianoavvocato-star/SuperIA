@@ -1,4 +1,4 @@
-# SuperIA Privata — Android
+# SuperIA — Android
 
 ## Direzione tecnica attuale
 L'app Android è **online-only per l'inferenza AI**. Non usa Gemma, LiteRT-LM, Ollama o altri modelli LLM locali. Le risposte sono richieste al backend SuperIA attraverso HTTPS.
@@ -20,7 +20,7 @@ L'app Android è **online-only per l'inferenza AI**. Non usa Gemma, LiteRT-LM, O
 La dipendenza LiteRT-LM e i sorgenti Android per motore, catalogo e importazione Gemma sono stati rimossi. La nuova versione esegue una sola volta la migrazione che elimina la precedente cronologia locale della chat; non elimina la memoria di progetto né l'archivio documenti.
 
 ## Verifica CI — 21 novembre 2026
-La pipeline Android [44925187326](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/44925187326) sul commit `9ce190cd87ed8c0114a5213ebbb534929e066c1c` è terminata **SUCCESS al secondo tentativo**. Sono riusciti test unitari, build debug, build APK firmato, upload artefatto e test strumentali Android Keystore su emulatore.
+La pipeline Android [44925187326](https://github.com/damianoavvocato-star/SuperIA/actions/runs/44925187326) sul commit `9ce190cd87ed8c0114a5213ebbb534929e066c1c` è terminata **SUCCESS al secondo tentativo**. Sono riusciti test unitari, build debug, build APK firmato, upload artefatto e test strumentali Android Keystore su emulatore.
 Artefatto: `superia-privata-installable`, ID `14716277709`, circa 31,2 MB; scadenza 19 febbraio 2027.
 Questa CI non sostituisce il collaudo pratico su Realme C75 e Xiaomi Mi 10T.
 
