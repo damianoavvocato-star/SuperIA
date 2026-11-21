@@ -1,7 +1,7 @@
-# Registro operativo delle fasi — SuperIA Privata
+# Registro operativo delle fasi — SuperIA
 
 Aggiornato: 15 novembre 2026  
-Ambito: esclusivamente il repository **SuperIA-Privata**. La roadmap ufficiale resta `docs/ROADMAP.md`; questo documento ne rende verificabili stato, attività residue e criteri di chiusura. Il progetto resta Android-only, personale, gratuito senza API a pagamento obbligatorie e local-first.
+Ambito: esclusivamente il repository **SuperIA**. La roadmap ufficiale resta `docs/ROADMAP.md`; questo documento ne rende verificabili stato, attività residue e criteri di chiusura. Il progetto resta Android-only, personale, gratuito senza API a pagamento obbligatorie e local-first.
 
 ## Legenda degli stati
 
@@ -60,8 +60,8 @@ Questo controllo confronta roadmap, file realmente presenti nella branch `main`,
 | 15 | CI Android unit test + assembleDebug + upload artifact; CI backend pytest; workflow Pages per anteprima web | **CI parziale, non collaudo/rilascio.** Non risultano test strumentali, test su device, benchmark, security test, APK release firmato, procedura aggiornamento o manuale di rilascio. |
 
 ### Evidenze CI aggiornate
-- Android run [43764049532](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764049532), commit `5c4f8ab4`: **SUCCESS**, unit test Android, `assembleDebug` e upload APK.
-- Backend run [43764208860](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764208860): **SUCCESS**.
+- Android run [43764049532](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43764049532), commit `5c4f8ab4`: **SUCCESS**, unit test Android, `assembleDebug` e upload APK.
+- Backend run [43764208860](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43764208860): **SUCCESS**.
 - Le CI non certificano inferenza reale, OCR pratico, pairing, prestazioni, sicurezza complessiva o compatibilità fisica.
 
 ### Correzioni e discrepanze rilevate
@@ -110,7 +110,7 @@ Per ciascun dispositivo registrare: modello esatto, versione Android, spazio lib
 - Distinguere sempre **codice presente**, **CI superata**, **test reale superato** e **fase chiusa**.
 - Non sommare la RAM virtuale a quella fisica.
 - Non dichiarare disponibile una funzione solo perché compare nella roadmap o in una demo statica.
-- Mantenere SuperIA-Privata separata da **Editore Foto e Video IA** e **Imperium_Italia**.
+- Mantenere SuperIA separata da **Editore Foto e Video IA** e **Imperium_Italia**.
 
 
 ## Avanzamento Fase 3 — primo incremento implementato
@@ -143,9 +143,9 @@ La Fase 3 è quindi **parziale e non completata**. Non considerare disponibile l
 
 ### Evidenze CI Fase 3
 
-- Run Android [43760034745](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760034745), commit `3b1c95f68b70c1fa5e0c41393fe34c0a49e721ed`: unit test, `assembleDebug` e upload APK tutti SUCCESS. Comprende il flusso documenti, BM25, OCR Tesseract e importazione del modello lingua.
+- Run Android [43760034745](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43760034745), commit `3b1c95f68b70c1fa5e0c41393fe34c0a49e721ed`: unit test, `assembleDebug` e upload APK tutti SUCCESS. Comprende il flusso documenti, BM25, OCR Tesseract e importazione del modello lingua.
 - Artefatto intermedio `superia-privata-debug`: 59.733.545 byte, SHA-256 archivio `d3a8d4967f79f601ae398a645184c0f52d641f738d36ed467bc622f2c53e0adc`, scadenza 13 febbraio 2027. Questo artefatto precede l'ultimo limite di quota dell'archivio e non va considerato la build definitiva.
-- Run [43760180500](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43760180500) verifica la revisione successiva con quote 50 documenti/200 MB; al momento dell'aggiornamento è ancora in esecuzione. Non dichiarare superata la CI della revisione finale finché il run non termina con SUCCESS.
+- Run [43760180500](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43760180500) verifica la revisione successiva con quote 50 documenti/200 MB; al momento dell'aggiornamento è ancora in esecuzione. Non dichiarare superata la CI della revisione finale finché il run non termina con SUCCESS.
 
 
 ## Nuovo requisito approvato: conversazione unica persistente — 15 novembre 2026
@@ -184,8 +184,8 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 ## Conversazione continua: verifica CI e ripresa richieste interrotte — 15 novembre 2026
 
 ### Evidenze verificate del primo incremento
-- Android run [43763662848](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43763662848), commit `440e4c4d`: unit test Android, assemble debug e upload APK **SUCCESS**.
-- Backend run [43763683712](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43763683712), commit `0f7f2836`: test backend **SUCCESS**.
+- Android run [43763662848](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43763662848), commit `440e4c4d`: unit test Android, assemble debug e upload APK **SUCCESS**.
+- Backend run [43763683712](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43763683712), commit `0f7f2836`: test backend **SUCCESS**.
 - Artefatto Android `superia-privata-debug`, 59.742.747 byte, digest SHA-256 archivio `49ae27b189478d391cc4e35dddded0f9dd78e895213e62874f9774cb62b8ffb1`, scadenza 13 febbraio 2027. È l'artefatto della revisione con memoria modificabile, non include le successive modifiche di ripresa richieste interrotte.
 
 ### Incremento ripresa richieste
@@ -213,8 +213,8 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 
 
 ### Esito finale CI ripresa richieste — aggiornamento 15 novembre 2026
-- Android [run 43764049532](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764049532), commit `5c4f8ab4bed0075ee6c84314f90934eed7b91c57`: workflow **SUCCESS**; unit test Android, assemble debug APK e upload artifact tutti SUCCESS.
-- Backend [run 43764089944](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43764089944), commit `2241caac22d39125e570e9fb2a9fbb2a9f62dfe0`: workflow **SUCCESS**.
+- Android [run 43764049532](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43764049532), commit `5c4f8ab4bed0075ee6c84314f90934eed7b91c57`: workflow **SUCCESS**; unit test Android, assemble debug APK e upload artifact tutti SUCCESS.
+- Backend [run 43764089944](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43764089944), commit `2241caac22d39125e570e9fb2a9fbb2a9f62dfe0`: workflow **SUCCESS**.
 - Artefatto aggiornato `superia-privata-debug`, ID `14181935552`, 59.748.079 byte, digest SHA-256 archivio `a84696e6897848c5941ff877c1d8878e584f4a72af9e2e9252f7284d330b47f8`, scadenza 13 febbraio 2027.
 - Anche Android run intermedio `43764036071` ha completato test/build/upload; il riferimento definitivo resta l'ultimo commit `5c4f8ab4`.
 - La CI conferma compilazione e test automatici, non prova riavvio/process death, modello in esecuzione o comportamento su hardware reale.
@@ -223,8 +223,8 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 ## Copertura aggiuntiva test conversazione lunga — 15 novembre 2026
 
 - Commit `ca49c9b3f8c5fd44349985ff335f219441bdd670`: aggiunti test unitari per verificare che i messaggi più pertinenti recuperati dalla cronologia mantengano l'ordine temporale originale, che il recupero sia limitato a `MAX_RECALLED_MESSAGES`, che i messaggi non pertinenti vengano esclusi e che memoria/documenti siano etichettati esplicitamente come contesto e non come istruzioni.
-- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
-- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): ancora **IN_PROGRESS** al momento di questo aggiornamento; non dichiarare superati i nuovi test né disponibile il nuovo APK finché la run non termina.
+- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43765011829): **SUCCESS**.
+- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43765011809): ancora **IN_PROGRESS** al momento di questo aggiornamento; non dichiarare superati i nuovi test né disponibile il nuovo APK finché la run non termina.
 - Questi test coprono la costruzione del contesto del prompt; non sostituiscono test Android strumentali su cifratura, migrazione, recupero dopo process death, inferenza incrementale o dispositivi reali.
 
 
@@ -240,8 +240,8 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 
 ### CI dei test contesto conversazionale
 
-- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011809): **SUCCESS**, unit test, assembleDebug e upload APK.
-- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43765011829): **SUCCESS**.
+- Android run [43765011809](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43765011809): **SUCCESS**, unit test, assembleDebug e upload APK.
+- Backend run [43765011829](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43765011829): **SUCCESS**.
 - Artefatto Android `superia-privata-debug`, ID `14181443808`, 59.748.118 byte, SHA-256 archivio `e4e14303623d858ae5d3548e119bb3d22f045b72c97b670feb835394bf57ca4c`, scadenza 13 febbraio 2027. È relativo al commit `ca49c9b3`, non contiene ancora l'incremento di output progressivo.
 
 
@@ -252,7 +252,7 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 - Estratto l'accumulo in `StreamingTextAccumulator` e aggiunti test unitari per concatenazione ordinata, testo cumulativo e chunk vuoti.
 - L'adapter ora passa anche `InferenceRequest.maxOutputTokens` a `sendMessageAsync(..., maxOutputToken = ...)` e rifiuta limiti non positivi: prima il campo della richiesta non veniva applicato.
 - Commit: `5b540fff` (accumulatore), `2a4f4573` (test), `415ff74c` (adapter), `59a393c0` (limite token).
-- CI di riferimento precedente: Android run [43810811687](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811687) **SUCCESS** e backend run [43810811557](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43810811557) **SUCCESS** sul commit `875ded1e`; queste run precedono i quattro commit elencati sopra. La nuova CI deve essere eseguita e superata prima di convalidare questa revisione.
+- CI di riferimento precedente: Android run [43810811687](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43810811687) **SUCCESS** e backend run [43810811557](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43810811557) **SUCCESS** sul commit `875ded1e`; queste run precedono i quattro commit elencati sopra. La nuova CI deve essere eseguita e superata prima di convalidare questa revisione.
 - **Residui che impediscono la chiusura Fase 2:** test strumentali di `ChatHistoryStore` (Android Keystore/AES-GCM, migrazione, archivio corrotto e recupero AtomicFile), test pratico con Gemma importato e inferenza/streaming visibili, verifica della persistenza dopo chiusura forzata/riavvio, misure RAM/tempi/temperatura/batteria su Realme C75 e Xiaomi Mi 10T. Restano inoltre fuori dal primo incremento la memoria automatica/riassunti progressivi, il retrieval semantico e il cambio modello senza perdere la conversazione.
 - **Stato aggiornato:** codice streaming e limite token implementati; test unitari aggiunti; nuova CI in attesa. Fase 2 resta parziale e non chiusa. Nessun test fisico può essere simulato dalla CI remota.
 
@@ -268,18 +268,18 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 
 ### Stabilizzazione emulatore CI e protezione cronologia durante inferenza — 16 novembre 2026
 
-- La prima esecuzione strumentale [43817419853](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43817419853) ha superato i test unitari ma è fallita prima dei test Android perché l'emulatore API 35 non ha completato il boot entro il timeout.
+- La prima esecuzione strumentale [43817419853](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43817419853) ha superato i test unitari ma è fallita prima dei test Android perché l'emulatore API 35 non ha completato il boot entro il timeout.
 - Aggiornata la matrice emulatore a API 34 / Google APIs / x86_64, boot timeout 900 secondi, rendering SwiftShader, snapshot disabilitati e animazioni disabilitate.
-- Nuova esecuzione [43833756542](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833756542): unit test superati; test strumentali in esecuzione al momento della registrazione.
-- Commit successivo [92dd143a](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/92dd143a170f1243a48b0adbc0c3e85b04f595f5) disabilita il comando "Cancella cronologia" mentre l'inferenza è attiva, evitando che una risposta in corso possa riscrivere una cronologia appena cancellata.
-- Nuova CI sul commit 92dd143a: Android [43833963899](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963899) in esecuzione; backend [43833963975](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963975) in coda al momento dell'aggiornamento.
+- Nuova esecuzione [43833756542](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43833756542): unit test superati; test strumentali in esecuzione al momento della registrazione.
+- Commit successivo [92dd143a](https://github.com/damianoavvocato-star/SuperIA/commit/92dd143a170f1243a48b0adbc0c3e85b04f595f5) disabilita il comando "Cancella cronologia" mentre l'inferenza è attiva, evitando che una risposta in corso possa riscrivere una cronologia appena cancellata.
+- Nuova CI sul commit 92dd143a: Android [43833963899](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43833963899) in esecuzione; backend [43833963975](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43833963975) in coda al momento dell'aggiornamento.
 - La Fase 2 resta aperta fino all'esito dei test strumentali, alla verifica di inferenza reale e ai test sui dispositivi target.
 
 
 ### Esito CI Keystore e correzione avvio emulatore — 16 novembre 2026
 
-- Android [run 43833756542](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833756542), commit `ebf08e62`: **SUCCESS**. I test unitari, i test strumentali Android Keystore, la compilazione APK debug e l'upload dell'artefatto sono tutti terminati con successo.
-- Android [run 43833963899](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43833963899), commit `92dd143a`: **FAILURE ambientale prima dell'esecuzione dei test**. Il log mostra `Starting 0 tests` e fallimento installazione APK perché Android Package Installer ha tentato di leggere il provider Settings prima che i system providers fossero installati. Non è un fallimento di un'asserzione della suite; i test strumentali non sono partiti.
+- Android [run 43833756542](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43833756542), commit `ebf08e62`: **SUCCESS**. I test unitari, i test strumentali Android Keystore, la compilazione APK debug e l'upload dell'artefatto sono tutti terminati con successo.
+- Android [run 43833963899](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43833963899), commit `92dd143a`: **FAILURE ambientale prima dell'esecuzione dei test**. Il log mostra `Starting 0 tests` e fallimento installazione APK perché Android Package Installer ha tentato di leggere il provider Settings prima che i system providers fossero installati. Non è un fallimento di un'asserzione della suite; i test strumentali non sono partiti.
 - Corretto il workflow nel commit `3355bc05`: prima di `connectedDebugAndroidTest` attende `sys.boot_completed=1`, la disponibilità del package manager e altri 10 secondi di stabilizzazione; se i servizi non diventano pronti entro 180 secondi, il job fallisce con diagnostica invece di lanciare test su un emulatore incompleto.
 - La nuova esecuzione CI sul commit `3355bc05` deve ancora terminare: non considerare convalidata la correzione finché la run Android non risulta SUCCESS.
 - La suite strumentale ha già un'esecuzione riuscita sul commit `ebf08e62`; la successiva revisione `92dd143a` include anche la protezione UI che disabilita la cancellazione cronologia durante inferenza, ma la sua CI è stata interrotta dal problema di avvio/installazione dell'emulatore.
@@ -297,9 +297,9 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 
 ### Diagnostica CI emulatore e correzione invocazione script — 16 novembre 2026
 
-- Android run [43883393409](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883393409) e [43883636513](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883636513): unit test Android **SUCCESS**, ma il job strumentale è terminato prima di Gradle con errore di sintassi della shell (ciclo for incompleto). Non è un fallimento di test dell'app: lo script multi-linea passato all'azione dell'emulatore è stato interpretato in modo incompleto.
-- Backend [43883636647](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883636647) e [43883668712](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43883668712): **SUCCESS**.
-- Corretto il workflow Android nel commit [63c32675](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/63c326759a9769d2fbeccc2e11a7f19bdafbc68c): il comando di attesa boot + avvio test è ora una singola istruzione shell, evitando il troncamento del blocco multi-linea.
+- Android run [43883393409](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43883393409) e [43883636513](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43883636513): unit test Android **SUCCESS**, ma il job strumentale è terminato prima di Gradle con errore di sintassi della shell (ciclo for incompleto). Non è un fallimento di test dell'app: lo script multi-linea passato all'azione dell'emulatore è stato interpretato in modo incompleto.
+- Backend [43883636647](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43883636647) e [43883668712](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43883668712): **SUCCESS**.
+- Corretto il workflow Android nel commit [63c32675](https://github.com/damianoavvocato-star/SuperIA/commit/63c326759a9769d2fbeccc2e11a7f19bdafbc68c): il comando di attesa boot + avvio test è ora una singola istruzione shell, evitando il troncamento del blocco multi-linea.
 - **Verifica ancora pendente:** la nuova run Android deve dimostrare che l'emulatore arriva alla suite strumentale, che tutti i test passano e che APK debug e artefatto vengono prodotti. Non anticipare l'esito.
 - Il gate fisico Fase 2 resta aperto: Gemma importato, inferenza/streaming, persistenza dopo riavvio e benchmark su Realme C75 e Xiaomi Mi 10T richiedono i dispositivi reali; la CI emulata non può certificare questi risultati.
 
@@ -307,7 +307,7 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 ### Test di regressione contesto conversazione — 16 novembre 2026
 
 - Aggiunti tre test unitari a ChatPromptBuilderTest: limite della memoria di progetto molto lunga, limiti simultanei di cronologia e documento con conservazione del nuovo messaggio, rifiuto di un limite cronologia pari a zero.
-- Commit [516b5e2d](https://github.com/damianoavvocato-star/SuperIA-Privata/commit/516b5e2d9b3fdf2b8e4628472143480858075e05). Il commit modifica un file sotto android/, quindi è previsto l'avvio del workflow Android configurato sul branch main.
+- Commit [516b5e2d](https://github.com/damianoavvocato-star/SuperIA/commit/516b5e2d9b3fdf2b8e4628472143480858075e05). Il commit modifica un file sotto android/, quindi è previsto l'avvio del workflow Android configurato sul branch main.
 - Esito dei nuovi test e della CI non ancora disponibile/verificato in questa registrazione.
 - Restano aperti i gate di inferenza reale Gemma, ripresa dopo interruzione, compatibilità/performance sui due telefoni target e verifica finale APK sulla revisione più recente.
 
@@ -347,19 +347,19 @@ Limiti ancora aperti: il recupero dei messaggi è lessicale e non semantico; la 
 
 ### Pubblicazione APK e stato CI — 16 novembre 2026 (run 43890341130)
 
-- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android **SUCCESS**; `assembleDebug` **SUCCESS**; upload artifact **SUCCESS**.
+- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: test unitari Android **SUCCESS**; `assembleDebug` **SUCCESS**; upload artifact **SUCCESS**.
 - Artefatto `superia-privata-debug`, ID `14235164539`, dimensione archivio 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
 - Al controllo delle 15:54 CET, lo step `Run Android Keystore instrumentation tests` risultava ancora **IN_PROGRESS**. La run Android nel suo complesso non è quindi conclusa e i test strumentali non sono ancora attestati come superati su questa revisione.
-- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890360518), commit documentale `edce5e40a01bdae002065178c3ace5e2d437c188`: **SUCCESS**.
+- Backend run [43890360518](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890360518), commit documentale `edce5e40a01bdae002065178c3ace5e2d437c188`: **SUCCESS**.
 - L'APK è un artefatto debug CI, non una release firmata né una certificazione di compatibilità sui telefoni. Restano obbligatori test reali con Gemma importato, ripresa dopo chiusura/riavvio e misure su Realme C75 e Xiaomi Mi 10T.
 
 
 ### Esito CI Android Keystore — 16 novembre 2026 (run 43890341130)
 
-- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
+- Android run [43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), commit `a82cf5ca255ebcb9b619d773768adb97b87facee`: **SUCCESS**.
 - Test unitari Android: SUCCESS; compilazione APK debug: SUCCESS; upload artifact: SUCCESS.
 - Test strumentali Android Keystore eseguiti su emulatore API 34: **6 test avviati, 6 terminati; task `connectedDebugAndroidTest` e build Gradle SUCCESS**.
 - Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte; SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`; scadenza 14 febbraio 2027.
 - Questo risultato convalida la suite strumentale sul solo emulatore CI. Non dimostra inferenza Gemma reale, ripresa dopo force-stop/riavvio su device, né prestazioni sui telefoni Realme C75 e Xiaomi Mi 10T.
-- Una precedente run Android [43890080541](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890080541), commit `fa712c9...`, risultava ancora in corso al controllo; è una run distinta e più vecchia. Non è stata modificata o annullata.
+- Una precedente run Android [43890080541](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890080541), commit `fa712c9...`, risultava ancora in corso al controllo; è una run distinta e più vecchia. Non è stata modificata o annullata.
 - **Stato Fase 2:** test automatici e strumentali CI superati su questa revisione; fase ancora **parziale** in attesa dei test end-to-end con Gemma e dei collaudi fisici sui due dispositivi target.
