@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": "SuperIA Privata",
+  "project": "SuperIA",
   "created_at": "2026-11-15",
   "purpose": "Candidate model families for later hardware-specific evaluation. No model is approved for distribution or automatically downloaded by this registry.",
   "policy": {
