@@ -198,17 +198,17 @@ async def chat_stream(
             ):
                 event = item.get("event", "delta")
                 payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
-                yield f"event: {event}\\ndata: {payload}\\n\\n"
+                yield f"event: {event}\ndata: {payload}\n\n"
         except NoFreeProviderAvailable as exc:
             payload = json.dumps({"message": str(exc), "retryable": True}, ensure_ascii=False)
-            yield f"event: error\\ndata: {payload}\\n\\n"
+            yield f"event: error\ndata: {payload}\n\n"
         except Exception as exc:
             payload = json.dumps({
                 "message": "Il flusso si è interrotto. Il testo già ricevuto resta visibile; non è stato effettuato un fallback dopo l'inizio della risposta.",
                 "retryable": True,
                 "error_type": type(exc).__name__,
             }, ensure_ascii=False)
-            yield f"event: error\\ndata: {payload}\\n\\n"
+            yield f"event: error\ndata: {payload}\n\n"
 
     return StreamingResponse(
         events(),
