@@ -1,6 +1,6 @@
 # Android signing and updates
 
-SuperIA Privata uses one persistent Android signing key for every installable APK.
+SuperIA uses one persistent Android signing key for every installable APK.
 
 ## Required GitHub Actions repository secrets
 
