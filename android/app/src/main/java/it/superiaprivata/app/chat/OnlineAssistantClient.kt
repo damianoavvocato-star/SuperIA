@@ -76,7 +76,52 @@ class OnlineConnectionStore(context: Context) {
     }
 }
 
+data class PairingResult(val accessToken: String, val deviceId: String, val expiresAtEpochSeconds: Long)
+
 object OnlineAssistantClient {
+    suspend fun pair(endpointValue: String, pairingCode: String, deviceName: String): PairingResult = withContext(Dispatchers.IO) {
+        require(pairingCode.length >= 16) { "Il codice di associazione deve contenere almeno 16 caratteri." }
+        val endpoint = endpointValue.trim().trimEnd('/')
+        val base = URL(endpoint)
+        require(base.protocol.equals("https", ignoreCase = true)) {
+            "Per proteggere l'associazione è consentito soltanto HTTPS."
+        }
+        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
+            "Indirizzo backend non valido."
+        }
+        val connection = (URL("$endpoint/api/v1/device/pair").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            instanceFollowRedirects = false
+            connectTimeout = 15_000
+            readTimeout = 15_000
+            doOutput = true
+            setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            setRequestProperty("Accept", "application/json")
+        }
+        try {
+            val body = JSONObject().put("pairing_code", pairingCode)
+                .put("device_name", deviceName.take(80))
+                .toString().toByteArray(Charsets.UTF_8)
+            connection.outputStream.use { it.write(body) }
+            val status = connection.responseCode
+            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
+            val raw = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+            val json = runCatching { JSONObject(raw) }.getOrNull()
+            if (status !in 200..299) {
+                val detail = json?.optString("detail")?.takeIf { it.isNotBlank() }
+                throw IllegalStateException(detail ?: "Associazione non riuscita (HTTP $status).")
+            }
+            val token = json?.optString("access_token").orEmpty()
+            val deviceId = json?.optString("device_id").orEmpty()
+            val expiresAt = json?.optLong("expires_at") ?: 0L
+            require(token.isNotBlank() && deviceId.isNotBlank() && expiresAt > 0L) {
+                "Il backend ha restituito dati di associazione incompleti."
+            }
+            PairingResult(token, deviceId, expiresAt)
+        } finally {
+            connection.disconnect()
+        }
+    }
     suspend fun checkHealth(endpointValue: String): String = withContext(Dispatchers.IO) {
         val endpoint = endpointValue.trim().trimEnd('/')
         val base = URL(endpoint)
