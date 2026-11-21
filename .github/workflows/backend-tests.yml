@@ -9,6 +9,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: superia
+          POSTGRES_PASSWORD: superia-test
+          POSTGRES_DB: superia_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U superia -d superia_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      SUPERIA_TEST_POSTGRES_URL: postgresql://superia:superia-test@localhost:5432/superia_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
