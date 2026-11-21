@@ -1,5 +1,18 @@
 # Roadmap generale — SuperIA
 
+## Aggiornamento vincolante — 21 novembre 2026
+
+Questo aggiornamento prevale sulle note storiche più vecchie presenti nel documento.
+
+- La direzione attuale è online-only: inferenza AI tramite backend SuperIA HTTPS. Gemma/LiteRT-LM e il runtime LLM locale sono stati rimossi dal progetto Android; le vecchie sezioni che descrivono inferenza locale sono archivio storico, non attività correnti.
+- La chat Android, il pairing individuale, la cronologia cifrata, la memoria di progetto, la preparazione del contesto e il router backend sono incrementi presenti nel codice, ma non equivalgono a un servizio online pronto.
+- Il backend non è pubblicato, non è collegato a un database di produzione e non ha provider reali attivati. Restano da completare hosting gratuito verificato, database persistente, rate limiting reale al gateway/WAF, provider approvati, streaming, failover, gestione quote e collaudo end-to-end.
+- Il workflow Android corrente è solo test unitari (gradle --no-daemon testDebugUnitTest). Non deve assemblare, firmare o caricare APK.
+- Blocco APK: non generare APK intermedi. Una singola build APK definitiva sarà consentita soltanto dopo che tutte le funzioni necessarie alla chat online saranno implementate e verificate end-to-end.
+- Per lo stato operativo e i criteri aggiornati consultare docs/PHASE_TRACKER.md, docs/PHASE2_STATUS.md e docs/ONLINE_ONLY_MIGRATION_PLAN.md.
+
+Le voci storiche successive in questo documento possono contenere esiti di build e artefatti APK prodotti prima del blocco. Sono registrazioni del passato e non autorizzano nuove build.
+
 ## Obiettivo e decisioni vincolanti
 
 Costruire un'unica piattaforma Android personale e non commerciale che riunisca, in un'interfaccia sola, il maggior numero possibile di capacità delle 182 IA e di nuove funzioni richieste dall'utente. Le capacità si acquisiscono tramite componenti open source compatibili, replica funzionale indipendente e connettori/API ufficiali. L'uso personale non annulla automaticamente copyright, licenze o termini dei servizi: non si copiano codice, pesi, asset o servizi proprietari senza autorizzazione. Il processo è definito in [docs/FUNCTION_REPLICATION_AND_INTEGRATION.md](FUNCTION_REPLICATION_AND_INTEGRATION.md).
