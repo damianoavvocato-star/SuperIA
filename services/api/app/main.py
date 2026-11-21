@@ -3,14 +3,20 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field
 
+from app.device_auth import issue_device_token, revoke_device_token, validate_device_token
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.schemas import ChatRequest, ChatResponse
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
+
+
+class RequestBodyTooLarge(Exception):
+    """Raised when a streamed API request exceeds the configured body limit."""
 
 
 class RequestBodyLimitMiddleware:
@@ -24,24 +30,15 @@ class RequestBodyLimitMiddleware:
         if scope["type"] != "http" or not scope.get("path", "").startswith("/api/v1/"):
             await self.app(scope, receive, send)
             return
-
-        headers = dict(scope.get("headers", []))
-        raw_length = headers.get(b"content-length")
+        raw_length = dict(scope.get("headers", [])).get(b"content-length")
         if raw_length:
             try:
                 if int(raw_length) > self.max_body_bytes:
-                    await JSONResponse(
-                        status_code=413,
-                        content={"detail": "Richiesta troppo grande."},
-                    )(scope, receive, send)
+                    await JSONResponse(status_code=413, content={"detail": "Richiesta troppo grande."})(scope, receive, send)
                     return
             except ValueError:
-                await JSONResponse(
-                    status_code=400,
-                    content={"detail": "Header Content-Length non valido."},
-                )(scope, receive, send)
+                await JSONResponse(status_code=400, content={"detail": "Header Content-Length non valido."})(scope, receive, send)
                 return
-
         received_bytes = 0
 
         async def limited_receive():
@@ -56,49 +53,62 @@ class RequestBodyLimitMiddleware:
         try:
             await self.app(scope, limited_receive, send)
         except RequestBodyTooLarge:
-            await JSONResponse(
-                status_code=413,
-                content={"detail": "Richiesta troppo grande."},
-            )(scope, receive, send)
+            await JSONResponse(status_code=413, content={"detail": "Richiesta troppo grande."})(scope, receive, send)
 
 
-class RequestBodyTooLarge(Exception):
-    """Raised when a streamed API request exceeds the configured body limit."""
+class PairDeviceRequest(BaseModel):
+    pairing_code: str = Field(min_length=16, max_length=256)
+    device_name: str = Field(min_length=1, max_length=80)
+
+
+class RevokeDeviceRequest(BaseModel):
+    device_id: str = Field(min_length=36, max_length=36)
 
 
 app = FastAPI(
     title="SuperIA Privata API",
-    version="0.3.0",
-    description="Router online con vincolo inderogabile free-only e nessun fallback a pagamento.",
+    version="0.4.0",
+    description="Router online free-only con associazione dispositivi e token revocabili.",
 )
 app.add_middleware(RequestBodyLimitMiddleware, max_body_bytes=MAX_API_BODY_BYTES)
 
 
 @lru_cache(maxsize=1)
 def get_provider() -> FreeOnlyRouter:
-    """Reuse router state within a warm serverless instance.
-
-    Vercel may recycle instances at any time: /tmp SQLite is only a local
-    best-effort cache, never the source of durable conversation history.
-    """
+    """Reuse router state within a warm serverless instance."""
     return FreeOnlyRouter()
 
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
 
+def _required_secret(name: str) -> str:
+    value = os.environ.get(name, "").strip()
+    if not value:
+        raise HTTPException(status_code=503, detail=f"Configurazione server mancante: {name}.")
+    return value
+
+
+def _auth_database_path() -> str:
+    return _required_secret("SUPERIA_AUTH_DB")
+
+
 async def require_api_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> None:
-    configured_token = os.environ.get("SUPERIA_API_ACCESS_TOKEN", "").strip()
-    if not configured_token:
-        raise HTTPException(
-            status_code=503,
-            detail="Backend non configurato: token di accesso non impostato.",
-        )
-    supplied_token = credentials.credentials if credentials else ""
-    if not supplied_token or not hmac.compare_digest(supplied_token, configured_token):
-        raise HTTPException(status_code=401, detail="Token di accesso mancante o non valido.")
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=401, detail="Token dispositivo mancante o non valido.")
+    if not validate_device_token(_auth_database_path(), credentials.credentials):
+        raise HTTPException(status_code=401, detail="Token dispositivo scaduto, revocato o non valido.")
+
+
+async def require_admin_token(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+) -> None:
+    expected = _required_secret("SUPERIA_ADMIN_TOKEN")
+    supplied = credentials.credentials if credentials else ""
+    if not supplied or not hmac.compare_digest(supplied, expected):
+        raise HTTPException(status_code=401, detail="Credenziale amministratore non valida.")
 
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
@@ -111,6 +121,25 @@ async def health() -> dict[str, str]:
     return {"status": "ok", "project": "SuperIA Privata"}
 
 
+@app.post("/api/v1/device/pair", tags=["devices"])
+async def pair_device(request: PairDeviceRequest) -> dict[str, object]:
+    expected = _required_secret("SUPERIA_PAIRING_CODE")
+    if not hmac.compare_digest(request.pairing_code, expected):
+        raise HTTPException(status_code=401, detail="Codice di associazione non valido.")
+    return issue_device_token(_auth_database_path(), request.device_name)
+
+
+@app.post("/api/v1/device/revoke", tags=["devices"])
+async def revoke_device(
+    request: RevokeDeviceRequest,
+    _: None = Depends(require_admin_token),
+) -> dict[str, bool]:
+    revoked = revoke_device_token(_auth_database_path(), request.device_id)
+    if not revoked:
+        raise HTTPException(status_code=404, detail="Dispositivo non trovato o già revocato.")
+    return {"revoked": True}
+
+
 @app.get("/api/v1/capabilities", tags=["system"])
 async def capabilities(
     _: None = Depends(require_api_token),
@@ -119,17 +148,9 @@ async def capabilities(
     configured = await provider.list_models()
     return {
         "project": "SuperIA Privata",
-        "version": "0.3.0",
+        "version": "0.4.0",
         "mode": "online-free-only",
-        "modules": {
-            "assistant": "online-free-only",
-            "images": "planned",
-            "video": "planned",
-            "audio": "planned",
-            "coding": "planned",
-            "research": "planned",
-            "agents": "planned",
-        },
+        "modules": {"assistant": "online-free-only", "images": "planned", "video": "planned", "audio": "planned", "coding": "planned", "research": "planned", "agents": "planned"},
         "external_providers_enabled_by_default": False,
         "paid_fallback": False,
         "payment_methods_allowed": False,
@@ -146,10 +167,7 @@ async def providers(
     return {
         "mode": "free-only",
         "paid_fallback": False,
-        "providers": [
-            {"id": item, "enabled": any(model.startswith(item + ":") for model in configured)}
-            for item in FreeOnlyRouter.PROVIDER_ORDER
-        ],
+        "providers": [{"id": item, "enabled": any(model.startswith(item + ":") for model in configured)} for item in FreeOnlyRouter.PROVIDER_ORDER],
     }
 
 
