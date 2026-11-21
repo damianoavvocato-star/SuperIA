@@ -110,13 +110,16 @@ def test_cooldown_survives_router_recreation(tmp_path):
     asyncio.run(run())
 
 
-def test_auth_or_billing_error_persistently_disables_provider(tmp_path):
+@pytest.mark.parametrize("status_code", [401, 402, 403])
+def test_auth_or_billing_error_persistently_disables_provider(tmp_path, status_code):
     async def run():
         env = free_env("groq")
-        state_db = str(tmp_path / "router-state.sqlite3")
+        state_db = str(tmp_path / f"router-state-{status_code}.sqlite3")
+        calls = []
 
         def handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(402, json={"error": "payment required"})
+            calls.append(request.url.host)
+            return httpx.Response(status_code, json={"error": "provider rejected request"})
 
         transport = httpx.MockTransport(handler)
 
@@ -130,6 +133,9 @@ def test_auth_or_billing_error_persistently_disables_provider(tmp_path):
         second = FreeOnlyRouter(environ=env, client_factory=client_factory, state_db_path=state_db)
         with pytest.raises(NoFreeProviderAvailable):
             await second.chat([{"role": "user", "content": "Ancora ciao"}])
+
+        assert calls == ["api.groq.com"]
+
     asyncio.run(run())
 
 
