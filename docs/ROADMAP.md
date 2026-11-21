@@ -1,4 +1,4 @@
-# Roadmap generale — SuperIA Privata
+# Roadmap generale — SuperIA
 
 ## Obiettivo e decisioni vincolanti
 
@@ -86,7 +86,7 @@ Una fase passa a "completata" solo quando:
 
 ## Regola di separazione
 
-Tutto il lavoro di questa roadmap riguarda esclusivamente **SuperIA Privata**. Non modificare repository, file, database, impostazioni o pipeline di **Editore Foto e Video IA**.
+Tutto il lavoro di questa roadmap riguarda esclusivamente **SuperIA**. Non modificare repository, file, database, impostazioni o pipeline di **Editore Foto e Video IA**.
 
 
 ## Aggiornamento motore AI locale — 15 novembre 2026
@@ -134,7 +134,7 @@ Questo aggiornamento sostituisce le note precedenti che descrivevano la chat And
 - ricostruzione del contesto a partire dagli ultimi 12 messaggi, limitata a 6.000 caratteri;
 - chiusura delle risorse native anche quando l'inizializzazione del runtime fallisce e gestione esplicita delle risposte vuote.
 
-CI: Android run [43758098267](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098267); backend run [43758098112](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098112). Artefatto `superia-privata-debug`, archivio 38.276.044 byte, SHA-256 `ff54a42a7fdcb49b986e9da31c0fdfe6939b49322241b49d9d6450fb6dbefda4`, scadenza 13 febbraio 2027.
+CI: Android run [43758098267](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098267); backend run [43758098112](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098112). Artefatto `superia-privata-debug`, archivio 38.276.044 byte, SHA-256 `ff54a42a7fdcb49b986e9da31c0fdfe6939b49322241b49d9d6450fb6dbefda4`, scadenza 13 febbraio 2027.
 
 **La Fase 2 non viene dichiarata completata**: manca la prova end-to-end con il modello Gemma scaricato/importato e inferenza locale reale su Realme C75 e Xiaomi Mi 10T. Dettagli e gate in [docs/PHASE2_STATUS.md](PHASE2_STATUS.md) e [docs/ANDROID_RUNTIME_VALIDATION.md](ANDROID_RUNTIME_VALIDATION.md).
 
@@ -148,7 +148,7 @@ Limiti dichiarati: 25 MB per file, 250 pagine PDF, 200.000 caratteri estratti; O
 
 ## Requisito vincolante: conversazione continua e memoria di lavoro
 
-Decisione approvata dall'utente il 15 novembre 2026: SuperIA Privata deve offrire una conversazione principale persistente e continuabile nel tempo, senza obbligare l'utente ad aprire una nuova chat quando il contesto diventa lungo. La cronologia deve sopravvivere alla chiusura dell'app e al riavvio del dispositivo; il sistema deve mantenere un registro strutturato di obiettivi, decisioni, istruzioni, file e attività svolte, con riepiloghi progressivi e recupero selettivo dei messaggi/documenti pertinenti quando il limite di contesto del modello viene raggiunto. Il passaggio tra modelli deve preservare la stessa conversazione e il relativo contesto.
+Decisione approvata dall'utente il 15 novembre 2026: SuperIA deve offrire una conversazione principale persistente e continuabile nel tempo, senza obbligare l'utente ad aprire una nuova chat quando il contesto diventa lungo. La cronologia deve sopravvivere alla chiusura dell'app e al riavvio del dispositivo; il sistema deve mantenere un registro strutturato di obiettivi, decisioni, istruzioni, file e attività svolte, con riepiloghi progressivi e recupero selettivo dei messaggi/documenti pertinenti quando il limite di contesto del modello viene raggiunto. Il passaggio tra modelli deve preservare la stessa conversazione e il relativo contesto.
 
 Il requisito non implica che l'intera cronologia venga caricata in ogni richiesta: il motore deve ricostruire il contesto utile usando cronologia persistente, memoria di progetto, riepiloghi verificabili e retrieval locale. Deve essere possibile riprendere attività interrotte e distinguere chiaramente attività completate, in corso e bloccate. Conservazione locale cifrata, controllo utente su esportazione/cancellazione, privacy e funzionamento offline dove possibile sono obbligatori. Nessuna promessa di memoria perfetta: il sistema deve mostrare e consentire di correggere i riepiloghi e non inventare dettagli mancanti.
 
