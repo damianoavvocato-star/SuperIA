@@ -85,4 +85,26 @@ class OnlineAssistantClientTest {
             }
         }
     }
+
+    @Test
+    fun authenticatedReadinessRejectsPlainHttp() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.checkOnlineReadiness(
+                    OnlineConnectionConfig("http://example.test", "test-token")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun authenticatedReadinessRequiresDeviceToken() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.checkOnlineReadiness(
+                    OnlineConnectionConfig("https://example.test", "")
+                )
+            }
+        }
+    }
 }
