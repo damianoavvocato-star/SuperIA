@@ -42,6 +42,42 @@ class OnlineAssistantClientTest {
     }
 
     @Test
+    fun streamingRefusesPlainHttpBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("http://example.test", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRequiresDeviceCredentials() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", ""),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsOversizedPromptBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    "x".repeat(32_001)
+                ) {}
+            }
+        }
+    }
+
+    @Test
     fun healthCheckAlsoRejectsPlainHttp() {
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking {
