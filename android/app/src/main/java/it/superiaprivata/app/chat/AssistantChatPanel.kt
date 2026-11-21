@@ -277,22 +277,32 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             pendingLine.text,
                                             documentContext
                                         )
-                                        val result = OnlineAssistantClient.send(
+                                        val pendingIndexBefore = messages.indexOfFirst { it.id == pendingLine.id }
+                                        val staleAssistant = messages.drop((pendingIndexBefore + 1).coerceAtLeast(0))
+                                            .lastOrNull { it.role == "assistant" }
+                                        staleAssistant?.let { messages.remove(it) }
+                                        val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
+                                        messages.add(assistantLine)
+                                        OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                             retryPrompt
-                                        )
+                                        ) { piece ->
+                                            val index = messages.indexOfFirst { it.id == assistantLine.id }
+                                            if (index >= 0) messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                        }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
-                                        messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                         historyStore.save(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
-                                        
+                                        runCatching { historyStore.save(messages.toList()) }
                                         throw error
                                     } catch (error: OutOfMemoryError) {
-                                            generationError = "Memoria insufficiente durante la preparazione della richiesta. Riprova."
+                                        generationError = "Memoria insufficiente durante la preparazione della richiesta. Riprova."
+                                        runCatching { historyStore.save(messages.toList()) }
                                     } catch (error: Exception) {
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
+                                        runCatching { historyStore.save(messages.toList()) }
                                     } finally {
                                         generating = false
                                     }
@@ -385,20 +395,27 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 generationError = null
                                 try {
                                     val promptWithHistory = buildRequestPrompt(contextHistory, request, documentContext)
-                                    val result = OnlineAssistantClient.send(
+                                    val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
+                                    messages.add(assistantLine)
+                                    OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                         promptWithHistory
-                                    )
+                                    ) { piece ->
+                                        val index = messages.indexOfFirst { it.id == assistantLine.id }
+                                        if (index >= 0) messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                    }
                                     val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
-                                    messages.add(ChatLine(System.nanoTime(), result, "assistant"))
                                     historyStore.save(messages.toList())
                                 } catch (error: CancellationException) {
+                                    runCatching { historyStore.save(messages.toList()) }
                                     throw error
                                 } catch (error: OutOfMemoryError) {
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
+                                    runCatching { historyStore.save(messages.toList()) }
                                 } catch (error: Exception) {
                                     generationError = error.message ?: "Errore durante la richiesta online."
+                                    runCatching { historyStore.save(messages.toList()) }
                                 } finally {
                                     generating = false
                                 }
