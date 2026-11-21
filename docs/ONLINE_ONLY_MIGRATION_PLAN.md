@@ -41,3 +41,5 @@ Lovable ed Emergent possono restare strumenti di sviluppo con crediti gratuiti, 
 
 ## Avanzamento streaming — 21 novembre 2026
 È stato aggiunto un endpoint SSE autenticato e il router free-only inoltra i delta del provider. Il failover resta consentito soltanto prima del primo token: se il flusso si interrompe dopo aver mostrato testo, SuperIA conserva il parziale e segnala l'errore senza concatenare una risposta di un altro provider. Il client Android aggiorna il messaggio Compose progressivamente e salva il contenuto parziale. Sono stati aggiunti test mirati, ma la CI non ha ancora fornito un risultato verificabile e manca il collaudo end-to-end con provider gratuito reale. La fase resta aperta.
+
+Il client Android collega la cancellazione della coroutine alla chiusura della connessione HTTP per non lasciare letture SSE appese. È stato aggiunto anche un test router che simula la caduta della connessione dopo il primo token e verifica che il secondo provider non venga contattato.
