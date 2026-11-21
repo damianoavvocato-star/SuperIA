@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import time
 from contextlib import closing
 from pathlib import Path
@@ -7,6 +6,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 import httpx
+
+from app.database import connect_database
 
 
 class NoFreeProviderAvailable(RuntimeError):
@@ -40,14 +41,16 @@ class FreeOnlyRouter:
         self.environ = os.environ if environ is None else environ
         self.client_factory = client_factory
         self.state_db_path = state_db_path or self.environ.get(
-            "SUPERIA_ROUTER_STATE_DB", "/tmp/superia-router-state.sqlite3"
+            "SUPERIA_ROUTER_STATE_DB",
+            self.environ.get("SUPERIA_DATABASE_URL", "/tmp/superia-router-state.sqlite3"),
         )
         self._init_state()
 
-    def _connect_state(self) -> sqlite3.Connection:
-        db_path = Path(self.state_db_path)
-        db_path.parent.mkdir(parents=True, exist_ok=True)
-        connection = sqlite3.connect(str(db_path), timeout=10)
+    def _connect_state(self):
+        if not self.state_db_path.startswith(("postgresql://", "postgres://", "postgresql+psycopg://")):
+            db_path = Path(self.state_db_path)
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+        connection = connect_database(self.state_db_path)
         connection.execute(
             "CREATE TABLE IF NOT EXISTS provider_state ("
             "provider_id TEXT PRIMARY KEY, cooldown_until REAL NOT NULL DEFAULT 0, "
