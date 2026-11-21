@@ -347,3 +347,52 @@ def test_stream_chat_rejects_unapproved_or_unavailable_models(tmp_path):
         with pytest.raises(NoFreeProviderAvailable):
             _ = [item async for item in router.stream_chat([{"role": "user", "content": "Ciao"}])]
     asyncio.run(run())
+
+
+
+def test_stream_chat_never_switches_provider_after_emitting_partial_answer(tmp_path):
+    class BrokenAfterFirstToken(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            yield b'data: {"choices":[{"delta":{"content":"Risposta parziale"}}]}\\n\\n'
+            raise httpx.ReadError("connection dropped after first token")
+
+        async def aclose(self):
+            return None
+
+    async def run():
+        env = free_env("groq")
+        env.update(free_env("openrouter", "example/free-model:free"))
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            if request.url.host == "api.groq.com":
+                return httpx.Response(
+                    200,
+                    headers={"content-type": "text/event-stream"},
+                    stream=BrokenAfterFirstToken(),
+                )
+            return httpx.Response(
+                200,
+                headers={"content-type": "text/event-stream"},
+                content=b'data: {"choices":[{"delta":{"content":"NON DEVE APPARIRE"}}]}\\n\\ndata: [DONE]\\n\\n',
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "router-stream-partial.sqlite3"),
+        )
+        received = []
+        with pytest.raises(RuntimeError, match="Flusso interrotto dopo l'inizio"):
+            async for item in router.stream_chat([{"role": "user", "content": "Ciao"}]):
+                received.append(item)
+        assert [item["text"] for item in received] == ["Risposta parziale"]
+        assert calls == ["api.groq.com"]
+
+    asyncio.run(run())
