@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": "SuperIA Privata",
+  "project": "SuperIA",
   "platform": "android_only",
   "updated_at": "2026-11-15",
   "purpose": "Android-native runtime and infrastructure candidates. None is integrated or approved for release until exact version, license, checksum and device tests are recorded.",
