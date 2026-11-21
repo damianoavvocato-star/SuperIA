@@ -138,3 +138,11 @@ Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free resta il 
 - Vercel plan limits and pause behavior: https://vercel.com/docs/plans
 - Vercel Python runtime/filesystem: https://vercel.com/docs/functions/runtimes
 - Vercel Terms (Hobby personal/non-commercial; fees): https://vercel.com/legal/terms
+
+## Nota tecnica aggiornata — storage e protezione pairing (21 novembre 2026)
+
+- Il backend ora dispone di un adapter condiviso SQLite/PostgreSQL (services/api/app/database.py); autenticazione dispositivi e stato del router possono usare SUPERIA_DATABASE_URL. La migrazione SQLite→PostgreSQL è implementata con verifica di conteggi e fingerprint SHA-256. Questo non significa che un database esterno sia stato attivato: nessun account/database è stato creato e nessuna URL reale è configurata.
+- I test di integrazione PostgreSQL sono predisposti nel workflow CI con servizio PostgreSQL. I test più recenti di migrazione isolano lo schema per evitare collisioni.
+- **Blocco di rilascio pairing:** l'endpoint pubblico /api/v1/device/pair non ha ancora un rate limit IP applicato. Prima di esporlo su Internet è obbligatorio configurare un limite per IP sul gateway/WAF (e un limite aggiuntivo per codice di associazione), con risposta 429 e log senza registrare il codice. Non fidarsi di X-Forwarded-For o header analoghi se non provengono da proxy esplicitamente fidati.
+- Un rate limiter in memoria nel singolo processo non è sufficiente in produzione multi-istanza/serverless: può essere aggirato distribuendo richieste tra istanze e si azzera ai riavvii. Usare un controllo condiviso sul gateway o uno storage condiviso con comportamento fail-closed.
+- Il test test_postgres_auth_database_outage_does_not_fall_back_to_sqlite verifica che un errore del database PostgreSQL configurato venga propagato e non provochi un ripiego silenzioso su SQLite. Il test è stato aggiunto, ma il suo esito CI deve ancora essere verificato.
