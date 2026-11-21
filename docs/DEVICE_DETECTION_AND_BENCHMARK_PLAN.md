@@ -4,7 +4,7 @@ Data: 15 novembre 2026
 
 ## Scopo
 
-Rilevare le caratteristiche reali dei due telefoni destinati a SuperIA Privata e assegnare i carichi AI in base a misure ripetibili, non soltanto alla quantità di RAM o alle specifiche commerciali.
+Rilevare le caratteristiche reali dei due telefoni destinati a SuperIA e assegnare i carichi AI in base a misure ripetibili, non soltanto alla quantità di RAM o alle specifiche commerciali.
 
 ## Inventario dichiarato
 
