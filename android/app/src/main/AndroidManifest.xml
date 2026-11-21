@@ -3,7 +3,7 @@
     <application
         android:usesCleartextTraffic="false"
         android:allowBackup="false"
-        android:label="SuperIA Privata"
+        android:label="SuperIA"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
