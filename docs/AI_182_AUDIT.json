@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": "SuperIA Privata",
+  "project": "SuperIA",
   "created_at": "2026-11-15",
   "scope": "Desk audit and design mapping; not proof that candidate software, model weights, licenses, service plans, or device compatibility have been independently tested.",
   "policy": {
