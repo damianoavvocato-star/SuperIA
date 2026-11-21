@@ -2,10 +2,10 @@
 
 ## Esito CI verificato
 
-- Repository: `damianoavvocato-star/SuperIA-Privata`
+- Repository: `damianoavvocato-star/SuperIA`
 - Branch: `main`
 - Commit: `272a7c805f030ca05eda8b66b02754f34eb021c6`
-- Workflow Android debug build: [run 43746849747](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43746849747)
+- Workflow Android debug build: [run 43746849747](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43746849747)
 - Job `assemble-debug`: SUCCESS.
 - `Run Android unit tests`: SUCCESS.
 - `Assemble debug APK`: SUCCESS.
@@ -63,8 +63,8 @@ Fonti: [Message.kt](https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin
 
 ## Aggiornamento corrente — commit 8ba080ad4f43690f25c63f74d2ff7c3941944b5a
 
-- Android Actions: [run 43758098267](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098267) — **SUCCESS**. Test unitari, assembleDebug e upload artefatto tutti riusciti.
-- Backend Actions: [run 43758098112](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43758098112) — **SUCCESS**.
+- Android Actions: [run 43758098267](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098267) — **SUCCESS**. Test unitari, assembleDebug e upload artefatto tutti riusciti.
+- Backend Actions: [run 43758098112](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43758098112) — **SUCCESS**.
 - Artefatto: `superia-privata-debug`, ID `14178604470`, archivio 38.276.044 byte, SHA-256 `ff54a42a7fdcb49b986e9da31c0fdfe6939b49322241b49d9d6450fb6dbefda4`, scadenza 13 febbraio 2027.
 - Nuovi test: `ChatPromptBuilderTest` verifica prompt vuoto/non vuoto, inclusione messaggi utente/assistente e limite di contesto.
 - La cronologia cifrata viene usata per ricostruire il contesto conversazionale dopo la ricreazione del runtime: massimo 12 messaggi e 6.000 caratteri.
@@ -77,7 +77,7 @@ Fonti: [Message.kt](https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin
 
 ## Aggiornamento CI Android — 16 novembre 2026
 
-La run [43890341130](https://github.com/damianoavvocato-star/SuperIA-Privata/actions/runs/43890341130), sul commit `a82cf5ca255ebcb9b619d773768adb97b87facee`, è terminata con **SUCCESS**. Dai log del job Android risulta: test unitari superati, APK Debug compilato e caricato, 6 test strumentali avviati e 6 terminati sull'emulatore API 34; `connectedDebugAndroidTest` ha concluso con `BUILD SUCCESSFUL`.
+La run [43890341130](https://github.com/damianoavvocato-star/SuperIA/actions/runs/43890341130), sul commit `a82cf5ca255ebcb9b619d773768adb97b87facee`, è terminata con **SUCCESS**. Dai log del job Android risulta: test unitari superati, APK Debug compilato e caricato, 6 test strumentali avviati e 6 terminati sull'emulatore API 34; `connectedDebugAndroidTest` ha concluso con `BUILD SUCCESSFUL`.
 
 Artefatto `superia-privata-debug`, ID `14235164539`, 59.756.044 byte, SHA-256 archivio `663b62c4edb90da36e3885c7ab1d4fd0a9a8541a9bb18feb3207ffe44bc644c8`, scadenza 14 febbraio 2027.
 
