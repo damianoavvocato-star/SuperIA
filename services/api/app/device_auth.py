@@ -10,7 +10,7 @@ from app.database import connect_database
 DEVICE_TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60
 
 
-def _connect(database_path: str) -> sqlite3.Connection:
+def _connect(database_path: str):
     if database_path.startswith(("postgresql://", "postgres://", "postgresql+psycopg://")):
         return connect_database(database_path)
     path = Path(database_path)
