@@ -168,11 +168,10 @@ async def providers(
     _: None = Depends(require_api_token),
     provider: FreeOnlyRouter = Depends(get_provider),
 ) -> dict[str, object]:
-    configured = await provider.list_models()
     return {
         "mode": "free-only",
         "paid_fallback": False,
-        "providers": [{"id": item, "enabled": any(model.startswith(item + ":") for model in configured)} for item in FreeOnlyRouter.PROVIDER_ORDER],
+        "providers": provider.provider_status(),
     }
 
 
