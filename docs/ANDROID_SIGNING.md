@@ -1,30 +1,25 @@
-# Android signing and updates
+# Android signing and final APK release — SuperIA
 
-SuperIA uses one persistent Android signing key for every installable APK.
+## Stato corrente: rilascio bloccato
 
-## Required GitHub Actions repository secrets
+Su richiesta dell'utente, non generare, assemblare, firmare o caricare APK intermedi. Il workflow Android corrente deve eseguire esclusivamente i test unitari e non deve contenere passaggi di assemblaggio APK.
 
-Configure these secrets in **Settings → Secrets and variables → Actions → New repository secret**:
+La configurazione della firma descritta in questo documento è documentazione preparatoria per l'eventuale APK definitivo. Non attivare ora segreti di firma, workflow di release o upload di artefatti.
 
-- `SUPERIA_KEYSTORE_BASE64`: the complete single-line Base64 content of the private keystore file.
-- `SUPERIA_KEYSTORE_PASSWORD`: keystore password.
-- `SUPERIA_KEY_ALIAS`: private-key alias.
-- `SUPERIA_KEY_PASSWORD`: private-key password.
+## Gate obbligatorio prima della firma
 
-The repository is public. Never commit the keystore, passwords, Base64 content, or a keystore artifact to the repository. GitHub Actions decodes the key only into the runner's temporary directory and does not upload it.
+Una build definitiva potrà essere autorizzata soltanto dopo che tutte le funzioni necessarie alla chat online saranno implementate e verificate end-to-end: backend HTTPS, database persistente, rate limiting reale, pairing/autenticazione/revoca, provider gratuiti verificati, streaming, failover, hard-stop quote, continuità conversazionale, gestione errori, privacy e collaudo su dispositivi reali.
 
-## Build behavior
+## Identità Android
 
-- Unit and emulator tests use the normal debug variant.
-- The installable release APK is built and uploaded only when the persistent signing secrets are present.
-- The application ID remains `it.superiaprivata.app`.
-- CI sets a monotonically increasing version code from the GitHub Actions workflow run number.
-- Every future installable APK must use the same keystore and alias. Losing or replacing this key prevents in-place updates.
+- Application ID attuale: it.superiaprivata.app.
+- Il nome visibile del prodotto è SuperIA.
+- Non modificare applicationId, namespace o package Kotlin senza un piano di migrazione e autorizzazione esplicita: una modifica può interrompere aggiornamenti, firma, dati locali e identità installata.
 
-## First clean installation
+## Regole per il futuro APK definitivo
 
-Install the first APK produced with the persistent key after confirming the signing secrets are configured and the release build succeeds. Future APKs from the same workflow can then update that installation without uninstalling it.
-
-The old debug-signed installation may reject the first persistent-key APK because Android requires matching signatures for in-place updates. If that happens, uninstall the old app only after confirming there is no data to preserve. The local Gemma model must be imported again from its original file.
-
-Keep an offline backup of the original keystore and its passwords in a secure location separate from GitHub.
+- Usare una chiave di firma persistente e conservarne un backup offline sicuro.
+- Non inserire keystore, password, token o chiavi provider nel repository.
+- Conservare le credenziali di firma esclusivamente nei GitHub Actions Secrets solo quando il gate APK sarà stato superato e la release autorizzata.
+- Verificare firma, application ID, versionCode, aggiornamento in-place e integrità dell'artefatto prima di consegnare l'APK.
+- Non produrre APK multipli o intermedi: una sola build finale dopo il completamento della chat online.
