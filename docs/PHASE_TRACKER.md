@@ -72,3 +72,10 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Non attribuire percentuali globali arbitrarie alle fasi.
 - Non dichiarare un servizio online operativo finché non è pubblicato e testato.
 - Non creare APK intermedi: il blocco è vincolante fino alla chiusura della checklist chat online.
+
+## Aggiornamento 21 novembre 2026 — streaming chat
+- Backend: endpoint SSE autenticato `/api/v1/chat/stream` aggiunto.
+- Router: parsing dei delta OpenAI-compatible; failover limitato alla fase precedente al primo token; niente cambio silenzioso dopo output parziale.
+- Android: client SSE e aggiornamento progressivo della risposta nella chat unica; salvataggio del testo parziale in caso di errore.
+- Test: aggiunti test backend e Android. Esito CI ancora non verificato; test end-to-end con provider reale, cancellazione di rete e ripresa completa restano aperti.
+- Questa funzione è quindi **implementata a livello iniziale, non ancora validata**. Non sblocca la generazione dell'APK.
