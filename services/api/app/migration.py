@@ -18,7 +18,7 @@ def _rows_digest(rows: list[tuple[object, ...]]) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[str, int]:
+def migrate_sqlite_to_database(source_path: str, destination_url: str) -> dict[str, int | str]:
     source_file = Path(source_path).expanduser().resolve()
     if not source_file.is_file():
         raise FileNotFoundError("Source SQLite database does not exist")
