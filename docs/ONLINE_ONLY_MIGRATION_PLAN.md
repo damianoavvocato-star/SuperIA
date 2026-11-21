@@ -1,41 +1,40 @@
 # Migrazione SuperIA a online-only
 
-Aggiornato: 20 novembre 2026
+Aggiornato: 21 novembre 2026
 
 ## Decisione vincolante
 
-La versione finale di SuperIA esegue l'inferenza esclusivamente online. Gemma 3 1B e qualsiasi runtime locale sono componenti legacy di transizione: non vanno cancellati dal telefono né rimossi dalla build stabile finché il nuovo percorso online non è stato verificato end-to-end.
+SuperIA esegue l'inferenza AI esclusivamente online. Il runtime locale Gemma/LiteRT-LM è stato rimosso dal progetto Android e non deve essere reintrodotto come motore alternativo. La chat usa il backend SuperIA via HTTPS. Cronologia e memoria di progetto restano cifrate sul dispositivo; viene inviato al backend solo il contesto necessario.
 
 ## Regole economiche inderogabili
-
-- Sono ammessi crediti gratuiti interni al servizio (crediti, token, punti o unità), anche se assegnati una tantum o periodicamente.
-- Sono esclusi depositi, ricariche, acquisti, addebiti e saldi in valuta (euro, dollari, dinari o qualsiasi altra moneta).
-- Non collegare carte o metodi di pagamento e non attivare prove che possano convertirsi automaticamente in piani a pagamento.
-- Quando la quota gratuita termina, il router passa al prossimo provider eleggibile; se tutti sono esauriti, sospende la risposta e conserva la conversazione senza spendere denaro.
+- Sono ammessi crediti gratuiti interni al servizio (crediti, token, punti o unità), anche se assegnati una tantum o periodicamente e anche se il fornitore li contabilizza in valuta.
+- Sono esclusi depositi, ricariche, acquisti, addebiti, carte/metodi di pagamento, overage fatturabili e conversioni automatiche a piani pagati.
 - Non creare account multipli né ruotare chiavi per aggirare quote o condizioni.
-- Ogni provider resta disabilitato finché non sono verificati account, modello gratuito esatto, termini d'uso, privacy, disponibilità in Italia e hard-stop a quota zero.
+- Quando la quota gratuita termina, il router passa al prossimo provider gratuito già verificato; se tutti sono esauriti, interrompe la generazione e conserva la conversazione senza spendere denaro.
+- Ogni provider resta disabilitato finché non sono verificati account, modello gratuito esatto, termini, privacy, disponibilità in Italia, assenza di carta e hard-stop a quota zero.
 
 ## Stato tecnico verificato nel repository
+- Il client Android OnlineAssistantClient invia richieste HTTPS al backend e la UI prepara il prompt con cronologia pertinente, memoria di progetto e contesto documentale.
+- Il pairing individuale è implementato: il codice di associazione viene inviato a POST /api/v1/device/pair; token e ID dispositivo sono conservati cifrati tramite Android Keystore. Il codice di pairing non viene persistito.
+- Il backend FastAPI include autenticazione Bearer per dispositivo, token individuali memorizzati come hash, scadenza, revoca, endpoint chat e stato operativo dei provider.
+- Il router free-only include Gemini, Groq, OpenRouter (solo modelli con suffisso :free), Cloudflare Workers AI e SambaNova; provider disabilitati per default.
+- Sono presenti test unitari per router, autenticazione, API e database; tali test non sostituiscono un collaudo end-to-end con provider e hosting reali.
+- Il backend non è pubblicato e non è collegato a un database di produzione.
+- Non risultano account hosting/database creati, segreti di produzione configurati o provider AI attivati.
+- Il router supporta PostgreSQL tramite SUPERIA_DATABASE_URL; SQLite e il percorso /tmp sono soltanto fallback di sviluppo/test e non devono essere usati per stato persistente in produzione.
+- Il flag SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED=true è un gate di conferma operativa, non un rate limiter: prima dell'esposizione pubblica serve una regola IP reale sul gateway/WAF.
+- La CI Android è stata modificata per eseguire esclusivamente gradle --no-daemon testDebugUnitTest; non deve assemblare né caricare APK.
 
-- Esiste un prototipo FastAPI con router fail-closed per Gemini, Groq, OpenRouter, Cloudflare Workers AI e SambaNova.
-- Il router richiede attestazioni esplicite per gratuità, assenza di metodo di pagamento, hard-stop e assenza di billing in valuta.
-- OpenRouter accetta solo ID modello con suffisso `:free`.
-- Sono presenti test unitari per provider disabilitati per default, rifiuto di modelli OpenRouter non gratuiti, failover su 429, controlli di billing e persistenza SQLite di cooldown/disabilitazioni tra istanze del router.
-- Il backend non è pubblicato e non è collegato all'app Android.
-- Il router ora salva cooldown e disabilitazioni in SQLite, così sopravvivono alla ricreazione dell'oggetto e al riavvio del processo se il file DB risiede su storage persistente. Il default `/tmp/superia-router-state.sqlite3` è adatto ai test, non a un hosting effimero: in produzione va impostato `SUPERIA_ROUTER_STATE_DB` su un volume persistente.
-- Il prototipo non fornisce ancora autenticazione, quote per utente o protezioni anti-abuso.
-- Il controllo combinato CI per il commit documentale più recente non ha restituito status checks: non viene dichiarato un nuovo esito CI.
+## Lavoro ancora necessario
+1. Hosting e database: scegliere servizi gratuiti verificati senza carta, pagamenti, overage o conversioni automatiche; creare e configurare solo dopo l'audit dei termini. Usare un database persistente e verificare esportazione e ripristino.
+2. Hardening: rate limiting IP reale per pairing e limiti per dispositivo, protezione segreti, minimizzazione dei log, retention, revoca e gestione incidenti.
+3. Provider: verificare per ogni provider modello/API esatti, termini, disponibilità in Italia, quote, assenza di metodo di pagamento e comportamento hard-stop; attivare solo quelli approvati.
+4. Router: verificare rotazione su quota/429, cooldown, errori temporanei, provider disabilitati e persistenza dello stato dopo riavvio; nessun fallback a pagamento.
+5. Chat Android: completare streaming delle risposte, timeout, error handling, retry idempotente dove applicabile, ripresa dopo chiusura app, stato della richiesta e UX per indisponibilità/quote esaurite.
+6. Contesto: collaudare conversazione multi-turno, memoria di progetto, cronologia cifrata, retrieval documentale e limiti del prompt; non inviare tutta la cronologia senza necessità.
+7. Test end-to-end: pairing, autenticazione, invio/ricezione, provider failover, quota zero, rete assente, riavvio backend/database, revoca dispositivo, privacy e cancellazione.
+8. Dispositivi reali: verificare app e chat online su dispositivi Android reali, registrando errori, tempi, stabilità e consumo rete/batteria.
+9. Gate APK: solo dopo che tutti i punti precedenti sono completati e documentati, autorizzare una singola build APK definitiva. Nessun APK intermedio.
 
-## Fasi e criteri di completamento
-
-1. **Rendere coerenti architettura e documentazione** — in corso. Il README ora distingue la build locale legacy dal prodotto finale online-only.
-2. **Rendere robusto il router** — persistenza SQLite dei cooldown e dei provider disabilitati implementata con test dedicati; restano gestione quota più precisa, rate limit per utente, telemetria minima e test d'integrazione. In hosting il DB deve stare su volume persistente.
-3. **Verificare i provider** — audit ufficiale aggiornato, modello per modello e account per account. I crediti gratuiti non monetari sono ammessi; i servizi con ricariche/addebiti in valuta sono esclusi.
-4. **Preparare backend sicuro** — autenticazione, rate limit, protezione segreti, minimizzazione log e retention. Non pubblicare finché hosting e database non sono verificati a costo zero senza carta né billing automatico.
-5. **Collegare Android** — client HTTPS verso il backend, chiavi provider solo sul server, cronologia cifrata mantenuta sul dispositivo e contesto inviato a ogni richiesta.
-6. **Collaudare** — conversazione multi-turno, failover tra provider, quota esaurita, indisponibilità rete, riavvio backend, privacy, documenti e recupero cronologia.
-7. **Rimuovere Gemma** — solo dopo test end-to-end superati e una nuova build Android installata e verificata. Prima di quel gate, mantenere disponibile la build legacy.
-
-## Nota sui fornitori
-
-La lista nel documento `FREE_PROVIDER_BILLING_AUDIT.md` è una lista di candidati e servizi da verificare, non l'elenco di provider già attivi. Lovable ed Emergent possono essere mantenuti come strumenti/piattaforme con crediti gratuiti per le rispettive funzioni, ma non sono automaticamente endpoint API di chat e non vanno conteggiati come motori di inferenza senza un'API ufficiale compatibile e condizioni verificate.
+## Nota su strumenti e piattaforme
+Lovable ed Emergent possono restare strumenti di sviluppo con crediti gratuiti, ma non sono automaticamente endpoint API di inferenza. Non conteggiarli come provider chat finché non esiste un'API ufficiale compatibile e le relative condizioni sono state verificate. La lista in docs/FREE_PROVIDER_BILLING_AUDIT.md è un elenco di candidati, non un elenco di provider già attivi.
