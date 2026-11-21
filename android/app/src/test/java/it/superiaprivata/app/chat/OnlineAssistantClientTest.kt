@@ -49,4 +49,40 @@ class OnlineAssistantClientTest {
             }
         }
     }
+
+    @Test
+    fun refusesOversizedPromptBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.send(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    "x".repeat(32_001)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun refusesEndpointContainingUserInfo() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.send(
+                    OnlineConnectionConfig("https://user:password@example.test", "test-token"),
+                    "Ciao"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun refusesEndpointContainingFragment() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.send(
+                    OnlineConnectionConfig("https://example.test/#unsafe", "test-token"),
+                    "Ciao"
+                )
+            }
+        }
+    }
 }
