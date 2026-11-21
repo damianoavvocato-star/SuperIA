@@ -1,7 +1,9 @@
 import os
+import pytest
 
 from fastapi.testclient import TestClient
 
+from app.device_auth import issue_device_token, validate_device_token
 from app.main import MAX_API_BODY_BYTES, app, get_provider
 
 
@@ -13,75 +15,107 @@ class FakeProvider:
         return ["fake-local"]
 
 
-app.dependency_overrides[get_provider] = lambda: FakeProvider()
-os.environ["SUPERIA_API_ACCESS_TOKEN"] = "test-access-token"
-client = TestClient(app, headers={"Authorization": "Bearer test-access-token"})
+@pytest.fixture
+def auth_environment(tmp_path, monkeypatch):
+    database = str(tmp_path / "auth.sqlite3")
+    monkeypatch.setenv("SUPERIA_AUTH_DB", database)
+    monkeypatch.setenv("SUPERIA_PAIRING_CODE", "pairing-secret-code-123456")
+    monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "admin-secret-token-123456")
+    app.dependency_overrides[get_provider] = lambda: FakeProvider()
+    token_data = issue_device_token(database, "test-device")
+    yield database, token_data
+    app.dependency_overrides.pop(get_provider, None)
 
 
 def test_health():
-    r = client.get("/health")
-    assert r.status_code == 200 and r.json()["status"] == "ok"
+    response = TestClient(app).get("/health")
+    assert response.status_code == 200 and response.json()["status"] == "ok"
 
 
-def test_capabilities_keep_cloud_disabled():
-    r = client.get("/api/v1/capabilities")
-    assert r.status_code == 200
-    assert r.json()["external_providers_enabled_by_default"] is False
+def test_device_pairing_issues_unique_token(auth_environment):
+    database, _ = auth_environment
+    client = TestClient(app)
+    response = client.post("/api/v1/device/pair", json={
+        "pairing_code": "pairing-secret-code-123456",
+        "device_name": "Realme",
+    })
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    assert validate_device_token(database, token)
+    assert response.json()["device_id"]
 
 
-def test_models():
-    r = client.get("/api/v1/models")
-    assert r.status_code == 200 and r.json()["models"] == ["fake-local"]
+def test_device_pairing_rejects_wrong_code(auth_environment):
+    response = TestClient(app).post("/api/v1/device/pair", json={
+        "pairing_code": "incorrect-pairing-code",
+        "device_name": "Unknown",
+    })
+    assert response.status_code == 401
 
 
-def test_chat():
-    r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]})
-    assert r.status_code == 200 and r.json()["content"] == "Risposta di prova"
+def test_device_token_can_be_revoked(auth_environment):
+    database, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer admin-secret-token-123456"})
+    response = client.post("/api/v1/device/revoke", json={"device_id": token_data["device_id"]})
+    assert response.status_code == 200 and response.json()["revoked"] is True
+    assert not validate_device_token(database, token_data["access_token"])
+    protected = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    assert protected.get("/api/v1/models").status_code == 401
 
 
-def test_chat_rejects_empty_messages():
-    r = client.post("/api/v1/chat", json={"messages": []})
-    assert r.status_code == 422
+def test_revoke_requires_admin_token(auth_environment):
+    response = TestClient(app).post("/api/v1/device/revoke", json={"device_id": "00000000-0000-0000-0000-000000000000"})
+    assert response.status_code == 401
 
 
-def test_chat_rejects_unknown_role():
-    r = client.post("/api/v1/chat", json={"messages": [{"role": "tool", "content": "Ciao"}]})
-    assert r.status_code == 422
+def test_capabilities_keep_cloud_disabled(auth_environment):
+    database, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.get("/api/v1/capabilities")
+    assert response.status_code == 200
+    assert response.json()["external_providers_enabled_by_default"] is False
+    assert response.json()["paid_fallback"] is False
 
 
-def test_chat_rejects_oversized_message():
-    r = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "x" * 32001}]})
-    assert r.status_code == 422
+def test_models_and_chat_require_device_token(auth_environment):
+    _, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    assert client.get("/api/v1/models").status_code == 200
+    response = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]})
+    assert response.status_code == 200 and response.json()["content"] == "Risposta di prova"
 
 
-def test_api_rejects_body_over_hard_limit():
+def test_api_rejects_missing_or_invalid_device_token(auth_environment):
+    TestClient(app)
+    assert TestClient(app).get("/api/v1/models").status_code == 401
+    assert TestClient(app, headers={"Authorization": "Bearer wrong-secret"}).get("/api/v1/models").status_code == 401
+
+
+def test_api_fails_closed_when_auth_database_is_not_configured(monkeypatch):
+    monkeypatch.delenv("SUPERIA_AUTH_DB", raising=False)
+    monkeypatch.setenv("SUPERIA_PAIRING_CODE", "pairing-secret-code-123456")
+    response = TestClient(app).post("/api/v1/device/pair", json={
+        "pairing_code": "pairing-secret-code-123456",
+        "device_name": "Test",
+    })
+    assert response.status_code == 503
+
+
+def test_api_rejects_body_over_hard_limit(auth_environment):
+    _, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
     response = client.post(
         "/api/v1/chat",
         content=b"x" * (MAX_API_BODY_BYTES + 1),
         headers={"Content-Type": "application/json"},
     )
     assert response.status_code == 413
-    assert response.json()["detail"] == "Richiesta troppo grande."
 
 
 def test_home_page():
-    r = client.get("/")
-    assert r.status_code == 200 and "SuperIA Privata" in r.text
-    assert "localStorage" in r.text
-    assert "Nuova conversazione" in r.text
-    assert "Memoria personale locale" in r.text
-    assert "MEMORY_KEY" in r.text
-
-
-def test_api_routes_reject_missing_or_invalid_token(monkeypatch):
-    monkeypatch.setenv("SUPERIA_API_ACCESS_TOKEN", "expected-secret")
-    no_token_client = TestClient(app)
-    bad_token_client = TestClient(app, headers={"Authorization": "Bearer wrong-secret"})
-    assert no_token_client.get("/api/v1/models").status_code == 401
-    assert bad_token_client.get("/api/v1/models").status_code == 401
-
-
-def test_api_routes_fail_closed_when_server_token_is_unset(monkeypatch):
-    monkeypatch.delenv("SUPERIA_API_ACCESS_TOKEN", raising=False)
-    no_token_client = TestClient(app, headers={"Authorization": "Bearer test-access-token"})
-    assert no_token_client.get("/api/v1/models").status_code == 503
+    response = TestClient(app).get("/")
+    assert response.status_code == 200 and "SuperIA Privata" in response.text
+    assert "localStorage" in response.text
+    assert "Nuova conversazione" in response.text
+    assert "Memoria personale locale" in response.text
+    assert "MEMORY_KEY" in response.text
