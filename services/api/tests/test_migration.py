@@ -23,7 +23,10 @@ def test_migration_copies_tokens_and_provider_state(tmp_path):
     connection.close()
 
     result = migrate_sqlite_to_database(str(source), str(destination))
-    assert result == {"device_tokens": 1, "provider_state": 1}
+    assert result["device_tokens"] == 1
+    assert result["provider_state"] == 1
+    assert len(result["device_tokens_sha256"]) == 64
+    assert len(result["provider_state_sha256"]) == 64
     assert validate_device_token(str(destination), issued["access_token"])
 
 
