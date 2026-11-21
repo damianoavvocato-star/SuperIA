@@ -1,10 +1,11 @@
 import hmac
+import json
 import os
 from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
@@ -181,6 +182,43 @@ async def models(
     provider: FreeOnlyRouter = Depends(get_provider),
 ) -> dict[str, object]:
     return {"provider": "free-only-router", "models": await provider.list_models()}
+
+
+@app.post("/api/v1/chat/stream", tags=["assistant"])
+async def chat_stream(
+    request: ChatRequest,
+    _: None = Depends(require_api_token),
+    provider: FreeOnlyRouter = Depends(get_provider),
+) -> StreamingResponse:
+    async def events():
+        try:
+            async for item in provider.stream_chat(
+                [message.model_dump() for message in request.messages],
+                request.model,
+            ):
+                event = item.get("event", "delta")
+                payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
+                yield f"event: {event}\\ndata: {payload}\\n\\n"
+        except NoFreeProviderAvailable as exc:
+            payload = json.dumps({"message": str(exc), "retryable": True}, ensure_ascii=False)
+            yield f"event: error\\ndata: {payload}\\n\\n"
+        except Exception as exc:
+            payload = json.dumps({
+                "message": "Il flusso si è interrotto. Il testo già ricevuto resta visibile; non è stato effettuato un fallback dopo l'inizio della risposta.",
+                "retryable": True,
+                "error_type": type(exc).__name__,
+            }, ensure_ascii=False)
+            yield f"event: error\\ndata: {payload}\\n\\n"
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 @app.post("/api/v1/chat", response_model=ChatResponse, tags=["assistant"])
