@@ -64,3 +64,7 @@ La cronologia Android e i testi estratti dai documenti sono cifrati AES-GCM con 
 - Stato: implementazione iniziale presente, ma CI non ha ancora restituito esiti verificabili e il test end-to-end con provider reale non è stato eseguito. Non considerare la chat online pronta per produzione.
 
 - Il client Android interrompe anche la connessione HTTP sottostante quando la coroutine viene cancellata, evitando di lasciare una lettura SSE bloccata fino al timeout.
+
+
+### Richieste chat: retry e deduplicazione
+L'app assegna un identificativo stabile a ogni messaggio e lo conserva nella cronologia cifrata. Il backend registra l'esito per dispositivo, rifiuta ID riutilizzati con contenuti diversi e riproduce le risposte già completate senza richiamare il provider. Le risposte memorizzate per il replay sono cifrate AES-GCM; il backend richiede il segreto stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`, solo server-side. Questa protezione non equivale a exactly-once assoluto in caso di arresto del server tra la generazione del provider e la registrazione della risposta.
