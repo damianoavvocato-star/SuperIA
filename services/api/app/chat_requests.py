@@ -123,17 +123,17 @@ def claim_chat_request(
             connection.commit()
             return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
 
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE chat_requests
             SET status = 'processing', response_text = NULL, model = NULL,
                 provider = NULL, updated_at = ?
-            WHERE device_id = ? AND request_id = ?
+            WHERE device_id = ? AND request_id = ? AND status = 'failed'
             """,
             (now, device_id, request_id),
         )
         connection.commit()
-        return {"state": "claimed"}
+        return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
 
 
 def complete_chat_request(
