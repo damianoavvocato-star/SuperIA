@@ -86,3 +86,18 @@ def revoke_device_token(database_path: str, device_id: str) -> bool:
         )
         connection.commit()
         return cursor.rowcount == 1
+
+
+def device_id_for_token(database_path: str, token: str) -> str | None:
+    """Return the authenticated device ID without exposing token hashes."""
+    if not token:
+        return None
+    initialize_auth_store(database_path)
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    now = int(time.time())
+    with closing(_connect(database_path)) as connection:
+        row = connection.execute(
+            "SELECT device_id FROM device_tokens WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+            (token_hash, now),
+        ).fetchone()
+    return str(row["device_id"]) if row else None
