@@ -1,6 +1,7 @@
 package it.superiaprivata.app.chat
 
 import android.net.Uri
+import android.os.SystemClock
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Composable
 fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Modifier) {
@@ -285,16 +288,20 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         )
                                         val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
                                         messages.add(assistantLine)
+                                        val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                             retryPrompt
                                         ) { piece ->
                                             val index = messages.indexOfFirst { it.id == assistantLine.id }
-                                            if (index >= 0) messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                            if (index >= 0) {
+                                                messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                                streamPersister.onDelta(messages.toList())
+                                            }
                                         }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
-                                        historyStore.save(messages.toList())
+                                        streamPersister.flush(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
                                         runCatching { historyStore.save(messages.toList()) }
@@ -399,16 +406,20 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     val promptWithHistory = buildRequestPrompt(contextHistory, request, documentContext)
                                     val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
                                     messages.add(assistantLine)
+                                    val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                         promptWithHistory
                                     ) { piece ->
                                         val index = messages.indexOfFirst { it.id == assistantLine.id }
-                                        if (index >= 0) messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                        if (index >= 0) {
+                                            messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                            streamPersister.onDelta(messages.toList())
+                                        }
                                     }
                                     val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
-                                    historyStore.save(messages.toList())
+                                    streamPersister.flush(messages.toList())
                                 } catch (error: CancellationException) {
                                     runCatching { historyStore.save(messages.toList()) }
                                     throw error
@@ -442,6 +453,53 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+
+/**
+ * Periodically snapshots streaming output without writing once per token.
+ * Version checks prevent an older background write from overwriting a newer snapshot.
+ */
+private class StreamHistoryPersister(
+    private val store: ChatHistoryStore,
+    private val scope: kotlinx.coroutines.CoroutineScope
+) {
+    private val mutex = Mutex()
+    private var lastSnapshotAt = 0L
+    private var nextVersion = 0L
+    private var persistedVersion = 0L
+
+    fun onDelta(messages: List<ChatLine>) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastSnapshotAt < 900L) return
+        lastSnapshotAt = now
+        schedule(messages.toList())
+    }
+
+    suspend fun flush(messages: List<ChatLine>) {
+        val snapshot = messages.toList()
+        val version = synchronized(this) { ++nextVersion }
+        withContext(Dispatchers.IO) {
+            mutex.withLock {
+                if (version > persistedVersion) {
+                    store.save(snapshot)
+                    persistedVersion = version
+                }
+            }
+        }
+    }
+
+    private fun schedule(snapshot: List<ChatLine>) {
+        val version = synchronized(this) { ++nextVersion }
+        scope.launch(Dispatchers.IO) {
+            mutex.withLock {
+                if (version > persistedVersion) {
+                    store.save(snapshot)
+                    persistedVersion = version
+                }
             }
         }
     }
