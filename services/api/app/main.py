@@ -197,6 +197,8 @@ async def chat_stream(
     request_id = str(request.request_id) if request.request_id else None
     if request_id:
         idempotency_secret = _required_secret("SUPERIA_CHAT_IDEMPOTENCY_KEY")
+        if len(idempotency_secret) < 32:
+            raise HTTPException(status_code=503, detail="SUPERIA_CHAT_IDEMPOTENCY_KEY deve contenere almeno 32 caratteri.")
         messages = [message.model_dump() for message in request.messages]
         claim = claim_chat_request(
             database_url,
