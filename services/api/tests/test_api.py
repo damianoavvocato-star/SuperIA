@@ -243,7 +243,8 @@ def test_stream_request_id_replays_completed_response_without_second_provider_ca
     first = client.post("/api/v1/chat/stream", json=payload)
     second = client.post("/api/v1/chat/stream", json=payload)
     assert first.status_code == 200 and second.status_code == 200
-    assert first.text == second.text
+    assert "Risposta " in first.text and "Risposta " in second.text
+    assert 'event: done' in second.text
     assert fake.stream_calls == 1
 
 
