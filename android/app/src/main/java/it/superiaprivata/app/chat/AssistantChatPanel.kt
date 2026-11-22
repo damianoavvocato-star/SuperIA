@@ -291,7 +291,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
-                                            retryPrompt
+                                            retryPrompt,
+                                            requestId = pendingLine.requestId ?: java.util.UUID.randomUUID().toString()
                                         ) { piece ->
                                             val index = messages.indexOfFirst { it.id == assistantLine.id }
                                             if (index >= 0) {
@@ -389,7 +390,11 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         val request = draft.trim()
                         if (request.isNotEmpty()) {
                             val contextHistory = messages.toList()
-                            val userLine = ChatLine(System.nanoTime(), request, "user", pending = true)
+                            val userLine = ChatLine(
+                                System.nanoTime(), request, "user",
+                                pending = true,
+                                requestId = java.util.UUID.randomUUID().toString()
+                            )
                             messages.add(userLine)
                             val saved = runCatching { historyStore.save(messages.toList()) }
                             if (saved.isFailure) {
@@ -409,7 +414,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
-                                        promptWithHistory
+                                        promptWithHistory,
+                                        requestId = userLine.requestId ?: java.util.UUID.randomUUID().toString()
                                     ) { piece ->
                                         val index = messages.indexOfFirst { it.id == assistantLine.id }
                                         if (index >= 0) {
