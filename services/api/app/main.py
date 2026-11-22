@@ -196,12 +196,14 @@ async def chat_stream(
     database_url = _auth_database_path()
     request_id = str(request.request_id) if request.request_id else None
     if request_id:
+        idempotency_secret = _required_secret("SUPERIA_CHAT_IDEMPOTENCY_KEY")
         messages = [message.model_dump() for message in request.messages]
         claim = claim_chat_request(
             database_url,
             device_id,
             request_id,
             request_payload_hash(messages, request.model),
+            idempotency_secret,
         )
         if claim["state"] == "conflict":
             raise HTTPException(status_code=409, detail="Questo ID richiesta è già associato a un contenuto diverso.")
@@ -241,6 +243,7 @@ async def chat_stream(
                         complete_chat_request(
                             database_url, device_id, request_id,
                             "".join(accumulated), final_model, final_provider,
+                            idempotency_secret,
                         )
                     completed = True
                 payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
