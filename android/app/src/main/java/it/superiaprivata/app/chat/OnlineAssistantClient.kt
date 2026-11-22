@@ -7,6 +7,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.KeyStore
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -216,6 +217,7 @@ object OnlineAssistantClient {
     suspend fun stream(
         config: OnlineConnectionConfig,
         prompt: String,
+        requestId: String = UUID.randomUUID().toString(),
         onDelta: suspend (String) -> Unit,
     ): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
@@ -245,10 +247,10 @@ object OnlineAssistantClient {
             if (cause is CancellationException) connection.disconnect()
         }
         try {
-            val body = JSONObject().put(
-                "messages",
-                JSONArray().put(JSONObject().put("role", "user").put("content", prompt))
-            ).toString().toByteArray(Charsets.UTF_8)
+            val body = JSONObject()
+                .put("request_id", requestId)
+                .put("messages", JSONArray().put(JSONObject().put("role", "user").put("content", prompt)))
+                .toString().toByteArray(Charsets.UTF_8)
             connection.outputStream.use { it.write(body) }
             val status = connection.responseCode
             if (status !in 200..299) {
