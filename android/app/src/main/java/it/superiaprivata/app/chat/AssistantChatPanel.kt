@@ -280,23 +280,34 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         if (staleAssistant?.text.isNullOrBlank()) {
                                             staleAssistant?.let { messages.remove(it) }
                                         }
+                                        val retryRequestId = pendingLine.requestId ?: java.util.UUID.randomUUID().toString()
+                                        val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
+                                        if (pendingPosition >= 0) {
+                                            messages[pendingPosition] = pendingLine.copy(requestId = retryRequestId)
+                                            historyStore.save(messages.toList())
+                                        }
                                         val contextHistory = messages.filterNot { it.pending || it.id == staleAssistant?.id }
                                         val retryPrompt = buildRequestPrompt(
                                             contextHistory,
                                             pendingLine.text,
                                             documentContext
                                         )
-                                        val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
-                                        messages.add(assistantLine)
+                                        val assistantLine = staleAssistant?.takeIf { it.text.isNotBlank() }
+                                            ?: ChatLine(System.nanoTime(), "", "assistant").also { messages.add(it) }
+                                        var receivedNewOutput = false
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
                                             retryPrompt,
-                                            requestId = pendingLine.requestId ?: java.util.UUID.randomUUID().toString()
+                                            requestId = retryRequestId
                                         ) { piece ->
                                             val index = messages.indexOfFirst { it.id == assistantLine.id }
                                             if (index >= 0) {
-                                                messages[index] = messages[index].copy(text = messages[index].text + piece)
+                                                val previous = messages[index].text
+                                                messages[index] = messages[index].copy(
+                                                    text = if (receivedNewOutput) previous + piece else piece
+                                                )
+                                                receivedNewOutput = true
                                                 streamPersister.onDelta(messages.toList())
                                             }
                                         }
