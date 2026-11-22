@@ -1,14 +1,34 @@
 """Persistent per-device idempotency records for chat requests."""
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
+import os
 import time
 from contextlib import closing
+
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.database import connect_database
 
 PROCESSING_LEASE_SECONDS = 30 * 60
+
+def _encrypt_response(content: str, secret: str) -> str:
+    if not secret:
+        raise ValueError("SUPERIA_CHAT_IDEMPOTENCY_KEY is required")
+    nonce = os.urandom(12)
+    key = hashlib.sha256(secret.encode("utf-8")).digest()
+    ciphertext = AESGCM(key).encrypt(nonce, content.encode("utf-8"), None)
+    return base64.urlsafe_b64encode(nonce + ciphertext).decode("ascii")
+
+
+def _decrypt_response(value: str, secret: str) -> str:
+    packed = base64.urlsafe_b64decode(value.encode("ascii"))
+    nonce, ciphertext = packed[:12], packed[12:]
+    key = hashlib.sha256(secret.encode("utf-8")).digest()
+    return AESGCM(key).decrypt(nonce, ciphertext, None).decode("utf-8")
+
 
 
 def _connect(database_url: str):
@@ -51,6 +71,7 @@ def claim_chat_request(
     device_id: str,
     request_id: str,
     payload_hash: str,
+    encryption_secret: str,
 ) -> dict[str, object]:
     """Atomically claim a request, replay a completed one, or reject a live duplicate."""
     initialize_chat_request_store(database_url)
@@ -82,7 +103,7 @@ def claim_chat_request(
             connection.commit()
             return {
                 "state": "completed",
-                "content": row["response_text"] or "",
+                "content": _decrypt_response(row["response_text"] or "", encryption_secret),
                 "model": row["model"] or "unknown",
                 "provider": row["provider"] or "free-only-router",
             }
@@ -122,7 +143,9 @@ def complete_chat_request(
     content: str,
     model: str,
     provider: str,
+    encryption_secret: str,
 ) -> None:
+    encrypted_response = _encrypt_response(content, encryption_secret)
     with closing(_connect(database_url)) as connection:
         connection.execute(
             """
@@ -131,7 +154,7 @@ def complete_chat_request(
                 provider = ?, updated_at = ?
             WHERE device_id = ? AND request_id = ? AND status = 'processing'
             """,
-            (content, model, provider, int(time.time()), device_id, request_id),
+            (encrypted_response, model, provider, int(time.time()), device_id, request_id),
         )
         connection.commit()
 
