@@ -31,6 +31,7 @@ def auth_environment(tmp_path, monkeypatch):
     monkeypatch.setenv("SUPERIA_PAIRING_CODE", "pairing-secret-code-123456")
     monkeypatch.setenv("SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED", "true")
     monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "admin-secret-token-123456")
+    monkeypatch.setenv("SUPERIA_CHAT_IDEMPOTENCY_KEY", "test-idempotency-encryption-secret-keep-stable")
     app.dependency_overrides[get_provider] = lambda: FakeProvider()
     token_data = issue_device_token(database, "test-device")
     yield database, token_data
