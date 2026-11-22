@@ -312,7 +312,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             }
                                         }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
-                                        if (pendingIndex >= 0) messages[pendingIndex] = pendingLine.copy(pending = false)
+                                        if (pendingIndex >= 0) messages[pendingIndex] = messages[pendingIndex].copy(pending = false)
                                         streamPersister.flush(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
