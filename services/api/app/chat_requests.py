@@ -91,15 +91,16 @@ def claim_chat_request(
             if now - int(row["updated_at"]) <= PROCESSING_LEASE_SECONDS:
                 connection.commit()
                 return {"state": "processing"}
-            connection.execute(
+            cursor = connection.execute(
                 """
                 UPDATE chat_requests SET updated_at = ?
                 WHERE device_id = ? AND request_id = ? AND status = 'processing'
+                  AND updated_at = ?
                 """,
-                (now, device_id, request_id),
+                (now, device_id, request_id, int(row["updated_at"])),
             )
             connection.commit()
-            return {"state": "claimed"}
+            return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
 
         connection.execute(
             """
