@@ -485,8 +485,12 @@ private class StreamHistoryPersister(
         withContext(Dispatchers.IO) {
             mutex.withLock {
                 if (version > persistedVersion) {
-                    store.save(snapshot)
-                    persistedVersion = version
+                    try {
+                        store.save(snapshot)
+                        persistedVersion = version
+                    } catch (_: Exception) {
+                        // A later snapshot or the final flush will retry persistence.
+                    }
                 }
             }
         }
