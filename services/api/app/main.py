@@ -9,8 +9,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
-from app.device_auth import issue_device_token, revoke_device_token, validate_device_token
+from app.device_auth import device_id_for_token, issue_device_token, revoke_device_token
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
+from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, request_payload_hash
 from app.schemas import ChatRequest, ChatResponse
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
@@ -97,11 +98,13 @@ def _auth_database_path() -> str:
 
 async def require_api_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
-) -> None:
+) -> str:
     if not credentials or not credentials.credentials:
         raise HTTPException(status_code=401, detail="Token dispositivo mancante o non valido.")
-    if not validate_device_token(_auth_database_path(), credentials.credentials):
+    device_id = device_id_for_token(_auth_database_path(), credentials.credentials)
+    if not device_id:
         raise HTTPException(status_code=401, detail="Token dispositivo scaduto, revocato o non valido.")
+    return device_id
 
 
 async def require_admin_token(
@@ -187,22 +190,71 @@ async def models(
 @app.post("/api/v1/chat/stream", tags=["assistant"])
 async def chat_stream(
     request: ChatRequest,
-    _: None = Depends(require_api_token),
+    device_id: str = Depends(require_api_token),
     provider: FreeOnlyRouter = Depends(get_provider),
 ) -> StreamingResponse:
+    database_url = _auth_database_path()
+    request_id = str(request.request_id) if request.request_id else None
+    if request_id:
+        messages = [message.model_dump() for message in request.messages]
+        claim = claim_chat_request(
+            database_url,
+            device_id,
+            request_id,
+            request_payload_hash(messages, request.model),
+        )
+        if claim["state"] == "conflict":
+            raise HTTPException(status_code=409, detail="Questo ID richiesta è già associato a un contenuto diverso.")
+        if claim["state"] == "processing":
+            raise HTTPException(status_code=409, detail="Questa richiesta è già in elaborazione.")
+        if claim["state"] == "completed":
+            async def replay_events():
+                replay_payload = json.dumps({"text": claim["content"], "provider": claim["provider"], "model": claim["model"]}, ensure_ascii=False)
+                done_payload = json.dumps({"provider": claim["provider"], "model": claim["model"]}, ensure_ascii=False)
+                yield f"event: delta\ndata: {replay_payload}\n\n"
+                yield f"event: done\ndata: {done_payload}\n\n"
+            return StreamingResponse(
+                replay_events(),
+                media_type="text/event-stream",
+                headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
+            )
+
     async def events():
+        accumulated = []
+        final_model = request.model or "unknown"
+        final_provider = "free-only-router"
+        completed = False
         try:
             async for item in provider.stream_chat(
                 [message.model_dump() for message in request.messages],
                 request.model,
             ):
                 event = item.get("event", "delta")
+                if event == "delta":
+                    accumulated.append(str(item.get("text", "")))
+                if item.get("model"):
+                    final_model = str(item["model"])
+                if item.get("provider"):
+                    final_provider = str(item["provider"])
+                if event == "done":
+                    if request_id:
+                        complete_chat_request(
+                            database_url, device_id, request_id,
+                            "".join(accumulated), final_model, final_provider,
+                        )
+                    completed = True
                 payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
                 yield f"event: {event}\ndata: {payload}\n\n"
+            if not completed:
+                raise RuntimeError("Il provider ha chiuso lo stream senza evento done.")
         except NoFreeProviderAvailable as exc:
+            if request_id:
+                fail_chat_request(database_url, device_id, request_id)
             payload = json.dumps({"message": str(exc), "retryable": True}, ensure_ascii=False)
             yield f"event: error\ndata: {payload}\n\n"
         except Exception as exc:
+            if request_id and not completed:
+                fail_chat_request(database_url, device_id, request_id)
             payload = json.dumps({
                 "message": "Il flusso si è interrotto. Il testo già ricevuto resta visibile; non è stato effettuato un fallback dopo l'inizio della risposta.",
                 "retryable": True,
@@ -219,7 +271,6 @@ async def chat_stream(
             "Connection": "keep-alive",
         },
     )
-
 
 @app.post("/api/v1/chat", response_model=ChatResponse, tags=["assistant"])
 async def chat(
