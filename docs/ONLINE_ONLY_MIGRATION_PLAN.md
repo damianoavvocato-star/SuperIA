@@ -43,3 +43,12 @@ Lovable ed Emergent possono restare strumenti di sviluppo con crediti gratuiti, 
 È stato aggiunto un endpoint SSE autenticato e il router free-only inoltra i delta del provider. Il failover resta consentito soltanto prima del primo token: se il flusso si interrompe dopo aver mostrato testo, SuperIA conserva il parziale e segnala l'errore senza concatenare una risposta di un altro provider. Il client Android aggiorna il messaggio Compose progressivamente e salva il contenuto parziale. Sono stati aggiunti test mirati, ma la CI non ha ancora fornito un risultato verificabile e manca il collaudo end-to-end con provider gratuito reale. La fase resta aperta.
 
 Il client Android collega la cancellazione della coroutine alla chiusura della connessione HTTP per non lasciare letture SSE appese. È stato aggiunto anche un test router che simula la caduta della connessione dopo il primo token e verifica che il secondo provider non venga contattato.
+
+
+## Deduplicazione e recupero richieste — incremento implementato
+- Android crea un UUID per ogni messaggio e lo conserva nell'archivio chat cifrato; il pulsante di ripresa riutilizza lo stesso identificativo.
+- Il backend registra la richiesta per dispositivo, verifica l'hash del contenuto e impedisce che lo stesso ID venga riutilizzato con un payload differente.
+- Se la richiesta è già in elaborazione restituisce HTTP 409; se è completata riproduce la risposta salvata senza richiamare il provider; se è fallita permette un nuovo tentativo.
+- Le risposte archiviate per il replay sono cifrate con AES-256-GCM. È obbligatorio configurare il segreto server-side stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`, uguale su tutte le istanze e mai distribuito al client. La sua rotazione richiede ricifratura dei record.
+- Sono stati aggiunti test backend per replay, conflitto di payload, isolamento per dispositivo, duplicato in elaborazione e cifratura nel database. CI e collaudo reale restano da verificare.
+- La garanzia non è exactly-once assoluta: un arresto del server dopo la generazione del provider ma prima della registrazione atomica della risposta può richiedere una nuova generazione. Il retry non riprende il flusso dal token esatto.
