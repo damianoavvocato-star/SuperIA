@@ -321,3 +321,15 @@ def test_stream_idempotency_response_is_encrypted_in_database(auth_environment):
     assert stored
     assert "Risposta " not in stored
     assert "in streaming" not in stored
+
+
+def test_stream_request_id_fails_closed_without_encryption_secret(auth_environment, monkeypatch):
+    _, token_data = auth_environment
+    monkeypatch.delenv("SUPERIA_CHAT_IDEMPOTENCY_KEY", raising=False)
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post("/api/v1/chat/stream", json={
+        "request_id": "bb4fbfa9-2d48-4624-83b2-1a33f22a4edc",
+        "messages": [{"role": "user", "content": "Non archiviare in chiaro"}],
+    })
+    assert response.status_code == 503
+    assert "SUPERIA_CHAT_IDEMPOTENCY_KEY" in response.json()["detail"]
