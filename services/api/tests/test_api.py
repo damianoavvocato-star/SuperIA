@@ -279,3 +279,45 @@ def test_stream_request_id_is_scoped_to_authenticated_device(auth_environment):
     second_client = TestClient(app, headers={"Authorization": "Bearer " + second_device["access_token"]})
     assert first_client.post("/api/v1/chat/stream", json=payload).status_code == 200
     assert second_client.post("/api/v1/chat/stream", json=payload).status_code == 200
+
+
+def test_stream_request_id_rejects_an_already_processing_duplicate(auth_environment):
+    from app.chat_requests import claim_chat_request, request_payload_hash
+
+    database, token_data = auth_environment
+    request_id = "ed75b51c-5078-4d0f-b11c-9a5cc0f0df53"
+    messages = [{"role": "user", "content": "Richiesta già avviata"}]
+    claim = claim_chat_request(
+        database,
+        token_data["device_id"],
+        request_id,
+        request_payload_hash(messages, None),
+        os.environ["SUPERIA_CHAT_IDEMPOTENCY_KEY"],
+    )
+    assert claim["state"] == "claimed"
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post("/api/v1/chat/stream", json={
+        "request_id": request_id,
+        "messages": messages,
+    })
+    assert response.status_code == 409
+    assert "già in elaborazione" in response.json()["detail"]
+
+
+def test_stream_idempotency_response_is_encrypted_in_database(auth_environment):
+    import sqlite3
+
+    database, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    client.post("/api/v1/chat/stream", json={
+        "request_id": "a9a2fd12-ec9c-4a1d-b8c8-4f7d3c8f4a1e",
+        "messages": [{"role": "user", "content": "Risposta da proteggere"}],
+    })
+    with sqlite3.connect(database) as connection:
+        stored = connection.execute(
+            "SELECT response_text FROM chat_requests WHERE request_id = ?",
+            ("a9a2fd12-ec9c-4a1d-b8c8-4f7d3c8f4a1e",),
+        ).fetchone()[0]
+    assert stored
+    assert "Risposta " not in stored
+    assert "in streaming" not in stored
