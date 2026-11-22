@@ -8,6 +8,9 @@ from app.main import MAX_API_BODY_BYTES, app, get_provider
 
 
 class FakeProvider:
+    def __init__(self):
+        self.stream_calls = 0
+
     async def chat(self, messages, model=None):
         return {"content": "Risposta di prova", "model": model or "fake-local"}
 
@@ -15,6 +18,7 @@ class FakeProvider:
         return ["fake-local"]
 
     async def stream_chat(self, messages, model=None):
+        self.stream_calls += 1
         yield {"event": "delta", "text":"Risposta ", "provider": "fake", "model": "fake-local"}
         yield {"event": "delta", "text":"in streaming", "provider": "fake", "model": "fake-local"}
         yield {"event": "done", "provider": "fake", "model": "fake-local"}
@@ -225,3 +229,51 @@ def test_provider_endpoint_reports_safe_operational_state(auth_environment, tmp_
     finally:
         app.dependency_overrides[get_provider] = lambda: FakeProvider()
 
+
+
+def test_stream_request_id_replays_completed_response_without_second_provider_call(auth_environment):
+    _, token_data = auth_environment
+    fake = FakeProvider()
+    app.dependency_overrides[get_provider] = lambda: fake
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    payload = {
+        "request_id": "d6cc17ef-78e6-4eb8-bba5-8a4c164bba6f",
+        "messages": [{"role": "user", "content": "Rispondi una volta"}],
+    }
+    first = client.post("/api/v1/chat/stream", json=payload)
+    second = client.post("/api/v1/chat/stream", json=payload)
+    assert first.status_code == 200 and second.status_code == 200
+    assert first.text == second.text
+    assert fake.stream_calls == 1
+
+
+def test_stream_request_id_rejects_reuse_with_different_payload(auth_environment):
+    _, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    request_id = "6a2eac45-7b6d-4bd8-8d1b-97dc07a1c74e"
+    first = client.post("/api/v1/chat/stream", json={
+        "request_id": request_id,
+        "messages": [{"role": "user", "content": "Prima richiesta"}],
+    })
+    conflict = client.post("/api/v1/chat/stream", json={
+        "request_id": request_id,
+        "messages": [{"role": "user", "content": "Contenuto diverso"}],
+    })
+    assert first.status_code == 200
+    assert conflict.status_code == 409
+    assert "contenuto diverso" in conflict.json()["detail"]
+
+
+def test_stream_request_id_is_scoped_to_authenticated_device(auth_environment):
+    database, token_data = auth_environment
+    from app.device_auth import issue_device_token
+
+    second_device = issue_device_token(database, "second-device")
+    payload = {
+        "request_id": "9a3e39a6-fbf6-47cc-b5de-f43a719ab6c8",
+        "messages": [{"role": "user", "content": "Richiesta per dispositivo"}],
+    }
+    first_client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    second_client = TestClient(app, headers={"Authorization": "Bearer " + second_device["access_token"]})
+    assert first_client.post("/api/v1/chat/stream", json=payload).status_code == 200
+    assert second_client.post("/api/v1/chat/stream", json=payload).status_code == 200
