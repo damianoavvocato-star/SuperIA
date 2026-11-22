@@ -98,3 +98,5 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Il registro usa lo stesso database configurato per l'autenticazione. Per produzione deve essere PostgreSQL persistente e condiviso tra tutte le istanze; SQLite locale resta soltanto per sviluppo/test.
 
 - Privacy del registro richieste: le risposte salvate per il replay sono cifrate lato applicazione con AES-256-GCM. Il backend richiede il segreto stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`; deve essere generato casualmente, custodito solo nel secret manager del backend e condiviso tra le istanze. Non inserirlo nell'app Android, nel repository o nei log. Se manca, l'endpoint con request ID fallisce chiuso con HTTP 503. La rotazione della chiave richiede una procedura di ricifratura dei record esistenti, altrimenti il replay dei record precedenti non sarà decifrabile.
+
+- È stato aggiunto anche un test d'integrazione PostgreSQL che verifica claim, rifiuto del duplicato in elaborazione, completamento e replay della risposta decifrata; il workflow backend dispone già di un servizio PostgreSQL effimero. Il risultato della nuova run CI non è ancora verificabile da qui.
