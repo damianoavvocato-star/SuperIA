@@ -87,3 +87,12 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 
 - Persistenza durante lo streaming: Android salva snapshot cifrati della conversazione a intervalli limitati (circa 900 ms), con scritture serializzate e controllo versione per impedire che uno snapshot più vecchio sovrascriva uno più recente. Al termine viene forzato un salvataggio completo; in caso di errore/cancellazione resta attivo il salvataggio di recupero già esistente.
 - Limite noto: il server non dispone ancora di un registro persistente di idempotenza per richiesta. Un retry dopo perdita della connessione può quindi avviare una nuova generazione, non riprendere quella precedente. Non dichiarare garantita l'esecuzione exactly-once finché request ID, stato e risposta non sono registrati atomicamente nel database persistente condiviso.
+
+
+## Aggiornamento — identificativi e deduplicazione richieste chat
+- Ogni nuovo messaggio Android riceve un UUID stabile, conservato insieme al messaggio nell'archivio cifrato. Il retry riutilizza lo stesso UUID; se recupera una vecchia richiesta senza ID, assegna e salva l'ID prima di inviare.
+- Il backend associa ogni richiesta all'ID dispositivo autenticato e salva hash del payload, stato e risposta completata nel database condiviso configurato. La stessa coppia dispositivo/ID con payload differente viene rifiutata (HTTP 409); una richiesta già in elaborazione viene rifiutata (HTTP 409); una richiesta completata viene riprodotta dal registro senza invocare nuovamente il provider.
+- Gli errori prima del completamento rendono la richiesta riprovabile; i record in elaborazione hanno una lease di 30 minuti e il recupero della lease usa un aggiornamento condizionale atomico.
+- Test backend aggiunti per replay senza seconda chiamata al provider, conflitto di payload e isolamento tra dispositivi. Esito CI non ancora verificato.
+- Limite distribuito: questa protezione evita la duplicazione dopo che la risposta completata è stata registrata e blocca i duplicati durante l'elaborazione. Non può garantire exactly-once nel caso estremo in cui il provider abbia già generato la risposta ma il processo server si interrompa prima di registrarla nel database. La ripresa dello stream non riparte dal token interrotto: ritenta la richiesta con lo stesso ID.
+- Il registro usa lo stesso database configurato per l'autenticazione. Per produzione deve essere PostgreSQL persistente e condiviso tra tutte le istanze; SQLite locale resta soltanto per sviluppo/test.
