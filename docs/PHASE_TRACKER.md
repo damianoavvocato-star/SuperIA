@@ -380,3 +380,10 @@ Individuato e corretto il percorso di lettura: ChatHistoryStore ora chiama Atomi
 
 ### Micro-fase 29 — recupero AtomicFile anche per memoria progetto — 23 novembre 2026
 L'audit ha trovato lo stesso caso limite nel caricamento della memoria di progetto: il controllo preliminare di esistenza del file principale poteva impedire il recupero del backup. loadProjectMemory() ora tenta direttamente AtomicFile.openRead() e tratta come memoria vuota soltanto FileNotFoundException; gli errori di decifratura non vengono mascherati. Aggiunto test instrumented backup-only per la memoria oltre a quello per la cronologia. Commit codice 3b68cdec62d0b657f411b050da75b062db0d74bc; test 6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee. Test non eseguiti da testDebugUnitTest: micro-fase 29 resta in attesa di collaudo Android. Nessun APK.
+
+
+### Verifica CI — recupero AtomicFile cronologia e memoria — 23 novembre 2026
+- Backend CI sul commit `7732dbf040b32fc45c49d8fdddacfc64bce45345`: **SUCCESS** ([run 45216360181](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45216360181)).
+- Android CI sul commit `6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee`: lo step `Run Android unit tests` risulta **SUCCESS** ([run 45216321285](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45216321285)); al momento della verifica il job stava ancora completando gli step post-job. La CI non esegue `androidTest`, quindi non convalida i due nuovi test backup-only.
+- Il test Android unitario non genera APK: workflow confermato limitato a `gradle --no-daemon testDebugUnitTest`. Branch presente: solo `main`.
+- La micro-fase 29 resta aperta fino all'esecuzione dei test strumentali su emulatore/dispositivo. Nessun APK; nessun backend/provider/servizio esterno attivato.
