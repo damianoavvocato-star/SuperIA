@@ -359,6 +359,13 @@ async def chat_stream(
                 fail_chat_request(database_url, device_id, request_id, lease_token or '')
             payload = json.dumps({"message": str(exc), "retryable": True}, ensure_ascii=False)
             yield f"event: error\ndata: {payload}\n\n"
+        except asyncio.CancelledError:
+            # A disconnected client cancels the streaming task. Release its
+            # lease immediately so the same persisted request ID can be retried
+            # without waiting for the 30-minute stale-lease timeout.
+            if request_id and not completed:
+                fail_chat_request(database_url, device_id, request_id, lease_token or '')
+            raise
         except Exception as exc:
             if request_id and not completed:
                 fail_chat_request(database_url, device_id, request_id, lease_token or '')
