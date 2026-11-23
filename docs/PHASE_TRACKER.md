@@ -251,6 +251,7 @@ Completata igiene repository: `.gitignore` esteso, template `services/api/.env.e
 
 ## Micro-fase 18 — Completata (23 novembre 2026)
 Aggiunto `GET /api/v1/readiness` admin-only con stati sintetici process/database/device-auth/provider e nessun segreto in risposta. `/health` resta process-only. CI backend run 691: **102 passed, 1 warning**. Rapporto: [READINESS_DIAGNOSTICS_2026-11-23.md](READINESS_DIAGNOSTICS_2026-11-23.md).
+Test di regressione aggiuntivo: richieste readiness senza token o con token amministrativo errato devono restituire 401 senza esporre il segreto. Backend CI run 760 sul commit `53c9a18b1f9c7f833e453c8b30560b28d4a6be40`: **SUCCESS, 116 passed, 1 warning in 1.49s**.
 
 
 ## Micro-fase 19 — Bloccata da verifica account-level
