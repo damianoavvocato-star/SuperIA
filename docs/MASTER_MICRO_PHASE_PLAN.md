@@ -60,9 +60,9 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 
 | N. | Micro-fase | Criterio di completamento | Stato iniziale |
 |---:|---|---|---|
-| 19 | Audit provider AI gratuiti | Ogni provider candidato è verificato su termini, quota gratuita reale, carta richiesta, hard-stop, modelli e limiti. | Da iniziare |
+| 19 | Audit provider AI gratuiti | Ogni provider candidato è verificato su termini, quota gratuita reale, carta richiesta, hard-stop, modelli e limiti. | Bloccata da dipendenza esterna |
 | 20 | Attivazione controllata del primo provider gratuito | Una sola integrazione è provata con credenziale reale server-side e senza rischio di addebito. | Bloccata da dipendenza esterna |
-| 21 | Guard-rail free-only | Configurazione errata, quota finita, 402 e billing non consentito causano stop; nessun fallback pagato è possibile. | Parziale |
+| 21 | Guard-rail free-only | Configurazione errata, quota finita, 402 e billing non consentito causano stop; nessun fallback pagato è possibile. | Completata |
 | 22 | Rotazione tra provider approvati | Cooldown, selezione alternativa, quote e indisponibilità sono testati; nessuna rotazione di account/chiavi per eludere limiti. | Parziale |
 | 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Parziale |
 | 24 | Streaming SSE lato backend | Eventi delta/done/error, delimitatori, headers, timeout e chiusura stream sono verificati. | Implementata, verifica aggiuntiva |
@@ -218,3 +218,13 @@ Esteso `.gitignore`, aggiunto template `services/api/.env.example` con soli plac
 
 ### Esito micro-fase 18 — readiness — completata
 Aggiunto `GET /api/v1/readiness` protetto da token amministrativo; distingue processo, database, schema device auth e configurazione provider senza esporre URL, nomi provider o segreti. `/health` resta solo process health. Backend CI [run 691](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093774332): **102 passed, 1 warning in 1.19s**, SUCCESS. Rapporto [READINESS_DIAGNOSTICS_2026-11-23.md](READINESS_DIAGNOSTICS_2026-11-23.md). Deploy reale resta necessario per verificare servizi esterni.
+
+
+### Esito micro-fase 19 — audit provider — bloccata per account-level verification
+Completato audit pubblico dei 5 candidati: Groq e Cloudflare condizionati, OpenRouter non approvato per chat privata, Gemini non approvato per training sui prompt Free, SambaNova escluso per payment method e acquisto crediti. Aggiunta attestazione `DATA_POLICY_APPROVED` e rimosso SambaNova dal router. Nessun provider attivo. Rapporto [AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md](AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md). Serve verifica no-card, hard-stop e ZDR nel pannello account.
+
+### Esito micro-fase 20 — attivazione provider — bloccata da consenso esterno
+Non creati account né API key; non autorizzato il collegamento a provider. Non attivare provider senza consenso e verifica account-level. Nessun test reale di inferenza.
+
+### Esito micro-fase 21 — guard-rail free-only — completata
+Router richiede `SUPERIA_FREE_ONLY`, attestazioni economiche e `DATA_POLICY_APPROVED`, modello in allowlist; OpenRouter solo `:free`; Cloudflare account ID obbligatorio; SambaNova rifiutato. 429 cooldown/failover solo tra provider free approvati; 401/402/403 disabilita; 408/5xx/rete cooldown; mai switch dopo primo token; nessun fallback locale/pagato. Backend CI [run 705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45094107321): **104 passed, 1 warning**, SUCCESS. Rapporto [PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md](PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md).
