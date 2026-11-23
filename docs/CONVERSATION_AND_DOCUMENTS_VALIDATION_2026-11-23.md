@@ -39,3 +39,13 @@ Bloccata fino a backend/provider disponibili e consenso per staging. Nessun tele
 GitHub Actions Android [run 252](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095467026), commit `83e03d32b6a8d82d2423e16ba57c38045b24b019`: **SUCCESS**, `testDebugUnitTest`, BUILD SUCCESSFUL in 38s. Il workflow non ha eseguito assembleDebug/assembleRelease né prodotto APK.
 
 Stato: 33 completata a livello di test simulati; 29–30 parziali in attesa di dispositivo; 31–32 e 35 bloccate da dipendenze esterne; 34 parziale per WAF.
+
+
+## Audit e correzione archivio documenti — 24 novembre 2026
+- Audit statico di `LocalDocumentRepository` ha rilevato che `list()` ignorava gli archivi illeggibili (`mapNotNull`/`runCatching`) e usava una nuova chiave Keystore in lettura. In caso di chiave mancante i documenti potevano sparire dall'interfaccia e restare irrecuperabili con una chiave appena creata.
+- Corretto: la lettura usa esclusivamente la chiave Keystore già esistente; un archivio illeggibile interrompe il caricamento con errore esplicito senza cancellare o nascondere i file. Nuovi import non creano una chiave sostitutiva se esistono già archivi.
+- Corretto il recupero AtomicFile: `list()` considera anche backup `.enc.bak` e legge tramite `AtomicFile.openRead()`, consentendo il ripristino del backup dopo scrittura interrotta.
+- La UI carica l'archivio su dispatcher IO e mostra l'errore di recupero invece di fallire in composizione. La cancellazione verifica che il file appartenga alla directory privata e corrisponda all'ID del documento.
+- Aggiunti `LocalDocumentRepositoryInstrumentedTest` per lettura cifrata, backup-only, chiave mancante, archivio corrotto e rifiuto di path esterni. Sono test Android strumentali predisposti, **non eseguiti**: nessun APK di test generato/installato.
+- Backend CI [45288625663](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288625663) sul commit `78f1d9e`: SUCCESS. Android unit CI sui commit successivi e backend CI recenti sono in coda/in corso al momento dell'aggiornamento; vedere [run Android 45288717504](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717504) e [run Backend 45288717639](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717639).
+- Microfase 30 resta **parziale/in attesa di verifica runtime**: i test strumentali e OCR/import/export reali su dispositivo non sono stati eseguiti. Microfase 29 e gate 36 invariati.
