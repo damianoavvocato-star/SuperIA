@@ -138,3 +138,10 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Questo evita che una memoria illeggibile per corruzione o perdita della chiave venga presentata come memoria realmente vuota. La UI mantiene comunque un valore vuoto non utilizzabile come prova di successo e mostra l'errore nella sezione memoria.
 - Android CI [run 45265714340](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714340) e Backend CI [run 45265714497](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714497) erano ancora in esecuzione al momento della registrazione.
 - Nessun test instrumented è stato eseguito; nessun APK generato.
+
+
+### Ripetizione idempotente: ID richiesta riutilizzato — 23 novembre 2026
+- Verificate con successo le pipeline Android e Backend sul commit `82ca6606083bb5b656e4935f6eb174fa8ed477fa`: Android [45265714340](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714340), Backend [45265714497](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714497).
+- Estratta la funzione `requestIdForRetry`: una richiesta pendente conserva il proprio UUID tra i tentativi; per i record legacy privi di ID viene generato un UUID una sola volta, poi riutilizzato. Il client persiste l'ID prima di aprire lo stream.
+- Aggiunti test unitari per riuso ripetuto dell'UUID esistente e generazione/riuso per record legacy. Commit finale test `eccdef8fa7fa2d0a76cd45fb083bb7476d4e691a`.
+- CI sul commit finale: Android [45265956708](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265956708) e Backend [45265956651](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265956651), in coda al momento dell'annotazione. Nessun test instrumented/device e nessun APK.
