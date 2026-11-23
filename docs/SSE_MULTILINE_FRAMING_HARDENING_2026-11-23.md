@@ -40,3 +40,11 @@ La prima CI Android sul commit dei test ha evidenziato 6 fallimenti. L'analisi d
 - Android unit tests [45271269847](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269847) e Backend tests [45271269817](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269817): **SUCCESS**.
 - Aggiunto ulteriore test che verifica l'ignorare corretto di campi SSE di estensione (`id`, `retry`, campo sconosciuto) e di un tipo evento non gestito, mantenendo il successivo delta/done. Commit test `46ebb5a6376bb048c5e4a391a6b7a29056f310ae`; CI Android e backend avviate, esito da verificare.
 - Nessun APK; workflow Android resta limitato a `testDebugUnitTest`. Micro-fase 29 aperta per i test strumentali su emulatore/dispositivo e prove reali di rete/riavvio. Gate 36 bloccato.
+
+
+## Validazione finale campi di estensione SSE — 23 novembre 2026
+- Il test `sseParserIgnoresUnknownFieldsAndEventTypes` è stato validato: Android unit tests [45271516710](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516710) e Backend tests [45271516892](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516892): **SUCCESS**.
+- Sono inoltre concluse con **SUCCESS** le verifiche backend sui commit di report [45271549194](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271549194) e tracker [45271565435](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271565435).
+- Il test copre campi `id`, `retry`, campi sconosciuti e un tipo evento non gestito, seguito da delta e done validi.
+- Questo completa la validazione CI del blocco di hardening SSE descritto qui; non dimostra la resilienza a una disconnessione TCP reale né il comportamento dopo force-stop/riavvio su dispositivo.
+- Micro-fase 29 resta aperta in attesa dei test strumentali e delle prove pratiche; gate 36 resta bloccato. Nessun APK generato.
