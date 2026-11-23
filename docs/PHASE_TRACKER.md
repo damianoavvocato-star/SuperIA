@@ -204,3 +204,10 @@ GitHub Actions Backend tests, run 577 (ID `45089445756`), commit `036a2be916c782
 
 ## Micro-fase 08 — Completata (23 novembre 2026)
 Aggiunta validazione fail-closed della configurazione provider in `services/api/app/providers/free_router.py`; test per modalità globale, attestazioni, credenziali parziali, allowlist, OpenRouter e Cloudflare. Rapporto: [BACKEND_CONFIG_VALIDATION_2026-11-23.md](BACKEND_CONFIG_VALIDATION_2026-11-23.md). GitHub Actions Backend tests run 634, commit `a526d3fb69af368a16fe9a3120b7000eed6822e7`: **SUCCESS, 68 passed, 1 warning** con PostgreSQL. Le condizioni contrattuali/account reali non sono certificate dal codice e restano da verificare nella fase provider 19. Nessun APK.
+
+
+## Micro-fase 09 — Completata (23 novembre 2026)
+Verificati token casuali per dispositivo, hash SHA-256 lato server, UUID, TTL 90 giorni, scadenza, revoca selettiva e isolamento tra dispositivi. Test aggiunti e CI backend run 638 SUCCESS: **70 passed, 1 warning** con PostgreSQL. Rapporto: [DEVICE_AUTH_VALIDATION_2026-11-23.md](DEVICE_AUTH_VALIDATION_2026-11-23.md).
+
+## Micro-fase 10 — In corso (23 novembre 2026)
+Aggiunti test pairing per segreto server mancante, input fuori range e risposta contenente esclusivamente credenziali individuali. CI run successiva in attesa. Il flag `SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED` resta un gate e non prova il rate limiting effettivo; la protezione edge sarà verificata nella micro-fase 12. Nessun APK.
