@@ -245,12 +245,14 @@ async def chat_stream(
                     final_provider = str(item["provider"])
                 if event == "done":
                     if request_id:
-                        complete_chat_request(
+                        saved = complete_chat_request(
                             database_url, device_id, request_id,
                             "".join(accumulated), final_model, final_provider,
                             idempotency_secret,
                             lease_token or "",
                         )
+                        if not saved:
+                            raise RuntimeError("La richiesta non appartiene più a questo tentativo.")
                     completed = True
                 payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
                 yield f"event: {event}\ndata: {payload}\n\n"
