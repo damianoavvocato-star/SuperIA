@@ -309,3 +309,7 @@ Il builder Android rifiuta ora ruoli storici diversi da `user` e `assistant`, in
 
 ### Micro-fase 29 — hardening validazione archivio cronologia — 23 novembre 2026
 Aggiunta validazione condivisa prima del salvataggio e dopo la decodifica dell'archivio cifrato: sono ammessi soltanto i ruoli persistiti `user` e `assistant`; gli eventuali request ID devono essere UUID validi. I record legacy pending senza request ID restano leggibili. Aggiunti test unitari per ruolo anomalo, UUID malformato, ruoli validi e compatibilità legacy. La fase 29 resta **In attesa di verifica** fino al collaudo instrumented su Android reale/emulatore; il test unitario CI non sostituisce tale prova.
+
+
+### Micro-fase 29 — unicità identificativi cronologia — 23 novembre 2026
+La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request ID duplicati e messaggi assistant marcati pending. Aggiunti tre test unitari di regressione. Android CI [run 263](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45131163579): **SUCCESS**, `testDebugUnitTest`. Backend CI [run 780](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45131163584): **116 passed, 1 warning**. La fase 29 resta **In attesa di verifica** per il collaudo instrumented su dispositivo/emulatore reale. Nessun APK.
