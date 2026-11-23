@@ -321,3 +321,10 @@ La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request I
 - Backend CI [run 45158387265](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45158387265): SUCCESS, **116 passed, 1 warning in 1.57s**.
 - La persistenza periodica dei delta resta serializzata e versionata; il test di terminazione forzata, riavvio, sospensione e perdita rete su dispositivo reale non è ancora eseguito. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 bloccato. Nessun APK.
 - Rapporto: [CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md](CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md).
+
+
+### Verifica successiva — 23 novembre 2026
+- Commit `786823c12afee6f4c94c942f4afd1c250f6993bb`: Android unit tests e backend tests **SUCCESS**.
+- Commit `827ad1b35e41b00767235dab5a67496c75becad9`: Android run [45161032871](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032871) **SUCCESS**; backend run [45161032819](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032819) **SUCCESS**.
+- Il nuovo test copre collisione ID dopo overflow di `Long.MAX_VALUE`; commento KDoc del persister riallineato alla classe corretta.
+- Questi sono test automatici CI; non eseguono instrumented test né provano kill/restart, perdita rete o sospensione su dispositivo. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 resta bloccato. Nessun APK.
