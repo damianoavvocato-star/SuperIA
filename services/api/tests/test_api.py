@@ -204,6 +204,7 @@ def test_provider_endpoint_reports_safe_operational_state(auth_environment, tmp_
         "SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD": "true",
         "SUPERIA_PROVIDER_GROQ_HARD_STOP": "true",
         "SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING": "true",
+        "SUPERIA_PROVIDER_GROQ_DATA_POLICY_APPROVED": "true",
         "SUPERIA_PROVIDER_GROQ_API_KEY": "must-never-be-returned",
         "SUPERIA_PROVIDER_GROQ_MODEL": "openai/gpt-oss-120b",
         "SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS": "openai/gpt-oss-120b",
