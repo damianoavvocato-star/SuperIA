@@ -316,4 +316,21 @@ class OnlineAssistantClientTest {
     }
 
 
+
+    @Test
+    fun sseJsonFieldParserUnescapesControlCharactersAndUnicode() {
+        val value = OnlineAssistantClient.extractJsonStringField(
+            """{"text":"riga\\n\\\"citazione\\\" \\u00E8"}""",
+            "text"
+        )
+        assertEquals("riga\n\"citazione\" è", value)
+    }
+
+    @Test
+    fun sseJsonFieldParserRejectsMalformedOrMissingFields() {
+        assertEquals(null, OnlineAssistantClient.extractJsonStringField("""{"text":}""", "text"))
+        assertEquals(null, OnlineAssistantClient.extractJsonStringField("""{"other":"value"}""", "text"))
+    }
+
+
 }
