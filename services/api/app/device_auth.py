@@ -89,9 +89,12 @@ def revoke_device_token(database_path: str, device_id: str) -> bool:
 
 
 
-def rotate_device_token(database_path: str, device_id: str) -> dict[str, object] | None:
+def rotate_device_token(database_path: str, device_id: str, current_token: str) -> dict[str, object] | None:
     """Replace the active token for one device; the previous token stops working immediately."""
     initialize_auth_store(database_path)
+    if not current_token:
+        return None
+    current_hash = hashlib.sha256(current_token.encode("utf-8")).hexdigest()
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
     now = int(time.time())
@@ -101,9 +104,9 @@ def rotate_device_token(database_path: str, device_id: str) -> dict[str, object]
             """
             UPDATE device_tokens
             SET token_hash = ?, created_at = ?, expires_at = ?
-            WHERE device_id = ? AND revoked_at IS NULL AND expires_at > ?
+            WHERE device_id = ? AND token_hash = ? AND revoked_at IS NULL AND expires_at > ?
             """,
-            (token_hash, now, expires_at, device_id, now),
+            (token_hash, now, expires_at, device_id, current_hash, now),
         )
         connection.commit()
         if cursor.rowcount != 1:
