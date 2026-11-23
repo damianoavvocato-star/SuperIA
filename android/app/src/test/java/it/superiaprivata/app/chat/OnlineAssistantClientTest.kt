@@ -258,7 +258,7 @@ class OnlineAssistantClientTest {
             event: done
             data: {"provider":"fake","model":"fake-model"}
 
-        """.trimIndent().replace("\\n", "\n")
+        """.trimIndent()
         val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
         assertEquals("Ciao mondo", answer)
         assertEquals(listOf("Ciao ", "mondo"), deltas)
