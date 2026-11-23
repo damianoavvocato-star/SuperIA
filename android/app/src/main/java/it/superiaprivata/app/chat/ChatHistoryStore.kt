@@ -30,6 +30,15 @@ internal fun nextChatLineId(existingIds: Collection<Long>, candidate: Long): Lon
     return id
 }
 
+/** Reuse the durable id on retry; create one only for legacy pending entries. */
+internal fun requestIdForRetry(existingRequestId: String?): String {
+    if (existingRequestId != null) {
+        UUID.fromString(existingRequestId)
+        return existingRequestId
+    }
+    return UUID.randomUUID().toString()
+}
+
 data class ChatLine(val id: Long, val text: String, val role: String = "user", val pending: Boolean = false, val requestId: String? = null)
 
 /** Reject malformed transcript entries before they can be persisted or shown to the prompt builder. */
