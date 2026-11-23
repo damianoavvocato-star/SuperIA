@@ -88,6 +88,24 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     }
 
     val selected = documents.firstOrNull { it.id == selectedId }
+    val exportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        val document = selected
+        if (uri != null && document != null) scope.launch {
+            status = "Esportazione del testo estratto…"
+            try {
+                withContext(Dispatchers.IO) {
+                    val output = context.contentResolver.openOutputStream(uri)
+                        ?: error("Impossibile aprire il file di destinazione.")
+                    output.use { it.write(document.text.toByteArray(Charsets.UTF_8)) }
+                }
+                status = "Testo estratto esportato nella posizione scelta. La copia salvata è in chiaro."
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                status = error.message ?: "Esportazione non riuscita."
+            }
+        }
+    }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Documenti e conoscenza personale", style = MaterialTheme.typography.titleLarge)
@@ -197,6 +215,14 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Usa nella chat AI") }
+                OutlinedButton(
+                    onClick = {
+                        val suggestedName = document.title.substringBeforeLast('.', document.title)
+                            .replace(Regex("[^A-Za-z0-9._-]"), "_") + ".txt"
+                        exportPicker.launch(suggestedName)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Esporta testo estratto") }
                 OutlinedButton(
                     onClick = {
                         runCatching { repository.delete(document) }
