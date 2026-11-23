@@ -57,6 +57,25 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun recoversPreviousTranscriptWhenAtomicFileBackupIsTheOnlyCopy() {
+        val expected = listOf(
+            ChatLine(501L, "cronologia precedente da recuperare", "user"),
+            ChatLine(502L, "risposta precedente", "assistant")
+        )
+        store.save(expected)
+
+        val base = File(context.filesDir, "conversation_history.enc")
+        val backup = File(base.absolutePath + ".bak")
+        assertTrue("L'archivio principale deve esistere dopo il salvataggio", base.exists())
+        assertTrue(base.copyTo(backup, overwrite = true).exists())
+        assertTrue("Simula l'interruzione dopo il backup e prima del nuovo file", base.delete())
+
+        assertEquals(expected, ChatHistoryStore(context).load())
+        assertTrue("AtomicFile deve ripristinare il file principale", base.exists())
+        assertFalse("Il backup recuperato deve essere consumato", backup.exists())
+    }
+
+    @Test
     fun transcriptIsEncryptedAtRest() {
         val secret = "testo-che-non-deve-essere-leggibile"
         store.save(listOf(ChatLine(1L, secret, "user")))
