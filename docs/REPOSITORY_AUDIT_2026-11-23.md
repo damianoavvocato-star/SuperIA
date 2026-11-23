@@ -41,7 +41,7 @@ Verifica del repository pubblico `damianoavvocato-star/SuperIA`, branch predefin
 - Android: namespace/applicationId `it.superiaprivata.app`, compile/target SDK 35, min SDK 26, JDK target 17, AGP 8.9.2, Kotlin 2.2.0.
 - Gradle workflow usa Gradle 8.11.1. Il progetto non contiene wrapper Gradle nel root Android, perciò CI usa l'installazione Gradle del runner.
 - Backend requirements: FastAPI, Uvicorn, HTTPX, psycopg binary, cryptography; pytest per sviluppo.
-- Il backend mantiene dipendenze e file del vecchio provider Ollama; il router di produzione corrente è FreeOnlyRouter e i provider gratuiti restano disabilitati per default.
+- Il backend usa FreeOnlyRouter; nella micro-fase 24 il modulo Ollama e il prototipo web sono stati rimossi. I provider gratuiti restano disabilitati per default.
 - Nessun backend di produzione, database di produzione, rate limiting edge o provider reale è configurato.
 
 ## Confini e decisioni
@@ -52,4 +52,4 @@ Verifica del repository pubblico `damianoavvocato-star/SuperIA`, branch predefin
 - Non unire o copiare contenuti da Editore_Foto_Video_IA o Imperium_Italia.
 
 ## Esito micro-fase 03
-Completata la ricognizione statica di repository, branch, PR, cronologia, directory principali, workflow e dipendenze. Le incongruenze documentali individuate sono state corrette o marcate come storiche. I residui web/Ollama sono documentati come legacy e rinviati a una fase di pulizia dedicata; non si dichiara che siano già stati rimossi o che la loro eliminazione sia stata testata.
+Completata la ricognizione statica di repository, branch, PR, cronologia, directory principali, workflow e dipendenze. Le incongruenze documentali individuate sono state corrette o marcate come storiche. I residui web/Ollama e la route non-streaming sono stati rimossi nella micro-fase 24 dopo la ricerca dei riferimenti e l'aggiornamento dei test; la CI finale verifica l'assenza delle route legacy.
