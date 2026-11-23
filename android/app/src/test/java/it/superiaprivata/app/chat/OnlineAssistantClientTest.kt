@@ -320,7 +320,7 @@ class OnlineAssistantClientTest {
     @Test
     fun sseJsonFieldParserUnescapesControlCharactersAndUnicode() {
         val value = OnlineAssistantClient.extractJsonStringField(
-            """{"text":"riga\\n\\\"citazione\\\" \\u00E8"}""",
+            """{"text":"riga\n\"citazione\" \u00E8"}""",
             "text"
         )
         assertEquals("riga\n\"citazione\" è", value)
