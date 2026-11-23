@@ -191,9 +191,16 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         TextButton(
                             enabled = !generating,
                             onClick = {
-                                runCatching { historyStore.clear() }
-                                    .onSuccess { messages.clear(); storageError = null; exportStatus = null }
-                                    .onFailure { storageError = it.message ?: "Errore nella cancellazione" }
+                                scope.launch {
+                                    try {
+                                        withContext(Dispatchers.IO) { historyStore.clear() }
+                                        messages.clear()
+                                        storageError = null
+                                        exportStatus = null
+                                    } catch (error: Exception) {
+                                        storageError = error.message ?: "Errore nella cancellazione"
+                                    }
+                                }
                             }
                         ) { Text("Svuota") }
                     }
@@ -412,7 +419,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingPosition >= 0) {
                                             messages[pendingPosition] = pendingLine.copy(requestId = retryRequestId)
-                                            historyStore.save(messages.toList())
+                                            withContext(Dispatchers.IO) { historyStore.save(messages.toList()) }
                                         }
                                         val contextHistory = messages.filterNot { it.pending || it.id == staleAssistant?.id }
                                         val retryMessages = buildRequestMessages(
@@ -424,7 +431,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             ?: ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant").also { messages.add(it) }
                                         // Persist the assistant placeholder before opening the network stream.
                                         // Recovery after process death then sees a consistent transcript.
-                                        historyStore.save(messages.toList())
+                                        withContext(Dispatchers.IO) { historyStore.save(messages.toList()) }
                                         var receivedNewOutput = false
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
@@ -447,14 +454,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         streamPersister.flush(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
-                                        runCatching { historyStore.save(messages.toList()) }
+                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                         throw error
                                     } catch (error: OutOfMemoryError) {
                                         generationError = "Memoria insufficiente durante la preparazione della richiesta. Riprova."
-                                        runCatching { historyStore.save(messages.toList()) }
+                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     } catch (error: Exception) {
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
-                                        runCatching { historyStore.save(messages.toList()) }
+                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     } finally {
                                         generating = false
                                     }
@@ -538,23 +545,18 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 requestId = java.util.UUID.randomUUID().toString()
                             )
                             messages.add(userLine)
-                            val saved = runCatching { historyStore.save(messages.toList()) }
-                            if (saved.isFailure) {
-                                messages.remove(userLine)
-                                storageError = saved.exceptionOrNull()?.message ?: "Errore nel salvataggio"
-                                return@IconButton
-                            }
-                            storageError = null
                             draft = ""
                             scope.launch {
                                 generating = true
                                 generationError = null
                                 try {
+                                    withContext(Dispatchers.IO) { historyStore.save(messages.toList()) }
+                                    storageError = null
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
                                     val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant")
                                     messages.add(assistantLine)
                                     // Save the user pending state and assistant placeholder before network I/O.
-                                    historyStore.save(messages.toList())
+                                    withContext(Dispatchers.IO) { historyStore.save(messages.toList()) }
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(pairedEndpoint, backendToken),
@@ -571,14 +573,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
                                     streamPersister.flush(messages.toList())
                                 } catch (error: CancellationException) {
-                                    runCatching { historyStore.save(messages.toList()) }
+                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     throw error
                                 } catch (error: OutOfMemoryError) {
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
-                                    runCatching { historyStore.save(messages.toList()) }
+                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                 } catch (error: Exception) {
                                     generationError = error.message ?: "Errore durante la richiesta online."
-                                    runCatching { historyStore.save(messages.toList()) }
+                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                 } finally {
                                     generating = false
                                 }
