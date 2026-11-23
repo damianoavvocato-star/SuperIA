@@ -11,7 +11,7 @@ Ambito: esclusivamente il repository SuperIA. Questo registro separa codice pres
 - Inferenza AI esclusivamente online. Gemma/LiteRT-LM e il runtime locale sono stati rimossi dal progetto Android.
 - Cronologia e memoria di progetto restano cifrate localmente; al backend si invia soltanto il contesto necessario.
 - SuperIA resta indipendente da Editore Foto e Video IA e Imperium_Italia.
-- BLOCCO APK: non generare, assemblare, firmare o pubblicare APK intermedi. L'APK definitivo sarà autorizzato soltanto dopo il completamento e la verifica end-to-end di tutte le funzioni necessarie alla chat online.
+- Eccezione autorizzata il 24 novembre 2026: sono consentiti esclusivamente APK debug temporanei, generati e installati da GitHub Actions su emulatore per test strumentali delle microfasi 29–30. Vietati firma release, distribuzione e pubblicazione; l'APK definitivo resta bloccato fino al gate finale.
 
 ## Stato generale verificato
 - Repository: https://github.com/damianoavvocato-star/SuperIA, branch predefinito main.
@@ -19,7 +19,7 @@ Ambito: esclusivamente il repository SuperIA. Questo registro separa codice pres
 - Backend: prototipo FastAPI, autenticazione per dispositivo, pairing, revoca, endpoint chat e stato provider; non è pubblicato in produzione.
 - Provider: router free-only presente, provider disabilitati per default; nessun provider di produzione è stato attivato o verificato su account reale.
 - Hosting e database: nessun servizio di produzione creato o collegato; i candidati gratuiti restano da verificare prima della registrazione.
-- CI Android: workflow modificato per eseguire soltanto gradle --no-daemon testDebugUnitTest. La modifica rimuove assemblaggio debug/release, firma, upload APK e test strumentali che richiedono un APK.
+- CI Android: workflow con job JVM testDebugUnitTest e job strumentale su emulatore API 35. Il secondo può assemblare/installare soltanto APK debug temporanei non firmati per prove; non carica né distribuisce APK.
 - Non dichiarare un esito CI successivo a tale modifica senza una run verificata. Nessun APK va prodotto durante il completamento della chat online.
 
 ## Stato delle 16 fasi
@@ -538,3 +538,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Aggiunti `LocalDocumentRepositoryInstrumentedTest` per lettura cifrata, backup-only, chiave mancante, archivio corrotto e rifiuto di path esterni. Sono test Android strumentali predisposti, **non eseguiti**: nessun APK di test generato/installato.
 - Backend CI [45288625663](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288625663) sul commit `78f1d9e`: SUCCESS. Android unit CI sui commit successivi e backend CI recenti sono in coda/in corso al momento dell'aggiornamento; vedere [run Android 45288717504](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717504) e [run Backend 45288717639](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717639).
 - Microfase 30 resta **parziale/in attesa di verifica runtime**: i test strumentali e OCR/import/export reali su dispositivo non sono stati eseguiti. Microfase 29 e gate 36 invariati.
+
+
+### Autorizzazione test APK temporanei e avvio collaudo microfase 29 — 24 novembre 2026
+- Su esplicita autorizzazione dell'utente, revocato il divieto limitatamente alla generazione/installazione di APK debug temporanei in CI per i test strumentali. Resta vietata la build release e la distribuzione dell'APK finale prima del gate 36.
+- Aggiunta ProcessRestartRecoveryInstrumentedTest: due invocazioni separate verificano scrittura e lettura della cronologia pendente, request UUID, payload immutabile e memoria progetto.
+- Aggiornato .github/workflows/android-build.yml: job JVM invariato; aggiunto job con emulatore Android API 35 che esegue i test strumentali di chat/documenti, poi il test di scrittura, adb shell am force-stop e il test di recupero in una nuova invocazione.
+- Commit test 3b5c43b4b48df0d3652c0863d7584da5987f4186; commit workflow 22b54c6c2c75c530004d4d80ac0011481949538a.
+- Run Android sul workflow aggiornato: [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674), in esecuzione al momento dell'aggiornamento. Run JVM separata [45289429271](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289429271), in esecuzione.
+- Fino all'esito delle run non dichiarare superati i test strumentali. La prova su telefono fisico, Wi-Fi/rete mobile e riavvio dispositivo resta distinta e non viene simulata dall'emulatore.
