@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
   "project": "SuperIA",
-  "updated_at": "2026-11-15",
+  "updated_at": "2026-11-23",
   "policy": {
-    "default_mode": "local_first",
+    "default_mode": "online_only_for_AI_inference",
     "cloud_providers_enabled_by_default": false,
     "install_dependencies_automatically": false,
     "model_weights_require_individual_license_review": true,
-    "pin_commit_and_checksum_before_distribution": true
+    "pin_commit_and_checksum_before_distribution": true,
+    "local_llm_inference": "prohibited_by_current_SuperIA_architecture",
+    "local_non_llm_processing": "allowed_only_after_component_review"
   },
   "components": [
     {
@@ -23,7 +25,8 @@
         "macos"
       ],
       "offline": true,
-      "status": "candidate"
+      "status": "superseded_not_to_be_integrated",
+      "notes": "Local LLM inference conflicts with current online-only SuperIA architecture; retained only as historical audit record."
     },
     {
       "id": "llama-cpp",
@@ -39,7 +42,8 @@
         "android"
       ],
       "offline": true,
-      "status": "candidate"
+      "status": "superseded_not_to_be_integrated",
+      "notes": "Local LLM inference conflicts with current online-only SuperIA architecture; retained only as historical audit record."
     },
     {
       "id": "whisper",
