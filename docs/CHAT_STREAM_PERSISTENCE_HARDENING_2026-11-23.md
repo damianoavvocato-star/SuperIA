@@ -95,3 +95,8 @@ Il test resta instrumented e richiede un device/emulatore; non viene eseguito da
 - Backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136): **SUCCESS**, job `test`.
 - Confermato che il workflow Android non esegue assemble o packaging APK.
 - Il test di perdita chiave resta sotto `androidTest`: la CI appena conclusa non lo esegue. Micro-fase 29 ancora in attesa di esecuzione su emulatore/dispositivo; gate 36 bloccato, nessun APK e nessun servizio esterno attivato.
+
+
+### Correzione fixture del test instrumented — 23 novembre 2026
+
+Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState` è stata individuata una fixture incoerente con la validazione introdotta: il messaggio finale era marcato `pending=true` ma aveva ruolo `assistant`, mentre il contratto ammette pending soltanto per messaggi `user`. Corretto il ruolo del solo elemento pending, mantenendo alternanza user/assistant per gli altri messaggi. Commit `ed650a4af63e7bb4cb242fee6832e7a11b03327b`. La modifica interessa `androidTest`, non eseguito dal workflow unitario; lo stato CI specifico di questo commit non risulta ancora disponibile. La prova instrumented resta da eseguire su emulatore/dispositivo. Nessun APK.
