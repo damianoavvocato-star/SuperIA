@@ -108,3 +108,11 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Commit 40a9e712ae8efd3c1d7ab971e44ccb95b445daf2: load() tenta ora direttamente openRead(), che esegue il recupero AtomicFile; soltanto FileNotFoundException viene trattata come archivio assente, mentre gli errori di decifratura restano fail-closed.
 - Commit 409fb3703372bfee2d587118a61e013246e0497f: aggiunto test instrumented che simula la condizione backup-only, elimina il file principale e verifica il ripristino integrale della cronologia e il consumo del backup.
 - I test sono in androidTest e non sono eseguiti da testDebugUnitTest. La correzione è registrata ma non ancora validata su Android; CI dedicata da verificare. Micro-fase 29 resta aperta. Nessun APK generato.
+
+
+### Estensione recupero AtomicFile alla memoria di progetto — 23 novembre 2026
+
+- Audit del percorso parallelo ha rilevato lo stesso difetto in loadProjectMemory(): il controllo baseFile.exists() impediva ad AtomicFile.openRead() di ripristinare un eventuale backup .bak.
+- Commit 3b68cdec62d0b657f411b050da75b062db0d74bc: loadProjectMemory() tenta ora openRead() e restituisce stringa vuota soltanto quando l'archivio è realmente assente (FileNotFoundException); errori di decifratura restano espliciti.
+- Commit 6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee: aggiunto test instrumented per memoria backup-only, con verifica del contenuto ripristinato, file base ricreato e backup consumato.
+- Sia il test della cronologia sia quello della memoria sono sotto androidTest e non sono coperti da testDebugUnitTest. La CI del commit più recente e il collaudo Android restano da verificare. Micro-fase 29 aperta; nessun APK.
