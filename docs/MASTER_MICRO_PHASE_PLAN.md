@@ -236,3 +236,7 @@ Router richiede `SUPERIA_FREE_ONLY`, attestazioni economiche e `DATA_POLICY_APPR
 
 ### Esito micro-fasi 29–35 — continuità, documenti e collaudo — 23 novembre 2026
 29 in attesa: cronologia AES-GCM/Keystore, AtomicFile, pending ID, memoria editabile/cancellabile e export TXT implementati; instrumented test presenti ma non eseguiti su device. 30 in attesa: documenti locali cifrati, BM25, fonti, contesto 6k, prompt 32k, export TXT e delete implementati; OCR/storage reali da verificare. 31 bloccata da account/deploy esterno. 32 bloccata da provider reale e credenziale. 33 completata a livello simulato: 401/402/403/408/429/5xx/rete, DB, cooldown/failover e hard-stop; Backend CI [run 750](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095467059): **110 passed, 1 warning**. 34 in attesa: token, revoca, rotazione, isolamento device, input e segreti testati; WAF rate limit non disponibile. 35 bloccata fino a backend/provider e telefono reale. Rapporto [CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md](CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md).
+
+
+### Gate micro-fase 36 — NON SUPERATO — 23 novembre 2026
+Il gate resta bloccato: backend HTTPS pubblico, PostgreSQL persistente, WAF/IP rate limit, provider free reale approvato, secret manager e test E2E su telefono reale non sono disponibili. Non creare APK. Rapporto completo [ONLINE_CHAT_FINAL_GATE_2026-11-23.md](ONLINE_CHAT_FINAL_GATE_2026-11-23.md).
