@@ -266,7 +266,7 @@ Guard-rail free-only verificati: allowlist, attestazioni economiche + data polic
 
 ## Micro-fasi 22–28 — aggiornamento 23 novembre 2026
 - 22 Completata: failover/cooldown solo tra provider free approvati, nessun fallback locale o pagato.
-- 23 Completata: schema ruoli/limiti verificato; prompt totale Android ora limitato a 32.000 caratteri. Contesto ancora serializzato come singolo messaggio user con ruoli nel testo.
+- 23 Completata: schema ruoli/limiti verificato; Android invia ora messaggi strutturati user/assistant separati, contesto memoria/documenti etichettato e nuovo messaggio finale. Retry conserva i ruoli. Limite client: 1–60 messaggi, 32.000 caratteri totali.
 - 24 Completata: rimosse route non-streaming, root web prototype, static index, Ollama backend e metodo client send; solo SSE.
 - 25 Completata: parser SSE Android testato per delta, heartbeat, done, error, troncamento ed escape JSON.
 - 26 In attesa di verifica: heartbeat e lease implementati; test disconnessione reale telefono/rete ancora mancante.
@@ -297,3 +297,7 @@ Non soddisfatti: backend HTTPS pubblico, database PostgreSQL persistente, WAF IP
 
 ## Aggiornamento micro-fase 34 — 23 novembre 2026
 Aggiunto test di regressione pairing: valori non confermati del flag edge, header proxy falsificati, nessuna emissione token, risposta 503 senza segreto. Backend CI run 45119185491: **115 passed, 1 warning in 1.52s**, SUCCESS. La fase 34 resta in attesa della protezione WAF/gateway reale (micro-fase 12); il gate edge non va abilitato. Rapporto: [SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md](SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md).
+
+
+### Micro-fase 23 — aggiornamento contratto multi-turno — 23 novembre 2026
+Il client Android non appiattisce più la cronologia in un singolo messaggio user: invia array JSON con ruoli originali, contesto memoria/documenti separato e messaggio utente finale. Stesso comportamento per il retry. Test unitari coprono ruoli, budget totale, memoria/documenti e rifiuto di ruolo non supportato. Backend CI [run 771](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737059): **116 passed, 1 warning**. Android CI [run 259](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737107): **SUCCESS**, BUILD SUCCESSFUL in 36s. Fase 23 completata senza il precedente limite noto. Nessun APK.
