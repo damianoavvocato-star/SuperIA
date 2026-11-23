@@ -214,3 +214,7 @@ Esteso `.gitignore` a file ambiente, chiavi e directory secrets; aggiunto `servi
 
 ### Esito micro-fase 17 — igiene segreti — bloccata per secret manager produzione
 Esteso `.gitignore`, aggiunto template `services/api/.env.example` con soli placeholder e provider disabilitati, test redazione API key nelle diagnostiche. Code search per pattern comuni di chiavi e token non ha trovato match. Backend CI [run 683](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093635048): **100 passed, 1 warning**, SUCCESS. Secret manager e rotazione produzione richiedono deploy/account esterno, non ancora autorizzati. Rapporto [SECRET_MANAGEMENT_BASELINE_2026-11-23.md](SECRET_MANAGEMENT_BASELINE_2026-11-23.md).
+
+
+### Esito micro-fase 18 — readiness — completata
+Aggiunto `GET /api/v1/readiness` protetto da token amministrativo; distingue processo, database, schema device auth e configurazione provider senza esporre URL, nomi provider o segreti. `/health` resta solo process health. Backend CI [run 691](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093774332): **102 passed, 1 warning in 1.19s**, SUCCESS. Rapporto [READINESS_DIAGNOSTICS_2026-11-23.md](READINESS_DIAGNOSTICS_2026-11-23.md). Deploy reale resta necessario per verificare servizi esterni.
