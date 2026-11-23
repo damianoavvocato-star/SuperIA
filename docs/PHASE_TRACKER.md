@@ -233,3 +233,13 @@ Selezionati Render Free Web Service (staging only) e Aiven PostgreSQL Free (test
 
 ## Micro-fase 14 — Bloccata da autorizzazione esterna
 Preparato `render.yaml` con piano Free, Frankfurt, autoDeploy false, health check, provider AI e pairing disabilitati; segreti solo variabili non sincronizzate nel repository. Guida: [RENDER_STAGING_DEPLOY_GUIDE.md](RENDER_STAGING_DEPLOY_GUIDE.md). Per collegare account Render/Aiven e autorizzare GitHub App serve consenso esplicito. Nessun deploy eseguito.
+
+
+## Micro-fase 15 — Bloccata da provisioning esterno
+Il codice ora rifiuta SQLite e filesystem temporanei in staging/production e richiede PostgreSQL condiviso per auth e router state. CI run 678: **95 passed, 1 warning**. Database esterno non creato; consenso e provisioning Aiven ancora necessari.
+
+## Micro-fase 16 — Completata
+Migrazione SQLite/PostgreSQL verificata con conteggi, digest SHA-256, destinazione non vuota, schema errato, rollback completo e sorgente senza provider_state. CI run 680: **99 passed, 1 warning** con PostgreSQL. Rapporto: [DATABASE_PERSISTENCE_AND_MIGRATION_2026-11-23.md](DATABASE_PERSISTENCE_AND_MIGRATION_2026-11-23.md).
+
+## Micro-fase 17 — In corso
+Esteso `.gitignore` per .env e segreti; aggiunto template `services/api/.env.example` senza credenziali reali e con provider disabilitati; test di redazione delle API key nelle diagnostiche. Ricerca pattern segreti noti senza match. CI finale da verificare; secret manager reale richiede deploy/consenso esterno.
