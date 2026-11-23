@@ -428,10 +428,11 @@ internal suspend fun consumeSseEvents(
     val answer = StringBuilder()
     var eventName = ""
     val eventData = StringBuilder()
+    var hasEventData = false
     var completed = false
 
     suspend fun dispatchEvent() {
-        if (eventData.isEmpty()) {
+        if (!hasEventData) {
             eventName = ""
             return
         }
@@ -464,6 +465,7 @@ internal suspend fun consumeSseEvents(
         }
         eventName = ""
         eventData.clear()
+        hasEventData = false
     }
 
     while (true) {
@@ -476,9 +478,10 @@ internal suspend fun consumeSseEvents(
             line.startsWith(":") -> Unit
             line.startsWith("event:") -> eventName = line.substringAfter("event:").trim()
             line.startsWith("data:") -> {
-                if (eventData.isNotEmpty()) eventData.append('\n')
+                if (hasEventData) eventData.append('\n')
                 val value = line.substringAfter("data:")
                 eventData.append(if (value.startsWith(" ")) value.drop(1) else value)
+                hasEventData = true
             }
         }
     }
