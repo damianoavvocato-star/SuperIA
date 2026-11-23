@@ -124,3 +124,12 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Stato: test aggiunti, **non eseguiti**. Il workflow corrente esegue test unitari Android e non avvia test strumentali sul dispositivo/emulatore. Serve un successivo collaudo Android dedicato, senza produrre o distribuire APK intermedi.
 - La ripresa manuale resta necessaria dopo la riapertura; l'app non riparte automaticamente a generare per evitare invii inattesi e duplicazioni.
 - Nessun APK generato.
+
+### Miglioramento ripresa rete e diagnostica errori HTTP — 23 novembre 2026
+- Il client Android valida localmente che il requestId dello streaming sia un UUID prima di aprire la connessione, evitando richieste che il backend rifiuterebbe.
+- Aggiunta diagnostica specifica per HTTP 401 (riassociazione), 409 (richiesta già in elaborazione/conflitto), 429 (attendere il limite) e 5xx/503 (indisponibilità temporanea e provider gratuiti non pronti).
+- L'interfaccia mantiene la richiesta pendente e il testo parziale in cronologia cifrata in caso di errore; il recupero continua a usare lo stesso requestId.
+- Aggiunto test unitario per rifiutare un requestId malformato prima di aprire la rete.
+- Commit codice: `d59a7f462766c71b2899e2e9da2af6378128fdda`; commit test: `8ca78906102ae74b4612d1d7e1cc5ea51a789ff1`.
+- Stato: modifiche e test aggiunti; CI Android non verificata per questi commit. Non è stato eseguito un test end-to-end con rete intermittente e provider reale.
+- Nessun APK generato o distribuito.
