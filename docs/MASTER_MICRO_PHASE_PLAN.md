@@ -47,7 +47,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 08 | Validazione centralizzata della configurazione backend | Variabili obbligatorie, valori non validi e configurazioni insicure vengono rifiutati con comportamento fail-closed e test. | Completata |
 | 09 | Autenticazione individuale dei dispositivi | Token individuali, hash lato server, scadenza e isolamento tra dispositivi sono coperti da test. | Completata |
 | 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | Completata |
-| 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | Parziale |
+| 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | In attesa di verifica |
 | 12 | Rate limiting IP effettivo | Gateway/WAF applica limiti reali prima del pairing pubblico; prove dimostrano blocco, finestra e recupero. Il flag applicativo da solo non vale come prova. | Bloccata da dipendenza esterna |
 | 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Da iniziare |
 | 14 | Pubblicazione backend HTTPS di staging | Backend raggiungibile tramite HTTPS, segreti protetti e deploy ripetibile; health e readiness sono distinti. | Bloccata da dipendenza esterna |
@@ -182,3 +182,7 @@ Test aggiunti per segreto pairing mancante, validazione dei limiti input e conte
 
 ### Esito micro-fase 10 — pairing sicuro — 23 novembre 2026
 Verificati gate edge fail-closed, segreto server-side con confronto constant-time, limiti Pydantic (pairing code 16–256, device name 1–80), token individuale e risposta senza codice pairing. Aggiunti test per segreto mancante, input fuori range e contenuto risposta. Backend CI [run 639](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092525104): SUCCESS, **76 passed, 1 warning in 1.26s**, PostgreSQL effimero. Rapporto [PAIRING_SECURITY_VALIDATION_2026-11-23.md](PAIRING_SECURITY_VALIDATION_2026-11-23.md). Il rate limiting IP effettivo resta aperto alla fase 12.
+
+
+### Micro-fase 11 — revoca e rotazione token — in corso
+Implementati endpoint autenticati `POST /api/v1/device/rotate` e `POST /api/v1/device/revoke-self`; la rotazione sostituisce il token mantenendo il device ID e usa compare-and-swap sul token hash corrente per impedire doppie rotazioni concorrenti. Android dispone di rinnovo e revoca remota nella schermata Impostazioni. L'endpoint associato è ora fissato separatamente dal campo di inserimento: le richieste autenticate non devono inviare il Bearer token a un endpoint modificato dall'utente. Test backend e Android in esecuzione; fase non completata finché entrambi i workflow finali non risultano SUCCESS.
