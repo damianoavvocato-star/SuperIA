@@ -354,6 +354,26 @@ class OnlineAssistantClientTest {
 
 
     @Test
+    fun sseParserKeepsEarlierDeltaWhenFollowingEventIsMalformed() {
+        val deltas = mutableListOf<String>()
+        val stream = """
+            event: delta
+            data: {"text":"prima parte"}
+
+            event: delta
+            data: {"text":}
+
+        """.trimIndent() + "\n\n"
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+            }
+        }
+        assertEquals(listOf("prima parte"), deltas)
+        assertEquals("Il backend ha inviato un frammento SSE non valido.", error.message)
+    }
+
+    @Test
     fun sseParserRejectsMalformedDeltaInsteadOfSilentlyDroppingIt() {
         val stream = """
             event: delta
