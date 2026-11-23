@@ -292,3 +292,7 @@ Non soddisfatti: backend HTTPS pubblico, database PostgreSQL persistente, WAF IP
 
 ## Riepilogo stato piano — 23 novembre 2026
 21/50 micro-fasi completate (42%); 10 bloccate da dipendenze esterne; 5 in attesa di verifica pratica; 14 non iniziate (fasi 37–50). Le fasi completate sono supportate da test/documenti/commit indicati nei rapporti; nessun completamento è attribuito a deploy o provider reali non eseguiti.
+
+
+## Aggiornamento micro-fase 34 — 23 novembre 2026
+Aggiunto test di regressione pairing: valori non confermati del flag edge, header proxy falsificati, nessuna emissione token, risposta 503 senza segreto. Backend CI run 45119185491: **115 passed, 1 warning in 1.52s**, SUCCESS. La fase 34 resta in attesa della protezione WAF/gateway reale (micro-fase 12); il gate edge non va abilitato. Rapporto: [SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md](SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md).
