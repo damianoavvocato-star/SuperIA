@@ -371,3 +371,38 @@ def test_stream_emits_heartbeat_while_provider_is_silent(auth_environment, monke
         assert slow.stream_calls == 1
     finally:
         api_module.app.dependency_overrides[api_module.get_provider] = lambda: FakeProvider()
+
+
+
+def test_pairing_requires_server_side_pairing_secret(auth_environment, monkeypatch):
+    monkeypatch.delenv("SUPERIA_PAIRING_CODE", raising=False)
+    response = TestClient(app).post("/api/v1/device/pair", json={
+        "pairing_code": "pairing-secret-code-123456",
+        "device_name": "NoSecret",
+    })
+    assert response.status_code == 503
+    assert "SUPERIA_PAIRING_CODE" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("payload", [
+    {"pairing_code": "too-short", "device_name": "Phone"},
+    {"pairing_code": "pairing-secret-code-123456", "device_name": ""},
+    {"pairing_code": "p" * 257, "device_name": "Phone"},
+    {"pairing_code": "pairing-secret-code-123456", "device_name": "x" * 81},
+])
+def test_pairing_rejects_out_of_range_input(auth_environment, payload):
+    response = TestClient(app).post("/api/v1/device/pair", json=payload)
+    assert response.status_code == 422
+
+
+def test_pairing_response_contains_only_individual_device_credentials(auth_environment):
+    response = TestClient(app).post("/api/v1/device/pair", json={
+        "pairing_code": "pairing-secret-code-123456",
+        "device_name": "Privacy test phone",
+    })
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload) == {"access_token", "device_id", "expires_at", "token_type"}
+    assert payload["token_type"] == "Bearer"
+    assert payload["expires_at"] > 0
+    assert "pairing-secret-code-123456" not in response.text
