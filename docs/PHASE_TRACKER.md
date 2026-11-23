@@ -450,3 +450,9 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Prima CI Android fallita: `org.json` Android è stub non implementato nei test JVM locali. Correzione: aggiunta dipendenza `testImplementation("org.json:json:20250517")` nel commit `20b33283961322f1adae8df2d29aae3cc98ef543`.
 - Run 45269768768 (Android) e 45269768629 (backend) erano ancora in corso all'ultimo controllo; non conteggiare la modifica come validata finché Android non è verde. Report: `docs/ANDROID_SSE_STREAM_RELIABILITY_2026-11-23.md`.
 - Nessun test rete reale/device; micro-fase 29 resta aperta e gate 36 bloccato. Nessun APK o provisioning esterno.
+
+### SSE multiline framing — 23 novembre 2026
+- Parser aggiornato per accumulare più righe `data:` nello stesso evento e dispatch soltanto alla riga vuota; heartbeat ignorati; un evento incompleto a EOF non viene consegnato.
+- Aggiunti test per evento JSON multilinea e EOF senza delimitatore; i test precedenti coprono errori JSON, heartbeat, errore dopo delta e assenza di `done`.
+- Commit parser `772f711040c1930eaa25d27883903b7122d1b3e8`; test `5edf07e801c326f0eb98d44dcdaa187c479580d2`. CI Android run 45270145822 e backend run 45270145607 ancora in corso all'ultimo controllo.
+- Report `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`. Test in memoria, non E2E rete/device. Micro-fase 29 aperta; gate 36 bloccato; nessun APK.
