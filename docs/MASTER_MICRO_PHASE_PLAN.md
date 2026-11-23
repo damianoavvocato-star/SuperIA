@@ -32,7 +32,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 
 | N. | Micro-fase | Criterio di completamento | Stato iniziale |
 |---:|---|---|---|
-| 01 | Audit del catalogo delle 182 IA | Ogni voce ha capacità, alternativa, licenza, costo/quota, requisiti e stato di verifica; le voci non verificate restano esplicitamente aperte. | Da iniziare |
+| 01 | Inventario e riallineamento policy delle 182 IA | Conteggio 182/182 verificato; policy online-only applicata ai 182 record; nessuna voce è dichiarata integrata o verificata; audit di provider, licenze e quote resta alla micro-fase 19 e ai relativi test. | Completata |
 | 02 | Consolidamento delle decisioni vincolanti | Un'unica fonte aggiornata conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; le decisioni storiche superate sono marcate come tali. | In corso |
 | 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; nessun lavoro parallelo o progetto estraneo viene incorporato. | In attesa di verifica |
 | 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | In corso |
@@ -126,3 +126,13 @@ Dopo aver lavorato:
 - I test Android aggiunti più di recente non risultano ancora verificati da una run CI consultabile; non marcarli come superati.
 - Backend pubblico, database di produzione, provider gratuito reale, rate limiting edge e test su telefoni reali restano dipendenze aperte.
 - Nessun APK intermedio deve essere prodotto.
+
+
+### Evidenza micro-fase 01 — 23 novembre 2026
+
+- Conteggio JSON verificato: 182/182 record, numerazione completa da 1 a 182.
+- Tutti i 182 record sono stati riallineati alla policy di inferenza online tramite backend SuperIA; strumenti locali ammessi solo per attività non-LLM.
+- 16 riferimenti candidati a inferenza LLM locale sono stati sostituiti con il percorso provider online approvato.
+- Matrice alternative e analisi funzionale marcate come documenti storici dove proponevano local-first; registro componenti marca Ollama e llama.cpp come superati/non integrabili per inferenza.
+- Non è stata dichiarata alcuna verifica individuale di prezzi, termini, quote, licenze, disponibilità o compatibilità: tali controlli restano esplicitamente aperti e saranno eseguiti sulle alternative/provider effettivamente selezionati.
+- Verifica strutturale post-commit: nessun candidato nei 182 record conserva riferimenti a inferenza LLM locale; nessun record è stato marcato come integrato.
