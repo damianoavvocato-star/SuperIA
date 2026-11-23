@@ -137,8 +137,6 @@ class ChatPromptBuilderTest {
     fun rejectsZeroHistoryMessageLimit() {
         ChatPromptBuilder.build(emptyList(), "Ciao", maxHistoryMessages = 0)
     }
-}
-
 
     @Test
     fun combinedHistoryMemoryAndDocumentsNeverExceedBackendPromptLimit() {
@@ -170,3 +168,4 @@ class ChatPromptBuilderTest {
 
         assertEquals(promptText, prompt)
     }
+}
