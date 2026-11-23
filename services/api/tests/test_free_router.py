@@ -396,3 +396,53 @@ def test_stream_chat_never_switches_provider_after_emitting_partial_answer(tmp_p
         assert calls == ["api.groq.com"]
 
     asyncio.run(run())
+
+
+def test_provider_config_rejects_invalid_global_free_only_value(tmp_path):
+    with pytest.raises(ValueError, match="SUPERIA_FREE_ONLY"):
+        FreeOnlyRouter(
+            environ={"SUPERIA_FREE_ONLY": "yes"},
+            state_db_path=str(tmp_path / "invalid-global.sqlite3"),
+        )
+
+
+def test_provider_config_rejects_credentials_without_global_free_only(tmp_path):
+    env = free_env("groq")
+    env.pop("SUPERIA_FREE_ONLY")
+    with pytest.raises(ValueError, match="requires SUPERIA_FREE_ONLY=true"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "missing-global.sqlite3"))
+
+
+def test_provider_config_rejects_missing_free_attestation(tmp_path):
+    env = free_env("groq")
+    env["SUPERIA_PROVIDER_GROQ_HARD_STOP"] = "false"
+    with pytest.raises(ValueError, match="HARD_STOP"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "missing-attestation.sqlite3"))
+
+
+def test_provider_config_rejects_partial_credentials(tmp_path):
+    env = free_env("groq")
+    env.pop("SUPERIA_PROVIDER_GROQ_API_KEY")
+    with pytest.raises(ValueError, match="API_KEY, MODEL and FREE_MODEL_IDS"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "partial-provider.sqlite3"))
+
+
+def test_provider_config_rejects_model_not_in_free_allowlist(tmp_path):
+    env = free_env("groq")
+    env["SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS"] = "another-model"
+    with pytest.raises(ValueError, match="included in FREE_MODEL_IDS"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "model-not-allowed.sqlite3"))
+
+
+def test_provider_config_rejects_cloudflare_without_account_id(tmp_path):
+    env = free_env("cloudflare", "@cf/meta/llama")
+    with pytest.raises(ValueError, match="ACCOUNT_ID is required"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "cloudflare-account.sqlite3"))
+
+
+def test_provider_config_accepts_complete_free_provider_attestations(tmp_path):
+    router = FreeOnlyRouter(
+        environ=free_env("groq"),
+        state_db_path=str(tmp_path / "valid-provider.sqlite3"),
+    )
+    assert asyncio.run(router.list_models()) == ["groq:openai/gpt-oss-120b"]
