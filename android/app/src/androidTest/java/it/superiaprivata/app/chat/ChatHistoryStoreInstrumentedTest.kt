@@ -16,6 +16,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -135,6 +136,28 @@ class ChatHistoryStoreInstrumentedTest {
         assertTrue("Un archivio alterato non deve essere accettato come cronologia valida", failed)
     }
 
+
+    @Test
+    fun missingKeystoreKeyFailsClosedWithoutDestroyingEncryptedArchive() {
+        store.save(listOf(ChatLine(77L, "contenuto da preservare", "user")))
+        val archive = File(context.filesDir, "conversation_history.enc")
+        val originalBytes = archive.readBytes()
+
+        KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+            deleteEntry("superia_chat_history_aes")
+        }
+
+        var failed = false
+        try {
+            store.load()
+        } catch (_: Exception) {
+            failed = true
+        }
+
+        assertTrue("La perdita della chiave non deve produrre una cronologia vuota o corrotta", failed)
+        assertArrayEquals("Il file cifrato originale deve restare intatto", originalBytes, archive.readBytes())
+    }
 
     @Test
     fun concurrentStoreInstancesSerializeAtomicTranscriptWrites() {
