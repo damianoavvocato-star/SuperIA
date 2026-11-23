@@ -3,17 +3,16 @@ import hmac
 import json
 import os
 from functools import lru_cache
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from app.device_auth import device_id_for_token, issue_device_token, revoke_device_token, rotate_device_token
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, refresh_chat_request_lease, request_payload_hash
-from app.schemas import ChatRequest, ChatResponse
+from app.schemas import ChatRequest
 from app.database import connect_database, validate_deployment_database_url
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
@@ -123,11 +122,6 @@ async def require_admin_token(
     supplied = credentials.credentials if credentials else ""
     if not supplied or not hmac.compare_digest(supplied, expected):
         raise HTTPException(status_code=401, detail="Credenziale amministratore non valida.")
-
-
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
-async def home() -> str:
-    return (Path(__file__).parent / "static" / "index.html").read_text(encoding="utf-8")
 
 
 @app.get("/health", tags=["system"])
@@ -384,15 +378,3 @@ async def chat_stream(
             "Connection": "keep-alive",
         },
     )
-
-@app.post("/api/v1/chat", response_model=ChatResponse, tags=["assistant"])
-async def chat(
-    request: ChatRequest,
-    _: None = Depends(require_api_token),
-    provider: FreeOnlyRouter = Depends(get_provider),
-) -> ChatResponse:
-    try:
-        result = await provider.chat([message.model_dump() for message in request.messages], request.model)
-        return ChatResponse(**result)
-    except NoFreeProviderAvailable as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
