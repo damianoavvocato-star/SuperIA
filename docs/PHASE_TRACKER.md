@@ -356,3 +356,11 @@ Aggiunta al test instrumented `concurrentStoreInstancesSerializeAtomicTranscript
 - Android CI [run 45213885568](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885568): **SUCCESS**; backend [run 45213885468](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885468): **SUCCESS**.
 - Aggiunto nel commit `76cd14a285d610f8b38ab40703e349890c895d0e` un test instrumented per perdita della chiave: la cronologia deve fallire chiusa e l'archivio cifrato deve restare invariato. CI Android [run 45214332436](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332436) e backend [run 45214332705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332705) avviate, esito da verificare.
 - Il test instrumented non è eseguito da `testDebugUnitTest`; serve ancora emulatore/dispositivo. Fase 29 aperta; nessun APK.
+
+
+### Micro-fase 29 — lettura senza ricreazione della chiave persa — 23 novembre 2026
+- Android CI [run 45214332436](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332436) e backend [run 45214332705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332705): **SUCCESS** sul commit `76cd14a`.
+- La decifratura usa ora `getExistingKey()`: se la chiave Android Keystore manca, la lettura fallisce esplicitamente e non genera una chiave incompatibile. La creazione resta ammessa soltanto per nuove scritture.
+- Test instrumented esteso: verifica che la chiave non venga ricreata e che il file cifrato non venga modificato dopo il fallimento.
+- Commit codice `13a2770`, test `bac1cbb`. CI di `bac1cbb`: Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189), backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136), ancora in esecuzione al momento dell'annotazione.
+- La fase 29 resta aperta: i test sono instrumented e non sono stati eseguiti su emulatore/dispositivo. Nessun APK.
