@@ -1,3 +1,5 @@
+> **DOCUMENTO STORICO / NON USARE COME GUIDA DI CONFIGURAZIONE.** Questo file contiene istruzioni superate sul token condiviso `SUPERIA_API_ACCESS_TOKEN` e sull'endpoint non-streaming. L'implementazione corrente usa pairing individuale `POST /api/v1/device/pair`, token device revocabili, Bearer per dispositivo e chat SSE `POST /api/v1/chat/stream`. Per i requisiti aggiornati usare [docs/VERCEL_HOBBY_PREPARATION.md](VERCEL_HOBBY_PREPARATION.md), [docs/PHASE_TRACKER.md](PHASE_TRACKER.md) e [docs/ONLINE_ONLY_MIGRATION_PLAN.md](ONLINE_ONLY_MIGRATION_PLAN.md). Non configurare il vecchio token condiviso.
+
 # Backend online — configurazione free-only
 
 Il backend FastAPI usa il router `FreeOnlyRouter`. La versione finale della chat è online-only e free-only; nessun fallback locale o a pagamento è consentito.
