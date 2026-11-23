@@ -293,7 +293,7 @@ object OnlineAssistantClient {
     ): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
-        require(prompt.length <= 32_000) { "La richiesta supera il limite di 32.000 caratteri." }
+        require(prompt.length <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS) { "La richiesta supera il limite di 32.000 caratteri." }
         require(runCatching { UUID.fromString(requestId) }.isSuccess) {
             "Identificativo della richiesta non valido. Riapri la chat e riprova."
         }
