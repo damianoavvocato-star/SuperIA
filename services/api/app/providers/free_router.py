@@ -7,7 +7,7 @@ from typing import Callable
 
 import httpx
 
-from app.database import connect_database
+from app.database import connect_database, validate_deployment_database_url
 
 
 class NoFreeProviderAvailable(RuntimeError):
@@ -81,11 +81,14 @@ class FreeOnlyRouter:
     ) -> None:
         self.environ = os.environ if environ is None else environ
         validate_provider_environment(self.environ)
+        environment = self.environ.get("SUPERIA_ENVIRONMENT", "development")
+        database_url = self.environ.get("SUPERIA_DATABASE_URL", "").strip()
+        router_state_url = self.environ.get("SUPERIA_ROUTER_STATE_DB", "").strip()
+        validate_deployment_database_url(database_url, environment, "SUPERIA_DATABASE_URL")
+        if router_state_url:
+            validate_deployment_database_url(router_state_url, environment, "SUPERIA_ROUTER_STATE_DB")
         self.client_factory = client_factory
-        self.state_db_path = state_db_path or self.environ.get(
-            "SUPERIA_ROUTER_STATE_DB",
-            self.environ.get("SUPERIA_DATABASE_URL", "/tmp/superia-router-state.sqlite3"),
-        )
+        self.state_db_path = state_db_path or router_state_url or database_url or "/tmp/superia-router-state.sqlite3"
         self._init_state()
 
     def _connect_state(self):
