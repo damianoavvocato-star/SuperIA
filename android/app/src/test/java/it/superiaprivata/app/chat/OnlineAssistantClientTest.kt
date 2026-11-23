@@ -318,6 +318,60 @@ class OnlineAssistantClientTest {
 
 
     @Test
+    fun sseParserRejectsMalformedDeltaInsteadOfSilentlyDroppingIt() {
+        val stream = """
+            event: delta
+            data: {"text":}
+
+            event: done
+            data: {"provider":"fake"}
+
+        """.trimIndent()
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals("Il backend ha inviato un frammento SSE non valido.", error.message)
+    }
+
+    @Test
+    fun sseParserRejectsDeltaWithoutStringText() {
+        val stream = """
+            event: delta
+            data: {"text":42}
+
+            event: done
+            data: {}
+
+        """.trimIndent()
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals("Il backend ha inviato un frammento SSE senza testo valido.", error.message)
+    }
+
+    @Test
+    fun sseParserRejectsMalformedCompletionEvent() {
+        val stream = """
+            event: delta
+            data: {"text":"risposta"}
+
+            event: done
+            data: {invalid}
+
+        """.trimIndent()
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals("Il backend ha inviato un evento di completamento non valido.", error.message)
+    }
+
+    @Test
     fun sseJsonFieldParserUnescapesControlCharactersAndUnicode() {
         val value = OnlineAssistantClient.extractJsonStringField(
             """{"text":"riga\n\"citazione\" \u00E8"}""",
