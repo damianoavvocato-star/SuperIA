@@ -34,7 +34,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 |---:|---|---|---|
 | 01 | Inventario e riallineamento policy delle 182 IA | Conteggio 182/182 verificato; policy online-only applicata ai 182 record; nessuna voce è dichiarata integrata o verificata; audit di provider, licenze e quote resta alla micro-fase 19 e ai relativi test. | Completata |
 | 02 | Consolidamento delle decisioni vincolanti | Un'unica policy corrente conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; registri e documenti legacy sono marcati come storici/superati. | Completata |
-| 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; nessun lavoro parallelo o progetto estraneo viene incorporato. | In attesa di verifica |
+| 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; incongruenze documentali corrette o marcate storiche; residui legacy documentati senza cancellazioni non verificate. | Completata |
 | 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | In corso |
 | 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | In attesa di verifica |
 | 06 | Baseline dei test Android senza APK | Il workflow esegue solo testDebugUnitTest; il risultato CI del commit corrente è acquisito e non contiene task di assemblaggio APK. | In attesa di verifica |
@@ -144,3 +144,8 @@ Dopo aver lavorato:
 - Il registro modelli locali è stato declassato a riferimento storico: candidati, runtime e decisioni non autorizzano download o integrazioni.
 - La policy corrente è coerente: client Android, inferenza AI esclusivamente online via backend HTTPS, provider gratuiti verificati, nessun fallback locale LLM o a pagamento; elaborazioni locali non-LLM consentite solo previa verifica.
 - Verifica documentale completata; non equivale a deploy o collaudo runtime.
+
+
+### Evidenza micro-fase 03 — 23 novembre 2026
+
+Audit statico registrato in [docs/REPOSITORY_AUDIT_2026-11-23.md](REPOSITORY_AUDIT_2026-11-23.md). Repository pubblico non archiviato, default branch `main`, un solo branch e zero PR. Workflow Android esegue solo `testDebugUnitTest`; backend CI run 605 SUCCESS sul commit precedente all'audit; web-preview deploya soltanto `preview/`. README aggiornati al percorso SSE; guida backend token condiviso, architettura e privacy del prototipo marcate storiche; registro componenti Android riallineato. Residui `services/api/app/static/index.html`, `providers/ollama.py` e route legacy `/api/v1/chat` sono stati documentati e non rimossi: richiedono una micro-fase dedicata di pulizia e test.
