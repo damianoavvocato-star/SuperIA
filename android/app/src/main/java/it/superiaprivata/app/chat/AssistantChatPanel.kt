@@ -197,60 +197,97 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 singleLine = true,
                 visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://") && pairingCode.length >= 16,
-                    onClick = {
-                        scope.launch {
-                            checkingBackend = true
-                            connectionStatus = "Associazione sicura del dispositivo in corso…"
-                            try {
-                                val paired = OnlineAssistantClient.pair(
-                                    backendEndpoint.trim(),
-                                    pairingCode,
-                                    android.os.Build.MODEL ?: "Dispositivo Android"
-                                )
-                                connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken, paired.deviceId))
-                                backendToken = paired.accessToken
-                                pairingCode = ""
-                                connectionStatus = "Dispositivo associato (ID ${paired.deviceId}). Token individuale salvato cifrato; scadenza tra 90 giorni."
-                                generationError = null
-                            } catch (error: Exception) {
-                                connectionStatus = error.message ?: "Associazione non riuscita."
-                            } finally {
-                                checkingBackend = false
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://") && pairingCode.length >= 16,
+                        onClick = {
+                            scope.launch {
+                                checkingBackend = true
+                                connectionStatus = "Associazione sicura del dispositivo in corso…"
+                                try {
+                                    val paired = OnlineAssistantClient.pair(
+                                        backendEndpoint.trim(),
+                                        pairingCode,
+                                        android.os.Build.MODEL ?: "Dispositivo Android"
+                                    )
+                                    connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken, paired.deviceId))
+                                    backendToken = paired.accessToken
+                                    pairingCode = ""
+                                    connectionStatus = "Dispositivo associato (ID ${paired.deviceId}). Token individuale salvato cifrato; scadenza tra 90 giorni."
+                                    generationError = null
+                                } catch (error: Exception) {
+                                    connectionStatus = error.message ?: "Associazione non riuscita."
+                                } finally {
+                                    checkingBackend = false
+                                }
                             }
                         }
-                    }
-                ) { Text(if (checkingBackend) "Associazione…" else "Associa dispositivo") }
-                OutlinedButton(
-                    enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
-                    onClick = {
-                        scope.launch {
-                            checkingBackend = true
-                            connectionStatus = "Verifica del backend in corso…"
-                            try {
-                                connectionStatus = OnlineAssistantClient.checkOnlineReadiness(OnlineConnectionConfig(backendEndpoint.trim(), backendToken))
-                            } catch (error: Exception) {
-                                connectionStatus = error.message ?: "Verifica del backend non riuscita."
-                            } finally {
-                                checkingBackend = false
+                    ) { Text(if (checkingBackend) "Associazione…" else "Associa dispositivo") }
+                    OutlinedButton(
+                        enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
+                        onClick = {
+                            scope.launch {
+                                checkingBackend = true
+                                connectionStatus = "Verifica del backend in corso…"
+                                try {
+                                    connectionStatus = OnlineAssistantClient.checkOnlineReadiness(
+                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken)
+                                    )
+                                } catch (error: Exception) {
+                                    connectionStatus = error.message ?: "Verifica del backend non riuscita."
+                                } finally {
+                                    checkingBackend = false
+                                }
                             }
                         }
-                    }
-                ) { Text(if (checkingBackend) "Verifica…" else "Verifica backend") }
-                TextButton(
-                    enabled = !generating,
-                    onClick = {
-                        runCatching { connectionStore.clear() }
-                            .onSuccess {
-                                backendEndpoint = ""
-                                backendToken = ""
-                                connectionStatus = "Collegamento rimosso."
+                    ) { Text(if (checkingBackend) "Verifica…" else "Verifica backend") }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        enabled = !generating && !checkingBackend && onlineConfigured,
+                        onClick = {
+                            scope.launch {
+                                checkingBackend = true
+                                connectionStatus = "Rinnovo sicuro del token in corso…"
+                                try {
+                                    val rotated = OnlineAssistantClient.rotate(
+                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken, savedConnection.deviceId)
+                                    )
+                                    val updated = OnlineConnectionConfig(backendEndpoint.trim(), rotated.accessToken, rotated.deviceId)
+                                    connectionStore.save(updated)
+                                    backendToken = rotated.accessToken
+                                    connectionStatus = "Token rinnovato. Il token precedente è stato invalidato."
+                                } catch (error: Exception) {
+                                    connectionStatus = error.message ?: "Rinnovo del token non riuscito."
+                                } finally {
+                                    checkingBackend = false
+                                }
                             }
-                            .onFailure { connectionStatus = it.message ?: "Rimozione non riuscita." }
-                    }
-                ) { Text("Rimuovi") }
+                        }
+                    ) { Text(if (checkingBackend) "Rinnovo…" else "Rinnova token") }
+                    TextButton(
+                        enabled = !generating && !checkingBackend && onlineConfigured,
+                        onClick = {
+                            scope.launch {
+                                checkingBackend = true
+                                connectionStatus = "Revoca del dispositivo sul server in corso…"
+                                try {
+                                    OnlineAssistantClient.revoke(
+                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken, savedConnection.deviceId)
+                                    )
+                                    connectionStore.clear()
+                                    backendToken = ""
+                                    connectionStatus = "Dispositivo revocato sul server e disconnesso."
+                                } catch (error: Exception) {
+                                    connectionStatus = error.message ?: "Revoca non riuscita; credenziali locali conservate."
+                                } finally {
+                                    checkingBackend = false
+                                }
+                            }
+                        }
+                    ) { Text("Revoca e disconnetti") }
+                }
             }
             Text(connectionStatus, style = MaterialTheme.typography.bodySmall)
             Text(
