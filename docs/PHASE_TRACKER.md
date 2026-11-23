@@ -410,3 +410,13 @@ Verificato il successo Android+Backend sul commit `82ca6606083bb5b656e4935f6eb17
 
 ### Continuità chat — disconnessione SSE
 Corretto il percorso server quando il client interrompe la connessione: la cancellazione asyncio rilascia subito il lease idempotente come `failed`, consentendo un nuovo claim con lo stesso request ID senza attendere i 30 minuti di timeout. Il lease token mantiene il fencing. La funzione di retry `failed` è già coperta da `test_failed_request_can_be_retried_once`; resta da aggiungere/eseguire una prova E2E di disconnessione ASGI e rete reale. Commit `96dc9e943864b328cc0f3dd5ff4d5b8ef68fd939`; Backend CI [45267609593](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45267609593) completata con esito **SUCCESS**.
+
+
+### Micro-fase 29 — payload esatto conservato per retry idempotente — 23 novembre 2026
+- Audit del percorso di ripresa: prima della correzione Android conservava il request ID ma ricostruiva il payload usando memoria/documenti correnti. Una modifica del contesto dopo l'interruzione poteva causare HTTP 409 perché lo stesso ID sarebbe stato riutilizzato con hash diverso.
+- `ChatLine` ora può conservare `requestMessages` completi; il payload viene serializzato nell'archivio AES-GCM/AtomicFile insieme alla cronologia. Le richieste nuove salvano il payload costruito prima della rete; i retry usano il payload salvato, senza ricostruirlo. Per le vecchie richieste pendenti prive di payload viene costruito una sola volta e salvato prima del retry.
+- Dopo completamento il payload temporaneo viene rimosso dalla riga, mantenendo la cronologia conversazionale ordinaria.
+- Validazione aggiunta: payload solo su righe user pendenti, ruoli/contenuti ammessi, limite totale 32.000 caratteri e ultimo messaggio user coerente con il testo pendente.
+- Commit codice: store `94fff4ca0e915fce66f85c2e7b1af98a198def8f`; UI `b4192e29b29b4aca2ce579753f0a0d79b9c81838`; test unitari `5b1a139dd3e28c096e889d4e0b55a6332e791438`; test instrumented persistenza `b5df43041238c39893b54cafdd04a6c85e77dca1`.
+- Stato test: in attesa della nuova CI Android; il test instrumented di ricreazione archivio ora verifica anche il round-trip del payload, ma non è eseguito da `testDebugUnitTest` e resta da eseguire su emulatore/dispositivo. Nessun test di force-stop reale, nessun APK.
+- Gate 36 resta bloccato; nessun backend/provider/database/WAF esterno attivato.
