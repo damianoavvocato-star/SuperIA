@@ -436,3 +436,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android unit CI [45268526027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526027) e Backend CI [45268526344](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526344) SUCCESS. Nessuna prova di force-stop reale, rete reale o dispositivo; nessun APK.
 - Rapporto: [ANDROID_RECOVERY_REVIEW_2026-11-23.md](ANDROID_RECOVERY_REVIEW_2026-11-23.md), commit `0f28518a2a1da5b863ab94d5d6c7e96e08163cfc`.
 - La micro-fase resta aperta finché non viene eseguita la suite instrumented su emulatore/dispositivo e completato il test E2E con backend/provider autorizzati. Gate 36 resta bloccato.
+
+### Streaming SSE — validazione rigorosa eventi — 23 novembre 2026
+- Audit del parser Android: i frammenti `delta` con JSON malformato o campo `text` non stringa venivano ignorati tramite estrazione permissiva, con rischio di accettare una risposta apparentemente completata ma incompleta.
+- Il parser ora richiede un oggetto JSON valido per `delta` e `done`; `delta.text` deve essere stringa. Anche l'evento `error` richiede JSON valido e usa un messaggio stringa valido, altrimenti produce un errore esplicito. I frammenti precedenti restano già persistiti dal persister e la richiesta resta pendente per il retry.
+- Aggiunti test per delta malformato, campo text non stringa e evento done malformato. Test ancora da eseguire nella CI successiva; non dichiarare il fix validato fino a esito verde.
+- Commit parser a248b47c73054781a9c803ea636cacc5fa883be6; commit test 992f6cdee2b12ce8dc8fe36ce0628d3910096dff.
+- Confermato che il repository espone solo il branch `main`. Nessun APK; nessuna modifica a provider o servizi esterni. Micro-fase 29 e gate 36 restano aperti/bloccati.
