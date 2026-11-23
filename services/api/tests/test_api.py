@@ -442,3 +442,29 @@ def test_device_rotation_requires_valid_current_token():
 def test_self_revocation_requires_valid_current_token():
     response = TestClient(app).post("/api/v1/device/revoke-self")
     assert response.status_code == 401
+
+
+
+def test_staging_auth_database_rejects_sqlite_fallback(monkeypatch, tmp_path):
+    from fastapi import HTTPException
+    from app.main import _auth_database_path
+
+    monkeypatch.setenv("SUPERIA_ENVIRONMENT", "staging")
+    monkeypatch.setenv("SUPERIA_AUTH_DB", str(tmp_path / "auth.sqlite3"))
+    monkeypatch.delenv("SUPERIA_DATABASE_URL", raising=False)
+    with pytest.raises(HTTPException) as error:
+        _auth_database_path()
+    assert error.value.status_code == 503
+
+    monkeypatch.setenv("SUPERIA_DATABASE_URL", str(tmp_path / "auth.sqlite3"))
+    with pytest.raises(HTTPException) as error:
+        _auth_database_path()
+    assert error.value.status_code == 503
+
+
+def test_staging_auth_database_accepts_shared_postgres_url(monkeypatch):
+    from app.main import _auth_database_path
+
+    monkeypatch.setenv("SUPERIA_ENVIRONMENT", "staging")
+    monkeypatch.setenv("SUPERIA_DATABASE_URL", "postgresql://user:pass@db.example/superia")
+    assert _auth_database_path() == "postgresql://user:pass@db.example/superia"
