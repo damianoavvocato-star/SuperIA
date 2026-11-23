@@ -79,8 +79,8 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 |---:|---|---|---|
 | 31 | Deploy di staging ripetibile | Deploy, migrazioni, restart, rollback e monitoraggio essenziale sono ripetibili senza interventi manuali nascosti. | Bloccata da dipendenza esterna |
 | 32 | Test end-to-end backend-provider | Pairing, autenticazione, chat multi-turno, streaming e persistenza sono provati contro provider reale gratuito. | Bloccata da dipendenza esterna |
-| 33 | Test quote finite e indisponibilità | Esaurimento quota, provider down, 401/403/429/5xx, rete assente e database non disponibile non producono addebiti o perdita silenziosa. | Completata |
-| 34 | Test sicurezza e abuso | Rate limit, revoca, accesso incrociato, input oversized, segreti, log e concorrenza superano prove mirate. | In attesa di verifica |
+| 33 | Test quote finite e indisponibilità | Esaurimento quota, provider down, 401/403/429/5xx, rete assente e database non disponibile non producono addebiti o perdita silenziosa. | Completata con test simulati |
+| 34 | Test sicurezza e abuso | Rate limit, revoca, accesso incrociato, input oversized, segreti, log e concorrenza superano prove mirate. | In attesa di verifica; WAF reale mancante |
 | 35 | Collaudo su telefoni Android reali | Pairing e chat sono provati su dispositivi fisici, con Wi-Fi/mobile, sospensione app, riavvio, rete interrotta e ripresa. | Bloccata da dipendenza esterna |
 | 36 | Gate finale chat online | Tutti i punti 1–12 del PHASE_TRACKER sono chiusi con evidenze. Solo dopo questa fase si può autorizzare la singola build APK finale della chat. | Bloccata da dipendenze esterne |
 
