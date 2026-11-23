@@ -422,8 +422,13 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         )
                                         val assistantLine = staleAssistant?.takeIf { it.text.isNotBlank() }
                                             ?: ChatLine(nextChatLineId(messages.map { it.id }), "", "assistant").also { messages.add(it) }
+                                        // Persist the assistant placeholder before opening the network stream.
+                                        // Recovery after process death then sees a consistent transcript.
+                                        historyStore.save(messages.toList())
                                         var receivedNewOutput = false
-                                        val streamPersister = StreamHistoryPersister(historyStore, scope)
+                                        // Persist the placeholder before network I/O can be interrupted by process death.
+                                    historyStore.save(messages.toList())
+                                    val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(pairedEndpoint, backendToken),
                                             retryMessages,
