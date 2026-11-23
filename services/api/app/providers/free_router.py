@@ -29,7 +29,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if global_mode and global_mode not in {"true", "false"}:
         raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
 
-    provider_ids = ("gemini", "groq", "openrouter", "cloudflare", "sambanova")
+    provider_ids = ("gemini", "groq", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
@@ -71,7 +71,7 @@ class FreeOnlyRouter:
     and hard-stops at quota exhaustion. No paid model is selected automatically.
     """
 
-    PROVIDER_ORDER = ("gemini", "groq", "openrouter", "cloudflare", "sambanova")
+    PROVIDER_ORDER = ("gemini", "groq", "openrouter", "cloudflare")
 
     def __init__(
         self,
@@ -184,9 +184,6 @@ class FreeOnlyRouter:
             if not account_id:
                 return None
             endpoint = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions"
-            headers = {"Authorization": f"Bearer {api_key}"}
-        elif provider_id == "sambanova":
-            endpoint = "https://api.sambanova.ai/v1/chat/completions"
             headers = {"Authorization": f"Bearer {api_key}"}
         else:
             return None
