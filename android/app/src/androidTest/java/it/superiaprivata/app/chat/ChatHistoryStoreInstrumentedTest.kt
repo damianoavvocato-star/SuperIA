@@ -141,15 +141,21 @@ class ChatHistoryStoreInstrumentedTest {
         val firstStore = ChatHistoryStore(context)
         val secondStore = ChatHistoryStore(context)
         val start = CountDownLatch(1)
-        val finished = CountDownLatch(2)
         val executor = Executors.newFixedThreadPool(2)
         val firstTranscript = (0 until 80).map { ChatLine(it.toLong(), "prima-$it", "user") }
         val secondTranscript = (100 until 180).map { ChatLine(it.toLong(), "seconda-$it", "assistant") }
         try {
-            executor.execute { start.await(); firstStore.save(firstTranscript); finished.countDown() }
-            executor.execute { start.await(); secondStore.save(secondTranscript); finished.countDown() }
+            val firstWrite = executor.submit {
+                start.await()
+                firstStore.save(firstTranscript)
+            }
+            val secondWrite = executor.submit {
+                start.await()
+                secondStore.save(secondTranscript)
+            }
             start.countDown()
-            assertTrue("Le scritture concorrenti devono terminare", finished.await(10, TimeUnit.SECONDS))
+            firstWrite.get(10, TimeUnit.SECONDS)
+            secondWrite.get(10, TimeUnit.SECONDS)
             val restored = ChatHistoryStore(context).load()
             assertTrue(restored == firstTranscript || restored == secondTranscript)
         } finally {
