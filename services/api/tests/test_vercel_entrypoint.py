@@ -6,7 +6,9 @@ def test_vercel_entrypoint_exports_existing_fastapi_app():
     assert app.title == "SuperIA API"
     paths = {route.path for route in app.routes}
     assert "/health" in paths
-    assert "/api/v1/chat" in paths
+    assert "/api/v1/chat/stream" in paths
+    assert "/api/v1/chat" not in paths
+    assert "/" not in paths
 
 
 def test_provider_router_is_reused_within_warm_instance(monkeypatch, tmp_path):
