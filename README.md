@@ -13,7 +13,7 @@ Assistente AI personale e modulare, con client Android nativo e inferenza esclus
 ## Stato attuale — 21 novembre 2026
 
 ### Android
-- Chat Compose collegata al client OnlineAssistantClient per richieste HTTPS a POST /api/v1/chat.
+- Chat Compose collegata al client OnlineAssistantClient per richieste HTTPS in streaming SSE a POST /api/v1/chat/stream; il vecchio endpoint non-streaming è legacy.
 - Pairing individuale tramite POST /api/v1/device/pair; token e ID dispositivo conservati cifrati tramite Android Keystore. Il codice pairing non viene persistito.
 - Token individuali memorizzati come hash lato server, revocabili e con scadenza di 90 giorni.
 - Cronologia cifrata localmente, memoria di progetto, ricostruzione del contesto e gestione delle richieste pendenti con possibilità di ripresa.
