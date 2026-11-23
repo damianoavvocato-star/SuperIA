@@ -42,3 +42,11 @@ La revisione statica non ha evidenziato una nuova regressione nel percorso di re
 - Verifica documentazione [run 45272126971](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272126971) e tracker [run 45272141250](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272141250): **SUCCESS**.
 - Questi workflow non eseguono la suite `androidTest`: i tre nuovi test strumentali restano non eseguiti. Nessuna prova force-stop/process-death o dispositivo reale è stata effettuata.
 - Stato invariato: micro-fase 29 aperta in attesa di esecuzione strumentale; nessun APK assemblato.
+
+
+## Revisione finale test strumentali e vincolo di esecuzione — 23 novembre 2026
+- Corretto il commento del test `pendingRequestIdSurvivesStoreRecreationForSafeRetry`: la nuova istanza di store verifica il recupero nello stesso processo Android e non simula process death. Commit `90fc1150650278b78f5e14fb5516d18cf58a6b26`.
+- Ricontrollati i test strumentali: coprono cifratura AES-GCM, perdita chiave, archivio AtomicFile/backup, migrazione legacy, cancellazione, concorrenza, payload congelato e integrità UUID. Non emerge un nuovo difetto statico certo che giustifichi modifiche al comportamento applicativo.
+- Il workflow Android resta intenzionalmente limitato a `gradle --no-daemon testDebugUnitTest`; non va ampliato con `connectedDebugAndroidTest` perché tale task costruisce/installerebbe gli APK debug e test, in conflitto con il vincolo del progetto di non assemblare APK prima del gate finale.
+- Di conseguenza, la suite `androidTest` non può essere eseguita nel rispetto simultaneo dei vincoli attuali. Per sbloccarla occorre una futura autorizzazione esplicita a generare/installare build di test non distribuibili, oppure rivedere formalmente il vincolo APK. Non ho avviato task di assemblaggio.
+- La verifica di vero process death/force-stop, riavvio, rete interrotta e dispositivo fisico resta obbligatoria prima di chiudere la microfase 29; nessuna di queste prove è dichiarata eseguita.
