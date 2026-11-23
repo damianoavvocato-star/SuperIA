@@ -70,8 +70,8 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | Implementata, verifica end-to-end aperta |
 | 27 | Idempotenza e deduplicazione richieste | Request ID, hash payload, replay cifrato, lease e fencing sono testati su PostgreSQL; limiti exactly-once sono documentati. | CI backend superata, test reale aperto |
 | 28 | Retry e ripresa dopo interruzione | Retry usa lo stesso ID, non duplica risposte già persistite e comunica chiaramente quando deve rigenerare invece di riprendere lo stream. | Parziale |
-| 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | Parziale |
-| 30 | Contesto documentale e privacy dei dati | PDF/DOCX/TXT/CSV, retrieval, citazioni, minimizzazione contesto, log, retention, export e cancellazione sono testati e documentati. | Primo incremento presente |
+| 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | In attesa di verifica |
+| 30 | Contesto documentale e privacy dei dati | PDF/DOCX/TXT/CSV, retrieval, citazioni, minimizzazione contesto, log, retention, export e cancellazione sono testati e documentati. | In attesa di verifica |
 
 ### D. Collaudo e sblocco della chat online
 
@@ -79,8 +79,8 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 |---:|---|---|---|
 | 31 | Deploy di staging ripetibile | Deploy, migrazioni, restart, rollback e monitoraggio essenziale sono ripetibili senza interventi manuali nascosti. | Bloccata da dipendenza esterna |
 | 32 | Test end-to-end backend-provider | Pairing, autenticazione, chat multi-turno, streaming e persistenza sono provati contro provider reale gratuito. | Bloccata da dipendenza esterna |
-| 33 | Test quote finite e indisponibilità | Esaurimento quota, provider down, 401/403/429/5xx, rete assente e database non disponibile non producono addebiti o perdita silenziosa. | Da iniziare |
-| 34 | Test sicurezza e abuso | Rate limit, revoca, accesso incrociato, input oversized, segreti, log e concorrenza superano prove mirate. | Da iniziare |
+| 33 | Test quote finite e indisponibilità | Esaurimento quota, provider down, 401/403/429/5xx, rete assente e database non disponibile non producono addebiti o perdita silenziosa. | Completata |
+| 34 | Test sicurezza e abuso | Rate limit, revoca, accesso incrociato, input oversized, segreti, log e concorrenza superano prove mirate. | In attesa di verifica |
 | 35 | Collaudo su telefoni Android reali | Pairing e chat sono provati su dispositivi fisici, con Wi-Fi/mobile, sospensione app, riavvio, rete interrotta e ripresa. | Bloccata da dipendenza esterna |
 | 36 | Gate finale chat online | Tutti i punti 1–12 del PHASE_TRACKER sono chiusi con evidenze. Solo dopo questa fase si può autorizzare la singola build APK finale della chat. | Bloccata dalle fasi precedenti |
 
@@ -232,3 +232,7 @@ Router richiede `SUPERIA_FREE_ONLY`, attestazioni economiche e `DATA_POLICY_APPR
 
 ### Esito micro-fasi 22–28 — motore chat online — 23 novembre 2026
 22 completata: failover solo tra provider free approvati, cooldown e stop. 23 completata: contratto API 1–60 messaggi, ruoli validi, 32k per messaggio; Android limita anche il prompt totale con memoria/documenti/cronologia. Limite noto: Android invia il contesto come un singolo messaggio user con ruoli esplicitati nel testo. 24 completata: rimossi route non-streaming, root web prototype, static index, Ollama backend e client send; solo SSE resta esposto. 25 completata: parser SSE testabile e copertura delta/done/error/heartbeat/troncamento/escape JSON. 26 in attesa: heartbeat e rinnovo lease testati, ma disconnessione su telefono/rete reale manca. 27 completata: dedupe, replay cifrato, 409, lease/fencing verificati. 28 in attesa: request ID e pending persistono, ma test app kill/restart reale manca. Backend CI [run 738](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45094905446): **109 passed, 1 warning**; Android CI [run 246](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095009850): SUCCESS, BUILD SUCCESSFUL in 39s. Rapporto [ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md](ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md).
+
+
+### Esito micro-fasi 29–35 — continuità, documenti e collaudo — 23 novembre 2026
+29 in attesa: cronologia AES-GCM/Keystore, AtomicFile, pending ID, memoria editabile/cancellabile e export TXT implementati; instrumented test presenti ma non eseguiti su device. 30 in attesa: documenti locali cifrati, BM25, fonti, contesto 6k, prompt 32k, export TXT e delete implementati; OCR/storage reali da verificare. 31 bloccata da account/deploy esterno. 32 bloccata da provider reale e credenziale. 33 completata a livello simulato: 401/402/403/408/429/5xx/rete, DB, cooldown/failover e hard-stop; Backend CI [run 750](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095467059): **110 passed, 1 warning**. 34 in attesa: token, revoca, rotazione, isolamento device, input e segreti testati; WAF rate limit non disponibile. 35 bloccata fino a backend/provider e telefono reale. Rapporto [CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md](CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md).
