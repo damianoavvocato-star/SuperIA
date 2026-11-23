@@ -290,10 +290,30 @@ object OnlineAssistantClient {
         prompt: String,
         requestId: String = UUID.randomUUID().toString(),
         onDelta: suspend (String) -> Unit,
+    ): String = stream(
+        config,
+        listOf(ChatPromptMessage("user", prompt)),
+        requestId,
+        onDelta
+    )
+
+    suspend fun stream(
+        config: OnlineConnectionConfig,
+        messages: List<ChatPromptMessage>,
+        requestId: String = UUID.randomUUID().toString(),
+        onDelta: suspend (String) -> Unit,
     ): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
-        require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
-        require(prompt.length <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS) { "La richiesta supera il limite di 32.000 caratteri." }
+        require(messages.isNotEmpty() && messages.size <= 60) {
+            "La conversazione deve contenere da 1 a 60 messaggi."
+        }
+        require(messages.all { it.role in setOf("system", "user", "assistant") && it.content.isNotBlank() }) {
+            "La conversazione contiene un ruolo o un messaggio non valido."
+        }
+        require(messages.all { it.content.length <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS } &&
+            messages.sumOf { it.content.length } <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS) {
+            "La conversazione supera il limite complessivo di 32.000 caratteri."
+        }
         require(runCatching { UUID.fromString(requestId) }.isSuccess) {
             "Identificativo della richiesta non valido. Riapri la chat e riprova."
         }
@@ -320,9 +340,13 @@ object OnlineAssistantClient {
             if (cause is CancellationException) connection.disconnect()
         }
         try {
+            val messageArray = JSONArray()
+            messages.forEach { message ->
+                messageArray.put(JSONObject().put("role", message.role).put("content", message.content))
+            }
             val body = JSONObject()
                 .put("request_id", requestId)
-                .put("messages", JSONArray().put(JSONObject().put("role", "user").put("content", prompt)))
+                .put("messages", messageArray)
                 .toString().toByteArray(Charsets.UTF_8)
             connection.outputStream.use { it.write(body) }
             val status = connection.responseCode
