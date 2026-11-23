@@ -46,6 +46,9 @@ object ChatPromptBuilder {
         val prompt = newPrompt.trim()
         require(prompt.isNotEmpty()) { "La richiesta non può essere vuota." }
         require(maxHistoryMessages > 0) { "Il numero di messaggi di contesto deve essere positivo." }
+        require(history.all { it.role == "user" || it.role == "assistant" }) {
+            "La cronologia contiene un ruolo non supportato."
+        }
         require(prompt.length <= MAX_TOTAL_PROMPT_CHARACTERS) {
             "La richiesta supera il limite di $MAX_TOTAL_PROMPT_CHARACTERS caratteri."
         }
