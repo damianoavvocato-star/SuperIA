@@ -426,9 +426,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         // Recovery after process death then sees a consistent transcript.
                                         historyStore.save(messages.toList())
                                         var receivedNewOutput = false
-                                        // Persist the placeholder before network I/O can be interrupted by process death.
-                                    historyStore.save(messages.toList())
-                                    val streamPersister = StreamHistoryPersister(historyStore, scope)
+                                        val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(pairedEndpoint, backendToken),
                                             retryMessages,
@@ -555,6 +553,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
                                     val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant")
                                     messages.add(assistantLine)
+                                    // Save the user pending state and assistant placeholder before network I/O.
+                                    historyStore.save(messages.toList())
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(pairedEndpoint, backendToken),
