@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "SuperIA",
   "platform": "android_only",
-  "updated_at": "2026-11-15",
+  "updated_at": "2026-11-23",
   "purpose": "Android-native runtime and infrastructure candidates. None is integrated or approved for release until exact version, license, checksum and device tests are recorded.",
   "policy": {
     "no_paid_api_required": true,
@@ -10,7 +10,11 @@
     "cloud_opt_in_only": true,
     "versions_must_be_pinned": true,
     "device_benchmark_required": true,
-    "model_license_review_required": true
+    "model_license_review_required": true,
+    "online_only_for_AI_inference": true,
+    "local_LLM_inference": "prohibited_by_current_SuperIA_architecture",
+    "cloud_backend": "SuperIA HTTPS with individually approved free providers only",
+    "local_non_LLM_processing": "allowed only after separate component review"
   },
   "components": [
     {
@@ -37,9 +41,10 @@
       "role": "on-device LLM runtime; streaming and tool use",
       "source": "https://developers.google.com/edge/litert-lm",
       "license": "verify exact artifact and transitive dependencies",
-      "status": "primary_candidate",
+      "status": "superseded_not_to_be_integrated",
       "version": null,
-      "hardware": "CPU/GPU as supported by exact build and device; benchmark required"
+      "hardware": "CPU/GPU as supported by exact build and device; benchmark required",
+      "note": "Local LLM inference conflicts with current online-only SuperIA architecture."
     },
     {
       "id": "litert-android",
@@ -57,9 +62,10 @@
       "role": "alternative local GGUF inference runtime",
       "source": "https://github.com/ggml-org/llama.cpp",
       "license": "MIT",
-      "status": "secondary_candidate",
+      "status": "superseded_not_to_be_integrated",
       "version": null,
-      "hardware": "CPU and supported Vulkan/GPU paths; verify Android build and device"
+      "hardware": "CPU and supported Vulkan/GPU paths; verify Android build and device",
+      "note": "Local LLM inference conflicts with current online-only SuperIA architecture."
     },
     {
       "id": "whisper-cpp-android",
