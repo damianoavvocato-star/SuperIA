@@ -157,4 +157,53 @@ class OnlineAssistantClientTest {
             }
         }
     }
+
+    @Test
+    fun streamingRejectsEndpointWithQueryBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test?token=unsafe", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsEndpointWithUserInfoBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://user:password@example.test", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsEndpointWithFragmentBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test/#unsafe", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsBlankPromptBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    "   "
+                ) {}
+            }
+        }
+    }
+
 }
