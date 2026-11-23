@@ -6,7 +6,7 @@ L'app Android è online-only per l'inferenza AI. Non usa Gemma, LiteRT-LM, Ollam
 ## Funzioni presenti nel codice
 - App nativa Kotlin + Jetpack Compose.
 - Chat unica con cronologia locale cifrata AES-GCM.
-- Client HTTPS per POST /api/v1/chat, con Bearer token.
+- Client HTTPS per POST /api/v1/chat/stream con eventi SSE e token individuale ottenuto tramite pairing.
 - Pairing dispositivo tramite POST /api/v1/device/pair; token e device ID vengono conservati cifrati tramite Android Keystore. Il codice di pairing non viene salvato.
 - Token individuali revocabili, con scadenza gestita dal backend.
 - Configurazione endpoint/token e verifica della disponibilità del backend tramite endpoint autenticati.
