@@ -53,7 +53,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 14 | Pubblicazione backend HTTPS di staging | Backend raggiungibile tramite HTTPS, segreti protetti e deploy ripetibile; health e readiness sono distinti. | Bloccata da dipendenza esterna |
 | 15 | Database PostgreSQL persistente | Database condiviso e persistente configurato; nessuno stato di produzione dipende da filesystem temporanei. | Bloccata da dipendenza esterna |
 | 16 | Migrazione e verifica dati | Migrazione SQLite/PostgreSQL verificata con conteggi, hash, schema e test di rollback/errore. | Completata |
-| 17 | Gestione dei segreti di produzione | Chiavi provider, token amministrativi e chiave idempotenza sono solo nel secret manager; rotazione e assenza segreti nei log testate. | In attesa di verifica |
+| 17 | Gestione dei segreti di produzione | Chiavi provider, token amministrativi e chiave idempotenza sono solo nel secret manager; rotazione e assenza segreti nei log testate. | Bloccata da dipendenza esterna |
 | 18 | Readiness e diagnostica operativa | Endpoint diagnostici distinguono processo, database, autenticazione e provider senza rivelare segreti. | Da iniziare |
 
 ### C. Motore chat online
@@ -210,3 +210,7 @@ Testata migrazione SQLite/PostgreSQL con conteggi, digest SHA-256, rifiuto desti
 
 ### Micro-fase 17 — gestione segreti — in corso
 Esteso `.gitignore` a file ambiente, chiavi e directory secrets; aggiunto `services/api/.env.example` con placeholder vuoti e provider disabilitati; aggiunto test che impedisce la divulgazione delle API key nelle diagnostiche. Ricerca repository per pattern comuni di chiavi non ha restituito match. CI finale in attesa; il secret manager di produzione resta da configurare dopo il deploy.
+
+
+### Esito micro-fase 17 — igiene segreti — bloccata per secret manager produzione
+Esteso `.gitignore`, aggiunto template `services/api/.env.example` con soli placeholder e provider disabilitati, test redazione API key nelle diagnostiche. Code search per pattern comuni di chiavi e token non ha trovato match. Backend CI [run 683](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093635048): **100 passed, 1 warning**, SUCCESS. Secret manager e rotazione produzione richiedono deploy/account esterno, non ancora autorizzati. Rapporto [SECRET_MANAGEMENT_BASELINE_2026-11-23.md](SECRET_MANAGEMENT_BASELINE_2026-11-23.md).
