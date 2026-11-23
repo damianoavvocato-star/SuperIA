@@ -406,3 +406,39 @@ def test_pairing_response_contains_only_individual_device_credentials(auth_envir
     assert payload["token_type"] == "Bearer"
     assert payload["expires_at"] > 0
     assert "pairing-secret-code-123456" not in response.text
+
+
+
+def test_authenticated_device_rotation_replaces_old_token(auth_environment):
+    database, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post("/api/v1/device/rotate")
+    assert response.status_code == 200
+    rotated = response.json()
+    assert rotated["device_id"] == token_data["device_id"]
+    assert rotated["access_token"] != token_data["access_token"]
+    assert validate_device_token(database, rotated["access_token"])
+    assert not validate_device_token(database, token_data["access_token"])
+
+    new_client = TestClient(app, headers={"Authorization": "Bearer " + rotated["access_token"]})
+    assert new_client.get("/api/v1/providers").status_code == 200
+
+
+def test_authenticated_device_can_revoke_its_own_token(auth_environment):
+    database, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post("/api/v1/device/revoke-self")
+    assert response.status_code == 200
+    assert response.json() == {"revoked": True}
+    assert not validate_device_token(database, token_data["access_token"])
+    assert client.get("/api/v1/providers").status_code == 401
+
+
+def test_device_rotation_requires_valid_current_token():
+    response = TestClient(app).post("/api/v1/device/rotate")
+    assert response.status_code == 401
+
+
+def test_self_revocation_requires_valid_current_token():
+    response = TestClient(app).post("/api/v1/device/revoke-self")
+    assert response.status_code == 401
