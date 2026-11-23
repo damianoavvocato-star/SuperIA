@@ -526,3 +526,33 @@ def test_stream_rejects_invalid_conversation_contract(auth_environment, messages
     client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
     response = client.post("/api/v1/chat/stream", json={"messages": messages})
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize("edge_flag", ["", "false", "0", "yes", "enabled"])
+def test_pairing_gate_rejects_unconfirmed_values_and_spoofed_forwarding_headers(
+    auth_environment, monkeypatch, edge_flag
+):
+    import app.main as main_module
+
+    monkeypatch.setenv("SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED", edge_flag)
+
+    def token_must_not_be_issued(*args, **kwargs):
+        raise AssertionError("Il pairing non deve emettere token senza protezione edge confermata.")
+
+    monkeypatch.setattr(main_module, "issue_device_token", token_must_not_be_issued)
+    response = TestClient(app).post(
+        "/api/v1/device/pair",
+        json={
+            "pairing_code": "pairing-secret-code-123456",
+            "device_name": "Unprotected",
+        },
+        headers={
+            "X-Forwarded-For": "203.0.113.77",
+            "X-Real-IP": "203.0.113.77",
+            "Forwarded": "for=203.0.113.77",
+        },
+    )
+
+    assert response.status_code == 503
+    assert "protezione anti-abuso non confermata" in response.json()["detail"]
+    assert "pairing-secret-code-123456" not in response.text
