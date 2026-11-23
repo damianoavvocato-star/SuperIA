@@ -96,11 +96,11 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         if (messages.isNotEmpty()) messageListState.animateScrollToItem(messages.lastIndex)
     }
 
-    suspend fun buildRequestPrompt(
+    suspend fun buildRequestMessages(
         history: List<ChatLine>,
         request: String,
         explicitlySelectedContext: String?
-    ): String {
+    ): List<ChatPromptMessage> {
         val storedDocuments = withContext(Dispatchers.IO) {
             LocalDocumentRepository(context).list()
         }
@@ -109,7 +109,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         val retrievedContext = withContext(Dispatchers.Default) {
             LocalDocumentContextBuilder.build(request, storedDocuments, combinedContext.ifBlank { null })
         }
-        return ChatPromptBuilder.build(
+        return ChatPromptBuilder.buildMessages(
             history,
             request,
             documentContext = retrievedContext,
@@ -415,7 +415,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             historyStore.save(messages.toList())
                                         }
                                         val contextHistory = messages.filterNot { it.pending || it.id == staleAssistant?.id }
-                                        val retryPrompt = buildRequestPrompt(
+                                        val retryMessages = buildRequestMessages(
                                             contextHistory,
                                             pendingLine.text,
                                             documentContext
@@ -426,7 +426,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
                                             OnlineConnectionConfig(pairedEndpoint, backendToken),
-                                            retryPrompt,
+                                            retryMessages,
                                             requestId = retryRequestId
                                         ) { piece ->
                                             val index = messages.indexOfFirst { it.id == assistantLine.id }
@@ -547,13 +547,13 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 generating = true
                                 generationError = null
                                 try {
-                                    val promptWithHistory = buildRequestPrompt(contextHistory, request, documentContext)
+                                    val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
                                     val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
                                     messages.add(assistantLine)
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
                                         OnlineConnectionConfig(pairedEndpoint, backendToken),
-                                        promptWithHistory,
+                                        messagesWithHistory,
                                         requestId = userLine.requestId ?: java.util.UUID.randomUUID().toString()
                                     ) { piece ->
                                         val index = messages.indexOfFirst { it.id == assistantLine.id }
