@@ -29,6 +29,10 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if global_mode and global_mode not in {"true", "false"}:
         raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
 
+    excluded_prefix = "SUPERIA_PROVIDER_SAMBANOVA_"
+    if any(key.startswith(excluded_prefix) and value.strip() for key, value in environ.items()):
+        raise ValueError("SambaNova is excluded because its current Free plan requires a payment method and credit purchase.")
+
     provider_ids = ("gemini", "groq", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
