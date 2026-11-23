@@ -50,3 +50,11 @@ La revisione statica non ha evidenziato una nuova regressione nel percorso di re
 - Il workflow Android resta intenzionalmente limitato a `gradle --no-daemon testDebugUnitTest`; non va ampliato con `connectedDebugAndroidTest` perché tale task costruisce/installerebbe gli APK debug e test, in conflitto con il vincolo del progetto di non assemblare APK prima del gate finale.
 - Di conseguenza, la suite `androidTest` non può essere eseguita nel rispetto simultaneo dei vincoli attuali. Per sbloccarla occorre una futura autorizzazione esplicita a generare/installare build di test non distribuibili, oppure rivedere formalmente il vincolo APK. Non ho avviato task di assemblaggio.
 - La verifica di vero process death/force-stop, riavvio, rete interrotta e dispositivo fisico resta obbligatoria prima di chiudere la microfase 29; nessuna di queste prove è dichiarata eseguita.
+
+
+## Conferma CI dopo la revisione — 24 novembre 2026
+- Android unit tests [run 45273970255](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273970255): **SUCCESS**, commit `90fc1150650278b78f5e14fb5516d18cf58a6b26`.
+- Backend tests [run 45273970258](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273970258): **SUCCESS**, stesso commit.
+- Controllo documentazione [run 45273993198](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273993198): **SUCCESS**, commit `311234e4b421e4ddf3a4de0ef1c588fdb05c354f`.
+- Confermato che il branch `main` è aggiornato al commit `1331a58f87c9abcf423602d1ba34b2d99b89ddc0`. La suite CI Android resta limitata a `testDebugUnitTest`; nessun test strumentale, APK, emulatore o dispositivo fisico è stato eseguito.
+- Nessuna modifica al giudizio di chiusura: micro-fase 29 aperta in attesa di test strumentali e prove reali; gate 36 bloccato dalle dipendenze esterne e dall'E2E.
