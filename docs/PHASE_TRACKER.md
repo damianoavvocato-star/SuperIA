@@ -456,3 +456,8 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Aggiunti test per evento JSON multilinea e EOF senza delimitatore; i test precedenti coprono errori JSON, heartbeat, errore dopo delta e assenza di `done`.
 - Commit parser `772f711040c1930eaa25d27883903b7122d1b3e8`; test `5edf07e801c326f0eb98d44dcdaa187c479580d2`. CI Android run 45270145822 e backend run 45270145607 ancora in corso all'ultimo controllo.
 - Report `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`. Test in memoria, non E2E rete/device. Micro-fase 29 aperta; gate 36 bloccato; nessun APK.
+
+### Correzione fixture SSE — 23 novembre 2026
+- Prima CI Android sui test multilinea: 6 test falliti perché `trimIndent()` rimuoveva i delimitatori SSE finali dalle fixture; compilazione Kotlin riuscita. Aggiornate le fixture per terminare esplicitamente gli eventi completi e distinguere EOF su evento completo da EOF su evento incompleto.
+- Commit test `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`. Android run 45270440049 e backend run 45270440091 ancora in corso all'ultimo controllo; non dichiarare validazione completata.
+- Report `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`. Micro-fase 29 resta aperta, gate 36 bloccato, nessun APK.
