@@ -427,45 +427,62 @@ internal suspend fun consumeSseEvents(
 ): String {
     val answer = StringBuilder()
     var eventName = ""
+    val eventData = StringBuilder()
     var completed = false
+
+    suspend fun dispatchEvent() {
+        if (eventData.isEmpty()) {
+            eventName = ""
+            return
+        }
+        val data = eventData.toString()
+        when (eventName) {
+            "delta" -> {
+                val payload = runCatching { JSONObject(data) }.getOrElse {
+                    throw IllegalStateException("Il backend ha inviato un frammento SSE non valido.")
+                }
+                val piece = payload.opt("text") as? String
+                    ?: throw IllegalStateException("Il backend ha inviato un frammento SSE senza testo valido.")
+                if (piece.isNotEmpty()) {
+                    answer.append(piece)
+                    onDelta(piece)
+                }
+            }
+            "done" -> {
+                runCatching { JSONObject(data) }.getOrElse {
+                    throw IllegalStateException("Il backend ha inviato un evento di completamento non valido.")
+                }
+                completed = true
+            }
+            "error" -> {
+                val payload = runCatching { JSONObject(data) }.getOrElse {
+                    throw IllegalStateException("Il backend ha inviato un errore SSE non valido.")
+                }
+                val message = payload.opt("message") as? String
+                throw IllegalStateException(message?.takeIf { it.isNotBlank() } ?: "Il flusso online si è interrotto.")
+            }
+        }
+        eventName = ""
+        eventData.clear()
+    }
+
     while (true) {
         val line = reader.readLine() ?: break
         when {
+            line.isEmpty() -> {
+                dispatchEvent()
+                if (completed) break
+            }
+            line.startsWith(":") -> Unit
             line.startsWith("event:") -> eventName = line.substringAfter("event:").trim()
             line.startsWith("data:") -> {
-                val data = line.substringAfter("data:").trim()
-                if (data.isBlank()) continue
-                when (eventName) {
-                    "delta" -> {
-                        val payload = runCatching { JSONObject(data) }.getOrElse {
-                            throw IllegalStateException("Il backend ha inviato un frammento SSE non valido.")
-                        }
-                        val piece = payload.opt("text") as? String
-                            ?: throw IllegalStateException("Il backend ha inviato un frammento SSE senza testo valido.")
-                        if (piece.isNotEmpty()) {
-                            answer.append(piece)
-                            onDelta(piece)
-                        }
-                    }
-                    "done" -> {
-                        runCatching { JSONObject(data) }.getOrElse {
-                            throw IllegalStateException("Il backend ha inviato un evento di completamento non valido.")
-                        }
-                        completed = true
-                        break
-                    }
-                    "error" -> {
-                        val payload = runCatching { JSONObject(data) }.getOrElse {
-                            throw IllegalStateException("Il backend ha inviato un errore SSE non valido.")
-                        }
-                        val message = payload.opt("message") as? String
-                        throw IllegalStateException(message?.takeIf { it.isNotBlank() } ?: "Il flusso online si è interrotto.")
-                    }
-                }
-                eventName = ""
+                if (eventData.isNotEmpty()) eventData.append('\n')
+                val value = line.substringAfter("data:")
+                eventData.append(if (value.startsWith(" ")) value.drop(1) else value)
             }
         }
     }
+    // Per SSE un evento non terminato da una riga vuota non viene dispatchato a EOF.
     if (!completed) throw IllegalStateException(
         if (answer.isNotEmpty()) "Connessione interrotta: il testo parziale è stato conservato. Puoi riprendere la richiesta."
         else "Il backend ha chiuso il flusso senza completare la risposta."
