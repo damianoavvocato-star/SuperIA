@@ -566,9 +566,9 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     persistChatHistory(historyStore, messages)
                                     storageError = null
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
-                                    val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
-                                    if (pendingIndex >= 0) {
-                                        messages[pendingIndex] = userLine.copy(requestMessages = messagesWithHistory)
+                                    val payloadPendingIndex = messages.indexOfFirst { it.id == userLine.id }
+                                    if (payloadPendingIndex >= 0) {
+                                        messages[payloadPendingIndex] = userLine.copy(requestMessages = messagesWithHistory)
                                         // Store the exact encrypted request before any provider/network activity.
                                         persistChatHistory(historyStore, messages)
                                     }
