@@ -473,3 +473,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Parser ora dispatcha anche un campo `data:` esplicitamente vuoto (distinto da evento privo di data); un `done` vuoto viene rifiutato come JSON non valido. Test CRLF e dati vuoti inclusi.
 - Aggiunto test per campi SSE `id`, `retry`, campi sconosciuti e tipo evento non gestito, verificando che il delta e il completamento successivi siano comunque elaborati. Commit test `46ebb5a6376bb048c5e4a391a6b7a29056f310ae`; CI Android [45271516710](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516710) e Backend [45271516892](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516892) avviate, esito da verificare.
 - Nessun test instrumented/device o rete reale eseguito; micro-fase 29 resta aperta. Gate 36 bloccato. Nessun APK, provisioning o provider attivato.
+
+
+### Esito CI finale hardening SSE — 23 novembre 2026
+- Verificati gli esiti delle run Android [45271516710](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516710) e backend [45271516892](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516892): **SUCCESS** per il test sui campi di estensione SSE.
+- Anche le run di controllo documentazione [45271549194](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271549194) e [45271565435](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271565435): **SUCCESS**.
+- Hardening parser SSE e relativi test JVM validati in CI; non equivale a test instrumented/device o E2E su rete reale.
+- Micro-fase 29 resta aperta; gate 36 bloccato dalle dipendenze esterne e dal collaudo reale. Nessun APK, provider o infrastruttura esterna attivati.
+- Report: `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`.
