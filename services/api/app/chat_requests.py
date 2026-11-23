@@ -87,7 +87,7 @@ def claim_chat_request(
     now = int(time.time())
     lease_token = str(uuid.uuid4())
     with closing(_connect(database_url)) as connection:
-        connection.execute(
+        inserted = connection.execute(
             """
             INSERT INTO chat_requests
                 (device_id, request_id, payload_hash, status, response_text, lease_token,
@@ -97,6 +97,10 @@ def claim_chat_request(
             """,
             (device_id, request_id, payload_hash, lease_token, now, now),
         )
+        if inserted.rowcount == 1:
+            connection.commit()
+            return {"state": "claimed", "lease_token": lease_token}
+
         row = connection.execute(
             """
             SELECT payload_hash, status, response_text, model, provider, updated_at
