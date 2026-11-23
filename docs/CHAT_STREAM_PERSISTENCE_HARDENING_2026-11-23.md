@@ -85,5 +85,13 @@ Il test resta instrumented e richiede un device/emulatore; non viene eseguito da
 - Revisione del comportamento: la decifratura non deve chiamare una funzione che crea la chiave quando questa manca. Altrimenti una semplice lettura dopo perdita della chiave genererebbe una nuova chiave incompatibile con l'archivio, mascherando la causa del guasto.
 - Commit `13a277010891d3da7da91fa9c59608a17324d0c6`: introdotto `getExistingKey()` per la decifratura; `getOrCreateKey()` resta riservata alla cifratura/scrittura. Se la chiave manca, la lettura fallisce esplicitamente senza crearne un'altra.
 - Commit `bac1cbbef48006dd3d75bbd32435d157548fc87c`: test instrumented rafforzato per verificare anche che dopo la lettura fallita la chiave resti assente e l'archivio cifrato sia identico byte-per-byte.
-- CI per `bac1cbb`: Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189) e backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136) in esecuzione al momento dell'aggiornamento.
+- CI per `bac1cbb`: Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189) **SUCCESS** (`testDebugUnitTest`); backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136) **SUCCESS** (`pytest`).
 - I test che manipolano Android Keystore sono sotto `androidTest`: non vengono eseguiti dal job `testDebugUnitTest`. La verifica su emulatore/dispositivo resta necessaria; nessun APK e nessun servizio esterno.
+
+
+### Esito CI finale commit bac1cbb — 23 novembre 2026
+
+- Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189): **SUCCESS**, job `android-unit-tests`; task `gradle --no-daemon testDebugUnitTest`.
+- Backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136): **SUCCESS**, job `test`.
+- Confermato che il workflow Android non esegue assemble o packaging APK.
+- Il test di perdita chiave resta sotto `androidTest`: la CI appena conclusa non lo esegue. Micro-fase 29 ancora in attesa di esecuzione su emulatore/dispositivo; gate 36 bloccato, nessun APK e nessun servizio esterno attivato.
