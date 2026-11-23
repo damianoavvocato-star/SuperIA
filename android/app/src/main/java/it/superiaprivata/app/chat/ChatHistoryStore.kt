@@ -140,8 +140,14 @@ class ChatHistoryStore(context: Context) {
 
     /** User-editable project memory, encrypted with the same device-bound key. */
     fun loadProjectMemory(): String = synchronized(ARCHIVE_WRITE_LOCK) {
-        if (!memoryArchive.baseFile.exists()) return@synchronized ""
-        String(decrypt(memoryArchive.openRead().use { it.readBytes() }), Charsets.UTF_8)
+        // Match transcript recovery: openRead() must be allowed to restore a
+        // backup-only AtomicFile after process death during replacement.
+        val packedMemory = try {
+            memoryArchive.openRead().use { it.readBytes() }
+        } catch (_: java.io.FileNotFoundException) {
+            null
+        }
+        packedMemory?.let { String(decrypt(it), Charsets.UTF_8) } ?: ""
     }
 
     fun saveProjectMemory(memory: String) = synchronized(ARCHIVE_WRITE_LOCK) {
