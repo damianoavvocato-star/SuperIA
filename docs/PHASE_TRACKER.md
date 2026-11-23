@@ -349,3 +349,10 @@ La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request I
 
 ### Micro-fase 29 — test prima inizializzazione Keystore concorrente — 23 novembre 2026
 Aggiunta al test instrumented `concurrentStoreInstancesSerializeAtomicTranscriptWrites` la rimozione preventiva della chiave Android Keystore dedicata, così due istanze partono senza chiave e tentano il primo salvataggio simultaneamente. Commit test `f459de5fe9a5756b688f4acafa2caab91b810cab`. CI Android [run 45213497131](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213497131) **SUCCESS** (`testDebugUnitTest`) e backend [run 45213496563](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213496563) **SUCCESS**. Il test è instrumented: la CI unit non lo esegue e non equivale a una prova su device. Micro-fase 29 ancora in attesa di verifica pratica; nessun APK.
+
+
+### Micro-fase 29 — perdita della chiave Keystore — 23 novembre 2026
+- Corretto il test di migrazione legacy affinché inizializzi esplicitamente la chiave prima della cifratura di prova.
+- Android CI [run 45213885568](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885568): **SUCCESS**; backend [run 45213885468](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885468): **SUCCESS**.
+- Aggiunto nel commit `76cd14a285d610f8b38ab40703e349890c895d0e` un test instrumented per perdita della chiave: la cronologia deve fallire chiusa e l'archivio cifrato deve restare invariato. CI Android [run 45214332436](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332436) e backend [run 45214332705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332705) avviate, esito da verificare.
+- Il test instrumented non è eseguito da `testDebugUnitTest`; serve ancora emulatore/dispositivo. Fase 29 aperta; nessun APK.
