@@ -420,3 +420,6 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit codice: store `94fff4ca0e915fce66f85c2e7b1af98a198def8f`; UI `b4192e29b29b4aca2ce579753f0a0d79b9c81838`; test unitari `5b1a139dd3e28c096e889d4e0b55a6332e791438`; test instrumented persistenza `b5df43041238c39893b54cafdd04a6c85e77dca1`.
 - Stato test: in attesa della nuova CI Android; il test instrumented di ricreazione archivio ora verifica anche il round-trip del payload, ma non è eseguito da `testDebugUnitTest` e resta da eseguire su emulatore/dispositivo. Nessun test di force-stop reale, nessun APK.
 - Gate 36 resta bloccato; nessun backend/provider/database/WAF esterno attivato.
+
+
+- Rifinitura finale della persistenza payload: al completamento di una richiesta nuova il campo temporaneo `requestMessages` viene azzerato, come già avviene nel percorso di retry. Commit UI `542af37dca194db2bc9ecfd6e12943ef9b9d867c`. Android CI run [45268304090](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268304090) in esecuzione al momento dell'annotazione; Backend CI run [45268304495](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268304495) in esecuzione. Nessun APK.
