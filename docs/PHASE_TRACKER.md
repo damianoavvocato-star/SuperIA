@@ -488,3 +488,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Chiarimento: pendingRequestIdSurvivesStoreRecreationForSafeRetry verifica una nuova istanza dello store nello stesso processo, non un vero force-stop/riavvio del processo Android.
 - Micro-fase 29 aperta; prove su processo reale/device e rete ancora necessarie. Gate 36 bloccato; nessun APK.
 - Report: docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md.
+
+
+### CI confermata — integrità archivio retry Android — 23 novembre 2026
+- Android unit tests [45272097900](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272097900) e backend tests [45272097827](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272097827): **SUCCESS**.
+- Controlli documentazione [45272126971](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272126971) e tracker [45272141250](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272141250): **SUCCESS**.
+- La CI Android esegue `testDebugUnitTest`, non `androidTest`: i tre test strumentali aggiunti restano da eseguire su emulatore/dispositivo. Nessun force-stop o riavvio reale verificato.
+- Micro-fase 29 resta aperta; gate 36 resta bloccato. Nessun APK, deploy o provisioning esterno.
+- Dettagli: `docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md`.
