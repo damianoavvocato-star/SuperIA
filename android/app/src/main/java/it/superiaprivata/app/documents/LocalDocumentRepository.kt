@@ -25,12 +25,14 @@ class LocalDocumentRepository(context: Context) {
 
     fun import(uri: Uri, extractor: DocumentTextExtractor): StoredDocument {
         val extracted = extractor.extract(uri)
-        val existingFiles = directory.listFiles { candidate -> candidate.isFile && candidate.extension == "enc" }.orEmpty()
+        val existingFiles = documentFiles()
         require(existingFiles.size < MAX_DOCUMENTS) {
             "Archivio pieno: il limite è $MAX_DOCUMENTS documenti. Elimina un file prima di importarne altri."
         }
         val cleartext = "${extracted.title}\n${extracted.extension}\n\n${extracted.text}".toByteArray(Charsets.UTF_8)
-        val currentBytes = existingFiles.sumOf { it.length() }
+        val currentBytes = existingFiles.sumOf { file ->
+            maxOf(file.length(), File(file.absolutePath + ".bak").length())
+        }
         require(currentBytes + cleartext.size + GCM_IV_BYTES + 16 <= MAX_TOTAL_BYTES) {
             "Archivio documenti pieno: limite complessivo 200 MB. Elimina alcuni documenti."
         }
@@ -39,6 +41,67 @@ class LocalDocumentRepository(context: Context) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
         val encrypted = cipher.iv + cipher.doFinal(cleartext)
+        writeAtomically(file, encrypted)
+        return StoredDocument(id, extracted.title, extracted.text, file)
+    }
+
+    /**
+     * Reads every known archive through AtomicFile so a backup-only write is recovered.
+     * Any unreadable archive fails the whole operation: never hide a document or replace
+     * a missing Keystore key with a new key that cannot decrypt existing data.
+     */
+    fun list(): List<StoredDocument> = documentFiles().sortedByDescending { it.lastModified() }.map { file ->
+        try {
+            val packed = AtomicFile(file).openRead().use { it.readBytes() }
+            require(packed.size > GCM_IV_BYTES) { "Archivio documento non valido." }
+            val iv = packed.copyOfRange(0, GCM_IV_BYTES)
+            val ciphertext = packed.copyOfRange(GCM_IV_BYTES, packed.size)
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.DECRYPT_MODE, getExistingKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
+            val cleartext = String(cipher.doFinal(ciphertext), Charsets.UTF_8)
+            val parts = cleartext.split("\n\n", limit = 2)
+            val metadata = parts.first().lines()
+            val title = metadata.firstOrNull().orEmpty()
+            val extension = metadata.getOrNull(1).orEmpty()
+            val text = parts.getOrNull(1).orEmpty()
+            require(title.isNotBlank() && extension in SUPPORTED_EXTENSIONS && text.isNotBlank()) {
+                "Metadati del documento non validi."
+            }
+            StoredDocument(file.name.removeSuffix(".enc"), title, text, file)
+        } catch (error: Exception) {
+            throw IllegalStateException(
+                "Impossibile leggere il documento cifrato ${file.name}. I dati sono stati preservati; non eliminarli o reimportarli prima di aver verificato la chiave e l'archivio.",
+                error
+            )
+        }
+    }
+
+    fun delete(document: StoredDocument) {
+        val canonicalDirectory = directory.canonicalFile
+        val canonicalFile = document.file.canonicalFile
+        require(canonicalFile.parentFile == canonicalDirectory && canonicalFile.name == "${document.id}.enc") {
+            "Il documento selezionato non appartiene all'archivio privato."
+        }
+        AtomicFile(canonicalFile).delete()
+    }
+
+    private fun documentFiles(): List<File> {
+        val candidates = directory.listFiles().orEmpty()
+        return candidates.asSequence()
+            .filter { it.isFile }
+            .mapNotNull { candidate ->
+                when {
+                    candidate.name.endsWith(".enc.bak") -> File(candidate.absolutePath.removeSuffix(".bak"))
+                    candidate.name.endsWith(".enc") -> candidate
+                    else -> null
+                }
+            }
+            .distinctBy { it.absolutePath }
+            .filter { it.exists() || File(it.absolutePath + ".bak").exists() }
+            .toList()
+    }
+
+    private fun writeAtomically(file: File, encrypted: ByteArray) {
         val atomic = AtomicFile(file)
         var output: java.io.FileOutputStream? = null
         try {
@@ -49,30 +112,12 @@ class LocalDocumentRepository(context: Context) {
             if (output != null) atomic.failWrite(output)
             throw error
         }
-        return StoredDocument(id, extracted.title, extracted.text, file)
     }
 
-    fun list(): List<StoredDocument> = directory.listFiles { file ->
-        file.isFile && file.extension == "enc"
-    }.orEmpty().sortedByDescending { it.lastModified() }.mapNotNull { file ->
-        runCatching {
-            val packed = file.readBytes()
-            require(packed.size > GCM_IV_BYTES) { "Archivio documento non valido." }
-            val iv = packed.copyOfRange(0, GCM_IV_BYTES)
-            val ciphertext = packed.copyOfRange(GCM_IV_BYTES, packed.size)
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
-            val cleartext = String(cipher.doFinal(ciphertext), Charsets.UTF_8)
-            val lines = cleartext.split("\n\n", limit = 2)
-            val metadata = lines.first().lines()
-            val title = metadata.firstOrNull().orEmpty()
-            val text = lines.getOrNull(1).orEmpty()
-            StoredDocument(file.nameWithoutExtension, title, text, file)
-        }.getOrNull()
-    }
-
-    fun delete(document: StoredDocument) {
-        AtomicFile(document.file).delete()
+    private fun getExistingKey(): SecretKey {
+        val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
+        return keyStore.getKey(KEY_ALIAS, null) as? SecretKey
+            ?: throw IllegalStateException("La chiave Keystore dei documenti non è disponibile.")
     }
 
     private fun getOrCreateKey(): SecretKey {
@@ -101,5 +146,6 @@ class LocalDocumentRepository(context: Context) {
         const val GCM_TAG_BITS = 128
         const val MAX_DOCUMENTS = 50
         const val MAX_TOTAL_BYTES = 200L * 1024L * 1024L
+        val SUPPORTED_EXTENSIONS = setOf("pdf", "docx", "txt", "csv")
     }
 }
