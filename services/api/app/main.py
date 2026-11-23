@@ -153,9 +153,11 @@ async def revoke_device(
 
 @app.post("/api/v1/device/rotate", tags=["devices"])
 async def rotate_current_device_token(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     device_id: str = Depends(require_api_token),
 ) -> dict[str, object]:
-    rotated = rotate_device_token(_auth_database_path(), device_id)
+    current_token = credentials.credentials if credentials else ""
+    rotated = rotate_device_token(_auth_database_path(), device_id, current_token)
     if not rotated:
         raise HTTPException(status_code=401, detail="Token dispositivo scaduto o non più attivo; associa nuovamente il dispositivo.")
     return rotated
