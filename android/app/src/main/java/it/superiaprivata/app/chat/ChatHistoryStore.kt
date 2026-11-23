@@ -145,7 +145,7 @@ class ChatHistoryStore(context: Context) {
         memoryArchive.delete()
     }
 
-    private fun writeAtomically(target: AtomicFile, bytes: ByteArray) {
+    private fun writeAtomically(target: AtomicFile, bytes: ByteArray) = synchronized(ARCHIVE_WRITE_LOCK) {
         var stream: java.io.FileOutputStream? = null
         try {
             stream = target.startWrite()
@@ -157,7 +157,7 @@ class ChatHistoryStore(context: Context) {
         }
     }
 
-    fun clear() {
+    fun clear() = synchronized(ARCHIVE_WRITE_LOCK) {
         archive.delete()
         check(preferences.edit().remove(HISTORY_KEY).commit()) {
             "Impossibile cancellare la cronologia"
@@ -215,5 +215,6 @@ class ChatHistoryStore(context: Context) {
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val GCM_IV_BYTES = 12
         const val GCM_TAG_BITS = 128
+        val ARCHIVE_WRITE_LOCK = Any()
     }
 }
