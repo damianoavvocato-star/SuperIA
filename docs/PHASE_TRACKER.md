@@ -362,5 +362,9 @@ Aggiunta al test instrumented `concurrentStoreInstancesSerializeAtomicTranscript
 - Android CI [run 45214332436](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332436) e backend [run 45214332705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332705): **SUCCESS** sul commit `76cd14a`.
 - La decifratura usa ora `getExistingKey()`: se la chiave Android Keystore manca, la lettura fallisce esplicitamente e non genera una chiave incompatibile. La creazione resta ammessa soltanto per nuove scritture.
 - Test instrumented esteso: verifica che la chiave non venga ricreata e che il file cifrato non venga modificato dopo il fallimento.
-- Commit codice `13a2770`, test `bac1cbb`. CI di `bac1cbb`: Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189), backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136), ancora in esecuzione al momento dell'annotazione.
+- Commit codice `13a2770`, test `bac1cbb`. CI di `bac1cbb`: Android [run 45214619189](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619189) **SUCCESS** (`testDebugUnitTest`); backend [run 45214619136](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214619136) **SUCCESS** (`pytest`).
 - La fase 29 resta aperta: i test sono instrumented e non sono stati eseguiti su emulatore/dispositivo. Nessun APK.
+
+
+### Esito CI finale — micro-fase 29, commit bac1cbb — 23 novembre 2026
+Android unit CI e backend CI sono entrambe **SUCCESS**. Il workflow Android esegue esclusivamente `gradle --no-daemon testDebugUnitTest`; non genera APK. Il test che manipola la chiave Keystore è instrumented (`androidTest`) e non è eseguito da questa CI. Micro-fase 29 resta in attesa del collaudo su emulatore/dispositivo, incluse perdita chiave, integrità archivio, force-stop/reopen e recupero rete. Gate 36 bloccato; nessun APK o servizio esterno attivato.
