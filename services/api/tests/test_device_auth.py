@@ -80,3 +80,35 @@ def test_postgres_auth_database_outage_does_not_fall_back_to_sqlite(monkeypatch)
         device_auth.validate_device_token(
             "postgresql://unreachable.invalid/superia", "any-token"
         )
+
+
+
+def test_device_token_expires_at_configured_ttl(tmp_path, monkeypatch):
+    import app.device_auth as device_auth
+
+    now = [1_800_000_000]
+    monkeypatch.setattr(device_auth.time, "time", lambda: now[0])
+    database = str(tmp_path / "auth-expiry.sqlite3")
+    issued = issue_device_token(database, "expiry-phone")
+
+    assert issued["expires_at"] == now[0] + device_auth.DEVICE_TOKEN_TTL_SECONDS
+    assert validate_device_token(database, issued["access_token"])
+
+    now[0] = issued["expires_at"]
+    assert not validate_device_token(database, issued["access_token"])
+
+
+def test_revoking_one_device_does_not_revoke_another(tmp_path):
+    from app.device_auth import device_id_for_token
+
+    database = str(tmp_path / "auth-isolation.sqlite3")
+    first = issue_device_token(database, "first-phone")
+    second = issue_device_token(database, "second-phone")
+
+    assert device_id_for_token(database, first["access_token"]) == first["device_id"]
+    assert device_id_for_token(database, second["access_token"]) == second["device_id"]
+    assert revoke_device_token(database, first["device_id"])
+
+    assert device_id_for_token(database, first["access_token"]) is None
+    assert device_id_for_token(database, second["access_token"]) == second["device_id"]
+    assert validate_device_token(database, second["access_token"])
