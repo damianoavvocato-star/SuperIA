@@ -14,6 +14,7 @@ def free_env(provider_id="groq", model="openai/gpt-oss-120b"):
         prefix + "NO_PAYMENT_METHOD": "true",
         prefix + "HARD_STOP": "true",
         prefix + "NO_FIAT_BILLING": "true",
+        prefix + "DATA_POLICY_APPROVED": "true",
         prefix + "API_KEY": "test-secret",
         prefix + "MODEL": model,
         prefix + "FREE_MODEL_IDS": model,
@@ -484,3 +485,11 @@ def test_provider_diagnostics_never_return_api_key(tmp_path):
     assert "test-secret" not in diagnostics
     assert "test-secret" not in models
     assert "groq" in diagnostics
+
+
+
+def test_provider_config_rejects_missing_data_policy_approval(tmp_path):
+    env = free_env("groq")
+    env.pop("SUPERIA_PROVIDER_GROQ_DATA_POLICY_APPROVED")
+    with pytest.raises(ValueError, match="DATA_POLICY_APPROVED"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "data-policy.sqlite3"))
