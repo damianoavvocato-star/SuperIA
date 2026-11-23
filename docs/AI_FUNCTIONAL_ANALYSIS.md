@@ -1,3 +1,5 @@
+> **Nota di prevalenza — 23 novembre 2026:** questa analisi funzionale contiene proposte storiche local-first. Per SuperIA prevale la policy online-only: l'inferenza AI avviene esclusivamente tramite backend HTTPS e provider gratuiti approvati. Strumenti locali non-LLM (ad esempio OCR, indicizzazione e gestione file) possono essere valutati separatamente. Le proposte di inferenza LLM locale non sono attività correnti e non vanno reintrodotte.
+
 # Analisi funzionale delle 182 IA — Fase 0
 
 > Versione: 1.1 — 15 novembre 2026  
