@@ -1,3 +1,5 @@
+> **Avviso di prevalenza — 23 novembre 2026:** le sezioni storiche di questo documento che propongono inferenza LLM locale, Ollama, llama.cpp, Gemma o LiteRT-LM non descrivono l'architettura corrente e non autorizzano implementazioni. La decisione vigente per SuperIA è inferenza AI esclusivamente online tramite backend HTTPS SuperIA e provider gratuiti approvati. Elaborazioni locali non-LLM (archivio, OCR, indicizzazione e gestione file) restano valutabili separatamente.
+
 # Architettura Android-only — SuperIA
 
 Data decisione: 15 novembre 2026
