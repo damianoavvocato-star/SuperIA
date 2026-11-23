@@ -185,8 +185,15 @@ class ChatHistoryStore(context: Context) {
         val iv = packed.copyOfRange(0, GCM_IV_BYTES)
         val ciphertext = packed.copyOfRange(GCM_IV_BYTES, packed.size)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
+        cipher.init(Cipher.DECRYPT_MODE, getExistingKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
         return cipher.doFinal(ciphertext)
+    }
+
+    /** Decryption must never silently replace a missing key with a new, unrelated key. */
+    private fun getExistingKey(): SecretKey {
+        val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
+        return keyStore.getKey(KEY_ALIAS, null) as? SecretKey
+            ?: throw IllegalStateException("La chiave Keystore della cronologia non è disponibile.")
     }
 
     private fun getOrCreateKey(): SecretKey {
