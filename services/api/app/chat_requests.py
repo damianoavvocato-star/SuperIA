@@ -136,6 +136,24 @@ def claim_chat_request(
         return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
 
 
+
+def refresh_chat_request_lease(
+    database_url: str,
+    device_id: str,
+    request_id: str,
+) -> bool:
+    """Keep a live stream's processing lease fresh while tokens are arriving."""
+    with closing(_connect(database_url)) as connection:
+        cursor = connection.execute(
+            """
+            UPDATE chat_requests SET updated_at = ?
+            WHERE device_id = ? AND request_id = ? AND status = 'processing'
+            """,
+            (int(time.time()), device_id, request_id),
+        )
+        connection.commit()
+        return cursor.rowcount == 1
+
 def complete_chat_request(
     database_url: str,
     device_id: str,
