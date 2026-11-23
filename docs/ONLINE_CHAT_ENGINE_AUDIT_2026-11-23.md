@@ -35,3 +35,7 @@ Android conserva request ID e richiesta pendente nella cronologia cifrata; retry
 - Android [run 259](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737107), commit `f76334e183d723384c671fa8253b68cdf743be2d`: **SUCCESS**, `testDebugUnitTest`, BUILD SUCCESSFUL in 36s. Nessun task APK.
 
 Stato: micro-fasi 22, 23, 24, 25 e 27 completate; 26 e 28 restano in attesa di test E2E su dispositivo e rete reali.
+
+
+### Disconnessione client: rilascio immediato lease — 23 novembre 2026
+Audit del generatore SSE: la cancellazione ASGI causata dalla disconnessione del client è `asyncio.CancelledError`, che non viene intercettata da `except Exception`. Prima della correzione il record poteva restare `processing` fino alla scadenza lease di 30 minuti, impedendo il retry immediato con lo stesso request ID. Aggiunto handler specifico che marca la richiesta come `failed` usando il lease token proprietario e rilancia la cancellazione; il fencing impedisce a un tentativo obsoleto di modificare il record. Il test esistente `test_failed_request_can_be_retried_once` copre il passaggio `failed` → nuovo claim, ma la cancellazione ASGI su connessione reale resta da verificare con test E2E. Commit `96dc9e943864b328cc0f3dd5ff4d5b8ef68fd939`; Backend CI [45267609593](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45267609593) in corso al momento dell'annotazione.
