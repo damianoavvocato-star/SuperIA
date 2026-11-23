@@ -138,6 +138,11 @@ class ChatHistoryStoreInstrumentedTest {
 
     @Test
     fun concurrentStoreInstancesSerializeAtomicTranscriptWrites() {
+        // Exercise the first-use race: both instances may need to create the Keystore key.
+        KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+            deleteEntry("superia_chat_history_aes")
+        }
         val firstStore = ChatHistoryStore(context)
         val secondStore = ChatHistoryStore(context)
         val start = CountDownLatch(1)
