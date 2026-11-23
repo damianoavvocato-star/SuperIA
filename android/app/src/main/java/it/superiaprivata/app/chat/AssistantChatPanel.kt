@@ -421,7 +421,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             documentContext
                                         )
                                         val assistantLine = staleAssistant?.takeIf { it.text.isNotBlank() }
-                                            ?: ChatLine(nextChatLineId(messages.map { it.id }), "", "assistant").also { messages.add(it) }
+                                            ?: ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant").also { messages.add(it) }
                                         // Persist the assistant placeholder before opening the network stream.
                                         // Recovery after process death then sees a consistent transcript.
                                         historyStore.save(messages.toList())
@@ -535,7 +535,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         if (request.isNotEmpty()) {
                             val contextHistory = messages.toList()
                             val userLine = ChatLine(
-                                nextChatLineId(messages.map { it.id }), request, "user",
+                                nextChatLineId(messages.map { it.id }, System.nanoTime()), request, "user",
                                 pending = true,
                                 requestId = java.util.UUID.randomUUID().toString()
                             )
@@ -553,7 +553,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 generationError = null
                                 try {
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
-                                    val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }), "", "assistant")
+                                    val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant")
                                     messages.add(assistantLine)
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
