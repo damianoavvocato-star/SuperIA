@@ -174,3 +174,31 @@ def test_existing_chat_request_table_is_migrated_with_lease_token(tmp_path):
     )
     assert claim["state"] == "claimed"
     assert claim["lease_token"]
+
+
+
+def test_idempotency_records_are_isolated_between_devices(tmp_path):
+    database = str(tmp_path / "cross-device.sqlite3")
+    secret = "cross-device-secret-that-is-at-least-32-characters"
+    request_id = "shared-request-id"
+    messages = [{"role": "user", "content": "Richiesta privata"}]
+    payload_hash = request_payload_hash(messages, None)
+
+    first = claim_chat_request(database, "device-A", request_id, payload_hash, secret)
+    assert first["state"] == "claimed"
+    assert complete_chat_request(
+        database, "device-A", request_id, "Risposta A", "model-a", "provider-a",
+        secret, str(first["lease_token"]),
+    )
+
+    second = claim_chat_request(database, "device-B", request_id, payload_hash, secret)
+    assert second["state"] == "claimed"
+    assert complete_chat_request(
+        database, "device-B", request_id, "Risposta B", "model-b", "provider-b",
+        secret, str(second["lease_token"]),
+    )
+
+    replay_a = claim_chat_request(database, "device-A", request_id, payload_hash, secret)
+    replay_b = claim_chat_request(database, "device-B", request_id, payload_hash, secret)
+    assert replay_a["content"] == "Risposta A"
+    assert replay_b["content"] == "Risposta B"
