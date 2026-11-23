@@ -316,7 +316,6 @@ object OnlineAssistantClient {
             setRequestProperty("Content-Type", "application/json; charset=utf-8")
             setRequestProperty("Accept", "text/event-stream")
         }
-        val answer = StringBuilder()
         val cancellationHandle = currentCoroutineContext().job.invokeOnCompletion { cause ->
             if (cause is CancellationException) connection.disconnect()
         }
