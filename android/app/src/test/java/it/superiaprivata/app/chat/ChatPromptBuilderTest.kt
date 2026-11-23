@@ -218,4 +218,22 @@ class ChatPromptBuilderTest {
         assertEquals("R".repeat(31_500), messages.last().content)
     }
 
+
+    @Test
+    fun rejectsUnsupportedStoredConversationRolesInsteadOfTreatingThemAsUserMessages() {
+        val result = runCatching {
+            ChatPromptBuilder.buildMessages(
+                listOf(ChatLine(1L, "Contenuto con ruolo inatteso", "tool")),
+                "Nuova domanda"
+            )
+        }
+
+        assertTrue(result.isFailure)
+        assertEquals(
+            "La cronologia contiene un ruolo non supportato.",
+            result.exceptionOrNull()?.message
+        )
+    }
+
+
 }
