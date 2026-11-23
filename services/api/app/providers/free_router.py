@@ -89,6 +89,7 @@ class FreeOnlyRouter:
             validate_deployment_database_url(router_state_url, environment, "SUPERIA_ROUTER_STATE_DB")
         self.client_factory = client_factory
         self.state_db_path = state_db_path or router_state_url or database_url or "/tmp/superia-router-state.sqlite3"
+        validate_deployment_database_url(self.state_db_path, environment, "SUPERIA_ROUTER_STATE_DB")
         self._init_state()
 
     def _connect_state(self):
