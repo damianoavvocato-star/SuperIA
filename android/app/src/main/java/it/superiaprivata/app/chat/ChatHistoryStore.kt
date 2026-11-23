@@ -39,7 +39,14 @@ internal fun requestIdForRetry(existingRequestId: String?): String {
     return UUID.randomUUID().toString()
 }
 
-data class ChatLine(val id: Long, val text: String, val role: String = "user", val pending: Boolean = false, val requestId: String? = null)
+data class ChatLine(
+    val id: Long,
+    val text: String,
+    val role: String = "user",
+    val pending: Boolean = false,
+    val requestId: String? = null,
+    val requestMessages: List<ChatPromptMessage>? = null
+)
 
 /** Reject malformed transcript entries before they can be persisted or shown to the prompt builder. */
 internal fun validatePersistedChatLines(messages: List<ChatLine>) {
@@ -55,6 +62,21 @@ internal fun validatePersistedChatLines(messages: List<ChatLine>) {
         if (line.pending) {
             require(line.role == "user") {
                 "Solo un messaggio utente può essere in attesa."
+            }
+        }
+        line.requestMessages?.let { requestMessages ->
+            require(line.pending) { "Il payload di retry può esistere soltanto per una richiesta pendente." }
+            require(requestMessages.isNotEmpty() && requestMessages.size <= 60) {
+                "Il payload della richiesta pendente non è valido."
+            }
+            require(requestMessages.all { it.role in setOf("system", "user", "assistant") && it.content.isNotBlank() }) {
+                "Il payload della richiesta pendente contiene messaggi non validi."
+            }
+            require(requestMessages.sumOf { it.content.length } <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS) {
+                "Il payload della richiesta pendente supera il limite consentito."
+            }
+            require(requestMessages.last().role == "user" && requestMessages.last().content == line.text.trim()) {
+                "Il payload della richiesta pendente non corrisponde al messaggio utente."
             }
         }
         line.requestId?.let { value ->
@@ -137,7 +159,20 @@ class ChatHistoryStore(context: Context) {
         validatePersistedChatLines(messages)
         val json = JSONArray()
         messages.forEach { line ->
-            json.put(JSONObject().put("id", line.id).put("text", line.text).put("role", line.role).put("pending", line.pending).put("requestId", line.requestId))
+            val item = JSONObject()
+                .put("id", line.id)
+                .put("text", line.text)
+                .put("role", line.role)
+                .put("pending", line.pending)
+                .put("requestId", line.requestId)
+            line.requestMessages?.let { requestMessages ->
+                val payload = JSONArray()
+                requestMessages.forEach { message ->
+                    payload.put(JSONObject().put("role", message.role).put("content", message.content))
+                }
+                item.put("requestMessages", payload)
+            }
+            json.put(item)
         }
         val compressed = ByteArrayOutputStream().also { output ->
             GZIPOutputStream(output).use { gzip ->
@@ -190,7 +225,20 @@ class ChatHistoryStore(context: Context) {
         val array = JSONArray(json)
         val messages = (0 until array.length()).map { index ->
             val item = array.getJSONObject(index)
-            ChatLine(item.getLong("id"), item.getString("text"), item.optString("role", "user"), item.optBoolean("pending", false), item.optString("requestId").takeIf { it.isNotBlank() })
+            val requestMessages = item.optJSONArray("requestMessages")?.let { payload ->
+                (0 until payload.length()).map { messageIndex ->
+                    val message = payload.getJSONObject(messageIndex)
+                    ChatPromptMessage(message.getString("role"), message.getString("content"))
+                }
+            }
+            ChatLine(
+                item.getLong("id"),
+                item.getString("text"),
+                item.optString("role", "user"),
+                item.optBoolean("pending", false),
+                item.optString("requestId").takeIf { it.isNotBlank() },
+                requestMessages
+            )
         }
         validatePersistedChatLines(messages)
         return messages
