@@ -116,3 +116,10 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Commit 3b68cdec62d0b657f411b050da75b062db0d74bc: loadProjectMemory() tenta ora openRead() e restituisce stringa vuota soltanto quando l'archivio è realmente assente (FileNotFoundException); errori di decifratura restano espliciti.
 - Commit 6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee: aggiunto test instrumented per memoria backup-only, con verifica del contenuto ripristinato, file base ricreato e backup consumato.
 - Sia il test della cronologia sia quello della memoria sono sotto androidTest e non sono coperti da testDebugUnitTest. La CI del commit più recente e il collaudo Android restano da verificare. Micro-fase 29 aperta; nessun APK.
+
+
+### Verifica CI e controlli privacy memoria progetto — 23 novembre 2026
+- Sul commit `74201a0ad2996f561931b6bab4eb3a1c06b62ad8` entrambe le pipeline sono terminate con successo: Android unit tests [run 45265214148](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265214148) e Backend tests [run 45265214131](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265214131).
+- Nuovo test instrumented `explicitClearRemovesAtomicFileBackupsAndPreventsDataResurrection`: la cancellazione deve eliminare i backup `.bak` sia della cronologia sia della memoria e impedire la ricomparsa dei dati.
+- Nuovi test instrumented della memoria: archivio alterato rifiutato; chiave Keystore mancante non ricreata durante la lettura; archivio cifrato conservato byte-per-byte.
+- Questi test aggiuntivi sono nel commit `271e913e78e90aeb51eb21a55171af28f3d986c9` e non sono ancora eseguiti: la CI Android esegue esclusivamente `testDebugUnitTest`, non `androidTest`.
