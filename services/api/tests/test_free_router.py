@@ -446,3 +446,27 @@ def test_provider_config_accepts_complete_free_provider_attestations(tmp_path):
         state_db_path=str(tmp_path / "valid-provider.sqlite3"),
     )
     assert asyncio.run(router.list_models()) == ["groq:openai/gpt-oss-120b"]
+
+
+
+def test_deployed_router_rejects_temporary_database_paths():
+    with pytest.raises(ValueError, match="PostgreSQL"):
+        FreeOnlyRouter(
+            environ={
+                "SUPERIA_ENVIRONMENT": "production",
+                "SUPERIA_DATABASE_URL": "",
+                "SUPERIA_AUTH_DB": "/tmp/auth.sqlite3",
+            },
+            state_db_path="/tmp/router.sqlite3",
+        )
+
+
+def test_deployed_router_rejects_sqlite_router_state_even_with_postgres_auth_db():
+    with pytest.raises(ValueError, match="PostgreSQL"):
+        FreeOnlyRouter(
+            environ={
+                "SUPERIA_ENVIRONMENT": "staging",
+                "SUPERIA_DATABASE_URL": "postgresql://user:pass@db.example/superia",
+                "SUPERIA_ROUTER_STATE_DB": "/tmp/router.sqlite3",
+            },
+        )
