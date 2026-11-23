@@ -7,10 +7,11 @@ Confermato: il router usa soltanto provider esplicitamente configurati e approva
 
 ## 23 — contratto messaggi e contesto
 - Backend accetta 1–60 messaggi con ruoli `system`, `user`, `assistant`, contenuto massimo 32.000 caratteri per messaggio.
-- Android ricostruisce contesto con cronologia recente, passaggi precedenti pertinenti, memoria e documenti, mantenendo etichette di ruolo nel prompt.
+- Android ricostruisce il contesto con cronologia recente, passaggi pertinenti, memoria e documenti; invia ora un array strutturato di messaggi con ruoli distinti `user` e `assistant`, senza appiattire i turni in un singolo messaggio.
 - Corretto un limite: il totale completo (prompt + memoria + documenti + cronologia + intestazioni) è ora limitato a 32.000 caratteri; se il messaggio nuovo occupa tutto il budget, il contesto viene omesso invece di far fallire la richiesta.
 - Aggiunti test API per ruoli non validi, messaggi vuoti, 61 messaggi e contenuto oltre limite.
-- Nota architetturale: l'Android invia il contesto ricostruito come singolo messaggio user con ruoli esplicitati nel testo, non ancora come array separato di turni user/assistant. Il backend supporta l'array multi-messaggio; una futura ottimizzazione può passare i turni separatamente.
+- La memoria e i documenti sono raccolti in un messaggio di contesto utente etichettato come contenuto e non come istruzioni; i turni storici mantengono il ruolo originale. Il messaggio nuovo è sempre l'ultimo turno `user`.
+- Il client valida ruoli ammessi, numero massimo di 60 messaggi e limite complessivo di 32.000 caratteri prima di aprire la connessione HTTPS. Anche il retry ricostruisce e invia gli stessi ruoli.
 
 ## 24 — backend streaming-only
 Rimosso l'endpoint non-streaming `POST /api/v1/chat`, il root web prototype, il file statico `index.html`, il modulo provider Ollama e il metodo Android `OnlineAssistantClient.send()`. L'unica API chat esposta è `POST /api/v1/chat/stream` (SSE). Aggiornati test e documentazione; le vecchie route rispondono 404.
@@ -29,6 +30,8 @@ Android conserva request ID e richiesta pendente nella cronologia cifrata; retry
 
 ## Evidenze CI
 - Backend [run 738](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45094905446), commit `90fd3efaaea800dbe89e942955c1fe571b080187`: **109 passed, 1 warning in 1.36s**, PostgreSQL effimero.
-- Android [run 246](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095009850), commit `9a5579cc47eb278363163ecf19583c7b4d977aac`: **SUCCESS**, `testDebugUnitTest`, BUILD SUCCESSFUL in 39s. Nessun APK.
+- Android [run 246](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45095009850), commit `9a5579cc47eb278363163ecf19583c7b4d977aac`: baseline precedente, SUCCESS.
+- Backend [run 771](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737059), commit `f76334e183d723384c671fa8253b68cdf743be2d`: **116 passed, 1 warning in 1.64s**, SUCCESS.
+- Android [run 259](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737107), commit `f76334e183d723384c671fa8253b68cdf743be2d`: **SUCCESS**, `testDebugUnitTest`, BUILD SUCCESSFUL in 36s. Nessun task APK.
 
 Stato: micro-fasi 22, 23, 24, 25 e 27 completate; 26 e 28 restano in attesa di test E2E su dispositivo e rete reali.
