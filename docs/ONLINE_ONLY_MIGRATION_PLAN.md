@@ -52,3 +52,7 @@ Il client Android collega la cancellazione della coroutine alla chiusura della c
 - Le risposte archiviate per il replay sono cifrate con AES-256-GCM. È obbligatorio configurare il segreto server-side stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`, uguale su tutte le istanze e mai distribuito al client. La sua rotazione richiede ricifratura dei record.
 - Sono stati aggiunti test backend per replay, conflitto di payload, isolamento per dispositivo, duplicato in elaborazione e cifratura nel database. CI e collaudo reale restano da verificare.
 - La garanzia non è exactly-once assoluta: un arresto del server dopo la generazione del provider ma prima della registrazione atomica della risposta può richiedere una nuova generazione. Il retry non riprende il flusso dal token esatto.
+
+
+## Protezione concorrente delle richieste chat
+Il registro idempotente assegna un fencing token casuale a ogni tentativo che acquisisce una richiesta. Il token viene sostituito quando una lease scaduta viene recuperata o quando una richiesta fallita viene riprovata. Rinnovo della lease, completamento e marcatura di errore sono aggiornamenti condizionati al token attualmente registrato: un processo precedente non può modificare lo stato del tentativo più recente. L'aggiunta della colonna lease_token è migrata in modo compatibile nei database SQLite esistenti e PostgreSQL. Il primo INSERT riuscito restituisce immediatamente il claim al chiamante; i duplicati simultanei non ottengono un secondo claim. I test sono presenti ma la CI e il collaudo end-to-end devono ancora essere verificati.
