@@ -496,3 +496,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - La CI Android esegue `testDebugUnitTest`, non `androidTest`: i tre test strumentali aggiunti restano da eseguire su emulatore/dispositivo. Nessun force-stop o riavvio reale verificato.
 - Micro-fase 29 resta aperta; gate 36 resta bloccato. Nessun APK, deploy o provisioning esterno.
 - Dettagli: `docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md`.
+
+
+### Revisione test strumentali e vincolo APK — 23 novembre 2026
+- Corretto il commento del test di ripristino: nuova istanza dello store nello stesso processo, non simulazione process death. Commit `90fc1150650278b78f5e14fb5516d18cf58a6b26`.
+- Audit statico della suite androidTest completato senza individuare una regressione certa da correggere.
+- Il workflow Android resta limitato a `testDebugUnitTest`. La task `connectedDebugAndroidTest` richiede build/installazione degli APK debug e test, vietati dal gate attuale che impedisce qualsiasi assemblaggio APK prima del completamento funzionale. Nessuna task di assemblaggio avviata.
+- Microfase 29 resta aperta: serve autorizzazione esplicita futura per build strumentale non distribuibile, oltre a force-stop/process death, riavvio, rete interrotta e test su dispositivo fisico. Non dichiarare prove eseguite.
+- Report: `docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md`.
