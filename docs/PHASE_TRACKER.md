@@ -429,3 +429,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 
 
 - Verifica finale dopo fix `da713b3b3c4ddd938e410563815fbf92fc4d8af8`: Android unit tests [run 45268526027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526027) **SUCCESS**; Backend tests [run 45268526344](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526344) **SUCCESS**. Il task Android è esclusivamente `gradle --no-daemon testDebugUnitTest`: nessun APK assemblato. La CI conferma la compilazione Kotlin e i test unitari, non esegue `androidTest`; il round-trip del payload cifrato, il force-stop/reopen e la ripresa rete reale restano da provare su emulatore/dispositivo. Gate 36 ancora bloccato.
+
+### Micro-fase 29 — audit ripresa dopo riapertura e payload immutabile — 23 novembre 2026
+- Revisione statica del percorso UI “Richiesta non completata” / “Riprendi richiesta”: la cronologia iniziale viene caricata dallo store cifrato; la ripresa è esplicita e non automatica; il retry riutilizza request ID e payload salvato; il placeholder assistant viene riutilizzato e il primo delta del replay sostituisce il testo parziale precedente.
+- Verificato il round-trip request ID + payload nel test strumentale `pendingRequestIdSurvivesStoreRecreationForSafeRetry`, ma il test non è stato eseguito: il workflow ordinario lancia soltanto `testDebugUnitTest`.
+- Android unit CI [45268526027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526027) e Backend CI [45268526344](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526344) SUCCESS. Nessuna prova di force-stop reale, rete reale o dispositivo; nessun APK.
+- Rapporto: [ANDROID_RECOVERY_REVIEW_2026-11-23.md](ANDROID_RECOVERY_REVIEW_2026-11-23.md), commit `0f28518a2a1da5b863ab94d5d6c7e96e08163cfc`.
+- La micro-fase resta aperta finché non viene eseguita la suite instrumented su emulatore/dispositivo e completato il test E2E con backend/provider autorizzati. Gate 36 resta bloccato.
