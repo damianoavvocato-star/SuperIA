@@ -387,3 +387,10 @@ L'audit ha trovato lo stesso caso limite nel caricamento della memoria di proget
 - Android CI sul commit `6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee`: lo step `Run Android unit tests` risulta **SUCCESS** ([run 45216321285](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45216321285)); al momento della verifica il job stava ancora completando gli step post-job. La CI non esegue `androidTest`, quindi non convalida i due nuovi test backup-only.
 - Il test Android unitario non genera APK: workflow confermato limitato a `gradle --no-daemon testDebugUnitTest`. Branch presente: solo `main`.
 - La micro-fase 29 resta aperta fino all'esecuzione dei test strumentali su emulatore/dispositivo. Nessun APK; nessun backend/provider/servizio esterno attivato.
+
+
+### Micro-fase 29 — test aggiuntivi di integrità e cancellazione — 23 novembre 2026
+- CI del commit `74201a0ad2996f561931b6bab4eb3a1c06b62ad8`: Android unit tests SUCCESS ([45265214148](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265214148)); Backend tests SUCCESS ([45265214131](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265214131)).
+- Aggiunti test instrumented per cancellazione anche dei backup AtomicFile, assenza di resurrezione dei dati, memoria corrotta (fail-closed) e chiave Keystore mancante senza ricreazione né perdita dell'archivio.
+- Commit test `271e913e78e90aeb51eb21a55171af28f3d986c9`; commit documentazione `6393a5007ae5346ad9444f9eeca0b07e387a1d52`.
+- I nuovi test instrumented non sono coperti dal workflow CI ordinario; micro-fase 29 resta aperta in attesa di test su emulatore/dispositivo. Nessun APK.
