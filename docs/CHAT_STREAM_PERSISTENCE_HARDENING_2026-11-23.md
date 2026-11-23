@@ -123,3 +123,11 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Nuovo test instrumented `explicitClearRemovesAtomicFileBackupsAndPreventsDataResurrection`: la cancellazione deve eliminare i backup `.bak` sia della cronologia sia della memoria e impedire la ricomparsa dei dati.
 - Nuovi test instrumented della memoria: archivio alterato rifiutato; chiave Keystore mancante non ricreata durante la lettura; archivio cifrato conservato byte-per-byte.
 - Questi test aggiuntivi sono nel commit `271e913e78e90aeb51eb21a55171af28f3d986c9` e non sono ancora eseguiti: la CI Android esegue esclusivamente `testDebugUnitTest`, non `androidTest`.
+
+
+### Estensione fail-closed alla memoria cifrata — 23 novembre 2026
+- Commit test `271e913e78e90aeb51eb21a55171af28f3d986c9`: aggiunti test instrumented per memoria progetto corrotta e perdita della chiave Android Keystore.
+- I test verificano rispettivamente che il contenuto alterato venga rifiutato e che, con chiave mancante, la lettura fallisca senza creare una nuova chiave né modificare l'archivio cifrato originale.
+- Aggiunto inoltre `explicitClearRemovesAtomicFileBackupsAndPreventsDataResurrection`, che verifica la cancellazione di entrambi i backup `.bak` e l'assenza di recupero dei dati cancellati.
+- CI del commit `271e913e78e90aeb51eb21a55171af28f3d986c9`: Android run [45265475942](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265475942) e Backend run [45265476027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265476027) risultano ancora in esecuzione al momento dell'aggiornamento.
+- I test nuovi sono instrumented e non vengono eseguiti da `testDebugUnitTest`; resta necessario il collaudo su emulatore/dispositivo. Nessun APK.
