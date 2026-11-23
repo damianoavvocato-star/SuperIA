@@ -1,3 +1,5 @@
+> **Nota di prevalenza — 23 novembre 2026:** questo documento è una matrice storica di candidati tecnici, non l'architettura corrente. Le proposte di runtime LLM locale (inclusi Ollama e llama.cpp per inferenza) sono superate e non devono essere implementate in SuperIA. La policy corrente impone inferenza AI esclusivamente online tramite backend HTTPS SuperIA e provider gratuiti approvati; sono ammessi strumenti locali soltanto per elaborazioni non-LLM. Nessuna integrazione è approvata solo perché compare in questa matrice.
+
 # Matrice preliminare delle alternative gratuite e locali
 
 > Documento di lavoro della Fase 0. Le soluzioni qui sotto sono candidate tecniche, non integrazioni già completate. La presenza di codice pubblico non garantisce che i pesi del modello, i dataset o ogni uso siano liberi: ogni licenza va controllata sul repository e sulla scheda del modello specifico prima del download e dell'integrazione.
