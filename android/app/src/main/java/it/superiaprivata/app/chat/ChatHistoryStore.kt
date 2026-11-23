@@ -13,12 +13,27 @@ import java.io.File
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import java.security.KeyStore
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 data class ChatLine(val id: Long, val text: String, val role: String = "user", val pending: Boolean = false, val requestId: String? = null)
+
+/** Reject malformed transcript entries before they can be persisted or shown to the prompt builder. */
+internal fun validatePersistedChatLines(messages: List<ChatLine>) {
+    messages.forEach { line ->
+        require(line.role == "user" || line.role == "assistant") {
+            "La cronologia contiene un ruolo non supportato."
+        }
+        line.requestId?.let { value ->
+            require(runCatching { UUID.fromString(value) }.isSuccess) {
+                "La cronologia contiene un identificativo richiesta non valido."
+            }
+        }
+    }
+}
 
 /**
  * Persistent, append-by-replacement conversation archive.
@@ -79,6 +94,7 @@ class ChatHistoryStore(context: Context) {
     }
 
     fun save(messages: List<ChatLine>) {
+        validatePersistedChatLines(messages)
         val json = JSONArray()
         messages.forEach { line ->
             json.put(JSONObject().put("id", line.id).put("text", line.text).put("role", line.role).put("pending", line.pending).put("requestId", line.requestId))
@@ -126,10 +142,12 @@ class ChatHistoryStore(context: Context) {
 
     private fun decode(json: String): List<ChatLine> {
         val array = JSONArray(json)
-        return (0 until array.length()).map { index ->
+        val messages = (0 until array.length()).map { index ->
             val item = array.getJSONObject(index)
             ChatLine(item.getLong("id"), item.getString("text"), item.optString("role", "user"), item.optBoolean("pending", false), item.optString("requestId").takeIf { it.isNotBlank() })
         }
+        validatePersistedChatLines(messages)
+        return messages
     }
 
     private fun encrypt(cleartext: ByteArray): ByteArray {

@@ -305,3 +305,7 @@ Il client Android non appiattisce più la cronologia in un singolo messaggio use
 
 ### Micro-fase 23 — validazione ruoli della cronologia persistita — 23 novembre 2026
 Il builder Android rifiuta ora ruoli storici diversi da `user` e `assistant`, invece di reinterpretarli silenziosamente come messaggi utente. Test Android [run 261](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45124275214): **SUCCESS**, `testDebugUnitTest`, BUILD SUCCESSFUL. Test backend [run 776](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45124275144): **116 passed, 1 warning**. Il workflow Android continua a eseguire soltanto test unitari, nessun APK.
+
+
+### Micro-fase 29 — hardening validazione archivio cronologia — 23 novembre 2026
+Aggiunta validazione condivisa prima del salvataggio e dopo la decodifica dell'archivio cifrato: sono ammessi soltanto i ruoli persistiti `user` e `assistant`; gli eventuali request ID devono essere UUID validi. I record legacy pending senza request ID restano leggibili. Aggiunti test unitari per ruolo anomalo, UUID malformato, ruoli validi e compatibilità legacy. La fase 29 resta **In attesa di verifica** fino al collaudo instrumented su Android reale/emulatore; il test unitario CI non sostituisce tale prova.
