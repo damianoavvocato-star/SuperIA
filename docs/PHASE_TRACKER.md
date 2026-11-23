@@ -167,3 +167,8 @@ Commit di riferimento: audit `c3815b8`, matrice `585a2c9`, analisi `08cdd38`, re
 ## Micro-fase 02 completata — 23 novembre 2026
 
 Consolidata la policy online-only: le proposte local-first/local LLM presenti in ROADMAP, decisioni Fase 0 e architettura Android sono marcate come storiche; il registro modelli locali è disattivato come fonte di candidati per l'inferenza corrente. Nessun modello locale deve essere scaricato o integrato. Le elaborazioni non-LLM locali restano valutabili. Verifica documentale, non runtime.
+
+
+## Micro-fase 03 completata — 23 novembre 2026
+
+Audit statico repository/branch/cronologia/workflow/documenti registrato in [REPOSITORY_AUDIT_2026-11-23.md](REPOSITORY_AUDIT_2026-11-23.md). Branch unico `main`, zero PR. README allineati a SSE; documentazione legacy su token condiviso e prototipo web marcata storica; registry Android online-only. I residui legacy web/Ollama e route non-streaming sono documentati ma non cancellati senza micro-fase specifica e test. Backend CI run 605 SUCCESS sul commit precedente a questo audit; non è CI Android né E2E.
