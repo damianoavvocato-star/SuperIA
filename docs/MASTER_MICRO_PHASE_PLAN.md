@@ -64,7 +64,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 20 | Attivazione controllata del primo provider gratuito | Una sola integrazione è provata con credenziale reale server-side e senza rischio di addebito. | Bloccata da dipendenza esterna |
 | 21 | Guard-rail free-only | Configurazione errata, quota finita, 402 e billing non consentito causano stop; nessun fallback pagato è possibile. | Completata |
 | 22 | Rotazione tra provider approvati | Cooldown, selezione alternativa, quote e indisponibilità sono testati; nessuna rotazione di account/chiavi per eludere limiti. | Completata |
-| 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Completata, con limite noto |
+| 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Completata |
 | 24 | Streaming SSE lato backend | Eventi delta/done/error, delimitatori, headers, timeout e chiusura stream sono verificati. | Completata |
 | 25 | Streaming SSE lato Android | Parsing incrementale, ordine dei delta, completamento, errori e cancellazione sono coperti da test. | Completata |
 | 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | In attesa di verifica pratica |
@@ -248,3 +248,7 @@ Riconciliate le righe della tabella con le evidenze dettagliate in PHASE_TRACKER
 
 ### Aggiornamento micro-fase 34 — regressione pairing anti-spoofing — 23 novembre 2026
 Aggiunto test parametrico: flag edge vuoto/false/0/yes/enabled, header proxy falsificati (`X-Forwarded-For`, `X-Real-IP`, `Forwarded`) e guardia che impedisce emissione token; verifica 503 e assenza del pairing code. Backend CI [run 45119185491](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119185491): **115 passed, 1 warning in 1.52s**. La fase 34 resta in attesa perché manca ancora rate limiting condiviso WAF/gateway reale; fase 12 bloccata e flag pairing edge resta false. Rapporto [SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md](SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md).
+
+
+### Aggiornamento micro-fase 23 — ruoli multi-turno nativi — 23 novembre 2026
+Rimosso il limite noto del precedente prompt appiattito: Android ora invia messaggi strutturati user/assistant, contesto memoria/documenti separato ed etichettato, nuovo messaggio finale e retry con gli stessi ruoli. Validazione client: ruoli, 1–60 messaggi e 32.000 caratteri totali. Backend CI [run 771](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737059): **116 passed, 1 warning**; Android CI [run 259](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119737107): **SUCCESS**, testDebugUnitTest. Nessun APK.
