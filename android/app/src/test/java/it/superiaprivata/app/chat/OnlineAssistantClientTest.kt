@@ -206,8 +206,6 @@ class OnlineAssistantClientTest {
         }
     }
 
-}
-
 
     @Test
     fun tokenRotationRefusesPlainHttpBeforeOpeningConnection() {
@@ -275,3 +273,4 @@ class OnlineAssistantClientTest {
             }
         }
     }
+}
