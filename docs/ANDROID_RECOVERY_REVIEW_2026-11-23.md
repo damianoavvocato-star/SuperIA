@@ -35,3 +35,10 @@ La revisione statica non ha evidenziato una nuova regressione nel percorso di re
 - Commit dei test: 13c3f3e7d5781f1779d324477c71a617f83eaf7e.
 - Precisazione: il test pendingRequestIdSurvivesStoreRecreationForSafeRetry crea una nuova istanza di ChatHistoryStore nello stesso processo. Verifica il round-trip dell'archivio cifrato, ma non simula un vero processo Android terminato e riavviato.
 - Questi tre nuovi casi sono test strumentali non eseguiti dalla task CI testDebugUnitTest. La loro esecuzione su emulatore/dispositivo resta aperta; nessun risultato runtime viene dichiarato.
+
+## Verifica CI successiva — 23 novembre 2026
+- Android unit tests [run 45272097900](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272097900): **SUCCESS** sul commit `13c3f3e7d5781f1779d324477c71a617f83eaf7e`.
+- Backend tests [run 45272097827](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272097827): **SUCCESS** sullo stesso commit.
+- Verifica documentazione [run 45272126971](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272126971) e tracker [run 45272141250](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45272141250): **SUCCESS**.
+- Questi workflow non eseguono la suite `androidTest`: i tre nuovi test strumentali restano non eseguiti. Nessuna prova force-stop/process-death o dispositivo reale è stata effettuata.
+- Stato invariato: micro-fase 29 aperta in attesa di esecuzione strumentale; nessun APK assemblato.
