@@ -73,7 +73,7 @@ class ChatHistoryValidationTest {
 
     @Test
     fun generatesUnusedMessageIdWhenNanoTimeCandidateAlreadyExists() {
-        assertEquals(42L, nextChatLineId(listOf(42L, 43L, 44L), 42L))
+        assertEquals(45L, nextChatLineId(listOf(42L, 43L, 44L), 42L))
         assertEquals(45L, nextChatLineId(listOf(42L, 43L, 44L), 45L))
     }
 
