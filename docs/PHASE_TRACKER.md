@@ -372,3 +372,7 @@ Android unit CI e backend CI sono entrambe **SUCCESS**. Il workflow Android eseg
 
 ### Micro-fase 29 — coerenza fixture test instrumented — 23 novembre 2026
 In revisione di `ChatHistoryStoreInstrumentedTest` è stata corretta la fixture `persistsMoreThanOneHundredMessagesAndPendingState`: il messaggio pending finale ora ha ruolo `user`, conforme alla validazione di archivio (pending consentito soltanto per user); gli altri messaggi mantengono l'alternanza dei ruoli. Commit `ed650a4af63e7bb4cb242fee6832e7a11b03327b`. La modifica è in `androidTest`, quindi non viene compilata/eseguita dal task CI unitario `testDebugUnitTest`; nessuna evidenza di run dedicata disponibile al momento. La micro-fase 29 resta aperta per collaudo strumentale reale. Nessun APK.
+
+
+### Micro-fase 29 — recupero backup AtomicFile — 23 novembre 2026
+Individuato e corretto il percorso di lettura: ChatHistoryStore ora chiama AtomicFile.openRead() anche quando il file principale non esiste, così AtomicFile può ripristinare l'unica copia valida dal backup .bak. Aggiunto test instrumented che simula backup-only e verifica contenuto, ripristino del file principale e rimozione del backup. Commit codice 40a9e712ae8efd3c1d7ab971e44ccb95b445daf2; commit test 409fb3703372bfee2d587118a61e013246e0497f. Il test è in androidTest e richiede esecuzione strumentale su device/emulatore; non è coperto da testDebugUnitTest. Micro-fase 29 resta in attesa di verifica pratica. Nessun APK.
