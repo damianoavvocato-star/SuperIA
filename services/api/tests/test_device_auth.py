@@ -144,3 +144,18 @@ def test_expired_or_revoked_device_token_cannot_be_rotated(tmp_path, monkeypatch
     active = issue_device_token(database, "revoked-phone")
     assert revoke_device_token(database, active["device_id"])
     assert device_auth.rotate_device_token(database, active["device_id"], active["access_token"]) is None
+
+
+
+def test_only_one_rotation_can_win_for_the_same_presented_token(tmp_path):
+    from app.device_auth import rotate_device_token
+
+    database = str(tmp_path / "auth-rotation-race.sqlite3")
+    issued = issue_device_token(database, "rotation-race-phone")
+
+    first = rotate_device_token(database, issued["device_id"], issued["access_token"])
+    second = rotate_device_token(database, issued["device_id"], issued["access_token"])
+
+    assert first is not None
+    assert second is None
+    assert validate_device_token(database, first["access_token"])
