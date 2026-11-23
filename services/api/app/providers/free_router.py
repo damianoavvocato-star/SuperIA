@@ -23,6 +23,47 @@ class ProviderConfig:
     headers: dict[str, str]
 
 
+def validate_provider_environment(environ: dict[str, str]) -> None:
+    """Reject partial or ambiguous provider configuration before routing any request."""
+    global_mode = environ.get("SUPERIA_FREE_ONLY", "").strip().lower()
+    if global_mode and global_mode not in {"true", "false"}:
+        raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
+
+    provider_ids = ("gemini", "groq", "openrouter", "cloudflare", "sambanova")
+    attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING")
+    for provider_id in provider_ids:
+        prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
+        key = environ.get(prefix + "API_KEY", "").strip()
+        model = environ.get(prefix + "MODEL", "").strip()
+        model_ids = {
+            item.strip()
+            for item in environ.get(prefix + "FREE_MODEL_IDS", "").split(",")
+            if item.strip()
+        }
+        configured = bool(key or model or model_ids or environ.get(prefix + "ACCOUNT_ID", "").strip())
+        if not configured:
+            continue
+        if global_mode != "true":
+            raise ValueError(f"{prefix} configuration requires SUPERIA_FREE_ONLY=true.")
+        missing = [
+            name for name in attestation_keys
+            if environ.get(prefix + name, "").strip().lower() != "true"
+        ]
+        if missing:
+            raise ValueError(
+                f"{prefix} provider configuration rejected: missing affirmative free-only attestations: "
+                + ", ".join(missing)
+            )
+        if not key or not model or not model_ids:
+            raise ValueError(f"{prefix} API_KEY, MODEL and FREE_MODEL_IDS must all be configured.")
+        if model not in model_ids:
+            raise ValueError(f"{prefix} MODEL must be included in FREE_MODEL_IDS.")
+        if provider_id == "openrouter" and not model.endswith(":free"):
+            raise ValueError("OpenRouter model must end with ':free'.")
+        if provider_id == "cloudflare" and not environ.get(prefix + "ACCOUNT_ID", "").strip():
+            raise ValueError(f"{prefix} ACCOUNT_ID is required for Cloudflare.")
+
+
 class FreeOnlyRouter:
     """
     Fail-closed router. A provider is eligible only when the operator has
@@ -39,6 +80,7 @@ class FreeOnlyRouter:
         state_db_path: str | None = None,
     ) -> None:
         self.environ = os.environ if environ is None else environ
+        validate_provider_environment(self.environ)
         self.client_factory = client_factory
         self.state_db_path = state_db_path or self.environ.get(
             "SUPERIA_ROUTER_STATE_DB",
