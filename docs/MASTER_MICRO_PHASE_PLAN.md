@@ -37,7 +37,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; incongruenze documentali corrette o marcate storiche; residui legacy documentati senza cancellazioni non verificate. | Completata |
 | 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | Completata |
 | 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | Completata |
-| 06 | Baseline dei test Android senza APK | Il workflow esegue solo testDebugUnitTest; il risultato CI del commit corrente è acquisito e non contiene task di assemblaggio APK. | In attesa di verifica |
+| 06 | Baseline dei test Android senza APK | Il workflow esegue solo testDebugUnitTest; il risultato CI del commit corrente è acquisito e non contiene task di assemblaggio APK. | Completata |
 | 07 | Baseline dei test backend | Suite backend e PostgreSQL CI sono riproducibili; esito, commit, numero test e warning sono registrati. | Completata |
 
 ### B. Sicurezza e infrastruttura online
@@ -159,7 +159,11 @@ Documentazione principale allineata alla policy online-only, al piano operativo 
 Audit statico dei sorgenti Android registrato in [ANDROID_CLIENT_AUDIT_2026-11-23.md](ANDROID_CLIENT_AUDIT_2026-11-23.md). Verificati HTTPS e rifiuto URL pericolosi, pairing individuale, token cifrato, SSE, UUID request, cancellazione connessione, cronologia/memoria cifrate, prompt bounded e ripresa manuale. Rilevato il metodo legacy non-streaming `send()` ancora presente; non rimosso senza verifica riferimenti e test. L'audit non equivale a test su telefono reale.
 
 ### Esito micro-fase 06 — baseline Android — 23 novembre 2026
-Workflow verificato: JDK 17, Gradle 8.11.1, comando unico `gradle --no-daemon testDebugUnitTest`; nessun task assemble/sign/upload APK. Sono presenti test unitari client, ma non è stata acquisita una run CI Android verificabile sul commit corrente. Stato mantenuto **In attesa di verifica**; non dichiarare superati i test Android.
+Workflow verificato: JDK 17, Gradle 8.11.1, comando unico `gradle --no-daemon testDebugUnitTest`; nessun task assemble/sign/upload APK. Sono presenti test unitari client, ma non è stata acquisita una run CI Android verificabile sul commit corrente. La run Android 222 è stata acquisita e verificata SUCCESS; non ha eseguito assemblaggio APK.
 
 ### Esito micro-fase 07 — baseline backend — 23 novembre 2026
 Verificata GitHub Actions run 577, ID `45089445756`, commit `036a2be916c7828be6c492d43b6b37fcc1dcacd3`: job PostgreSQL completato SUCCESS; log pytest: **60 passed, 1 warning in 1.31s**. Tutti gli step del job, inclusi avvio PostgreSQL e suite `services/api/tests`, sono conclusi con successo. Questa evidenza non certifica deploy, provider reale o E2E Android.
+
+
+### Verifica CI Android — micro-fase 06 — 23 novembre 2026
+GitHub Actions [run 222](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45091390966), ID `45091390966`, commit `739f585b168b24bc817ab0cbcc49babc799ad392`: job `android-unit-tests` SUCCESS. Log: `gradle --no-daemon testDebugUnitTest`, task `:app:testDebugUnitTest`, **BUILD SUCCESSFUL in 28s**. I passaggi job confermano JDK 17 e Gradle setup. Non compaiono task assemble/sign/upload APK. La run verifica la suite sul commit indicato, non necessariamente l'HEAD documentale successivo.
