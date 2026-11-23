@@ -100,6 +100,22 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun recoversProjectMemoryWhenAtomicFileBackupIsTheOnlyCopy() {
+        val expected = "memoria progetto precedente da recuperare"
+        store.saveProjectMemory(expected)
+
+        val base = File(context.filesDir, "project_memory.enc")
+        val backup = File(base.absolutePath + ".bak")
+        assertTrue("La memoria cifrata deve esistere dopo il salvataggio", base.exists())
+        assertTrue(base.copyTo(backup, overwrite = true).exists())
+        assertTrue("Simula l'interruzione dopo il backup e prima del nuovo file", base.delete())
+
+        assertEquals(expected, ChatHistoryStore(context).loadProjectMemory())
+        assertTrue("AtomicFile deve ripristinare il file principale", base.exists())
+        assertFalse("Il backup recuperato deve essere consumato", backup.exists())
+    }
+
+    @Test
     fun projectMemoryCanBeSavedLoadedAndCleared() {
         store.saveProjectMemory("decisione privata del progetto")
 
