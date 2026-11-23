@@ -88,6 +88,33 @@ def revoke_device_token(database_path: str, device_id: str) -> bool:
         return cursor.rowcount == 1
 
 
+
+def rotate_device_token(database_path: str, device_id: str) -> dict[str, object] | None:
+    """Replace the active token for one device; the previous token stops working immediately."""
+    initialize_auth_store(database_path)
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    now = int(time.time())
+    expires_at = now + DEVICE_TOKEN_TTL_SECONDS
+    with closing(_connect(database_path)) as connection:
+        cursor = connection.execute(
+            """
+            UPDATE device_tokens
+            SET token_hash = ?, created_at = ?, expires_at = ?
+            WHERE device_id = ? AND revoked_at IS NULL AND expires_at > ?
+            """,
+            (token_hash, now, expires_at, device_id, now),
+        )
+        connection.commit()
+        if cursor.rowcount != 1:
+            return None
+    return {
+        "access_token": token,
+        "device_id": device_id,
+        "expires_at": expires_at,
+        "token_type": "Bearer",
+    }
+
 def device_id_for_token(database_path: str, token: str) -> str | None:
     """Return the authenticated device ID without exposing token hashes."""
     if not token:
