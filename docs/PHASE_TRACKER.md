@@ -148,3 +148,10 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Commit test: 045a619b092d93b4da8f132ae3f6479b0f45cc96.
 - La modifica al percorso android/** attiva il workflow Android unit tests su push a main; l'esito deve essere controllato prima di considerare verificata la suite.
 - La Fase 1 resta aperta: pairing e connessione su backend HTTPS pubblicato, rate limiting effettivo sul gateway/WAF e prova su dispositivo fisico non sono ancora eseguibili perché l'infrastruttura di produzione non è stata configurata. Nessun APK creato.
+
+
+## Piano dettagliato in 50 micro-fasi — 23 novembre 2026
+
+Il lavoro operativo viene ora suddiviso in 50 micro-fasi numerate, ognuna con criterio di accettazione, stato iniziale e dipendenze. Consultare [docs/MASTER_MICRO_PHASE_PLAN.md](MASTER_MICRO_PHASE_PLAN.md). Le 16 fasi macro restano la mappa generale; le 50 micro-fasi sono l'unità di esecuzione e verifica. Si procede una micro-fase alla volta. Il gate chat online è la micro-fase 36; il blocco APK resta attivo fino al suo superamento e alla verifica completa dei requisiti.
+
+Audit repository del 23 novembre 2026: è presente soltanto il branch `main`; la ricerca pull request non ha restituito PR nel repository. Non sono stati creati rami aggiuntivi.
