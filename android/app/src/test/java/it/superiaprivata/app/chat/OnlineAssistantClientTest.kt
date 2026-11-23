@@ -258,7 +258,7 @@ class OnlineAssistantClientTest {
             event: done
             data: {"provider":"fake","model":"fake-model"}
 
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
         assertEquals("Ciao mondo", answer)
         assertEquals(listOf("Ciao ", "mondo"), deltas)
@@ -275,7 +275,7 @@ class OnlineAssistantClientTest {
             event: done
             data: {"provider":"fake"}
 
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
         assertEquals("Ciao mondo", answer)
         assertEquals(listOf("Ciao mondo"), deltas)
@@ -310,7 +310,7 @@ class OnlineAssistantClientTest {
             event: error
             data: {"message":"Provider interrotto"}
 
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
@@ -325,7 +325,7 @@ class OnlineAssistantClientTest {
         val stream = """
             event: delta
             data: {"text":"parziale"}
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
@@ -342,7 +342,7 @@ class OnlineAssistantClientTest {
         val stream = """
             event: done
             data: {}
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
@@ -398,7 +398,7 @@ class OnlineAssistantClientTest {
             event: done
             data: {invalid}
 
-        """.trimIndent()
+        """.trimIndent() + "\n\n"
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
