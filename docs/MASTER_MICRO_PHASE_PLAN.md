@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — micro-fasi 01–08 completate  
+Aggiornato: 23 novembre 2026 — micro-fase 09 completata; 10 in corso  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -45,8 +45,8 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | N. | Micro-fase | Criterio di completamento | Stato iniziale |
 |---:|---|---|---|
 | 08 | Validazione centralizzata della configurazione backend | Variabili obbligatorie, valori non validi e configurazioni insicure vengono rifiutati con comportamento fail-closed e test. | Completata |
-| 09 | Autenticazione individuale dei dispositivi | Token individuali, hash lato server, scadenza e isolamento tra dispositivi sono coperti da test. | Parziale |
-| 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | Parziale |
+| 09 | Autenticazione individuale dei dispositivi | Token individuali, hash lato server, scadenza e isolamento tra dispositivi sono coperti da test. | Completata |
+| 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | In attesa di verifica |
 | 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | Parziale |
 | 12 | Rate limiting IP effettivo | Gateway/WAF applica limiti reali prima del pairing pubblico; prove dimostrano blocco, finestra e recupero. Il flag applicativo da solo non vale come prova. | Bloccata da dipendenza esterna |
 | 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Da iniziare |
@@ -171,3 +171,10 @@ GitHub Actions [run 222](https://github.com/damianoavvocato-star/SuperIA/actions
 
 ### Esito micro-fase 08 — validazione configurazione backend — 23 novembre 2026
 Aggiunta `validate_provider_environment` nel router e chiamata all'inizializzazione. Rifiuta modalità free-only non valida, provider parziali, attestazioni non affirmative, modello fuori allowlist, OpenRouter senza suffisso `:free` e Cloudflare senza account ID. Test dedicati. Evidenza [Backend tests run 634](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092312609): SUCCESS, **68 passed, 1 warning in 1.14s**, PostgreSQL effimero. Rapporto: [BACKEND_CONFIG_VALIDATION_2026-11-23.md](BACKEND_CONFIG_VALIDATION_2026-11-23.md). La verifica delle condizioni reali dei provider resta micro-fase 19.
+
+
+### Esito micro-fase 09 — autenticazione dispositivi — 23 novembre 2026
+Audit di `device_auth.py` e test: token casuale, SHA-256 server-side, UUID per dispositivo, TTL 90 giorni, scadenza, revoca e isolamento. Aggiunti test per expiry e revoca selettiva. Backend CI [run 638](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092450472): SUCCESS, **70 passed, 1 warning in 1.08s**, PostgreSQL effimero. Rapporto [DEVICE_AUTH_VALIDATION_2026-11-23.md](DEVICE_AUTH_VALIDATION_2026-11-23.md).
+
+### Micro-fase 10 — pairing sicuro — in corso
+Test aggiunti per segreto pairing mancante, validazione dei limiti input e contenuto della risposta. CI backend sul commit `a0f08ad51a890ebdd0992fe65d7ae281d2ef6462` in attesa di completamento. Il flag edge resta solo un gate di configurazione e non sostituisce il rate limiting reale della micro-fase 12.
