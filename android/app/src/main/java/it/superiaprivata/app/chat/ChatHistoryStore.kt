@@ -77,8 +77,8 @@ class ChatHistoryStore(context: Context) {
      * One-time migration: discard conversations produced by the retired on-device model.
      * The encrypted archive remains available for new online conversations.
      */
-    fun clearLegacyLocalHistoryOnce() {
-        if (preferences.getBoolean(ONLINE_ONLY_MIGRATION_KEY, false)) return
+    fun clearLegacyLocalHistoryOnce() = synchronized(ARCHIVE_WRITE_LOCK) {
+        if (preferences.getBoolean(ONLINE_ONLY_MIGRATION_KEY, false)) return@synchronized
         archive.delete()
         val legacyModels = File(appContext.filesDir, "models")
         check(!legacyModels.exists() || legacyModels.deleteRecursively()) {
@@ -96,25 +96,25 @@ class ChatHistoryStore(context: Context) {
         ) { "Impossibile completare la migrazione della cronologia online." }
     }
 
-    fun load(): List<ChatLine> {
+    fun load(): List<ChatLine> = synchronized(ARCHIVE_WRITE_LOCK) {
         if (archive.baseFile.exists()) {
             val packed = archive.openRead().use { it.readBytes() }
             val jsonBytes = decrypt(packed)
             val json = runCatching {
                 GZIPInputStream(ByteArrayInputStream(jsonBytes)).use { it.readBytes() }
             }.getOrElse { jsonBytes }
-            return decode(String(json, Charsets.UTF_8))
+            return@synchronized decode(String(json, Charsets.UTF_8))
         }
 
         // One-time migration from the previous encrypted SharedPreferences archive.
-        val legacy = preferences.getString(HISTORY_KEY, null) ?: return emptyList()
+        val legacy = preferences.getString(HISTORY_KEY, null) ?: return@synchronized emptyList()
         val packed = Base64.decode(legacy, Base64.NO_WRAP)
         val migrated = decode(String(decrypt(packed), Charsets.UTF_8))
         save(migrated)
         check(preferences.edit().remove(HISTORY_KEY).commit()) {
             "Cronologia migrata, ma impossibile rimuovere la copia precedente."
         }
-        return migrated
+        migrated
     }
 
     fun save(messages: List<ChatLine>) {
@@ -132,16 +132,16 @@ class ChatHistoryStore(context: Context) {
     }
 
     /** User-editable project memory, encrypted with the same device-bound key. */
-    fun loadProjectMemory(): String {
-        if (!memoryArchive.baseFile.exists()) return ""
-        return String(decrypt(memoryArchive.openRead().use { it.readBytes() }), Charsets.UTF_8)
+    fun loadProjectMemory(): String = synchronized(ARCHIVE_WRITE_LOCK) {
+        if (!memoryArchive.baseFile.exists()) return@synchronized ""
+        String(decrypt(memoryArchive.openRead().use { it.readBytes() }), Charsets.UTF_8)
     }
 
     fun saveProjectMemory(memory: String) {
         writeAtomically(memoryArchive, encrypt(memory.trim().toByteArray(Charsets.UTF_8)))
     }
 
-    fun clearProjectMemory() {
+    fun clearProjectMemory() = synchronized(ARCHIVE_WRITE_LOCK) {
         memoryArchive.delete()
     }
 
