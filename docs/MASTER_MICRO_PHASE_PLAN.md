@@ -52,8 +52,8 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Completata |
 | 14 | Pubblicazione backend HTTPS di staging | Backend raggiungibile tramite HTTPS, segreti protetti e deploy ripetibile; health e readiness sono distinti. | Bloccata da dipendenza esterna |
 | 15 | Database PostgreSQL persistente | Database condiviso e persistente configurato; nessuno stato di produzione dipende da filesystem temporanei. | Bloccata da dipendenza esterna |
-| 16 | Migrazione e verifica dati | Migrazione SQLite/PostgreSQL verificata con conteggi, hash, schema e test di rollback/errore. | Parziale |
-| 17 | Gestione dei segreti di produzione | Chiavi provider, token amministrativi e chiave idempotenza sono solo nel secret manager; rotazione e assenza segreti nei log testate. | Da iniziare |
+| 16 | Migrazione e verifica dati | Migrazione SQLite/PostgreSQL verificata con conteggi, hash, schema e test di rollback/errore. | Completata |
+| 17 | Gestione dei segreti di produzione | Chiavi provider, token amministrativi e chiave idempotenza sono solo nel secret manager; rotazione e assenza segreti nei log testate. | In attesa di verifica |
 | 18 | Readiness e diagnostica operativa | Endpoint diagnostici distinguono processo, database, autenticazione e provider senza rivelare segreti. | Da iniziare |
 
 ### C. Motore chat online
@@ -200,3 +200,13 @@ Selezionati Render Free Web Service (staging only) + Aiven PostgreSQL Free (data
 
 ### Esito micro-fase 14 — deploy HTTPS staging — bloccata da autorizzazione esterna — 23 novembre 2026
 Preparato `render.yaml` con piano Free, regione Frankfurt, rootDir `services/api`, health check `/health`, autoDeploy false, provider AI disabilitati e pairing edge false. Segreti dichiarati solo `sync: false`. Guida: [RENDER_STAGING_DEPLOY_GUIDE.md](RENDER_STAGING_DEPLOY_GUIDE.md). Non sono stati creati account, installate GitHub App, provisionati DB o servizi né eseguito deploy: occorre consenso esplicito dell'utente. Stato resta bloccato.
+
+
+### Esito micro-fase 15 — database persistente — bloccata da provisioning esterno
+Implementata guardia fail-closed: staging/production richiedono PostgreSQL per auth e stato router; SQLite e `/tmp` restano solo development/test. Test automatici superati. Nessun database esterno è stato creato: serve consenso per Aiven e provisioning. Rapporto [DATABASE_PERSISTENCE_AND_MIGRATION_2026-11-23.md](DATABASE_PERSISTENCE_AND_MIGRATION_2026-11-23.md).
+
+### Esito micro-fase 16 — migrazione dati — completata
+Testata migrazione SQLite/PostgreSQL con conteggi, digest SHA-256, rifiuto destinazione non vuota, errore schema, rollback integrale e assenza tabella provider_state. Backend CI [run 680](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093532739): **99 passed, 1 warning in 1.57s**, PostgreSQL effimero. Nessun dato utente migrato.
+
+### Micro-fase 17 — gestione segreti — in corso
+Esteso `.gitignore` a file ambiente, chiavi e directory secrets; aggiunto `services/api/.env.example` con placeholder vuoti e provider disabilitati; aggiunto test che impedisce la divulgazione delle API key nelle diagnostiche. Ricerca repository per pattern comuni di chiavi non ha restituito match. CI finale in attesa; il secret manager di produzione resta da configurare dopo il deploy.
