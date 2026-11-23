@@ -394,3 +394,7 @@ L'audit ha trovato lo stesso caso limite nel caricamento della memoria di proget
 - Aggiunti test instrumented per cancellazione anche dei backup AtomicFile, assenza di resurrezione dei dati, memoria corrotta (fail-closed) e chiave Keystore mancante senza ricreazione né perdita dell'archivio.
 - Commit test `271e913e78e90aeb51eb21a55171af28f3d986c9`; commit documentazione `6393a5007ae5346ad9444f9eeca0b07e387a1d52`.
 - I nuovi test instrumented non sono coperti dal workflow CI ordinario; micro-fase 29 resta aperta in attesa di test su emulatore/dispositivo. Nessun APK.
+
+
+### Micro-fase 29 — memoria cifrata: corruzione, perdita chiave e cancellazione backup — 23 novembre 2026
+Aggiunti test instrumented che verificano: memoria alterata rifiutata; chiave Keystore mancante senza ricreazione e senza modifica dell'archivio cifrato; cancellazione dei backup AtomicFile della cronologia e della memoria senza resurrezione dei dati. Commit test `271e913e78e90aeb51eb21a55171af28f3d986c9`. Android CI [run 45265475942](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265475942) e backend CI [run 45265476027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265476027) risultano ancora in esecuzione all'aggiornamento. I test instrumented non sono coperti dal workflow `testDebugUnitTest`; micro-fase 29 resta aperta in attesa di emulatore/dispositivo. Nessun APK.
