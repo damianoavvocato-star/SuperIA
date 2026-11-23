@@ -286,7 +286,10 @@ class OnlineAssistantClientTest {
 
     @Test
     fun sseParserRejectsEndOfStreamWithoutDoneAndKeepsPartialOutput() {
-        val stream = "event: delta\\ndata: {\\"text\\":\\"parziale\\"}\\n".replace("\\n", "\n")
+        val stream = """
+            event: delta
+            data: {"text":"parziale"}
+        """.trimIndent()
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
