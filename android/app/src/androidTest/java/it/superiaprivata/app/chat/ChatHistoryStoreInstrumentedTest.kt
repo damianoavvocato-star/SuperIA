@@ -254,6 +254,8 @@ class ChatHistoryStoreInstrumentedTest {
 
     @Test
     fun legacyPendingRequestWithoutIdRemainsReadableAndCanBeUpgraded() {
+        // Ensure the device-bound key exists even if another test removed it first.
+        store.save(emptyList())
         val legacyJson = JSONArray().put(
             JSONObject()
                 .put("id", 902L)
