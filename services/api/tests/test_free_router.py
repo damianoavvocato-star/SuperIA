@@ -470,3 +470,17 @@ def test_deployed_router_rejects_sqlite_router_state_even_with_postgres_auth_db(
                 "SUPERIA_ROUTER_STATE_DB": "/tmp/router.sqlite3",
             },
         )
+
+
+
+def test_provider_diagnostics_never_return_api_key(tmp_path):
+    env = free_env("groq")
+    router = FreeOnlyRouter(
+        environ=env,
+        state_db_path=str(tmp_path / "secret-redaction.sqlite3"),
+    )
+    diagnostics = repr(router.provider_status())
+    models = repr(asyncio.run(router.list_models()))
+    assert "test-secret" not in diagnostics
+    assert "test-secret" not in models
+    assert "groq" in diagnostics
