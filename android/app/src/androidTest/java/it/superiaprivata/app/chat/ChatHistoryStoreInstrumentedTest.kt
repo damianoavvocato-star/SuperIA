@@ -410,4 +410,81 @@ class ChatHistoryStoreInstrumentedTest {
         store.save(listOf(restored.copy(requestId = upgradedId)))
         assertEquals(upgradedId, ChatHistoryStore(context).load().single().requestId)
     }
+    @Test
+    fun duplicatePendingRequestIdsAreRejectedBeforeReplacingArchive() {
+        val original = listOf(ChatLine(910L, "cronologia valida", "user"))
+        store.save(original)
+        val duplicateId = "7a6d3c12-8c4e-4f20-9f15-2e7c3d4a5b60"
+        val first = ChatLine(
+            id = 911L,
+            text = "prima richiesta",
+            role = "user",
+            pending = true,
+            requestId = duplicateId,
+            requestMessages = listOf(ChatPromptMessage("user", "prima richiesta"))
+        )
+        val second = ChatLine(
+            id = 912L,
+            text = "seconda richiesta",
+            role = "user",
+            pending = true,
+            requestId = duplicateId,
+            requestMessages = listOf(ChatPromptMessage("user", "seconda richiesta"))
+        )
+
+        var rejected = false
+        try {
+            store.save(listOf(first, second))
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+
+        assertTrue("Due richieste pendenti non possono condividere lo stesso UUID", rejected)
+        assertEquals("La cronologia precedente deve restare intatta", original, ChatHistoryStore(context).load())
+    }
+
+    @Test
+    fun retryPayloadCannotBePersistedOnCompletedMessage() {
+        val completedWithPayload = ChatLine(
+            id = 913L,
+            text = "richiesta già completata",
+            role = "user",
+            pending = false,
+            requestId = "8b7e4d23-9d5f-4021-a026-3f8d4e5b6c71",
+            requestMessages = listOf(ChatPromptMessage("user", "richiesta già completata"))
+        )
+
+        var rejected = false
+        try {
+            store.save(listOf(completedWithPayload))
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+
+        assertTrue("Il payload temporaneo deve appartenere solo a richieste pendenti", rejected)
+        assertTrue(ChatHistoryStore(context).load().isEmpty())
+    }
+
+    @Test
+    fun retryPayloadMustMatchPendingUserMessage() {
+        val mismatched = ChatLine(
+            id = 914L,
+            text = "testo visibile",
+            role = "user",
+            pending = true,
+            requestId = "9c8f5e34-0e6a-4132-b137-4a9e5f6c7d82",
+            requestMessages = listOf(ChatPromptMessage("user", "payload differente"))
+        )
+
+        var rejected = false
+        try {
+            store.save(listOf(mismatched))
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+
+        assertTrue("Il payload immutabile deve corrispondere alla riga utente pendente", rejected)
+        assertTrue(ChatHistoryStore(context).load().isEmpty())
+    }
+
 }
