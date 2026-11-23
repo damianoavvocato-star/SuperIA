@@ -49,7 +49,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | Completata |
 | 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | Completata |
 | 12 | Rate limiting IP effettivo | Gateway/WAF applica limiti reali prima del pairing pubblico; prove dimostrano blocco, finestra e recupero. Il flag applicativo da solo non vale come prova. | Bloccata da dipendenza esterna |
-| 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Da iniziare |
+| 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Completata |
 | 14 | Pubblicazione backend HTTPS di staging | Backend raggiungibile tramite HTTPS, segreti protetti e deploy ripetibile; health e readiness sono distinti. | Bloccata da dipendenza esterna |
 | 15 | Database PostgreSQL persistente | Database condiviso e persistente configurato; nessuno stato di produzione dipende da filesystem temporanei. | Bloccata da dipendenza esterna |
 | 16 | Migrazione e verifica dati | Migrazione SQLite/PostgreSQL verificata con conteggi, hash, schema e test di rollback/errore. | Parziale |
@@ -190,3 +190,13 @@ Implementati endpoint autenticati `POST /api/v1/device/rotate` e `POST /api/v1/d
 
 ### Esito micro-fase 11 — revoca e rotazione — 23 novembre 2026
 Backend: endpoint authenticated rotate/self-revoke; rotazione token compare-and-swap, mantiene device ID e invalida il token precedente; test su scadenza, revoca, concorrenza e autenticazione. Android: metodi rotate/revoke e controlli UI; endpoint associato fissato separatamente dal campo modificabile per evitare inoltro del Bearer token a un host cambiato. Backend CI [run 661](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45093088810): **83 passed, 1 warning**, SUCCESS. Android CI [run 229](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092957056): SUCCESS, BUILD SUCCESSFUL in 36s, test-only. Rapporto [DEVICE_TOKEN_LIFECYCLE_2026-11-23.md](DEVICE_TOKEN_LIFECYCLE_2026-11-23.md). Test fisico resta alla fase 35.
+
+
+### Esito micro-fase 12 — rate limiting gateway — bloccata — 23 novembre 2026
+Verificata documentazione ufficiale Cloudflare WAF Free: una regola, path/IP, finestra e mitigazione minime di 10 secondi. Preparata configurazione proposta in [EDGE_RATE_LIMIT_PREPARATION_2026-11-23.md](EDGE_RATE_LIMIT_PREPARATION_2026-11-23.md). Non esiste dominio/zone autorizzato né backend pubblico; Cloudflare avverte inoltre che i contatori possono avere ritardo e lasciare passare richieste eccedenti. Il flag edge resta false. Serve dominio/zone e prova esterna; pairing pubblico resta disabilitato.
+
+### Esito micro-fase 13 — selezione hosting — completata per staging — 23 novembre 2026
+Selezionati Render Free Web Service (staging only) + Aiven PostgreSQL Free (database di staging), con limiti e hard-stop documentati in [FREE_STAGING_HOST_SELECTION_2026-11-23.md](FREE_STAGING_HOST_SELECTION_2026-11-23.md). EthioDeploy escluso per overage fatturabile; Render Postgres escluso per scadenza a 30 giorni. Nessun account creato o servizio attivato. Non è una selezione per produzione.
+
+### Esito micro-fase 14 — deploy HTTPS staging — bloccata da autorizzazione esterna — 23 novembre 2026
+Preparato `render.yaml` con piano Free, regione Frankfurt, rootDir `services/api`, health check `/health`, autoDeploy false, provider AI disabilitati e pairing edge false. Segreti dichiarati solo `sync: false`. Guida: [RENDER_STAGING_DEPLOY_GUIDE.md](RENDER_STAGING_DEPLOY_GUIDE.md). Non sono stati creati account, installate GitHub App, provisionati DB o servizi né eseguito deploy: occorre consenso esplicito dell'utente. Stato resta bloccato.
