@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — micro-fase 09 completata; 10 in corso  
+Aggiornato: 23 novembre 2026 — micro-fasi 01–10 completate  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -46,7 +46,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 |---:|---|---|---|
 | 08 | Validazione centralizzata della configurazione backend | Variabili obbligatorie, valori non validi e configurazioni insicure vengono rifiutati con comportamento fail-closed e test. | Completata |
 | 09 | Autenticazione individuale dei dispositivi | Token individuali, hash lato server, scadenza e isolamento tra dispositivi sono coperti da test. | Completata |
-| 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | In attesa di verifica |
+| 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | Completata |
 | 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | Parziale |
 | 12 | Rate limiting IP effettivo | Gateway/WAF applica limiti reali prima del pairing pubblico; prove dimostrano blocco, finestra e recupero. Il flag applicativo da solo non vale come prova. | Bloccata da dipendenza esterna |
 | 13 | Selezione hosting gratuito | Provider hosting verificato su termini attuali: nessuna carta, pagamento, overage o conversione automatica a piano pagato. | Da iniziare |
@@ -178,3 +178,7 @@ Audit di `device_auth.py` e test: token casuale, SHA-256 server-side, UUID per d
 
 ### Micro-fase 10 — pairing sicuro — in corso
 Test aggiunti per segreto pairing mancante, validazione dei limiti input e contenuto della risposta. CI backend sul commit `a0f08ad51a890ebdd0992fe65d7ae281d2ef6462` in attesa di completamento. Il flag edge resta solo un gate di configurazione e non sostituisce il rate limiting reale della micro-fase 12.
+
+
+### Esito micro-fase 10 — pairing sicuro — 23 novembre 2026
+Verificati gate edge fail-closed, segreto server-side con confronto constant-time, limiti Pydantic (pairing code 16–256, device name 1–80), token individuale e risposta senza codice pairing. Aggiunti test per segreto mancante, input fuori range e contenuto risposta. Backend CI [run 639](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092525104): SUCCESS, **76 passed, 1 warning in 1.26s**, PostgreSQL effimero. Rapporto [PAIRING_SECURITY_VALIDATION_2026-11-23.md](PAIRING_SECURITY_VALIDATION_2026-11-23.md). Il rate limiting IP effettivo resta aperto alla fase 12.
