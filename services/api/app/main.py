@@ -249,7 +249,7 @@ async def chat_stream(
                         ):
                             raise RuntimeError("Lease della richiesta non più attivo.")
                         # SSE comment: keeps proxies alive without becoming a chat event.
-                        yield ": keep-alive\\n\\n"
+                        yield ": keep-alive\n\n"
                         continue
                     try:
                         item = pending_next.result()
@@ -276,7 +276,7 @@ async def chat_stream(
                                 raise RuntimeError("La richiesta non appartiene più a questo tentativo.")
                         completed = True
                     payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
-                    yield f"event: {event}\\ndata: {payload}\\n\\n"
+                    yield f"event: {event}\ndata: {payload}\n\n"
                     pending_next = asyncio.create_task(stream_iterator.__anext__())
             finally:
                 if not pending_next.done():
