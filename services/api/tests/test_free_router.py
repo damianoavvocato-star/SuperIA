@@ -32,8 +32,8 @@ def test_router_is_disabled_by_default(tmp_path):
 def test_openrouter_rejects_paid_model(tmp_path):
     async def run():
         env = free_env("openrouter", "some-model")
-        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state.sqlite3'))
-        assert await router.list_models() == []
+        with pytest.raises(ValueError, match="OpenRouter model must end with ':free'"):
+            FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state.sqlite3'))
     asyncio.run(run())
 
 
@@ -67,12 +67,12 @@ def test_payment_method_and_no_fiat_billing_flags_are_mandatory(tmp_path):
     async def run():
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_PAYMENT_METHOD"] = "false"
-        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state-2.sqlite3'))
-        assert await router.list_models() == []
+        with pytest.raises(ValueError, match="NO_PAYMENT_METHOD"):
+            FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / 'router-state-2.sqlite3'))
         env = free_env("groq")
         env["SUPERIA_PROVIDER_GROQ_NO_FIAT_BILLING"] = "false"
-        router = FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "router-state-3.sqlite3"))
-        assert await router.list_models() == []
+        with pytest.raises(ValueError, match="NO_FIAT_BILLING"):
+            FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "router-state-3.sqlite3"))
     asyncio.run(run())
 
 
