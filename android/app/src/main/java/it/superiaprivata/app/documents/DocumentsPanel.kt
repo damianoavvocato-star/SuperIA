@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,13 +43,14 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     val extractor = remember(context) { DocumentTextExtractor(context) }
     val ocrStore = remember(context) { OcrLanguageDataStore(context) }
     var status by remember { mutableStateOf<String?>(null) }
-    val documents = remember(repository) {
-        mutableStateListOf<StoredDocument>().apply {
-            try {
-                addAll(repository.list())
-            } catch (error: Exception) {
-                status = error.message ?: "Archivio documenti non leggibile. I file cifrati sono stati preservati."
-            }
+    val documents = remember(repository) { mutableStateListOf<StoredDocument>() }
+    LaunchedEffect(repository) {
+        try {
+            val restored = withContext(Dispatchers.IO) { repository.list() }
+            documents.clear()
+            documents.addAll(restored)
+        } catch (error: Exception) {
+            status = error.message ?: "Archivio documenti non leggibile. I file cifrati sono stati preservati."
         }
     }
     var selectedId by remember { mutableStateOf<String?>(null) }
