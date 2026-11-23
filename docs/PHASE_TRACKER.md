@@ -520,3 +520,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Ricontrollati i test JVM `ChatHistoryValidationTest` e `OnlineAssistantClientTest`: coprono validazione ruoli/ID/payload, ID stabile e legacy, limiti messaggi e parser SSE (framing, CRLF, heartbeat, errori, EOF e campi sconosciuti).
 - Backend/documentation CI [45288035460](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288035460) sul commit `d970de1dc97c1375f678c4913be61544250b391d`: **SUCCESS**. Tracker CI [45288042336](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288042336) sul commit `cc665f9bc5d8aaae278f921c517f8e08d2b7d004`: **SUCCESS**.
 - Limite della verifica: si tratta di audit statico e CI; non equivale a `androidTest`, force-stop/process death, test su dispositivo o E2E di rete. Microfase 29 resta aperta e gate 36 bloccato. Nessun APK o servizio esterno attivato.
+
+
+## Preparazione recovery Android — 24 novembre 2026
+- Aggiornato `docs/DEVICE_SMOKE_TEST.md` con una sequenza riproducibile per process death reale, ripresa con lo stesso request ID/payload, Wi-Fi/mobile, sospensione, riavvio, cancellazione e controlli fail-closed.
+- Audit statico della suite `ChatHistoryStoreInstrumentedTest`: sono presenti test per cifratura AES-GCM, chiave Keystore mancante, archivio corrotto, AtomicFile backup, cancellazione senza resurrection, migrazione legacy, concorrenza e payload pendente.
+- Il test di ricreazione dello store è esplicitamente limitato allo stesso processo e non viene contato come simulazione di process death.
+- Nessuna build o installazione APK è stata avviata; `connectedDebugAndroidTest` resta non eseguito perché genera/installa APK e il blocco APK è ancora in vigore.
+- Microfase 29 resta **In attesa di verifica**; il protocollo è preparato, ma i test strumentali e le prove su telefono non sono stati eseguiti.
