@@ -57,3 +57,13 @@ La sincronizzazione usa il monitor condiviso statico `ARCHIVE_WRITE_LOCK` anche 
 - Branch: solo `main`.
 
 **Limite esplicito:** i nuovi test si trovano in `androidTest` e non sono eseguiti da `testDebugUnitTest`. Non risultano ancora eseguiti su emulatore/dispositivo; non si dichiara quindi superata la verifica pratica della micro-fase 29. Restano necessari i test instrumented e le prove force-stop/reopen/retry, perdita rete e recupero. Nessun APK generato; nessun servizio esterno attivato.
+
+### Verifica aggiuntiva della prima inizializzazione Keystore — commit f459de5
+
+Il test instrumented `concurrentStoreInstancesSerializeAtomicTranscriptWrites` elimina ora la chiave Android Keystore dedicata prima di avviare due istanze dello store in parallelo. In questo modo il test, quando sarà eseguito su Android, coprirà anche la condizione di prima inizializzazione concorrente della chiave, non soltanto la scrittura con una chiave già presente.
+
+CI del commit `f459de5fe9a5756b688f4acafa2caab91b810cab` avviata:
+- Android [run 45213497131](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213497131): in esecuzione al momento dell'aggiornamento.
+- Backend [run 45213496563](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213496563): in esecuzione al momento dell'aggiornamento.
+
+Il test resta instrumented e richiede un device/emulatore; non viene eseguito dal task unitario CI. Non considerare superata la verifica pratica della micro-fase 29.
