@@ -424,7 +424,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         if (staleAssistant?.text.isNullOrBlank()) {
                                             staleAssistant?.let { messages.remove(it) }
                                         }
-                                        val retryRequestId = pendingLine.requestId ?: java.util.UUID.randomUUID().toString()
+                                        val retryRequestId = requestIdForRetry(pendingLine.requestId)
                                         val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingPosition >= 0) {
                                             messages[pendingPosition] = pendingLine.copy(requestId = retryRequestId)
