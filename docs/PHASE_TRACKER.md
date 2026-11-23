@@ -223,3 +223,13 @@ Aggiunti rinnovo token individuale (nuovo token, stesso device ID, vecchio token
 
 ## Micro-fase 11 — Completata (23 novembre 2026)
 Aggiunti rinnovo token compare-and-swap (stesso device ID, token precedente invalidato) e revoca self-service autenticata. Android integra rinnovo e revoca remota; l'endpoint associato è fissato per non inoltrare il Bearer token a un host modificato. CI backend run 661 SUCCESS: **83 passed, 1 warning**; Android run 229 SUCCESS, testDebugUnitTest, BUILD SUCCESSFUL in 36s. Rapporto: [DEVICE_TOKEN_LIFECYCLE_2026-11-23.md](DEVICE_TOKEN_LIFECYCLE_2026-11-23.md). Test su dispositivo reale ancora da svolgere alla fase 35. Nessun APK.
+
+
+## Micro-fase 12 — Bloccata da dipendenza esterna (23 novembre 2026)
+Preparata la regola candidata Cloudflare WAF Free: path `/api/v1/device/pair`, conteggio IP, 5 richieste/10s, block per 10s. Nessuna zone/dominio autorizzato né deploy pubblico; la documentazione Cloudflare segnala ritardo dei contatori. Il flag edge resta false. Rapporto: [EDGE_RATE_LIMIT_PREPARATION_2026-11-23.md](EDGE_RATE_LIMIT_PREPARATION_2026-11-23.md).
+
+## Micro-fase 13 — Completata (selezione staging, non provisioning)
+Selezionati Render Free Web Service (staging only) e Aiven PostgreSQL Free (test data only). EthioDeploy escluso per overage wallet; Render Postgres escluso per scadenza 30 giorni. Limiti e fonti: [FREE_STAGING_HOST_SELECTION_2026-11-23.md](FREE_STAGING_HOST_SELECTION_2026-11-23.md). Nessun account o servizio creato.
+
+## Micro-fase 14 — Bloccata da autorizzazione esterna
+Preparato `render.yaml` con piano Free, Frankfurt, autoDeploy false, health check, provider AI e pairing disabilitati; segreti solo variabili non sincronizzate nel repository. Guida: [RENDER_STAGING_DEPLOY_GUIDE.md](RENDER_STAGING_DEPLOY_GUIDE.md). Per collegare account Render/Aiven e autorizzare GitHub App serve consenso esplicito. Nessun deploy eseguito.
