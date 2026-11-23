@@ -51,6 +51,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<RetrievedChunk>>(emptyList()) }
     var ocrReady by remember(ocrStore) { mutableStateOf(ocrStore.isItalianReady()) }
+    var pendingExportDocument by remember { mutableStateOf<StoredDocument?>(null) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
@@ -89,7 +90,8 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
 
     val selected = documents.firstOrNull { it.id == selectedId }
     val exportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-        val document = selected
+        val document = pendingExportDocument
+        pendingExportDocument = null
         if (uri != null && document != null) scope.launch {
             status = "Esportazione del testo estratto…"
             try {
@@ -219,6 +221,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
                     onClick = {
                         val suggestedName = document.title.substringBeforeLast('.', document.title)
                             .replace(Regex("[^A-Za-z0-9._-]"), "_") + ".txt"
+                        pendingExportDocument = document
                         exportPicker.launch(suggestedName)
                     },
                     modifier = Modifier.fillMaxWidth()
