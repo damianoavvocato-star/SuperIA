@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — micro-fase 04 verificata  
+Aggiornato: 23 novembre 2026 — micro-fasi 05 e 07 completate; 06 in attesa CI  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -36,9 +36,9 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 02 | Consolidamento delle decisioni vincolanti | Un'unica policy corrente conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; registri e documenti legacy sono marcati come storici/superati. | Completata |
 | 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; incongruenze documentali corrette o marcate storiche; residui legacy documentati senza cancellazioni non verificate. | Completata |
 | 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | Completata |
-| 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | In attesa di verifica |
+| 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | Completata |
 | 06 | Baseline dei test Android senza APK | Il workflow esegue solo testDebugUnitTest; il risultato CI del commit corrente è acquisito e non contiene task di assemblaggio APK. | In attesa di verifica |
-| 07 | Baseline dei test backend | Suite backend e PostgreSQL CI sono riproducibili; esito, commit, numero test e warning sono registrati. | In attesa di verifica |
+| 07 | Baseline dei test backend | Suite backend e PostgreSQL CI sono riproducibili; esito, commit, numero test e warning sono registrati. | Completata |
 
 ### B. Sicurezza e infrastruttura online
 
@@ -153,3 +153,13 @@ Audit statico registrato in [docs/REPOSITORY_AUDIT_2026-11-23.md](REPOSITORY_AUD
 
 ### Esito micro-fase 04 — 23 novembre 2026
 Documentazione principale allineata alla policy online-only, al piano operativo da 50 micro-fasi e allo stato reale della chat SSE. README, ROADMAP, PHASE0_DECISIONS e PHASE_TRACKER riportano la prevalenza del piano corrente; le indicazioni obsolete nel verbale storico sono esplicitamente superate. ONLINE_BACKEND_IMPLEMENTATION resta marcato come storico e rimanda alla documentazione corrente. Verificati i contenuti aggiornati via GitHub dopo i commit. Nessun codice runtime modificato; nessun APK generato.
+
+
+### Esito micro-fase 05 — audit client Android — 23 novembre 2026
+Audit statico dei sorgenti Android registrato in [ANDROID_CLIENT_AUDIT_2026-11-23.md](ANDROID_CLIENT_AUDIT_2026-11-23.md). Verificati HTTPS e rifiuto URL pericolosi, pairing individuale, token cifrato, SSE, UUID request, cancellazione connessione, cronologia/memoria cifrate, prompt bounded e ripresa manuale. Rilevato il metodo legacy non-streaming `send()` ancora presente; non rimosso senza verifica riferimenti e test. L'audit non equivale a test su telefono reale.
+
+### Esito micro-fase 06 — baseline Android — 23 novembre 2026
+Workflow verificato: JDK 17, Gradle 8.11.1, comando unico `gradle --no-daemon testDebugUnitTest`; nessun task assemble/sign/upload APK. Sono presenti test unitari client, ma non è stata acquisita una run CI Android verificabile sul commit corrente. Stato mantenuto **In attesa di verifica**; non dichiarare superati i test Android.
+
+### Esito micro-fase 07 — baseline backend — 23 novembre 2026
+Verificata GitHub Actions run 577, ID `45089445756`, commit `036a2be916c7828be6c492d43b6b37fcc1dcacd3`: job PostgreSQL completato SUCCESS; log pytest: **60 passed, 1 warning in 1.31s**. Tutti gli step del job, inclusi avvio PostgreSQL e suite `services/api/tests`, sono conclusi con successo. Questa evidenza non certifica deploy, provider reale o E2E Android.
