@@ -365,7 +365,11 @@ class ChatHistoryStoreInstrumentedTest {
             text = "Continua la risposta interrotta",
             role = "user",
             pending = true,
-            requestId = requestId
+            requestId = requestId,
+            requestMessages = listOf(
+                ChatPromptMessage("assistant", "Contesto precedente"),
+                ChatPromptMessage("user", "Continua la risposta interrotta")
+            )
         )
         store.save(listOf(pending))
 
@@ -377,6 +381,7 @@ class ChatHistoryStoreInstrumentedTest {
         assertTrue(restored.pending)
         assertEquals(pending.text, restored.text)
         assertEquals(pending.id, restored.id)
+        assertEquals(pending.requestMessages, restored.requestMessages)
     }
 
     @Test
