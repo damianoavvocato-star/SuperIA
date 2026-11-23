@@ -7,7 +7,7 @@ L'inferenza AI di SuperIA è esclusivamente online tramite backend HTTPS. Gemma 
 
 ## Funzioni già presenti nel codice
 - Chat nativa Kotlin/Jetpack Compose.
-- Client HTTPS OnlineAssistantClient per POST /api/v1/chat.
+- Client HTTPS OnlineAssistantClient per POST /api/v1/chat/stream (SSE).
 - Pairing individuale tramite POST /api/v1/device/pair.
 - Token dispositivo e device ID conservati cifrati tramite Android Keystore; codice di pairing non persistito.
 - Backend: token individuali memorizzati come hash, scadenza 90 giorni e revoca.
