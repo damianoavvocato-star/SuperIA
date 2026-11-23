@@ -20,11 +20,15 @@ object ChatPromptBuilder {
         maxHistoryMessages: Int = DEFAULT_HISTORY_MESSAGES,
         documentContext: String? = null,
         memorySummary: String? = null
-    ): String = buildMessages(
-        history, newPrompt, maxHistoryMessages, documentContext, memorySummary
-    ).joinToString("\n\n") { message ->
-        val speaker = if (message.role == "assistant") "Assistente" else "Utente"
-        "$speaker: ${message.content}"
+    ): String {
+        val messages = buildMessages(
+            history, newPrompt, maxHistoryMessages, documentContext, memorySummary
+        )
+        if (messages.size == 1 && messages[0].role == "user") return messages[0].content
+        return messages.joinToString("\n\n") { message ->
+            val speaker = if (message.role == "assistant") "Assistente" else "Utente"
+            "$speaker: ${message.content}"
+        }
     }
 
     /**
