@@ -425,17 +425,21 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             staleAssistant?.let { messages.remove(it) }
                                         }
                                         val retryRequestId = requestIdForRetry(pendingLine.requestId)
-                                        val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
-                                        if (pendingPosition >= 0) {
-                                            messages[pendingPosition] = pendingLine.copy(requestId = retryRequestId)
-                                            persistChatHistory(historyStore, messages)
-                                        }
-                                        val contextHistory = messages.filterNot { it.pending || it.id == staleAssistant?.id }
-                                        val retryMessages = buildRequestMessages(
-                                            contextHistory,
+                                        val retryMessages = pendingLine.requestMessages ?: buildRequestMessages(
+                                            messages.filterNot { it.pending || it.id == staleAssistant?.id },
                                             pendingLine.text,
                                             documentContext
                                         )
+                                        val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
+                                        if (pendingPosition >= 0) {
+                                            messages[pendingPosition] = pendingLine.copy(
+                                                requestId = retryRequestId,
+                                                requestMessages = retryMessages
+                                            )
+                                            // Freeze the exact provider payload before retrying. Reusing the
+                                            // same request ID with changed memory/documents would conflict server-side.
+                                            persistChatHistory(historyStore, messages)
+                                        }
                                         val assistantLine = staleAssistant?.takeIf { it.text.isNotBlank() }
                                             ?: ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant").also { messages.add(it) }
                                         // Persist the assistant placeholder before opening the network stream.
@@ -458,7 +462,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             }
                                         }
                                         val pendingIndex = messages.indexOfFirst { it.id == pendingLine.id }
-                                        if (pendingIndex >= 0) messages[pendingIndex] = messages[pendingIndex].copy(pending = false)
+                                        if (pendingIndex >= 0) messages[pendingIndex] = messages[pendingIndex].copy(pending = false, requestMessages = null)
                                         streamPersister.flush(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
@@ -562,6 +566,12 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     persistChatHistory(historyStore, messages)
                                     storageError = null
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
+                                    val pendingIndex = messages.indexOfFirst { it.id == userLine.id }
+                                    if (pendingIndex >= 0) {
+                                        messages[pendingIndex] = userLine.copy(requestMessages = messagesWithHistory)
+                                        // Store the exact encrypted request before any provider/network activity.
+                                        persistChatHistory(historyStore, messages)
+                                    }
                                     val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }, System.nanoTime()), "", "assistant")
                                     messages.add(assistantLine)
                                     // Save the user pending state and assistant placeholder before network I/O.
