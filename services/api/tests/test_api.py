@@ -468,3 +468,48 @@ def test_staging_auth_database_accepts_shared_postgres_url(monkeypatch):
     monkeypatch.setenv("SUPERIA_ENVIRONMENT", "staging")
     monkeypatch.setenv("SUPERIA_DATABASE_URL", "postgresql://user:pass@db.example/superia")
     assert _auth_database_path() == "postgresql://user:pass@db.example/superia"
+
+
+
+def test_admin_readiness_distinguishes_database_auth_and_provider_state(tmp_path, monkeypatch):
+    database = str(tmp_path / "readiness.sqlite3")
+    issue_device_token(database, "readiness-device")
+    monkeypatch.setenv("SUPERIA_ENVIRONMENT", "development")
+    monkeypatch.setenv("SUPERIA_AUTH_DB", database)
+    monkeypatch.setenv("SUPERIA_ROUTER_STATE_DB", str(tmp_path / "router-state.sqlite3"))
+    monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "readiness-admin-secret")
+    monkeypatch.setenv("SUPERIA_FREE_ONLY", "false")
+    monkeypatch.delenv("SUPERIA_DATABASE_URL", raising=False)
+    get_provider.cache_clear()
+    try:
+        response = TestClient(app).get(
+            "/api/v1/readiness",
+            headers={"Authorization": "Bearer readiness-admin-secret"},
+        )
+    finally:
+        get_provider.cache_clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload == {
+        "status": "ready",
+        "process": "ok",
+        "database": "ok",
+        "device_auth": "ok",
+        "provider_configuration": "none_configured",
+    }
+    assert "readiness-admin-secret" not in response.text
+
+
+def test_admin_readiness_reports_missing_postgres_as_degraded(monkeypatch, tmp_path):
+    monkeypatch.setenv("SUPERIA_ENVIRONMENT", "staging")
+    monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "readiness-admin-secret")
+    monkeypatch.setenv("SUPERIA_AUTH_DB", str(tmp_path / "must-not-fallback.sqlite3"))
+    monkeypatch.delenv("SUPERIA_DATABASE_URL", raising=False)
+    response = TestClient(app).get(
+        "/api/v1/readiness",
+        headers={"Authorization": "Bearer readiness-admin-secret"},
+    )
+    assert response.status_code == 503
+    assert response.json()["database"] == "unavailable"
+    assert response.json()["device_auth"] == "not_checked"
