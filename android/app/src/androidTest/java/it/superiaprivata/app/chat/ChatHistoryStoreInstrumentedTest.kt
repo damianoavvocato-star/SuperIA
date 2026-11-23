@@ -164,6 +164,68 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun concurrentArchiveReadersObserveOnlyCompleteTranscripts() {
+        val writer = ChatHistoryStore(context)
+        val reader = ChatHistoryStore(context)
+        val initial = listOf(ChatLine(1L, "iniziale", "user"))
+        val replacement = (0 until 120).map {
+            ChatLine(it.toLong(), "aggiornamento-$it", if (it % 2 == 0) "user" else "assistant")
+        }
+        writer.save(initial)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+        try {
+            val write = executor.submit {
+                start.await()
+                repeat(20) { writer.save(replacement) }
+            }
+            val read = executor.submit {
+                start.await()
+                repeat(40) {
+                    val snapshot = reader.load()
+                    assertTrue(snapshot == initial || snapshot == replacement)
+                }
+            }
+            start.countDown()
+            write.get(10, TimeUnit.SECONDS)
+            read.get(10, TimeUnit.SECONDS)
+            assertEquals(replacement, reader.load())
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun concurrentProjectMemoryReadsAndWritesRemainValid() {
+        val writer = ChatHistoryStore(context)
+        val reader = ChatHistoryStore(context)
+        val first = "memoria iniziale"
+        val replacement = "memoria aggiornata con contenuto completo"
+        writer.saveProjectMemory(first)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+        try {
+            val write = executor.submit {
+                start.await()
+                repeat(20) { writer.saveProjectMemory(replacement) }
+            }
+            val read = executor.submit {
+                start.await()
+                repeat(40) {
+                    val snapshot = reader.loadProjectMemory()
+                    assertTrue(snapshot == first || snapshot == replacement)
+                }
+            }
+            start.countDown()
+            write.get(10, TimeUnit.SECONDS)
+            read.get(10, TimeUnit.SECONDS)
+            assertEquals(replacement, reader.loadProjectMemory())
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun pendingRequestIdSurvivesStoreRecreationForSafeRetry() {
         val requestId = "9b3f3a2e-5a90-4b9f-8f7e-6c0d4d5e2a11"
         val pending = ChatLine(
