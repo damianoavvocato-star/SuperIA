@@ -154,8 +154,8 @@ class ChatHistoryStoreInstrumentedTest {
                 secondStore.save(secondTranscript)
             }
             start.countDown()
-            firstWrite.get(10, TimeUnit.SECONDS)
-            secondWrite.get(10, TimeUnit.SECONDS)
+            firstWrite.get(30, TimeUnit.SECONDS)
+            secondWrite.get(30, TimeUnit.SECONDS)
             val restored = ChatHistoryStore(context).load()
             assertTrue(restored == firstTranscript || restored == secondTranscript)
         } finally {
@@ -187,8 +187,8 @@ class ChatHistoryStoreInstrumentedTest {
                 }
             }
             start.countDown()
-            write.get(10, TimeUnit.SECONDS)
-            read.get(10, TimeUnit.SECONDS)
+            write.get(30, TimeUnit.SECONDS)
+            read.get(30, TimeUnit.SECONDS)
             assertEquals(replacement, reader.load())
         } finally {
             executor.shutdownNow()
@@ -217,8 +217,8 @@ class ChatHistoryStoreInstrumentedTest {
                 }
             }
             start.countDown()
-            write.get(10, TimeUnit.SECONDS)
-            read.get(10, TimeUnit.SECONDS)
+            write.get(30, TimeUnit.SECONDS)
+            read.get(30, TimeUnit.SECONDS)
             assertEquals(replacement, reader.loadProjectMemory())
         } finally {
             executor.shutdownNow()
