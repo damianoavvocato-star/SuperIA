@@ -466,3 +466,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android run 45270440049 e backend run 45270440091: SUCCESS sul commit `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`.
 - Aggiunto test per conservare il delta precedente se l'evento successivo è malformato; commit `e083de6094fab41afe21fd7c04cf05d3f344af2d`, CI da verificare.
 - Verificato staticamente che la cancellazione coroutine chiude la connessione HTTP con `disconnect()`; manca prova su rete reale/device. Micro-fase 29 aperta, gate 36 bloccato, nessun APK.
+
+
+### SSE Android — CRLF, data vuoti e campi di estensione — 23 novembre 2026
+- CI Android [45271269847](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269847) e Backend [45271269817](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269817): **SUCCESS** sul commit `0b84d9fa662f847ec3e87a9581afc7ab45df4a70`.
+- Parser ora dispatcha anche un campo `data:` esplicitamente vuoto (distinto da evento privo di data); un `done` vuoto viene rifiutato come JSON non valido. Test CRLF e dati vuoti inclusi.
+- Aggiunto test per campi SSE `id`, `retry`, campi sconosciuti e tipo evento non gestito, verificando che il delta e il completamento successivi siano comunque elaborati. Commit test `46ebb5a6376bb048c5e4a391a6b7a29056f310ae`; CI Android [45271516710](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516710) e Backend [45271516892](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271516892) avviate, esito da verificare.
+- Nessun test instrumented/device o rete reale eseguito; micro-fase 29 resta aperta. Gate 36 bloccato. Nessun APK, provisioning o provider attivato.
