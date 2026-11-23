@@ -376,3 +376,7 @@ In revisione di `ChatHistoryStoreInstrumentedTest` è stata corretta la fixture 
 
 ### Micro-fase 29 — recupero backup AtomicFile — 23 novembre 2026
 Individuato e corretto il percorso di lettura: ChatHistoryStore ora chiama AtomicFile.openRead() anche quando il file principale non esiste, così AtomicFile può ripristinare l'unica copia valida dal backup .bak. Aggiunto test instrumented che simula backup-only e verifica contenuto, ripristino del file principale e rimozione del backup. Commit codice 40a9e712ae8efd3c1d7ab971e44ccb95b445daf2; commit test 409fb3703372bfee2d587118a61e013246e0497f. Il test è in androidTest e richiede esecuzione strumentale su device/emulatore; non è coperto da testDebugUnitTest. Micro-fase 29 resta in attesa di verifica pratica. Nessun APK.
+
+
+### Micro-fase 29 — recupero AtomicFile anche per memoria progetto — 23 novembre 2026
+L'audit ha trovato lo stesso caso limite nel caricamento della memoria di progetto: il controllo preliminare di esistenza del file principale poteva impedire il recupero del backup. loadProjectMemory() ora tenta direttamente AtomicFile.openRead() e tratta come memoria vuota soltanto FileNotFoundException; gli errori di decifratura non vengono mascherati. Aggiunto test instrumented backup-only per la memoria oltre a quello per la cronologia. Commit codice 3b68cdec62d0b657f411b050da75b062db0d74bc; test 6af06776deb6ff4dc6d7ac5f9e75fbfd0b231fee. Test non eseguiti da testDebugUnitTest: micro-fase 29 resta in attesa di collaudo Android. Nessun APK.
