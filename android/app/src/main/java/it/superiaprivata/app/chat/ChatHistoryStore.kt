@@ -14,6 +14,10 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import java.security.KeyStore
 import java.util.UUID
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 /** Generate a stable transcript key without colliding with restored or in-memory messages. */
 internal fun nextChatLineId(existingIds: Collection<Long>, candidate: Long): Long {
@@ -24,10 +28,6 @@ internal fun nextChatLineId(existingIds: Collection<Long>, candidate: Long): Lon
     }
     return id
 }
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
 data class ChatLine(val id: Long, val text: String, val role: String = "user", val pending: Boolean = false, val requestId: String? = null)
 
