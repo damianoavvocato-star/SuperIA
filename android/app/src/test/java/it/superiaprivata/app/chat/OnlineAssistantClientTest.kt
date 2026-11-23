@@ -252,3 +252,26 @@ class OnlineAssistantClientTest {
             }
         }
     }
+
+
+    @Test
+    fun tokenRotationRejectsEndpointWithQueryBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.rotate(
+                    OnlineConnectionConfig("https://example.test?token=unsafe", "device-token")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun selfRevocationRejectsEndpointWithUserInfoBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.revoke(
+                    OnlineConnectionConfig("https://user:password@example.test", "device-token")
+                )
+            }
+        }
+    }
