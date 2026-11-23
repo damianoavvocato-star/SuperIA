@@ -88,3 +88,46 @@ def test_migration_to_postgres_preserves_tokens_and_provider_state(tmp_path):
         with psycopg.connect(database_url, autocommit=True) as admin:
             admin.execute(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE')
 
+
+
+
+def test_migration_rolls_back_all_copied_rows_on_schema_error(tmp_path):
+    source = tmp_path / "source-rollback.sqlite3"
+    destination = tmp_path / "destination-rollback.sqlite3"
+    issue_device_token(str(source), "rollback-source")
+    with sqlite3.connect(source) as connection:
+        connection.execute(
+            "CREATE TABLE provider_state (provider_id TEXT PRIMARY KEY, "
+            "cooldown_until REAL NOT NULL DEFAULT 0, disabled INTEGER NOT NULL DEFAULT 0)"
+        )
+        connection.execute(
+            "INSERT INTO provider_state(provider_id, cooldown_until, disabled) VALUES (?, ?, ?)",
+            ("groq", 1234.5, 1),
+        )
+    with sqlite3.connect(destination) as connection:
+        # Deliberately incompatible empty table causes a failure after token rows were copied.
+        connection.execute("CREATE TABLE provider_state (provider_id TEXT PRIMARY KEY)")
+
+    with pytest.raises(sqlite3.OperationalError):
+        migrate_sqlite_to_database(str(source), str(destination))
+
+    with sqlite3.connect(destination) as connection:
+        tables = {
+            row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        assert "device_tokens" not in tables
+        assert connection.execute("SELECT COUNT(*) FROM provider_state").fetchone()[0] == 0
+
+
+def test_migration_handles_source_without_provider_state_table(tmp_path):
+    source = tmp_path / "source-no-provider-state.sqlite3"
+    destination = tmp_path / "destination-no-provider-state.sqlite3"
+    issue_device_token(str(source), "no-provider-state")
+
+    result = migrate_sqlite_to_database(str(source), str(destination))
+    assert result["device_tokens"] == 1
+    assert result["provider_state"] == 0
+    assert len(result["device_tokens_sha256"]) == 64
+    assert len(result["provider_state_sha256"]) == 64
