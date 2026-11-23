@@ -243,3 +243,7 @@ Migrazione SQLite/PostgreSQL verificata con conteggi, digest SHA-256, destinazio
 
 ## Micro-fase 17 — In corso
 Esteso `.gitignore` per .env e segreti; aggiunto template `services/api/.env.example` senza credenziali reali e con provider disabilitati; test di redazione delle API key nelle diagnostiche. Ricerca pattern segreti noti senza match. CI finale da verificare; secret manager reale richiede deploy/consenso esterno.
+
+
+## Micro-fase 17 — Bloccata da dipendenza esterna (23 novembre 2026)
+Completata igiene repository: `.gitignore` esteso, template `services/api/.env.example` senza segreti, provider disabilitati, test che impedisce API key nelle diagnostiche; code search pattern segreti senza match. CI run 683: **100 passed, 1 warning**. Secret manager e rotazione produzione non configurabili senza deploy autorizzato. Rapporto: [SECRET_MANAGEMENT_BASELINE_2026-11-23.md](SECRET_MANAGEMENT_BASELINE_2026-11-23.md).
