@@ -251,3 +251,13 @@ Completata igiene repository: `.gitignore` esteso, template `services/api/.env.e
 
 ## Micro-fase 18 — Completata (23 novembre 2026)
 Aggiunto `GET /api/v1/readiness` admin-only con stati sintetici process/database/device-auth/provider e nessun segreto in risposta. `/health` resta process-only. CI backend run 691: **102 passed, 1 warning**. Rapporto: [READINESS_DIAGNOSTICS_2026-11-23.md](READINESS_DIAGNOSTICS_2026-11-23.md).
+
+
+## Micro-fase 19 — Bloccata da verifica account-level
+Audit pubblico provider aggiornato: Groq/Cloudflare candidati condizionati; OpenRouter e Gemini non approvati per chat privata; SambaNova escluso. Aggiunta attestazione `DATA_POLICY_APPROVED`, SambaNova rimosso dal router. Nessun provider abilitato; account no-card/ZDR da verificare con consenso. Rapporto: [AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md](AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md).
+
+## Micro-fase 20 — Bloccata da consenso esterno
+Nessun account provider o API key creati. Attivazione del primo provider reale richiede consenso e verifica account no-card/hard-stop/ZDR. Nessuna inferenza reale eseguita.
+
+## Micro-fase 21 — Completata
+Guard-rail free-only verificati: allowlist, attestazioni economiche + data policy, esclusione SambaNova, cooldown/failover 429, disabilitazione 401/402/403, cooldown 408/5xx/rete, nessun cambio provider dopo primo token, nessun fallback locale o pagato. CI backend run 705: **104 passed, 1 warning**. Rapporto: [PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md](PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md).
