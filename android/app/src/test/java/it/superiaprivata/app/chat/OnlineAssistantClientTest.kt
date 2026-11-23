@@ -347,6 +347,15 @@ class OnlineAssistantClientTest {
     }
 
     @Test
+    fun sseParserIgnoresUnknownFieldsAndEventTypes() = runBlocking {
+        val stream = "id: 42\nretry: 1500\nx-custom: ignored\nevent: telemetry\ndata: {\"status\":\"working\"}\n\nevent: delta\ndata: {\"text\":\"ok\"}\n\nevent: done\ndata: {}\n\n"
+        val deltas = mutableListOf<String>()
+        val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+        assertEquals("ok", answer)
+        assertEquals(listOf("ok"), deltas)
+    }
+
+    @Test
     fun sseParserDoesNotIgnoreExplicitlyEmptyDoneData() {
         val stream = "event: done\ndata:\n\n"
         val error = assertThrows(IllegalStateException::class.java) {
