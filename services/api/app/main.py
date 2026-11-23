@@ -14,6 +14,7 @@ from app.device_auth import device_id_for_token, issue_device_token, revoke_devi
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, refresh_chat_request_lease, request_payload_hash
 from app.schemas import ChatRequest, ChatResponse
+from app.database import validate_deployment_database_url
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
 SSE_HEARTBEAT_SECONDS = 15
@@ -94,8 +95,14 @@ def _required_secret(name: str) -> str:
 
 
 def _auth_database_path() -> str:
-    # Shared PostgreSQL URL for production; legacy SQLite path remains for local use.
-    return os.environ.get("SUPERIA_DATABASE_URL", "").strip() or _required_secret("SUPERIA_AUTH_DB")
+    # Deployed environments must never silently fall back to ephemeral/local SQLite.
+    environment = os.environ.get("SUPERIA_ENVIRONMENT", "development").strip().lower()
+    database_url = os.environ.get("SUPERIA_DATABASE_URL", "").strip()
+    try:
+        validate_deployment_database_url(database_url, environment, "SUPERIA_DATABASE_URL")
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return database_url or _required_secret("SUPERIA_AUTH_DB")
 
 
 async def require_api_token(
