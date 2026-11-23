@@ -4,8 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.util.AtomicFile
 import java.io.File
 import java.security.KeyStore
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -32,11 +34,21 @@ class LocalDocumentRepository(context: Context) {
         require(currentBytes + cleartext.size + GCM_IV_BYTES + 16 <= MAX_TOTAL_BYTES) {
             "Archivio documenti pieno: limite complessivo 200 MB. Elimina alcuni documenti."
         }
-        val id = "${System.currentTimeMillis()}_${existingFiles.size}"
+        val id = UUID.randomUUID().toString()
         val file = File(directory, "$id.enc")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
-        file.writeBytes(cipher.iv + cipher.doFinal(cleartext))
+        val encrypted = cipher.iv + cipher.doFinal(cleartext)
+        val atomic = AtomicFile(file)
+        var output: java.io.FileOutputStream? = null
+        try {
+            output = atomic.startWrite()
+            output.write(encrypted)
+            atomic.finishWrite(output)
+        } catch (error: Exception) {
+            if (output != null) atomic.failWrite(output)
+            throw error
+        }
         return StoredDocument(id, extracted.title, extracted.text, file)
     }
 
@@ -60,7 +72,7 @@ class LocalDocumentRepository(context: Context) {
     }
 
     fun delete(document: StoredDocument) {
-        check(document.file.delete()) { "Impossibile eliminare il documento dall'archivio." }
+        AtomicFile(document.file).delete()
     }
 
     private fun getOrCreateKey(): SecretKey {
