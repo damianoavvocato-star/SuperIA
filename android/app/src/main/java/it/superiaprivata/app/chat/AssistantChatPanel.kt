@@ -276,7 +276,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 connectionStatus = "Revoca del dispositivo sul server in corso…"
                                 try {
                                     OnlineAssistantClient.revoke(
-                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken, savedConnection.deviceId)
+                                        OnlineConnectionConfig(pairedEndpoint, backendToken, savedConnection.deviceId)
                                     )
                                     connectionStore.clear()
                                     backendToken = ""
@@ -464,7 +464,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     messages.add(assistantLine)
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(
-                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
+                                        OnlineConnectionConfig(pairedEndpoint, backendToken),
                                         promptWithHistory,
                                         requestId = userLine.requestId ?: java.util.UUID.randomUUID().toString()
                                     ) { piece ->
