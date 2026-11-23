@@ -437,19 +437,30 @@ internal suspend fun consumeSseEvents(
                 if (data.isBlank()) continue
                 when (eventName) {
                     "delta" -> {
-                        val piece = extractJsonStringField(data, "text").orEmpty()
+                        val payload = runCatching { JSONObject(data) }.getOrElse {
+                            throw IllegalStateException("Il backend ha inviato un frammento SSE non valido.")
+                        }
+                        val piece = payload.opt("text") as? String
+                            ?: throw IllegalStateException("Il backend ha inviato un frammento SSE senza testo valido.")
                         if (piece.isNotEmpty()) {
                             answer.append(piece)
                             onDelta(piece)
                         }
                     }
                     "done" -> {
+                        runCatching { JSONObject(data) }.getOrElse {
+                            throw IllegalStateException("Il backend ha inviato un evento di completamento non valido.")
+                        }
                         completed = true
                         break
                     }
-                    "error" -> throw IllegalStateException(
-                        extractJsonStringField(data, "message").orEmpty().ifBlank { "Il flusso online si è interrotto." }
-                    )
+                    "error" -> {
+                        val payload = runCatching { JSONObject(data) }.getOrElse {
+                            throw IllegalStateException("Il backend ha inviato un errore SSE non valido.")
+                        }
+                        val message = payload.opt("message") as? String
+                        throw IllegalStateException(message?.takeIf { it.isNotBlank() } ?: "Il flusso online si è interrotto.")
+                    }
                 }
                 eventName = ""
             }
