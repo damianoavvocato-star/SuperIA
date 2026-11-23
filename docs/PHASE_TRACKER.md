@@ -219,3 +219,7 @@ Pairing server-side verificato: codice segreto con `hmac.compare_digest`, gate f
 
 ## Micro-fase 11 — In corso (23 novembre 2026)
 Aggiunti rinnovo token individuale (nuovo token, stesso device ID, vecchio token invalidato) e revoca self-service autenticata. Rotazione protetta da compare-and-swap sul token hash attuale per evitare gare tra richieste concorrenti. Android aggiunge pulsanti per rinnovare e revocare sul server; l'endpoint associato è mantenuto separato dal campo modificabile, così il Bearer token non viene inoltrato a un host digitato successivamente. Test backend e Android in esecuzione. Non segnare completata finché le run finali non sono SUCCESS. Nessun APK.
+
+
+## Micro-fase 11 — Completata (23 novembre 2026)
+Aggiunti rinnovo token compare-and-swap (stesso device ID, token precedente invalidato) e revoca self-service autenticata. Android integra rinnovo e revoca remota; l'endpoint associato è fissato per non inoltrare il Bearer token a un host modificato. CI backend run 661 SUCCESS: **83 passed, 1 warning**; Android run 229 SUCCESS, testDebugUnitTest, BUILD SUCCESSFUL in 36s. Rapporto: [DEVICE_TOKEN_LIFECYCLE_2026-11-23.md](DEVICE_TOKEN_LIFECYCLE_2026-11-23.md). Test su dispositivo reale ancora da svolgere alla fase 35. Nessun APK.
