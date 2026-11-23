@@ -223,6 +223,9 @@ object OnlineAssistantClient {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
         require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
         require(prompt.length <= 32_000) { "La richiesta supera il limite di 32.000 caratteri." }
+        require(runCatching { UUID.fromString(requestId) }.isSuccess) {
+            "Identificativo della richiesta non valido. Riapri la chat e riprova."
+        }
 
         val endpoint = config.endpoint.trim().trimEnd('/')
         val base = URL(endpoint)
@@ -256,7 +259,15 @@ object OnlineAssistantClient {
             if (status !in 200..299) {
                 val raw = connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
                 val detail = runCatching { JSONObject(raw).optString("detail") }.getOrNull()
-                throw IllegalStateException(detail?.takeIf { it.isNotBlank() } ?: "Errore del backend (HTTP $status).")
+                val message = detail?.takeIf { it.isNotBlank() } ?: when (status) {
+                    401 -> "Token dispositivo non valido o scaduto: associa nuovamente il dispositivo."
+                    409 -> "La richiesta risulta già in elaborazione oppure l'identificativo è in conflitto. Attendi e riprendi la stessa richiesta."
+                    429 -> "Troppe richieste in poco tempo. Attendi prima di riprovare."
+                    503 -> "Servizio temporaneamente non disponibile o nessun provider gratuito pronto. Nessun servizio a pagamento verrà usato."
+                    in 500..599 -> "Errore temporaneo del server (HTTP $status). La richiesta resta salvata per il recupero."
+                    else -> "Errore del backend (HTTP $status)."
+                }
+                throw IllegalStateException(message)
             }
 
             var eventName = ""
