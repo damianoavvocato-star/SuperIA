@@ -244,3 +244,7 @@ Il gate resta bloccato: backend HTTPS pubblico, PostgreSQL persistente, WAF/IP r
 
 ### Allineamento stato piano e tracker — 23 novembre 2026
 Riconciliate le righe della tabella con le evidenze dettagliate in PHASE_TRACKER e nei rapporti: micro-fase 18 completata (CI 102 passed); 22–25 completate; 26 e 28 in attesa di prova pratica; 27 completata in CI con staging reale ancora aperto; 33 completata con test simulati; 34 in attesa per il WAF mancante. Il totale verificato resta 21/50 completate. Il gate 36 non è superato. Questa riconciliazione documentale non cambia il codice né autorizza deploy, pairing pubblico o APK.
+
+
+### Aggiornamento micro-fase 34 — regressione pairing anti-spoofing — 23 novembre 2026
+Aggiunto test parametrico: flag edge vuoto/false/0/yes/enabled, header proxy falsificati (`X-Forwarded-For`, `X-Real-IP`, `Forwarded`) e guardia che impedisce emissione token; verifica 503 e assenza del pairing code. Backend CI [run 45119185491](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45119185491): **115 passed, 1 warning in 1.52s**. La fase 34 resta in attesa perché manca ancora rate limiting condiviso WAF/gateway reale; fase 12 bloccata e flag pairing edge resta false. Rapporto [SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md](SECURITY_PAIRING_ANTI_SPOOFING_TEST_2026-11-23.md).
