@@ -273,3 +273,15 @@ Guard-rail free-only verificati: allowlist, attestazioni economiche + data polic
 - 28 In attesa di verifica: ID e pending persistono, retry usa lo stesso ID; manca test E2E kill/restart app su dispositivo.
 
 Evidenze: backend CI run 738 **109 passed, 1 warning**; Android CI run 246 SUCCESS, BUILD SUCCESSFUL in 39s. Rapporto: [ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md](ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md).
+
+
+## Micro-fasi 29–35 — aggiornamento 23 novembre 2026
+- 29 In attesa: cronologia cifrata, AtomicFile, pending ID, memoria editabile/cancellabile e export TXT; instrumented tests Android presenti ma non eseguiti.
+- 30 In attesa: documenti locali cifrati, BM25, fonti, contesto limitato, export testo e cancellazione; OCR e storage reali da provare.
+- 31 Bloccata: account/deploy staging non autorizzati.
+- 32 Bloccata: nessun provider reale o API key attivato.
+- 33 Completata con test simulati: status provider, quote, rete, DB e stop no-paid; CI run 750 **110 passed, 1 warning**.
+- 34 In attesa: revoca, rotazione, isolamento cross-device, input oversized, segreti e concorrenza testati; rate limit WAF mancante.
+- 35 Bloccata: test fisico Android richiede backend/provider e telefono.
+
+Rapporto: [CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md](CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md).
