@@ -511,3 +511,18 @@ def test_admin_readiness_reports_missing_postgres_as_degraded(monkeypatch, tmp_p
     assert response.status_code == 503
     assert response.json()["database"] == "unavailable"
     assert response.json()["device_auth"] == "not_checked"
+
+
+
+@pytest.mark.parametrize("messages", [
+    [],
+    [{"role": "tool", "content": "non ammesso"}],
+    [{"role": "user", "content": ""}],
+    [{"role": "user", "content": "x" * 32_001}],
+    [{"role": "user", "content": "messaggio"}] * 61,
+])
+def test_stream_rejects_invalid_conversation_contract(auth_environment, messages):
+    _, token_data = auth_environment
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    response = client.post("/api/v1/chat/stream", json={"messages": messages})
+    assert response.status_code == 422
