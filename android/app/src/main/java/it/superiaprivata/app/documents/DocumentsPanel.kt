@@ -51,6 +51,8 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
             documents.clear()
             documents.addAll(restored)
             archiveReady = true
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: Exception) {
             status = error.message ?: "Archivio documenti non leggibile. I file cifrati sono stati preservati."
         }
