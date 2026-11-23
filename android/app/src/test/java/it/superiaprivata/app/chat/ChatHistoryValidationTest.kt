@@ -16,6 +16,20 @@ class ChatHistoryValidationTest {
     }
 
     @Test
+    fun acceptsLargeTranscriptWithPendingUserMessageAtEnd() {
+        val transcript = (0 until 160).map { index ->
+            ChatLine(
+                id = index.toLong(),
+                text = "messaggio $index",
+                role = if (index == 159 || index % 2 == 0) "user" else "assistant",
+                pending = index == 159
+            )
+        }
+
+        validatePersistedChatLines(transcript)
+    }
+
+    @Test
     fun rejectsUnexpectedPersistedRole() {
         assertThrows(IllegalArgumentException::class.java) {
             validatePersistedChatLines(listOf(ChatLine(1L, "tool output", "tool")))
