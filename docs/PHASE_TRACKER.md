@@ -117,3 +117,10 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - La run comprende il test PostgreSQL del registro richieste e i test backend di streaming, deduplicazione, recupero lease e fencing token.
 - Il precedente run 576 aveva 59 test superati e un test router fallito per newline letterali errati nel fixture SSE; fixture corretto e run 577 superata.
 - Questa è una verifica CI backend, non un collaudo end-to-end con provider reale o dispositivo Android. Il blocco APK resta attivo.
+
+### Verifica Android — ripresa dopo chiusura/riapertura
+- Aggiunti due test strumentali per l'archivio cifrato: il primo ricrea ChatHistoryStore e verifica che una richiesta pendente conservi lo stesso requestId; il secondo verifica la compatibilità con una vecchia richiesta pendente senza requestId e la sua successiva migrazione.
+- Commit test: `978c82fe5b4f9f252abc462bd2925e4f5a7d162e`.
+- Stato: test aggiunti, **non eseguiti**. Il workflow corrente esegue test unitari Android e non avvia test strumentali sul dispositivo/emulatore. Serve un successivo collaudo Android dedicato, senza produrre o distribuire APK intermedi.
+- La ripresa manuale resta necessaria dopo la riapertura; l'app non riparte automaticamente a generare per evitare invii inattesi e duplicazioni.
+- Nessun APK generato.
