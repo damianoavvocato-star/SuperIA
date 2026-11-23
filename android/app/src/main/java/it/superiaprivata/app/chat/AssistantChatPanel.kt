@@ -70,6 +70,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     val connectionStore = remember(context) { OnlineConnectionStore(context) }
     val savedConnection = remember(connectionStore) { connectionStore.load() }
     var backendEndpoint by remember { mutableStateOf(savedConnection.endpoint) }
+    var pairedEndpoint by remember { mutableStateOf(savedConnection.endpoint) }
     var backendToken by remember { mutableStateOf(savedConnection.token) }
     var pairingCode by rememberSaveable { mutableStateOf("") }
     var connectionStatus by remember { mutableStateOf(if (savedConnection.isConfigured) "Configurazione backend caricata in modo protetto." else "Collega un backend HTTPS per iniziare.") }
@@ -86,7 +87,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
     var attachmentStatus by remember { mutableStateOf<String?>(null) }
     var importingDocument by remember { mutableStateOf(false) }
-    val onlineConfigured = backendEndpoint.isNotBlank() && backendToken.isNotBlank()
+    val onlineConfigured = pairedEndpoint.isNotBlank() && backendToken.isNotBlank()
     val messageListState = rememberLazyListState()
 
     LaunchedEffect(messages.size, messages.lastOrNull()?.text) {
@@ -212,6 +213,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         android.os.Build.MODEL ?: "Dispositivo Android"
                                     )
                                     connectionStore.save(OnlineConnectionConfig(backendEndpoint.trim(), paired.accessToken, paired.deviceId))
+                                    pairedEndpoint = backendEndpoint.trim()
                                     backendToken = paired.accessToken
                                     pairingCode = ""
                                     connectionStatus = "Dispositivo associato (ID ${paired.deviceId}). Token individuale salvato cifrato; scadenza tra 90 giorni."
@@ -225,14 +227,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         }
                     ) { Text(if (checkingBackend) "Associazione…" else "Associa dispositivo") }
                     OutlinedButton(
-                        enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
+                        enabled = !generating && !checkingBackend && onlineConfigured,
                         onClick = {
                             scope.launch {
                                 checkingBackend = true
-                                connectionStatus = "Verifica del backend in corso…"
+                                connectionStatus = "Verifica del backend associato in corso…"
                                 try {
                                     connectionStatus = OnlineAssistantClient.checkOnlineReadiness(
-                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken)
+                                        OnlineConnectionConfig(pairedEndpoint, backendToken)
                                     )
                                 } catch (error: Exception) {
                                     connectionStatus = error.message ?: "Verifica del backend non riuscita."
@@ -252,9 +254,9 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 connectionStatus = "Rinnovo sicuro del token in corso…"
                                 try {
                                     val rotated = OnlineAssistantClient.rotate(
-                                        OnlineConnectionConfig(backendEndpoint.trim(), backendToken, savedConnection.deviceId)
+                                        OnlineConnectionConfig(pairedEndpoint, backendToken, savedConnection.deviceId)
                                     )
-                                    val updated = OnlineConnectionConfig(backendEndpoint.trim(), rotated.accessToken, rotated.deviceId)
+                                    val updated = OnlineConnectionConfig(pairedEndpoint, rotated.accessToken, rotated.deviceId)
                                     connectionStore.save(updated)
                                     backendToken = rotated.accessToken
                                     connectionStatus = "Token rinnovato. Il token precedente è stato invalidato."
@@ -278,6 +280,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     )
                                     connectionStore.clear()
                                     backendToken = ""
+                                    pairedEndpoint = ""
                                     connectionStatus = "Dispositivo revocato sul server e disconnesso."
                                 } catch (error: Exception) {
                                     connectionStatus = error.message ?: "Revoca non riuscita; credenziali locali conservate."
@@ -334,7 +337,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         var receivedNewOutput = false
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
-                                            OnlineConnectionConfig(backendEndpoint.trim(), backendToken),
+                                            OnlineConnectionConfig(pairedEndpoint, backendToken),
                                             retryPrompt,
                                             requestId = retryRequestId
                                         ) { piece ->
