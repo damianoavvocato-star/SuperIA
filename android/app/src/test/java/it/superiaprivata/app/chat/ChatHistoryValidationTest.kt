@@ -51,6 +51,22 @@ class ChatHistoryValidationTest {
             listOf(ChatLine(1L, "Richiesta precedente", "user", pending = true))
         )
     }
+
+    @Test
+    fun retryPreservesExistingRequestIdAcrossAttempts() {
+        val original = "9b3f3a2e-5a90-4b9f-8f7e-6c0d4d5e2a11"
+
+        assertEquals(original, requestIdForRetry(original))
+        assertEquals(original, requestIdForRetry(requestIdForRetry(original)))
+    }
+
+    @Test
+    fun retryCreatesValidRequestIdForLegacyPendingMessage() {
+        val generated = requestIdForRetry(null)
+
+        assertEquals(generated, requestIdForRetry(generated))
+        org.junit.Assert.assertTrue(runCatching { java.util.UUID.fromString(generated) }.isSuccess)
+    }
     @Test
     fun rejectsDuplicateMessageIds() {
         assertThrows(IllegalArgumentException::class.java) {
