@@ -30,7 +30,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
         raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
 
     provider_ids = ("gemini", "groq", "openrouter", "cloudflare", "sambanova")
-    attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING")
+    attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
         key = environ.get(prefix + "API_KEY", "").strip()
