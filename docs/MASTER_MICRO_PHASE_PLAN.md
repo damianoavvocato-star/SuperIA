@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026  
+Aggiornato: 23 novembre 2026 — micro-fase 04 verificata  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -35,7 +35,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 01 | Inventario e riallineamento policy delle 182 IA | Conteggio 182/182 verificato; policy online-only applicata ai 182 record; nessuna voce è dichiarata integrata o verificata; audit di provider, licenze e quote resta alla micro-fase 19 e ai relativi test. | Completata |
 | 02 | Consolidamento delle decisioni vincolanti | Un'unica policy corrente conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; registri e documenti legacy sono marcati come storici/superati. | Completata |
 | 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; incongruenze documentali corrette o marcate storiche; residui legacy documentati senza cancellazioni non verificate. | Completata |
-| 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | In corso |
+| 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | Completata |
 | 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | In attesa di verifica |
 | 06 | Baseline dei test Android senza APK | Il workflow esegue solo testDebugUnitTest; il risultato CI del commit corrente è acquisito e non contiene task di assemblaggio APK. | In attesa di verifica |
 | 07 | Baseline dei test backend | Suite backend e PostgreSQL CI sono riproducibili; esito, commit, numero test e warning sono registrati. | In attesa di verifica |
@@ -149,3 +149,4 @@ Dopo aver lavorato:
 ### Evidenza micro-fase 03 — 23 novembre 2026
 
 Audit statico registrato in [docs/REPOSITORY_AUDIT_2026-11-23.md](REPOSITORY_AUDIT_2026-11-23.md). Repository pubblico non archiviato, default branch `main`, un solo branch e zero PR. Workflow Android esegue solo `testDebugUnitTest`; backend CI run 605 SUCCESS sul commit precedente all'audit; web-preview deploya soltanto `preview/`. README aggiornati al percorso SSE; guida backend token condiviso, architettura e privacy del prototipo marcate storiche; registro componenti Android riallineato. Residui `services/api/app/static/index.html`, `providers/ollama.py` e route legacy `/api/v1/chat` sono stati documentati e non rimossi: richiedono una micro-fase dedicata di pulizia e test.
+\n\n### Esito micro-fase 04 — 23 novembre 2026\nDocumentazione principale allineata alla policy online-only, al piano operativo da 50 micro-fasi e allo stato reale della chat SSE. README, ROADMAP, PHASE0_DECISIONS e PHASE_TRACKER riportano la prevalenza del piano corrente; le indicazioni obsolete nel verbale storico sono esplicitamente superate. ONLINE_BACKEND_IMPLEMENTATION resta marcato come storico e rimanda alla documentazione corrente. Verificati i contenuti aggiornati via GitHub dopo i commit. Nessun codice runtime modificato; nessun APK generato.\n
