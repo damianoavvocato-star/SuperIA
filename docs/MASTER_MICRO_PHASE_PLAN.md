@@ -33,7 +33,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | N. | Micro-fase | Criterio di completamento | Stato iniziale |
 |---:|---|---|---|
 | 01 | Inventario e riallineamento policy delle 182 IA | Conteggio 182/182 verificato; policy online-only applicata ai 182 record; nessuna voce è dichiarata integrata o verificata; audit di provider, licenze e quote resta alla micro-fase 19 e ai relativi test. | Completata |
-| 02 | Consolidamento delle decisioni vincolanti | Un'unica fonte aggiornata conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; le decisioni storiche superate sono marcate come tali. | In corso |
+| 02 | Consolidamento delle decisioni vincolanti | Un'unica policy corrente conferma Android-only, online-only, gratuità, privacy e separazione dei progetti; registri e documenti legacy sono marcati come storici/superati. | Completata |
 | 03 | Audit repository, branch e cronologia | Branch, PR, commit recenti, workflow e file principali sono registrati; nessun lavoro parallelo o progetto estraneo viene incorporato. | In attesa di verifica |
 | 04 | Allineamento della documentazione | README, ROADMAP, PHASE_TRACKER e documenti di migrazione non si contraddicono; le note storiche sono chiaramente archiviate. | In corso |
 | 05 | Audit del client Android | Configurazione HTTPS, token, storage cifrato, gestione errori e UI chat sono mappati rispetto al codice corrente. | In attesa di verifica |
@@ -136,3 +136,11 @@ Dopo aver lavorato:
 - Matrice alternative e analisi funzionale marcate come documenti storici dove proponevano local-first; registro componenti marca Ollama e llama.cpp come superati/non integrabili per inferenza.
 - Non è stata dichiarata alcuna verifica individuale di prezzi, termini, quote, licenze, disponibilità o compatibilità: tali controlli restano esplicitamente aperti e saranno eseguiti sulle alternative/provider effettivamente selezionati.
 - Verifica strutturale post-commit: nessun candidato nei 182 record conserva riferimenti a inferenza LLM locale; nessun record è stato marcato come integrato.
+
+
+### Evidenza micro-fase 02 — 23 novembre 2026
+
+- README e PHASE_TRACKER restano le fonti operative correnti; ROADMAP, decisioni Fase 0 e architettura Android ora marcano esplicitamente le proposte di inferenza LLM locale come storiche e superate.
+- Il registro modelli locali è stato declassato a riferimento storico: candidati, runtime e decisioni non autorizzano download o integrazioni.
+- La policy corrente è coerente: client Android, inferenza AI esclusivamente online via backend HTTPS, provider gratuiti verificati, nessun fallback locale LLM o a pagamento; elaborazioni locali non-LLM consentite solo previa verifica.
+- Verifica documentale completata; non equivale a deploy o collaudo runtime.
