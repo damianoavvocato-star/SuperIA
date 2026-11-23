@@ -211,6 +211,7 @@ async def chat_stream(
             raise HTTPException(status_code=409, detail="Questo ID richiesta è già associato a un contenuto diverso.")
         if claim["state"] == "processing":
             raise HTTPException(status_code=409, detail="Questa richiesta è già in elaborazione.")
+        lease_token = str(claim["lease_token"]) if claim["state"] == "claimed" else None
         if claim["state"] == "completed":
             async def replay_events():
                 replay_payload = json.dumps({"text": claim["content"], "provider": claim["provider"], "model": claim["model"]}, ensure_ascii=False)
@@ -236,7 +237,7 @@ async def chat_stream(
                 event = item.get("event", "delta")
                 if event == "delta":
                     accumulated.append(str(item.get("text", "")))
-                    if request_id and not refresh_chat_request_lease(database_url, device_id, request_id):
+                    if request_id and not refresh_chat_request_lease(database_url, device_id, request_id, lease_token or ''):
                         raise RuntimeError("Lease della richiesta non più attivo.")
                 if item.get("model"):
                     final_model = str(item["model"])
@@ -248,6 +249,7 @@ async def chat_stream(
                             database_url, device_id, request_id,
                             "".join(accumulated), final_model, final_provider,
                             idempotency_secret,
+                            lease_token or "",
                         )
                     completed = True
                 payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
@@ -256,7 +258,7 @@ async def chat_stream(
                 raise RuntimeError("Il provider ha chiuso lo stream senza evento done.")
         except NoFreeProviderAvailable as exc:
             if request_id:
-                fail_chat_request(database_url, device_id, request_id)
+                fail_chat_request(database_url, device_id, request_id, lease_token or '')
             payload = json.dumps({"message": str(exc), "retryable": True}, ensure_ascii=False)
             yield f"event: error\ndata: {payload}\n\n"
         except Exception as exc:
