@@ -461,3 +461,8 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Prima CI Android sui test multilinea: 6 test falliti perché `trimIndent()` rimuoveva i delimitatori SSE finali dalle fixture; compilazione Kotlin riuscita. Aggiornate le fixture per terminare esplicitamente gli eventi completi e distinguere EOF su evento completo da EOF su evento incompleto.
 - Commit test `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`. Android run 45270440049 e backend run 45270440091 ancora in corso all'ultimo controllo; non dichiarare validazione completata.
 - Report `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`. Micro-fase 29 resta aperta, gate 36 bloccato, nessun APK.
+
+### Esito CI SSE e test delta parziale — 23 novembre 2026
+- Android run 45270440049 e backend run 45270440091: SUCCESS sul commit `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`.
+- Aggiunto test per conservare il delta precedente se l'evento successivo è malformato; commit `e083de6094fab41afe21fd7c04cf05d3f344af2d`, CI da verificare.
+- Verificato staticamente che la cancellazione coroutine chiude la connessione HTTP con `disconnect()`; manca prova su rete reale/device. Micro-fase 29 aperta, gate 36 bloccato, nessun APK.
