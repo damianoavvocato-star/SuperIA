@@ -469,6 +469,22 @@ def test_staging_auth_database_accepts_shared_postgres_url(monkeypatch):
 
 
 
+def test_admin_readiness_rejects_missing_and_invalid_admin_tokens(monkeypatch):
+    monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "readiness-admin-secret")
+    client = TestClient(app)
+
+    missing = client.get("/api/v1/readiness")
+    invalid = client.get(
+        "/api/v1/readiness",
+        headers={"Authorization": "Bearer wrong-admin-token"},
+    )
+
+    assert missing.status_code == 401
+    assert invalid.status_code == 401
+    assert "readiness-admin-secret" not in missing.text
+    assert "readiness-admin-secret" not in invalid.text
+
+
 def test_admin_readiness_distinguishes_database_auth_and_provider_state(tmp_path, monkeypatch):
     database = str(tmp_path / "readiness.sqlite3")
     issue_device_token(database, "readiness-device")
