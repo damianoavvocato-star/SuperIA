@@ -530,6 +530,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     Icon(Icons.Default.Send, contentDescription = "Invia messaggio")
                 }
             }
+            exportStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             storageError?.let {
                 Text("Problema con la cronologia protetta: $it", color = MaterialTheme.colorScheme.error)
             }
