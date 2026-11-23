@@ -41,12 +41,18 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     val repository = remember(context) { LocalDocumentRepository(context) }
     val extractor = remember(context) { DocumentTextExtractor(context) }
     val ocrStore = remember(context) { OcrLanguageDataStore(context) }
+    var status by remember { mutableStateOf<String?>(null) }
     val documents = remember(repository) {
-        mutableStateListOf<StoredDocument>().apply { addAll(repository.list()) }
+        mutableStateListOf<StoredDocument>().apply {
+            try {
+                addAll(repository.list())
+            } catch (error: Exception) {
+                status = error.message ?: "Archivio documenti non leggibile. I file cifrati sono stati preservati."
+            }
+        }
     }
     var selectedId by remember { mutableStateOf<String?>(null) }
     var importing by remember { mutableStateOf(false) }
-    var status by remember { mutableStateOf<String?>(null) }
     var selectedContext by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<RetrievedChunk>>(emptyList()) }
