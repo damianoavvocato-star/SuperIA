@@ -333,3 +333,41 @@ def test_stream_request_id_fails_closed_without_encryption_secret(auth_environme
     })
     assert response.status_code == 503
     assert "SUPERIA_CHAT_IDEMPOTENCY_KEY" in response.json()["detail"]
+
+
+
+def test_stream_emits_heartbeat_while_provider_is_silent(auth_environment, monkeypatch):
+    import asyncio
+    import app.main as api_module
+
+    class SlowProvider(FakeProvider):
+        async def stream_chat(self, messages, model=None):
+            self.stream_calls += 1
+            await asyncio.sleep(0.04)
+            yield {"event": "delta", "text": "Dopo attesa", "provider": "fake", "model": "fake-local"}
+            yield {"event": "done", "provider": "fake", "model": "fake-local"}
+
+    _, token_data = auth_environment
+    monkeypatch.setattr(api_module, "SSE_HEARTBEAT_SECONDS", 0.01)
+    slow = SlowProvider()
+    api_module.app.dependency_overrides[api_module.get_provider] = lambda: slow
+    try:
+        client = TestClient(
+            api_module.app,
+            headers={"Authorization": "Bearer " + token_data["access_token"]},
+        )
+        response = client.post(
+            "/api/v1/chat/stream",
+            json={
+                "request_id": "b0b3c01f-4e61-4f0e-bfe8-4db3e1c2d3a4",
+                "messages": [{"role": "user", "content": "Attendi il provider"}],
+            },
+        )
+        assert response.status_code == 200
+        assert ": keep-alive\\n\\n" in response.text
+        assert 'event: delta' in response.text
+        assert '"text":"Dopo attesa"' in response.text
+        assert 'event: done' in response.text
+        assert slow.stream_calls == 1
+    finally:
+        api_module.app.dependency_overrides[api_module.get_provider] = lambda: FakeProvider()
