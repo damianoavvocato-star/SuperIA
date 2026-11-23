@@ -338,6 +338,26 @@ class OnlineAssistantClientTest {
     }
 
     @Test
+    fun sseParserAcceptsCrLfLineEndings() = runBlocking {
+        val stream = "event: delta\r\ndata: {\"text\":\"CRLF\"}\r\n\r\nevent: done\r\ndata: {}\r\n\r\n"
+        val deltas = mutableListOf<String>()
+        val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+        assertEquals("CRLF", answer)
+        assertEquals(listOf("CRLF"), deltas)
+    }
+
+    @Test
+    fun sseParserDoesNotIgnoreExplicitlyEmptyDoneData() {
+        val stream = "event: done\ndata:\n\n"
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals("Il backend ha inviato un evento di completamento non valido.", error.message)
+    }
+
+    @Test
     fun sseParserRejectsEmptyDoneEvent() {
         val stream = """
             event: done
