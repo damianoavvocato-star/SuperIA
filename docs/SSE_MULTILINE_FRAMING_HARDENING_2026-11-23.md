@@ -19,3 +19,9 @@ Il parser Android ora accumula tutte le righe `data:` fino alla riga vuota che d
 
 ## Limiti
 Il test usa un reader in memoria: non sostituisce un test E2E con connessione TCP interrotta né il collaudo su dispositivo fisico. Micro-fase 29 resta aperta; gate 36 resta bloccato.
+
+## Correzione fixture dopo la prima CI — 23 novembre 2026
+La prima CI Android sul commit dei test ha evidenziato 6 fallimenti. L'analisi dei casi ha mostrato che `trimIndent()` rimuove le righe vuote finali delle fixture: alcuni test non terminavano quindi l'ultimo evento con il delimitatore SSE richiesto. Non era un errore di compilazione Kotlin. Le fixture dei test per eventi completi ora aggiungono esplicitamente il delimitatore; i test EOF distinguono il delta correttamente terminato ma senza `done` dall'evento lasciato intenzionalmente incompleto.
+
+- Commit test aggiornati: `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`.
+- Android run 45270440049 e backend run 45270440091: **in corso** all'ultimo controllo. Nessun risultato verde dichiarato.
