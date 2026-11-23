@@ -338,3 +338,11 @@ La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request I
 - Android CI [run 45162213509](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213509): **SUCCESS**, job `android-unit-tests` completato.
 - Backend CI [run 45162213485](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213485): **SUCCESS**, job `test` completato.
 - La CI conferma i test automatici del commit; non prova terminazione forzata, riavvio, sospensione o perdita rete su dispositivo reale. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 resta bloccato. Nessun APK generato.
+
+### Micro-fase 29 — sincronizzazione archivio condivisa tra istanze — 23 novembre 2026
+- La sincronizzazione di `ChatHistoryStore` comprende ora il ciclo completo di lettura/scrittura, cifratura AES-GCM e inizializzazione della chiave Android Keystore tramite monitor condiviso `ARCHIVE_WRITE_LOCK`.
+- Aggiunti test instrumented per scritture simultanee da due istanze, letture concorrenti durante sostituzione dell'archivio e lettura/scrittura concorrente della memoria di progetto. I task concorrenti propagano gli errori al test chiamante con `Future.get(timeout)`.
+- Commit codice: `e811ca6be1f7811a205c393e36165ea4c893a73b`, `92d11e3724b759516241771ea7be0669aa955735`, `878a4323ebe03f109902e0d763e8fd8f955a77f2`.
+- Android CI [run 45211341253](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45211341253): **SUCCESS**, solo `testDebugUnitTest`. Backend CI [run 45211341376](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45211341376): **SUCCESS**.
+- **La micro-fase 29 resta in attesa di verifica pratica:** i test aggiunti sono sotto `androidTest` e non sono stati eseguiti dalla CI unit; mancano emulator/device, force-stop/reopen, retry con request ID invariato, sospensione e perdita/ripristino rete. Gate 36 resta bloccato. Nessun APK e nessun servizio esterno attivato.
+- Rapporto: [CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md](CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md).
