@@ -76,3 +76,7 @@ L'app assegna un identificativo stabile a ogni messaggio e lo conserva nella cro
 - Il database esistente viene aggiornato aggiungendo la colonna lease_token senza eliminare le risposte cifrate già registrate.
 - Corretto anche il primo claim: l'inserimento riuscito restituisce immediatamente lo stato claimed e il relativo token, anziché essere scambiato per un duplicato già in elaborazione.
 - Aggiunti test per fencing token, recupero lease, retry fallito e migrazione SQLite. Esecuzione CI ancora da verificare; nessun test è dichiarato superato.
+
+
+### Verifica backend — 23 novembre 2026
+GitHub Actions Backend tests, run 577, commit `036a2be916c7828be6c492d43b6b37fcc1dcacd3`: **60 test superati**, 1 warning, nessun test fallito. La verifica include PostgreSQL effimero, streaming SSE, deduplicazione e fencing delle richieste. Non sostituisce il collaudo end-to-end con provider reale e app Android; nessun APK viene generato in questa fase.
