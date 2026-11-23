@@ -421,7 +421,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                             documentContext
                                         )
                                         val assistantLine = staleAssistant?.takeIf { it.text.isNotBlank() }
-                                            ?: ChatLine(System.nanoTime(), "", "assistant").also { messages.add(it) }
+                                            ?: ChatLine(nextChatLineId(messages.map { it.id }), "", "assistant").also { messages.add(it) }
                                         var receivedNewOutput = false
                                         val streamPersister = StreamHistoryPersister(historyStore, scope)
                                         OnlineAssistantClient.stream(
@@ -530,7 +530,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         if (request.isNotEmpty()) {
                             val contextHistory = messages.toList()
                             val userLine = ChatLine(
-                                System.nanoTime(), request, "user",
+                                nextChatLineId(messages.map { it.id }), request, "user",
                                 pending = true,
                                 requestId = java.util.UUID.randomUUID().toString()
                             )
@@ -548,7 +548,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                 generationError = null
                                 try {
                                     val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
-                                    val assistantLine = ChatLine(System.nanoTime(), "", "assistant")
+                                    val assistantLine = ChatLine(nextChatLineId(messages.map { it.id }), "", "assistant")
                                     messages.add(assistantLine)
                                     val streamPersister = StreamHistoryPersister(historyStore, scope)
                                     OnlineAssistantClient.stream(

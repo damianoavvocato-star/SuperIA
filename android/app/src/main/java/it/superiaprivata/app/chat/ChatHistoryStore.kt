@@ -14,6 +14,16 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import java.security.KeyStore
 import java.util.UUID
+
+/** Generate a stable transcript key without colliding with restored or in-memory messages. */
+internal fun nextChatLineId(existingIds: Collection<Long>, candidate: Long): Long {
+    val used = existingIds.toHashSet()
+    var id = candidate
+    while (id in used) {
+        id = if (id == Long.MAX_VALUE) Long.MIN_VALUE else id + 1L
+    }
+    return id
+}
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey

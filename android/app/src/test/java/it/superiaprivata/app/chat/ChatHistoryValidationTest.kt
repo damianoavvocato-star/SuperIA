@@ -70,4 +70,15 @@ class ChatHistoryValidationTest {
         }
     }
 
+    @Test
+    fun generatesUnusedMessageIdWhenNanoTimeCandidateAlreadyExists() {
+        assertEquals(42L, nextChatLineId(listOf(42L, 43L, 44L), 42L))
+        assertEquals(45L, nextChatLineId(listOf(42L, 43L, 44L), 45L))
+    }
+
+    @Test
+    fun messageIdGenerationWrapsSafelyAtLongMaximum() {
+        assertEquals(Long.MIN_VALUE, nextChatLineId(listOf(Long.MAX_VALUE), Long.MAX_VALUE))
+    }
+
 }
