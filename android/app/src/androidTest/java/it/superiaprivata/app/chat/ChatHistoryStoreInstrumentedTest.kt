@@ -131,4 +131,52 @@ class ChatHistoryStoreInstrumentedTest {
 
         assertTrue("Un archivio alterato non deve essere accettato come cronologia valida", failed)
     }
+
+
+    @Test
+    fun pendingRequestIdSurvivesStoreRecreationForSafeRetry() {
+        val requestId = "9b3f3a2e-5a90-4b9f-8f7e-6c0d4d5e2a11"
+        val pending = ChatLine(
+            id = 901L,
+            text = "Continua la risposta interrotta",
+            role = "user",
+            pending = true,
+            requestId = requestId
+        )
+        store.save(listOf(pending))
+
+        // A new store instance models the next app process after close/reopen.
+        val reopenedStore = ChatHistoryStore(context)
+        val restored = reopenedStore.load().single()
+
+        assertEquals(requestId, restored.requestId)
+        assertTrue(restored.pending)
+        assertEquals(pending.text, restored.text)
+        assertEquals(pending.id, restored.id)
+    }
+
+    @Test
+    fun legacyPendingRequestWithoutIdRemainsReadableAndCanBeUpgraded() {
+        val legacyJson = JSONArray().put(
+            JSONObject()
+                .put("id", 902L)
+                .put("text", "Richiesta precedente")
+                .put("role", "user")
+                .put("pending", true)
+        ).toString().toByteArray(StandardCharsets.UTF_8)
+        val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val key = keyStore.getKey("superia_chat_history_aes", null) as SecretKey
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val packed = cipher.iv + cipher.doFinal(legacyJson)
+        File(context.filesDir, "conversation_history.enc").writeBytes(packed)
+
+        val restored = ChatHistoryStore(context).load().single()
+        assertTrue(restored.pending)
+        assertNull(restored.requestId)
+
+        val upgradedId = "0f5e8f75-6e12-4b3b-a0f6-efce3e8a0d55"
+        store.save(listOf(restored.copy(requestId = upgradedId)))
+        assertEquals(upgradedId, ChatHistoryStore(context).load().single().requestId)
+    }
 }
