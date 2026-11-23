@@ -341,49 +341,60 @@ object OnlineAssistantClient {
                 throw IllegalStateException(message)
             }
 
-            var eventName = ""
-            var completed = false
             connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
-                while (true) {
-                    val line = reader.readLine() ?: break
-                    when {
-                        line.startsWith("event:") -> eventName = line.substringAfter("event:").trim()
-                        line.startsWith("data:") -> {
-                            val data = line.substringAfter("data:").trim()
-                            if (data.isBlank()) continue
-                            val payload = runCatching { JSONObject(data) }.getOrNull() ?: continue
-                            when (eventName) {
-                                "delta" -> {
-                                    val piece = payload.optString("text")
-                                    if (piece.isNotEmpty()) {
-                                        answer.append(piece)
-                                        withContext(kotlinx.coroutines.Dispatchers.Main) { onDelta(piece) }
-                                    }
-                                }
-                                "done" -> {
-                                    completed = true
-                                    break
-                                }
-                                "error" -> throw IllegalStateException(
-                                    payload.optString("message").ifBlank { "Il flusso online si è interrotto." }
-                                )
-                            }
-                            eventName = ""
-                        }
-                    }
+                consumeSseEvents(reader) { piece ->
+                    withContext(kotlinx.coroutines.Dispatchers.Main) { onDelta(piece) }
                 }
             }
-            if (!completed) throw IllegalStateException(
-                if (answer.isNotEmpty()) "Connessione interrotta: il testo parziale è stato conservato. Puoi riprendere la richiesta."
-                else "Il backend ha chiuso il flusso senza completare la risposta."
-            )
-            if (answer.isBlank()) throw IllegalStateException("Il backend ha restituito una risposta vuota.")
-            answer.toString()
         } finally {
             cancellationHandle.dispose()
             connection.disconnect()
         }
     }
 
+
+
+internal suspend fun consumeSseEvents(
+    reader: java.io.BufferedReader,
+    onDelta: suspend (String) -> Unit,
+): String {
+    val answer = StringBuilder()
+    var eventName = ""
+    var completed = false
+    while (true) {
+        val line = reader.readLine() ?: break
+        when {
+            line.startsWith("event:") -> eventName = line.substringAfter("event:").trim()
+            line.startsWith("data:") -> {
+                val data = line.substringAfter("data:").trim()
+                if (data.isBlank()) continue
+                val payload = runCatching { JSONObject(data) }.getOrNull() ?: continue
+                when (eventName) {
+                    "delta" -> {
+                        val piece = payload.optString("text")
+                        if (piece.isNotEmpty()) {
+                            answer.append(piece)
+                            onDelta(piece)
+                        }
+                    }
+                    "done" -> {
+                        completed = true
+                        break
+                    }
+                    "error" -> throw IllegalStateException(
+                        payload.optString("message").ifBlank { "Il flusso online si è interrotto." }
+                    )
+                }
+                eventName = ""
+            }
+        }
+    }
+    if (!completed) throw IllegalStateException(
+        if (answer.isNotEmpty()) "Connessione interrotta: il testo parziale è stato conservato. Puoi riprendere la richiesta."
+        else "Il backend ha chiuso il flusso senza completare la risposta."
+    )
+    if (answer.isBlank()) throw IllegalStateException("Il backend ha restituito una risposta vuota.")
+    return answer.toString()
+}
 
 }
