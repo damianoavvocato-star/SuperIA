@@ -6,8 +6,8 @@
   "purpose": "Android-native runtime and infrastructure candidates. None is integrated or approved for release until exact version, license, checksum and device tests are recorded.",
   "policy": {
     "no_paid_api_required": true,
-    "local_first": true,
-    "cloud_opt_in_only": true,
+    "local_first": false,
+    "cloud_opt_in_only": false,
     "versions_must_be_pinned": true,
     "device_benchmark_required": true,
     "model_license_review_required": true,
