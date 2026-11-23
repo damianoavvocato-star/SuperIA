@@ -68,3 +68,11 @@ La cronologia Android e i testi estratti dai documenti sono cifrati AES-GCM con 
 
 ### Richieste chat: retry e deduplicazione
 L'app assegna un identificativo stabile a ogni messaggio e lo conserva nella cronologia cifrata. Il backend registra l'esito per dispositivo, rifiuta ID riutilizzati con contenuti diversi e riproduce le risposte già completate senza richiamare il provider. Le risposte memorizzate per il replay sono cifrate AES-GCM; il backend richiede il segreto stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`, solo server-side. Questa protezione non equivale a exactly-once assoluto in caso di arresto del server tra la generazione del provider e la registrazione della risposta.
+
+
+### Aggiornamento tecnico — protezione dei tentativi concorrenti
+- Ogni acquisizione o recupero di una richiesta riceve un token di proprietà casuale (fencing token); rinnovo lease, errore e completamento sono accettati soltanto dal proprietario corrente.
+- Un vecchio stream che riprende dopo il recupero della lease non può più aggiornare, fallire o completare la richiesta appartenente al nuovo tentativo.
+- Il database esistente viene aggiornato aggiungendo la colonna lease_token senza eliminare le risposte cifrate già registrate.
+- Corretto anche il primo claim: l'inserimento riuscito restituisce immediatamente lo stato claimed e il relativo token, anziché essere scambiato per un duplicato già in elaborazione.
+- Aggiunti test per fencing token, recupero lease, retry fallito e migrazione SQLite. Esecuzione CI ancora da verificare; nessun test è dichiarato superato.
