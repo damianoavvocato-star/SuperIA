@@ -364,7 +364,7 @@ def test_stream_emits_heartbeat_while_provider_is_silent(auth_environment, monke
             },
         )
         assert response.status_code == 200
-        assert ": keep-alive\\n\\n" in response.text
+        assert ": keep-alive\n\n" in response.text
         assert 'event: delta' in response.text
         assert '"text":"Dopo attesa"' in response.text
         assert 'event: done' in response.text
