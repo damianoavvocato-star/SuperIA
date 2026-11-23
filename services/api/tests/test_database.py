@@ -3,7 +3,7 @@ import uuid
 
 import pytest
 
-from app.database import connect_database
+from app.database import connect_database, is_postgres_url, validate_deployment_database_url
 
 
 def test_sqlite_connection_uses_named_rows_and_question_placeholders(tmp_path):
@@ -40,3 +40,21 @@ def test_postgres_connection_and_placeholder_adapter():
         finally:
             connection.execute(f"DROP TABLE IF EXISTS {table}")
             connection.commit()
+
+
+
+@pytest.mark.parametrize("value", ["postgresql://db.example/app", "postgres://db.example/app", "postgresql+psycopg://db.example/app"])
+def test_postgres_url_schemes_are_recognized(value):
+    assert is_postgres_url(value)
+    validate_deployment_database_url(value, "staging", "SUPERIA_DATABASE_URL")
+
+
+@pytest.mark.parametrize("value", ["", "/tmp/superia.sqlite3", "sqlite:////tmp/superia.sqlite3"])
+@pytest.mark.parametrize("environment", ["staging", "production"])
+def test_deployed_environments_reject_missing_or_sqlite_database(value, environment):
+    with pytest.raises(ValueError, match="PostgreSQL"):
+        validate_deployment_database_url(value, environment, "SUPERIA_DATABASE_URL")
+
+
+def test_development_environment_keeps_local_sqlite_support():
+    validate_deployment_database_url("/tmp/superia-dev.sqlite3", "development", "SUPERIA_DATABASE_URL")
