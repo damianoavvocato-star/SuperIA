@@ -36,4 +36,38 @@ class ChatHistoryValidationTest {
             listOf(ChatLine(1L, "Richiesta precedente", "user", pending = true))
         )
     }
+    @Test
+    fun rejectsDuplicateMessageIds() {
+        assertThrows(IllegalArgumentException::class.java) {
+            validatePersistedChatLines(
+                listOf(
+                    ChatLine(10L, "Primo messaggio", "user"),
+                    ChatLine(10L, "Risposta", "assistant")
+                )
+            )
+        }
+    }
+
+    @Test
+    fun rejectsDuplicateRequestIds() {
+        val requestId = "9b3f3a2e-5a90-4b9f-8f7e-6c0d4d5e2a11"
+        assertThrows(IllegalArgumentException::class.java) {
+            validatePersistedChatLines(
+                listOf(
+                    ChatLine(11L, "Prima richiesta", "user", requestId = requestId),
+                    ChatLine(12L, "Seconda richiesta", "user", requestId = requestId)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun rejectsPendingAssistantMessages() {
+        assertThrows(IllegalArgumentException::class.java) {
+            validatePersistedChatLines(
+                listOf(ChatLine(13L, "Risposta", "assistant", pending = true))
+            )
+        }
+    }
+
 }

@@ -23,13 +23,26 @@ data class ChatLine(val id: Long, val text: String, val role: String = "user", v
 
 /** Reject malformed transcript entries before they can be persisted or shown to the prompt builder. */
 internal fun validatePersistedChatLines(messages: List<ChatLine>) {
+    val messageIds = HashSet<Long>(messages.size)
+    val requestIds = HashSet<String>()
     messages.forEach { line ->
         require(line.role == "user" || line.role == "assistant") {
             "La cronologia contiene un ruolo non supportato."
         }
+        require(messageIds.add(line.id)) {
+            "La cronologia contiene identificativi messaggio duplicati."
+        }
+        if (line.pending) {
+            require(line.role == "user") {
+                "Solo un messaggio utente può essere in attesa."
+            }
+        }
         line.requestId?.let { value ->
             require(runCatching { UUID.fromString(value) }.isSuccess) {
                 "La cronologia contiene un identificativo richiesta non valido."
+            }
+            require(requestIds.add(value)) {
+                "La cronologia contiene identificativi richiesta duplicati."
             }
         }
     }
