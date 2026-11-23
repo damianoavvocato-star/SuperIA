@@ -145,3 +145,13 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Estratta la funzione `requestIdForRetry`: una richiesta pendente conserva il proprio UUID tra i tentativi; per i record legacy privi di ID viene generato un UUID una sola volta, poi riutilizzato. Il client persiste l'ID prima di aprire lo stream.
 - Aggiunti test unitari per riuso ripetuto dell'UUID esistente e generazione/riuso per record legacy. Commit finale test `eccdef8fa7fa2d0a76cd45fb083bb7476d4e691a`.
 - CI sul commit finale: Android [45265956708](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265956708) e Backend [45265956651](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265956651), in coda al momento dell'annotazione. Nessun test instrumented/device e nessun APK.
+
+
+### Retry dopo arresto: payload invariato e cifrato — 23 novembre 2026
+- Corretto il caso in cui la stessa richiesta pendente poteva essere ritentata con lo stesso request ID ma con un payload differente, se memoria di progetto o documenti cambiavano dopo l'interruzione.
+- Il payload provider-ready completo è ora conservato nel record `ChatLine` pendente e serializzato nello stesso archivio cifrato AES-GCM protetto da AtomicFile. Viene salvato prima dell'apertura della rete.
+- Il retry riutilizza il payload congelato. Per record legacy senza payload, lo costruisce una sola volta e lo persiste prima del tentativo. Al completamento il payload temporaneo viene eliminato dalla riga.
+- Validazione: il payload deve appartenere a una riga utente pendente, contenere ruoli ammessi, rispettare il limite complessivo e terminare con il testo della richiesta pendente.
+- Test unitari aggiunti per coerenza e rifiuto di payload su righe completate. Il test instrumented di ricreazione `ChatHistoryStore` ora controlla che il payload sopravviva al round-trip cifrato.
+- Commit: `94fff4c` store; `b4192e2` UI; `5b1a139` test unitari; `b5df430` test instrumented.
+- CI Android da verificare; test instrumented non eseguiti da `testDebugUnitTest`. Nessun force-stop reale, nessun APK.
