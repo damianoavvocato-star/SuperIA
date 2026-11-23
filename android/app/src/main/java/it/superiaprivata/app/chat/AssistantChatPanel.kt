@@ -80,6 +80,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var draft by remember { mutableStateOf("") }
     var projectMemory by remember(historyStore) { mutableStateOf(runCatching { historyStore.loadProjectMemory() }.getOrDefault("")) }
     var memorySaved by remember { mutableStateOf(false) }
+    var savingMemory by remember { mutableStateOf(false) }
     var memoryError by remember { mutableStateOf<String?>(null) }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
     var exportStatus by remember { mutableStateOf<String?>(null) }
@@ -331,6 +332,59 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 "La chiave viene conservata cifrata con Android Keystore. Usa soltanto un backend HTTPS fidato. Non inserire qui le chiavi dei fornitori IA: sono segreti che devono restare sul server.",
                 style = MaterialTheme.typography.bodySmall
             )
+
+            Text("Memoria di progetto", style = MaterialTheme.typography.titleSmall)
+            Text(
+                "Testo modificabile che SuperIA può usare come contesto nelle richieste future. Resta cifrato sul dispositivo e viene inviato solo come parte del contesto della chat.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedTextField(
+                value = projectMemory,
+                onValueChange = { projectMemory = it; memorySaved = false },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Memoria personale di progetto") },
+                minLines = 3,
+                maxLines = 5
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    enabled = !savingMemory && !generating,
+                    onClick = {
+                        scope.launch {
+                            savingMemory = true
+                            memoryError = null
+                            try {
+                                withContext(Dispatchers.IO) { historyStore.saveProjectMemory(projectMemory) }
+                                memorySaved = true
+                            } catch (error: Exception) {
+                                memoryError = error.message ?: "Salvataggio memoria non riuscito."
+                            } finally {
+                                savingMemory = false
+                            }
+                        }
+                    }
+                ) { Text(if (savingMemory) "Salvataggio…" else "Salva memoria cifrata") }
+                TextButton(
+                    enabled = !savingMemory && !generating && projectMemory.isNotBlank(),
+                    onClick = {
+                        scope.launch {
+                            savingMemory = true
+                            try {
+                                withContext(Dispatchers.IO) { historyStore.clearProjectMemory() }
+                                projectMemory = ""
+                                memorySaved = false
+                                memoryError = null
+                            } catch (error: Exception) {
+                                memoryError = error.message ?: "Cancellazione memoria non riuscita."
+                            } finally {
+                                savingMemory = false
+                            }
+                        }
+                    }
+                ) { Text("Cancella memoria") }
+            }
+            if (memorySaved) Text("Memoria salvata cifrata sul dispositivo.", style = MaterialTheme.typography.bodySmall)
+            memoryError?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
 
             }
 
