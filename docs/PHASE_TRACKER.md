@@ -513,3 +513,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Branch `main`, HEAD verificato: `1331a58f87c9abcf423602d1ba34b2d99b89ddc0`.
 - Questi esiti non includono `androidTest`: nessuna build/installazione APK, force-stop, process death, emulatore o prova su dispositivo fisico. Il workflow continua a eseguire soltanto `gradle --no-daemon testDebugUnitTest`.
 - Micro-fase 29 resta aperta; gate 36 resta bloccato. Nessun servizio esterno o provider attivato.
+
+
+## Audit aggiuntivo del flusso di ripresa e CI — 24 novembre 2026
+- Riesaminati il percorso UI “Riprendi richiesta”, la costruzione del payload immutabile, il riuso del request ID e il `StreamHistoryPersister`: il retry usa il payload cifrato già salvato quando presente, conserva lo stesso UUID e persiste placeholder/risposta parziale prima della conclusione. Il flush finale e quello su errore/cancellazione sono presenti. Nessuna modifica al codice è stata giustificata dall'audit statico.
+- Ricontrollati i test JVM `ChatHistoryValidationTest` e `OnlineAssistantClientTest`: coprono validazione ruoli/ID/payload, ID stabile e legacy, limiti messaggi e parser SSE (framing, CRLF, heartbeat, errori, EOF e campi sconosciuti).
+- Backend/documentation CI [45288035460](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288035460) sul commit `d970de1dc97c1375f678c4913be61544250b391d`: **SUCCESS**. Tracker CI [45288042336](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288042336) sul commit `cc665f9bc5d8aaae278f921c517f8e08d2b7d004`: **SUCCESS**.
+- Limite della verifica: si tratta di audit statico e CI; non equivale a `androidTest`, force-stop/process death, test su dispositivo o E2E di rete. Microfase 29 resta aperta e gate 36 bloccato. Nessun APK o servizio esterno attivato.
