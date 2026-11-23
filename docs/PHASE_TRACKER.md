@@ -443,3 +443,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Aggiunti test per delta malformato, campo text non stringa e evento done malformato. Test ancora da eseguire nella CI successiva; non dichiarare il fix validato fino a esito verde.
 - Commit parser a248b47c73054781a9c803ea636cacc5fa883be6; commit test 992f6cdee2b12ce8dc8fe36ce0628d3910096dff.
 - Confermato che il repository espone solo il branch `main`. Nessun APK; nessuna modifica a provider o servizi esterni. Micro-fase 29 e gate 36 restano aperti/bloccati.
+
+### SSE Android — hardening parser e CI — 23 novembre 2026
+- Audit statico conferma: EOF senza `done` genera errore; delta ricevute sono persistite; la UI mantiene la richiesta pendente e il retry riusa request ID/payload congelato. La prima delta del retry sostituisce il parziale, evitando duplicazioni.
+- Parser irrigidito: JSON valido richiesto per `delta`, `done`, `error`; `delta.text` deve essere stringa. Test negativi aggiunti.
+- Prima CI Android fallita: `org.json` Android è stub non implementato nei test JVM locali. Correzione: aggiunta dipendenza `testImplementation("org.json:json:20250517")` nel commit `20b33283961322f1adae8df2d29aae3cc98ef543`.
+- Run 45269768768 (Android) e 45269768629 (backend) erano ancora in corso all'ultimo controllo; non conteggiare la modifica come validata finché Android non è verde. Report: `docs/ANDROID_SSE_STREAM_RELIABILITY_2026-11-23.md`.
+- Nessun test rete reale/device; micro-fase 29 resta aperta e gate 36 bloccato. Nessun APK o provisioning esterno.
