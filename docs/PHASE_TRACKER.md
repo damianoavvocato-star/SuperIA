@@ -109,3 +109,11 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Corretto il primo inserimento: se l'INSERT crea il record, claim_chat_request restituisce immediatamente claimed. Il duplicato simultaneo resta processing.
 - Test aggiunti per proprietario precedente, token nuovo, completamento protetto e migrazione di un database SQLite preesistente.
 - Stato: codice e test aggiunti al repository; esecuzione CI e verifica PostgreSQL reale ancora non confermate. Non dichiarare la funzione validata end-to-end.
+
+
+### Verifica CI — 23 novembre 2026
+- GitHub Actions Backend tests, run **577**, commit `036a2be916c7828be6c492d43b6b37fcc1dcacd3`: **success**.
+- Esito: **60 test superati**, 1 warning, nessun test fallito.
+- La run comprende il test PostgreSQL del registro richieste e i test backend di streaming, deduplicazione, recupero lease e fencing token.
+- Il precedente run 576 aveva 59 test superati e un test router fallito per newline letterali errati nel fixture SSE; fixture corretto e run 577 superata.
+- Questa è una verifica CI backend, non un collaudo end-to-end con provider reale o dispositivo Android. Il blocco APK resta attivo.
