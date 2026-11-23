@@ -156,6 +156,11 @@ class ChatHistoryStoreInstrumentedTest {
         }
 
         assertTrue("La perdita della chiave non deve produrre una cronologia vuota o corrotta", failed)
+        assertNull(
+            "La lettura non deve creare silenziosamente una nuova chiave incompatibile",
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+                .getKey("superia_chat_history_aes", null)
+        )
         assertArrayEquals("Il file cifrato originale deve restare intatto", originalBytes, archive.readBytes())
     }
 
