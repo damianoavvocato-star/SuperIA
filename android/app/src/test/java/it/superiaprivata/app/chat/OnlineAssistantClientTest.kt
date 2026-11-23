@@ -300,7 +300,10 @@ class OnlineAssistantClientTest {
 
     @Test
     fun sseParserRejectsEmptyDoneEvent() {
-        val stream = "event: done\\ndata: {}\\n".replace("\\n", "\n")
+        val stream = """
+            event: done
+            data: {}
+        """.trimIndent()
         val error = assertThrows(IllegalStateException::class.java) {
             runBlocking {
                 OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
