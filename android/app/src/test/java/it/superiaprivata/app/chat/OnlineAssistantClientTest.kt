@@ -1,6 +1,7 @@
 package it.superiaprivata.app.chat
 
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
@@ -236,6 +237,76 @@ class OnlineAssistantClientTest {
                 ) {}
             }
         }
+    }
+
+
+
+    @Test
+    fun sseParserCollectsDeltasAndIgnoresHeartbeatComments() = runBlocking {
+        val deltas = mutableListOf<String>()
+        val stream = """
+            : keep-alive
+
+            event: delta
+            data: {"text":"Ciao "}
+
+            : keep-alive
+
+            event: delta
+            data: {"text":"mondo"}
+
+            event: done
+            data: {"provider":"fake","model":"fake-model"}
+
+        """.trimIndent().replace("\\n", "\n")
+        val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+        assertEquals("Ciao mondo", answer)
+        assertEquals(listOf("Ciao ", "mondo"), deltas)
+    }
+
+    @Test
+    fun sseParserSurfacesErrorAfterPreservingReceivedDeltas() {
+        val deltas = mutableListOf<String>()
+        val stream = """
+            event: delta
+            data: {"text":"testo parziale"}
+
+            event: error
+            data: {"message":"Provider interrotto"}
+
+        """.trimIndent()
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+            }
+        }
+        assertEquals(listOf("testo parziale"), deltas)
+        assertEquals("Provider interrotto", error.message)
+    }
+
+    @Test
+    fun sseParserRejectsEndOfStreamWithoutDoneAndKeepsPartialOutput() {
+        val stream = "event: delta\\ndata: {\\"text\\":\\"parziale\\"}\\n".replace("\\n", "\n")
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals(
+            "Connessione interrotta: il testo parziale è stato conservato. Puoi riprendere la richiesta.",
+            error.message
+        )
+    }
+
+    @Test
+    fun sseParserRejectsEmptyDoneEvent() {
+        val stream = "event: done\\ndata: {}\\n".replace("\\n", "\n")
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) {}
+            }
+        }
+        assertEquals("Il backend ha restituito una risposta vuota.", error.message)
     }
 
 
