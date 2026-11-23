@@ -138,3 +138,35 @@ class ChatPromptBuilderTest {
         ChatPromptBuilder.build(emptyList(), "Ciao", maxHistoryMessages = 0)
     }
 }
+
+
+    @Test
+    fun combinedHistoryMemoryAndDocumentsNeverExceedBackendPromptLimit() {
+        val history = listOf(
+            ChatLine(1L, "H".repeat(6_000), "user"),
+            ChatLine(2L, "A".repeat(6_000), "assistant")
+        )
+        val promptText = "R".repeat(31_500)
+        val prompt = ChatPromptBuilder.build(
+            history = history,
+            newPrompt = promptText,
+            documentContext = "D".repeat(6_000),
+            memorySummary = "M".repeat(6_000)
+        )
+
+        assertTrue(prompt.length <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS)
+        assertTrue(prompt.endsWith(promptText))
+    }
+
+    @Test
+    fun fullSizeUserMessageIsPreservedWithoutAdditionalContext() {
+        val promptText = "R".repeat(ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS)
+        val prompt = ChatPromptBuilder.build(
+            history = listOf(ChatLine(1L, "contesto precedente", "assistant")),
+            newPrompt = promptText,
+            memorySummary = "memoria",
+            documentContext = "documento"
+        )
+
+        assertEquals(promptText, prompt)
+    }
