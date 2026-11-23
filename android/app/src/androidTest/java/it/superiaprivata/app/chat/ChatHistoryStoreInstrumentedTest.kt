@@ -373,7 +373,7 @@ class ChatHistoryStoreInstrumentedTest {
         )
         store.save(listOf(pending))
 
-        // A new store instance models the next app process after close/reopen.
+        // A new store instance verifies archive recovery in the same Android process; it does not simulate process death.
         val reopenedStore = ChatHistoryStore(context)
         val restored = reopenedStore.load().single()
 
