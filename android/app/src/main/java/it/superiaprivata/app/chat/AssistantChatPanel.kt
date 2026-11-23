@@ -82,6 +82,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var memorySaved by remember { mutableStateOf(false) }
     var memoryError by remember { mutableStateOf<String?>(null) }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
+    var exportStatus by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
     var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
@@ -139,6 +140,35 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         }
     }
 
+    val exportConversationPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        if (uri != null) {
+            val snapshot = messages.toList()
+            scope.launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        val output = context.contentResolver.openOutputStream(uri)
+                            ?: error("Impossibile aprire il file di destinazione.")
+                        output.bufferedWriter(Charsets.UTF_8).use { writer ->
+                            snapshot.forEach { line ->
+                                writer.append(if (line.role == "assistant") "[SuperIA]" else "[Utente]")
+                                writer.append("\n")
+                                writer.append(line.text)
+                                writer.append("\n\n")
+                            }
+                        }
+                    }
+                    exportStatus = "Cronologia esportata nella posizione scelta. La copia salvata è in chiaro."
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    exportStatus = error.message ?: "Esportazione cronologia non riuscita."
+                }
+            }
+        }
+    }
+
 
 
     Card(
@@ -155,9 +185,13 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     if (messages.isNotEmpty()) {
                         TextButton(
                             enabled = !generating,
+                            onClick = { exportConversationPicker.launch("superia-conversazione.txt") }
+                        ) { Text("Esporta") }
+                        TextButton(
+                            enabled = !generating,
                             onClick = {
                                 runCatching { historyStore.clear() }
-                                    .onSuccess { messages.clear(); storageError = null }
+                                    .onSuccess { messages.clear(); storageError = null; exportStatus = null }
                                     .onFailure { storageError = it.message ?: "Errore nella cancellazione" }
                             }
                         ) { Text("Svuota") }
