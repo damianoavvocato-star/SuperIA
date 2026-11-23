@@ -88,12 +88,10 @@ def test_capabilities_keep_cloud_disabled(auth_environment):
     assert response.json()["paid_fallback"] is False
 
 
-def test_models_and_chat_require_device_token(auth_environment):
+def test_models_require_device_token(auth_environment):
     _, token_data = auth_environment
     client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
     assert client.get("/api/v1/models").status_code == 200
-    response = client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]})
-    assert response.status_code == 200 and response.json()["content"] == "Risposta di prova"
 
 
 def test_stream_endpoint_requires_device_token():
@@ -139,20 +137,17 @@ def test_api_rejects_body_over_hard_limit(auth_environment):
     _, token_data = auth_environment
     client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
     response = client.post(
-        "/api/v1/chat",
+        "/api/v1/chat/stream",
         content=b"x" * (MAX_API_BODY_BYTES + 1),
         headers={"Content-Type": "application/json"},
     )
     assert response.status_code == 413
 
 
-def test_home_page():
-    response = TestClient(app).get("/")
-    assert response.status_code == 200 and "SuperIA" in response.text
-    assert "localStorage" in response.text
-    assert "Nuova conversazione" in response.text
-    assert "Memoria personale locale" in response.text
-    assert "MEMORY_KEY" in response.text
+def test_legacy_web_root_and_non_streaming_chat_routes_are_removed():
+    client = TestClient(app)
+    assert client.get("/").status_code == 404
+    assert client.post("/api/v1/chat", json={"messages": [{"role": "user", "content": "Ciao"}]}).status_code == 404
 
 
 def test_pairing_fails_closed_without_confirmed_edge_rate_limit(auth_environment, monkeypatch):
@@ -163,14 +158,15 @@ def test_pairing_fails_closed_without_confirmed_edge_rate_limit(auth_environment
     })
     assert response.status_code == 503
 
-def test_chat_returns_service_unavailable_when_all_free_providers_are_exhausted(auth_environment):
+def test_stream_returns_error_event_when_all_free_providers_are_exhausted(auth_environment):
     from app.providers.free_router import NoFreeProviderAvailable
 
     class UnavailableProvider:
-        async def chat(self, messages, model=None):
+        async def stream_chat(self, messages, model=None):
             raise NoFreeProviderAvailable(
                 "Nessun provider gratuito disponibile. La conversazione resta salvata; riprova più tardi."
             )
+            yield {}
 
         async def list_models(self):
             return []
@@ -183,13 +179,14 @@ def test_chat_returns_service_unavailable_when_all_free_providers_are_exhausted(
             headers={"Authorization": "Bearer " + token_data["access_token"]},
         )
         response = client.post(
-            "/api/v1/chat",
+            "/api/v1/chat/stream",
             json={"messages": [{"role": "user", "content": "Riprendi la mia richiesta"}]},
         )
 
-        assert response.status_code == 503
-        assert "Nessun provider gratuito disponibile" in response.json()["detail"]
-        assert "riprova più tardi" in response.json()["detail"]
+        assert response.status_code == 200
+        assert "event: error" in response.text
+        assert "Nessun provider gratuito disponibile" in response.text
+        assert "riprova più tardi" in response.text
     finally:
         app.dependency_overrides[get_provider] = lambda: FakeProvider()
 
