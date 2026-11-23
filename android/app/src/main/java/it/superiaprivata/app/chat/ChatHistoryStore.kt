@@ -97,9 +97,16 @@ class ChatHistoryStore(context: Context) {
     }
 
     fun load(): List<ChatLine> = synchronized(ARCHIVE_WRITE_LOCK) {
-        if (archive.baseFile.exists()) {
-            val packed = archive.openRead().use { it.readBytes() }
-            val jsonBytes = decrypt(packed)
+        // openRead() performs AtomicFile recovery before reading. Do not gate it
+        // on baseFile.exists(): after an interrupted replacement the valid
+        // transcript may still be present only in AtomicFile's .bak file.
+        val packedArchive = try {
+            archive.openRead().use { it.readBytes() }
+        } catch (_: java.io.FileNotFoundException) {
+            null
+        }
+        if (packedArchive != null) {
+            val jsonBytes = decrypt(packedArchive)
             val json = runCatching {
                 GZIPInputStream(ByteArrayInputStream(jsonBytes)).use { it.readBytes() }
             }.getOrElse { jsonBytes }
