@@ -85,6 +85,7 @@ class LocalDocumentRepositoryInstrumentedTest {
 
     @Test
     fun corruptedDocumentFailsClosedInsteadOfBeingSilentlyDropped() {
+        getOrCreateKey()
         val archive = File(directory, "document-4.enc")
         archive.writeBytes(ByteArray(64) { (it * 7).toByte() })
 
