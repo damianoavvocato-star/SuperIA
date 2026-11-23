@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — micro-fasi 01–10 completate  
+Aggiornato: 23 novembre 2026 — 21/50 micro-fasi completate; gate chat online 36 bloccato  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -54,7 +54,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 15 | Database PostgreSQL persistente | Database condiviso e persistente configurato; nessuno stato di produzione dipende da filesystem temporanei. | Bloccata da dipendenza esterna |
 | 16 | Migrazione e verifica dati | Migrazione SQLite/PostgreSQL verificata con conteggi, hash, schema e test di rollback/errore. | Completata |
 | 17 | Gestione dei segreti di produzione | Chiavi provider, token amministrativi e chiave idempotenza sono solo nel secret manager; rotazione e assenza segreti nei log testate. | Bloccata da dipendenza esterna |
-| 18 | Readiness e diagnostica operativa | Endpoint diagnostici distinguono processo, database, autenticazione e provider senza rivelare segreti. | Da iniziare |
+| 18 | Readiness e diagnostica operativa | Endpoint diagnostici distinguono processo, database, autenticazione e provider senza rivelare segreti. | Completata |
 
 ### C. Motore chat online
 
@@ -63,13 +63,13 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 19 | Audit provider AI gratuiti | Ogni provider candidato è verificato su termini, quota gratuita reale, carta richiesta, hard-stop, modelli e limiti. | Bloccata da dipendenza esterna |
 | 20 | Attivazione controllata del primo provider gratuito | Una sola integrazione è provata con credenziale reale server-side e senza rischio di addebito. | Bloccata da dipendenza esterna |
 | 21 | Guard-rail free-only | Configurazione errata, quota finita, 402 e billing non consentito causano stop; nessun fallback pagato è possibile. | Completata |
-| 22 | Rotazione tra provider approvati | Cooldown, selezione alternativa, quote e indisponibilità sono testati; nessuna rotazione di account/chiavi per eludere limiti. | Parziale |
-| 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Parziale |
-| 24 | Streaming SSE lato backend | Eventi delta/done/error, delimitatori, headers, timeout e chiusura stream sono verificati. | Implementata, verifica aggiuntiva |
-| 25 | Streaming SSE lato Android | Parsing incrementale, ordine dei delta, completamento, errori e cancellazione sono coperti da test. | Parziale |
-| 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | Implementata, verifica end-to-end aperta |
-| 27 | Idempotenza e deduplicazione richieste | Request ID, hash payload, replay cifrato, lease e fencing sono testati su PostgreSQL; limiti exactly-once sono documentati. | CI backend superata, test reale aperto |
-| 28 | Retry e ripresa dopo interruzione | Retry usa lo stesso ID, non duplica risposte già persistite e comunica chiaramente quando deve rigenerare invece di riprendere lo stream. | Parziale |
+| 22 | Rotazione tra provider approvati | Cooldown, selezione alternativa, quote e indisponibilità sono testati; nessuna rotazione di account/chiavi per eludere limiti. | Completata |
+| 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Completata, con limite noto |
+| 24 | Streaming SSE lato backend | Eventi delta/done/error, delimitatori, headers, timeout e chiusura stream sono verificati. | Completata |
+| 25 | Streaming SSE lato Android | Parsing incrementale, ordine dei delta, completamento, errori e cancellazione sono coperti da test. | Completata |
+| 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | In attesa di verifica pratica |
+| 27 | Idempotenza e deduplicazione richieste | Request ID, hash payload, replay cifrato, lease e fencing sono testati su PostgreSQL; limiti exactly-once sono documentati. | Completata in CI; staging reale aperto |
+| 28 | Retry e ripresa dopo interruzione | Retry usa lo stesso ID, non duplica risposte già persistite e comunica chiaramente quando deve rigenerare invece di riprendere lo stream. | In attesa di verifica pratica |
 | 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | In attesa di verifica |
 | 30 | Contesto documentale e privacy dei dati | PDF/DOCX/TXT/CSV, retrieval, citazioni, minimizzazione contesto, log, retention, export e cancellazione sono testati e documentati. | In attesa di verifica |
 
@@ -82,7 +82,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 33 | Test quote finite e indisponibilità | Esaurimento quota, provider down, 401/403/429/5xx, rete assente e database non disponibile non producono addebiti o perdita silenziosa. | Completata |
 | 34 | Test sicurezza e abuso | Rate limit, revoca, accesso incrociato, input oversized, segreti, log e concorrenza superano prove mirate. | In attesa di verifica |
 | 35 | Collaudo su telefoni Android reali | Pairing e chat sono provati su dispositivi fisici, con Wi-Fi/mobile, sospensione app, riavvio, rete interrotta e ripresa. | Bloccata da dipendenza esterna |
-| 36 | Gate finale chat online | Tutti i punti 1–12 del PHASE_TRACKER sono chiusi con evidenze. Solo dopo questa fase si può autorizzare la singola build APK finale della chat. | Bloccata dalle fasi precedenti |
+| 36 | Gate finale chat online | Tutti i punti 1–12 del PHASE_TRACKER sono chiusi con evidenze. Solo dopo questa fase si può autorizzare la singola build APK finale della chat. | Bloccata da dipendenze esterne |
 
 ### E. Espansione funzionale dell'applicazione
 
@@ -240,3 +240,7 @@ Router richiede `SUPERIA_FREE_ONLY`, attestazioni economiche e `DATA_POLICY_APPR
 
 ### Gate micro-fase 36 — NON SUPERATO — 23 novembre 2026
 Il gate resta bloccato: backend HTTPS pubblico, PostgreSQL persistente, WAF/IP rate limit, provider free reale approvato, secret manager e test E2E su telefono reale non sono disponibili. Non creare APK. Rapporto completo [ONLINE_CHAT_FINAL_GATE_2026-11-23.md](ONLINE_CHAT_FINAL_GATE_2026-11-23.md).
+
+
+### Allineamento stato piano e tracker — 23 novembre 2026
+Riconciliate le righe della tabella con le evidenze dettagliate in PHASE_TRACKER e nei rapporti: micro-fase 18 completata (CI 102 passed); 22–25 completate; 26 e 28 in attesa di prova pratica; 27 completata in CI con staging reale ancora aperto; 33 completata con test simulati; 34 in attesa per il WAF mancante. Il totale verificato resta 21/50 completate. Il gate 36 non è superato. Questa riconciliazione documentale non cambia il codice né autorizza deploy, pairing pubblico o APK.
