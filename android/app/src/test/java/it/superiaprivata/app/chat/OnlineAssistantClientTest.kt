@@ -207,3 +207,48 @@ class OnlineAssistantClientTest {
     }
 
 }
+
+
+    @Test
+    fun tokenRotationRefusesPlainHttpBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.rotate(
+                    OnlineConnectionConfig("http://example.test", "device-token")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun tokenRotationRequiresCurrentDeviceToken() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.rotate(
+                    OnlineConnectionConfig("https://example.test", "")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun selfRevocationRefusesPlainHttpBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.revoke(
+                    OnlineConnectionConfig("http://example.test", "device-token")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun selfRevocationRequiresCurrentDeviceToken() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.revoke(
+                    OnlineConnectionConfig("https://example.test", "")
+                )
+            }
+        }
+    }
