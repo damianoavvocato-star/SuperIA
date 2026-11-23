@@ -211,3 +211,7 @@ Verificati token casuali per dispositivo, hash SHA-256 lato server, UUID, TTL 90
 
 ## Micro-fase 10 — In corso (23 novembre 2026)
 Aggiunti test pairing per segreto server mancante, input fuori range e risposta contenente esclusivamente credenziali individuali. CI run successiva in attesa. Il flag `SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED` resta un gate e non prova il rate limiting effettivo; la protezione edge sarà verificata nella micro-fase 12. Nessun APK.
+
+
+## Micro-fase 10 — Completata (23 novembre 2026)
+Pairing server-side verificato: codice segreto con `hmac.compare_digest`, gate fail-closed, vincoli input, token individuale e risposta minimale. Test aggiunti. Backend CI run 639 SUCCESS: **76 passed, 1 warning**. Rapporto: [PAIRING_SECURITY_VALIDATION_2026-11-23.md](PAIRING_SECURITY_VALIDATION_2026-11-23.md). Attenzione: il flag edge non implementa il rate limiting IP; la fase 12 resta obbligatoria prima dell'esposizione pubblica.
