@@ -46,7 +46,7 @@ class ChatHistoryStoreInstrumentedTest {
             ChatLine(
                 id = index.toLong(),
                 text = "messaggio riservato $index",
-                role = if (index % 2 == 0) "user" else "assistant",
+                role = if (index == 159 || index % 2 == 0) "user" else "assistant",
                 pending = index == 159
             )
         }
