@@ -32,3 +32,11 @@ La prima CI Android sul commit dei test ha evidenziato 6 fallimenti. L'analisi d
 - Aggiunto un test ulteriore: un delta valido deve restare consegnato al callback quando il successivo evento delta contiene JSON malformato.
 - Commit del nuovo test: `e083de6094fab41afe21fd7c04cf05d3f344af2d`. La CI di questo nuovo commit deve ancora concludersi.
 - Verifica statica: la cancellazione coroutine chiama `connection.disconnect()`; ciò non sostituisce il test reale di rete interrotta.
+
+
+## Verifica CRLF, dati SSE vuoti e campi di estensione — 23 novembre 2026
+- Il parser distingue ora un evento senza campo `data:` da un campo `data:` presente ma vuoto: quest'ultimo viene dispatchato correttamente e un `done` vuoto è rifiutato come JSON non valido. Commit parser `fd2f7f3e489289d27bd8c7f93a67bef30e6bf966`.
+- Aggiunti test per terminatori CRLF e `done` con `data:` esplicitamente vuoto. Commit test `0b84d9fa662f847ec3e87a9581afc7ab45df4a70`.
+- Android unit tests [45271269847](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269847) e Backend tests [45271269817](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45271269817): **SUCCESS**.
+- Aggiunto ulteriore test che verifica l'ignorare corretto di campi SSE di estensione (`id`, `retry`, campo sconosciuto) e di un tipo evento non gestito, mantenendo il successivo delta/done. Commit test `46ebb5a6376bb048c5e4a391a6b7a29056f310ae`; CI Android e backend avviate, esito da verificare.
+- Nessun APK; workflow Android resta limitato a `testDebugUnitTest`. Micro-fase 29 aperta per i test strumentali su emulatore/dispositivo e prove reali di rete/riavvio. Gate 36 bloccato.
