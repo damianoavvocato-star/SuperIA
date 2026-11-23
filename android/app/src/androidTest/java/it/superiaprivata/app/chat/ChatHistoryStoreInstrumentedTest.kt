@@ -122,6 +122,48 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun corruptedProjectMemoryFailsClosedInsteadOfReturningGarbage() {
+        store.clearProjectMemory()
+        File(context.filesDir, "project_memory.enc").writeBytes(ByteArray(64) { (it * 3).toByte() })
+
+        var failed = false
+        try {
+            store.loadProjectMemory()
+        } catch (_: Exception) {
+            failed = true
+        }
+
+        assertTrue("Una memoria di progetto alterata non deve essere accettata", failed)
+    }
+
+    @Test
+    fun missingKeystoreKeyFailsClosedWithoutDestroyingEncryptedProjectMemory() {
+        store.saveProjectMemory("memoria privata da preservare")
+        val archive = File(context.filesDir, "project_memory.enc")
+        val originalBytes = archive.readBytes()
+
+        KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+            deleteEntry("superia_chat_history_aes")
+        }
+
+        var failed = false
+        try {
+            store.loadProjectMemory()
+        } catch (_: Exception) {
+            failed = true
+        }
+
+        assertTrue("La perdita della chiave non deve restituire memoria vuota", failed)
+        assertNull(
+            "La lettura non deve ricreare una chiave incompatibile",
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+                .getKey("superia_chat_history_aes", null)
+        )
+        assertArrayEquals("L'archivio cifrato deve restare intatto", originalBytes, archive.readBytes())
+    }
+
+    @Test
     fun recoversProjectMemoryWhenAtomicFileBackupIsTheOnlyCopy() {
         val expected = "memoria progetto precedente da recuperare"
         store.saveProjectMemory(expected)
