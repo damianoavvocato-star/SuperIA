@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: superia-staging
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: services/api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: SUPERIA_ENVIRONMENT
+        value: staging
+      - key: SUPERIA_FREE_ONLY
+        value: "false"
+      - key: SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED
+        value: "false"
+      - key: SUPERIA_DATABASE_URL
+        sync: false
+      - key: SUPERIA_CHAT_IDEMPOTENCY_KEY
+        sync: false
+      - key: SUPERIA_PAIRING_CODE
+        sync: false
+      - key: SUPERIA_ADMIN_TOKEN
+        sync: false
