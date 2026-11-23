@@ -368,3 +368,7 @@ Aggiunta al test instrumented `concurrentStoreInstancesSerializeAtomicTranscript
 
 ### Esito CI finale — micro-fase 29, commit bac1cbb — 23 novembre 2026
 Android unit CI e backend CI sono entrambe **SUCCESS**. Il workflow Android esegue esclusivamente `gradle --no-daemon testDebugUnitTest`; non genera APK. Il test che manipola la chiave Keystore è instrumented (`androidTest`) e non è eseguito da questa CI. Micro-fase 29 resta in attesa del collaudo su emulatore/dispositivo, incluse perdita chiave, integrità archivio, force-stop/reopen e recupero rete. Gate 36 bloccato; nessun APK o servizio esterno attivato.
+
+
+### Micro-fase 29 — coerenza fixture test instrumented — 23 novembre 2026
+In revisione di `ChatHistoryStoreInstrumentedTest` è stata corretta la fixture `persistsMoreThanOneHundredMessagesAndPendingState`: il messaggio pending finale ora ha ruolo `user`, conforme alla validazione di archivio (pending consentito soltanto per user); gli altri messaggi mantengono l'alternanza dei ruoli. Commit `ed650a4af63e7bb4cb242fee6832e7a11b03327b`. La modifica è in `androidTest`, quindi non viene compilata/eseguita dal task CI unitario `testDebugUnitTest`; nessuna evidenza di run dedicata disponibile al momento. La micro-fase 29 resta aperta per collaudo strumentale reale. Nessun APK.
