@@ -67,3 +67,13 @@ CI del commit `f459de5fe9a5756b688f4acafa2caab91b810cab` avviata:
 - Backend [run 45213496563](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213496563): **SUCCESS**, job `test`.
 
 Il test resta instrumented e richiede un device/emulatore; non viene eseguito dal task unitario CI. Non considerare superata la verifica pratica della micro-fase 29.
+
+
+### Verifica CI e hardening perdita chiave — 23 novembre 2026
+
+- Il commit `864a6dab027a6f18f3e5825174d2f99963d43554` garantisce che il test di migrazione della richiesta pending inizializzi la chiave Android Keystore prima di usarla.
+- Android [run 45213885568](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885568): **SUCCESS**, solo `testDebugUnitTest`.
+- Backend [run 45213885468](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45213885468): **SUCCESS**.
+- Commit successivo `76cd14a285d610f8b38ab40703e349890c895d0e`: aggiunto test instrumented che elimina la chiave Keystore dopo aver scritto una cronologia cifrata, verifica che la lettura fallisca in modo chiuso e che l'archivio cifrato originale resti byte-per-byte intatto.
+- CI del commit `76cd14a`: Android [run 45214332436](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332436) e backend [run 45214332705](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45214332705) risultano avviate; esito da verificare.
+- Il nuovo test è in `androidTest` e non viene eseguito dal task unitario CI. La micro-fase 29 resta in attesa di esecuzione instrumented su emulatore/dispositivo; nessun APK e nessun servizio esterno.
