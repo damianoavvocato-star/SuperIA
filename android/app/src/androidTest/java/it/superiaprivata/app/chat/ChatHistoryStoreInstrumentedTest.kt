@@ -76,6 +76,28 @@ class ChatHistoryStoreInstrumentedTest {
     }
 
     @Test
+    fun explicitClearRemovesAtomicFileBackupsAndPreventsDataResurrection() {
+        val transcript = listOf(ChatLine(601L, "da cancellare definitivamente", "user"))
+        store.save(transcript)
+        store.saveProjectMemory("memoria da cancellare definitivamente")
+
+        val transcriptBase = File(context.filesDir, "conversation_history.enc")
+        val memoryBase = File(context.filesDir, "project_memory.enc")
+        val transcriptBackup = File(transcriptBase.absolutePath + ".bak")
+        val memoryBackup = File(memoryBase.absolutePath + ".bak")
+        transcriptBase.copyTo(transcriptBackup, overwrite = true)
+        memoryBase.copyTo(memoryBackup, overwrite = true)
+
+        store.clear()
+        store.clearProjectMemory()
+
+        assertFalse("La cancellazione cronologia deve rimuovere anche il backup", transcriptBackup.exists())
+        assertFalse("La cancellazione memoria deve rimuovere anche il backup", memoryBackup.exists())
+        assertTrue(ChatHistoryStore(context).load().isEmpty())
+        assertEquals("", ChatHistoryStore(context).loadProjectMemory())
+    }
+
+    @Test
     fun transcriptIsEncryptedAtRest() {
         val secret = "testo-che-non-deve-essere-leggibile"
         store.save(listOf(ChatLine(1L, secret, "user")))
