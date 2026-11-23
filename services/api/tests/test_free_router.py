@@ -353,7 +353,7 @@ def test_stream_chat_rejects_unapproved_or_unavailable_models(tmp_path):
 def test_stream_chat_never_switches_provider_after_emitting_partial_answer(tmp_path):
     class BrokenAfterFirstToken(httpx.AsyncByteStream):
         async def __aiter__(self):
-            yield b'data: {"choices":[{"delta":{"content":"Risposta parziale"}}]}\\n\\n'
+            yield b'data: {"choices":[{"delta":{"content":"Risposta parziale"}}]}\n\n'
             raise httpx.ReadError("connection dropped after first token")
 
         async def aclose(self):
@@ -375,7 +375,7 @@ def test_stream_chat_never_switches_provider_after_emitting_partial_answer(tmp_p
             return httpx.Response(
                 200,
                 headers={"content-type": "text/event-stream"},
-                content=b'data: {"choices":[{"delta":{"content":"NON DEVE APPARIRE"}}]}\\n\\ndata: [DONE]\\n\\n',
+                content=b'data: {"choices":[{"delta":{"content":"NON DEVE APPARIRE"}}]}\n\ndata: [DONE]\n\n',
             )
 
         transport = httpx.MockTransport(handler)
