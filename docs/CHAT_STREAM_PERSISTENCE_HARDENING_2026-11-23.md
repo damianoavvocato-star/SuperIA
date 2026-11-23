@@ -39,3 +39,21 @@ Il commit `790e88da53c2e4e9bf649e465f354e85cd7cad0d` coordina anche i salvataggi
 - Il workflow Android continua a eseguire soltanto `gradle --no-daemon testDebugUnitTest`; nessun task di assemblaggio APK è stato eseguito.
 
 Questa è evidenza CI, non prova pratica su telefono. Restano da eseguire test di chiusura forzata, riavvio, sospensione e perdita/ripristino della rete; le micro-fasi 26, 28 e 29 non vengono chiuse e il gate 36 resta bloccato.
+
+## Sincronizzazione archivio tra istanze — 23 novembre 2026
+
+I commit `e811ca6be1f7811a205c393e36165ea4c893a73b`, `92d11e3724b759516241771ea7be0669aa955735` e `878a4323ebe03f109902e0d763e8fd8f955a77f2` estendono la protezione al ciclo completo di cifratura e aggiungono test instrumented per:
+- due istanze di `ChatHistoryStore` che scrivono contemporaneamente trascrizioni complete;
+- letture concorrenti durante la sostituzione dell'archivio, che devono restituire soltanto uno snapshot completo;
+- letture/scritture concorrenti della memoria di progetto;
+- propagazione degli errori dai task concorrenti tramite `Future.get(timeout)`.
+
+La sincronizzazione usa il monitor condiviso statico `ARCHIVE_WRITE_LOCK` anche durante l'accesso/creazione della chiave Android Keystore, cifratura AES-GCM, lettura e scrittura atomica. I metodi annidati riutilizzano lo stesso monitor Java reentrant.
+
+### CI commit 878a432
+
+- Android [run 45211341253](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45211341253): **SUCCESS**, workflow `android-unit-tests`; task `gradle --no-daemon testDebugUnitTest`.
+- Backend [run 45211341376](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45211341376): **SUCCESS**, workflow `test`.
+- Branch: solo `main`.
+
+**Limite esplicito:** i nuovi test si trovano in `androidTest` e non sono eseguiti da `testDebugUnitTest`. Non risultano ancora eseguiti su emulatore/dispositivo; non si dichiara quindi superata la verifica pratica della micro-fase 29. Restano necessari i test instrumented e le prove force-stop/reopen/retry, perdita rete e recupero. Nessun APK generato; nessun servizio esterno attivato.
