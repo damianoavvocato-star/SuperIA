@@ -481,3 +481,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Hardening parser SSE e relativi test JVM validati in CI; non equivale a test instrumented/device o E2E su rete reale.
 - Micro-fase 29 resta aperta; gate 36 bloccato dalle dipendenze esterne e dal collaudo reale. Nessun APK, provider o infrastruttura esterna attivati.
 - Report: `docs/SSE_MULTILINE_FRAMING_HARDENING_2026-11-23.md`.
+
+### Integrità archivio retry Android — 23 novembre 2026
+- Commit test strumentali 13c3f3e7d5781f1779d324477c71a617f83eaf7e: rifiuto di UUID duplicati tra richieste pendenti, payload associato a messaggio completato e payload non coerente con il messaggio pendente. Il test sul duplicato verifica anche che l'archivio precedente resti intatto.
+- I test appartengono ad androidTest e non sono eseguiti da testDebugUnitTest. Non dichiarare questi casi superati finché non girano su emulatore/dispositivo.
+- Chiarimento: pendingRequestIdSurvivesStoreRecreationForSafeRetry verifica una nuova istanza dello store nello stesso processo, non un vero force-stop/riavvio del processo Android.
+- Micro-fase 29 aperta; prove su processo reale/device e rete ancora necessarie. Gate 36 bloccato; nessun APK.
+- Report: docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md.
