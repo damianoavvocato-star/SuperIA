@@ -1,6 +1,6 @@
 # Audit dei fornitori AI gratuiti — SuperIA
 
-Data della verifica documentale: **20 novembre 2026**.
+Data della verifica documentale: **23 novembre 2026**.\n\n> **Aggiornamento prevalente 23 novembre 2026:** per Gemini, Groq, Cloudflare Workers AI, OpenRouter e SambaNova fa fede il rapporto [AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md](AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md), che aggiorna quote, privacy e requisiti account. Nessun provider è attivo: l'approvazione account-level richiede verifica no-card, hard-stop e data policy.
 
 ## Regola di ammissione
 
@@ -12,14 +12,14 @@ Un servizio entra nella rotazione di produzione solo se offre un'API realmente u
 
 | N. | Servizio | Esito su prezzo, carta e billing | Decisione |
 |---:|---|---|---|
-| 1 | Google Gemini API / AI Studio | Piano Developer API Free senza collegamento a Cloud Billing; il piano Paid richiede billing. Nei piani Free i contenuti possono essere usati per migliorare i prodotti Google. | CANDIDATO, solo modelli/strumenti Free; privacy da valutare. |
-| 2 | GroqCloud | Piano Free con limiti per modello. Il passaggio al Developer tier richiede metodo di pagamento e genera fatturazione. | CANDIDATO, solo account Free senza metodo di pagamento. |
-| 3 | Cloudflare Workers AI | Workers Free include 10.000 Neurons/giorno; oltre la quota le richieste falliscono. Alcuni modelli richiedono metodo di pagamento o crediti prepagati. | CONDIZIONATO, allowlist di soli modelli Free. |
+| 1 | Google Gemini API / AI Studio | Free tier limitato; i contenuti Free sono usati per migliorare i prodotti Google. Paid/grounding può introdurre costi. | NON APPROVATO per chat privata senza consenso esplicito. |
+| 2 | GroqCloud | Free con limiti per modello; Developer richiede metodo di pagamento. Inferenza non conservata per default, ma log temporanei fino a 30 giorni salvo ZDR. | CONDIZIONATO a no-card account-level e ZDR attivo. |
+| 3 | Cloudflare Workers AI | 10.000 Neurons/giorno su Free; oltre quota le richieste falliscono. Alcuni modelli richiedono billing. Inferenza stateless: zero retention e no training. | CANDIDATO prioritario, solo modelli Free e no-card verificato. |
 | 4 | Mistral La Plateforme | Free mode per Vibe/Studio; chiavi e uso API richiedono attivazione billing e pay-as-you-go. | ESCLUSO dall'API gratuita. |
-| 5 | SambaNova Cloud | Uso gratuito dei modelli ospitati finché non viene collegato un metodo di pagamento. | CONDIZIONATO, mai collegare il metodo; verificare uso produzione. |
+| 5 | SambaNova Cloud | Il piano Free richiede aggiunta di metodo di pagamento e acquisto crediti. | ESCLUSO. |
 | 6 | NVIDIA NIM / Build | Accesso sviluppatori/prototipazione documentato; non è stata chiarita ufficialmente per tutti i modelli l'assenza di carta e billing. | NON VERIFICATO. |
 | 7 | Cohere | Chiave Trial gratuita e limitata; chiavi Production e uso live hanno condizioni differenti. | CREDITI GRATUITI finché non viene confermata l'idoneità per produzione. |
-| 8 | OpenRouter modelli :free | Modelli gratuiti senza acquisto crediti; piano Free con 50 richieste/giorno. Limiti più alti legati all'acquisto di crediti. | CANDIDATO, solo modelli :free, niente acquisto crediti. |
+| 8 | OpenRouter modelli :free | Free :free senza acquisto, 20 RPM/50 RPD; provider a valle hanno policy dati diverse e Free non offre Data Policy-Based Routing. | NON APPROVATO per chat privata; eventuale uso solo per contenuti pubblici con provider specifico verificato. |
 | 9 | Z.AI / Zhipu AI | Listino con prezzi per token; voci promozionali non dimostrano inferenza API gratuita ricorrente. | ESCLUSO per ora. |
 | 10 | Ollama Cloud | Pay-as-you-go a pagamento per token; Pro/Max/Team a pagamento. | ESCLUSO dall'inferenza cloud gratuita. |
 | 11 | OVHcloud AI Endpoints | Crediti/trial cloud temporanei; risorse cloud attivabili con billing. Nessuna quota API ricorrente senza billing verificata. | ESCLUSO dalla rotazione stabile. |
