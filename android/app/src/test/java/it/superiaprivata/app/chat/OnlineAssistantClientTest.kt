@@ -265,6 +265,42 @@ class OnlineAssistantClientTest {
     }
 
     @Test
+    fun sseParserCombinesMultipleDataLinesIntoOneEvent() = runBlocking {
+        val deltas = mutableListOf<String>()
+        val stream = """
+            event: delta
+            data: {"text":
+            data: "Ciao mondo"}
+
+            event: done
+            data: {"provider":"fake"}
+
+        """.trimIndent()
+        val answer = OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+        assertEquals("Ciao mondo", answer)
+        assertEquals(listOf("Ciao mondo"), deltas)
+    }
+
+    @Test
+    fun sseParserDoesNotDispatchUnterminatedEventAtEof() {
+        val deltas = mutableListOf<String>()
+        val stream = """
+            event: delta
+            data: {"text":"non ancora completo"}
+        """.trimIndent()
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.consumeSseEvents(stream.reader().buffered()) { deltas += it }
+            }
+        }
+        assertEquals(emptyList<String>(), deltas)
+        assertEquals(
+            "Il backend ha chiuso il flusso senza completare la risposta.",
+            error.message
+        )
+    }
+
+    @Test
     fun sseParserSurfacesErrorAfterPreservingReceivedDeltas() {
         val deltas = mutableListOf<String>()
         val stream = """
