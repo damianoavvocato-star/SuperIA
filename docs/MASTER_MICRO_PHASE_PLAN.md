@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — micro-fasi 05 e 07 completate; 06 in attesa CI  
+Aggiornato: 23 novembre 2026 — micro-fasi 01–08 completate  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -44,7 +44,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 
 | N. | Micro-fase | Criterio di completamento | Stato iniziale |
 |---:|---|---|---|
-| 08 | Validazione centralizzata della configurazione backend | Variabili obbligatorie, valori non validi e configurazioni insicure vengono rifiutati con comportamento fail-closed e test. | Da iniziare |
+| 08 | Validazione centralizzata della configurazione backend | Variabili obbligatorie, valori non validi e configurazioni insicure vengono rifiutati con comportamento fail-closed e test. | Completata |
 | 09 | Autenticazione individuale dei dispositivi | Token individuali, hash lato server, scadenza e isolamento tra dispositivi sono coperti da test. | Parziale |
 | 10 | Pairing sicuro | Codice pairing, emissione token, limiti, scadenza e risposte d'errore sono verificati. | Parziale |
 | 11 | Revoca e rotazione credenziali dispositivo | Revoca immediata, token scaduti e tentativi successivi sono verificati sia lato server sia Android. | Parziale |
@@ -167,3 +167,7 @@ Verificata GitHub Actions run 577, ID `45089445756`, commit `036a2be916c7828be6c
 
 ### Verifica CI Android — micro-fase 06 — 23 novembre 2026
 GitHub Actions [run 222](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45091390966), ID `45091390966`, commit `739f585b168b24bc817ab0cbcc49babc799ad392`: job `android-unit-tests` SUCCESS. Log: `gradle --no-daemon testDebugUnitTest`, task `:app:testDebugUnitTest`, **BUILD SUCCESSFUL in 28s**. I passaggi job confermano JDK 17 e Gradle setup. Non compaiono task assemble/sign/upload APK. La run verifica la suite sul commit indicato, non necessariamente l'HEAD documentale successivo.
+
+
+### Esito micro-fase 08 — validazione configurazione backend — 23 novembre 2026
+Aggiunta `validate_provider_environment` nel router e chiamata all'inizializzazione. Rifiuta modalità free-only non valida, provider parziali, attestazioni non affirmative, modello fuori allowlist, OpenRouter senza suffisso `:free` e Cloudflare senza account ID. Test dedicati. Evidenza [Backend tests run 634](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45092312609): SUCCESS, **68 passed, 1 warning in 1.14s**, PostgreSQL effimero. Rapporto: [BACKEND_CONFIG_VALIDATION_2026-11-23.md](BACKEND_CONFIG_VALIDATION_2026-11-23.md). La verifica delle condizioni reali dei provider resta micro-fase 19.
