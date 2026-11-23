@@ -49,3 +49,12 @@ Stato: 33 completata a livello di test simulati; 29–30 parziali in attesa di d
 - Aggiunti `LocalDocumentRepositoryInstrumentedTest` per lettura cifrata, backup-only, chiave mancante, archivio corrotto e rifiuto di path esterni. Sono test Android strumentali predisposti, **non eseguiti**: nessun APK di test generato/installato.
 - Backend CI [45288625663](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288625663) sul commit `78f1d9e`: SUCCESS. Android unit CI sui commit successivi e backend CI recenti sono in coda/in corso al momento dell'aggiornamento; vedere [run Android 45288717504](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717504) e [run Backend 45288717639](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45288717639).
 - Microfase 30 resta **parziale/in attesa di verifica runtime**: i test strumentali e OCR/import/export reali su dispositivo non sono stati eseguiti. Microfase 29 e gate 36 invariati.
+
+
+## Autorizzazione e collaudo strumentale Android — 24 novembre 2026
+- L'utente ha autorizzato la rimozione del blocco per APK intermedi limitatamente a build debug temporanee necessarie ai test strumentali. Nessuna build release o distribuzione autorizzata.
+- Aggiunto test orchestrabile in due invocazioni per verificare il recupero dopo force-stop del processo Android, inclusi request ID, payload e memoria di progetto.
+- Workflow Android esteso con emulatore API 35, test strumentali archivio/chat/documenti e sequenza force-stop/riapertura.
+- Commit test: 3b5c43b4b48df0d3652c0863d7584da5987f4186. Commit workflow: 22b54c6c2c75c530004d4d80ac0011481949538a.
+- Run emulator [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674) e unit [45289429271](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289429271) avviate; esito ancora da verificare.
+- La microfase 29 resta aperta fino a esito verde e verifica su dispositivo fisico; l'emulatore non prova Wi-Fi/mobile reali né riavvio fisico del telefono.
