@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from app.device_auth import device_id_for_token, issue_device_token, revoke_device_token
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
-from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, request_payload_hash
+from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, refresh_chat_request_lease, request_payload_hash
 from app.schemas import ChatRequest, ChatResponse
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
@@ -236,6 +236,8 @@ async def chat_stream(
                 event = item.get("event", "delta")
                 if event == "delta":
                     accumulated.append(str(item.get("text", "")))
+                    if request_id and not refresh_chat_request_lease(database_url, device_id, request_id):
+                        raise RuntimeError("Lease della richiesta non più attivo.")
                 if item.get("model"):
                     final_model = str(item["model"])
                 if item.get("provider"):
