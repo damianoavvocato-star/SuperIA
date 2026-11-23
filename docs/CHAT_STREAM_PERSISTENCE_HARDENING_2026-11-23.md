@@ -100,3 +100,11 @@ Il test resta instrumented e richiede un device/emulatore; non viene eseguito da
 ### Correzione fixture del test instrumented — 23 novembre 2026
 
 Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState` è stata individuata una fixture incoerente con la validazione introdotta: il messaggio finale era marcato `pending=true` ma aveva ruolo `assistant`, mentre il contratto ammette pending soltanto per messaggi `user`. Corretto il ruolo del solo elemento pending, mantenendo alternanza user/assistant per gli altri messaggi. Commit `ed650a4af63e7bb4cb242fee6832e7a11b03327b`. La modifica interessa `androidTest`, non eseguito dal workflow unitario; lo stato CI specifico di questo commit non risulta ancora disponibile. La prova instrumented resta da eseguire su emulatore/dispositivo. Nessun APK.
+
+
+### Recupero AtomicFile dopo interruzione scrittura — 23 novembre 2026
+
+- Individuato un caso limite in ChatHistoryStore.load(): il controllo preliminare di baseFile.exists() poteva saltare AtomicFile.openRead() quando, dopo un'interruzione, l'unica copia valida era il backup .bak.
+- Commit 40a9e712ae8efd3c1d7ab971e44ccb95b445daf2: load() tenta ora direttamente openRead(), che esegue il recupero AtomicFile; soltanto FileNotFoundException viene trattata come archivio assente, mentre gli errori di decifratura restano fail-closed.
+- Commit 409fb3703372bfee2d587118a61e013246e0497f: aggiunto test instrumented che simula la condizione backup-only, elimina il file principale e verifica il ripristino integrale della cronologia e il consumo del backup.
+- I test sono in androidTest e non sono eseguiti da testDebugUnitTest. La correzione è registrata ma non ancora validata su Android; CI dedicata da verificare. Micro-fase 29 resta aperta. Nessun APK generato.
