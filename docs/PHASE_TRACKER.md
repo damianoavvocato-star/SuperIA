@@ -100,3 +100,12 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Privacy del registro richieste: le risposte salvate per il replay sono cifrate lato applicazione con AES-256-GCM. Il backend richiede il segreto stabile `SUPERIA_CHAT_IDEMPOTENCY_KEY`; deve essere generato casualmente, custodito solo nel secret manager del backend e condiviso tra le istanze. Non inserirlo nell'app Android, nel repository o nei log. Se manca, l'endpoint con request ID fallisce chiuso con HTTP 503. La rotazione della chiave richiede una procedura di ricifratura dei record esistenti, altrimenti il replay dei record precedenti non sarà decifrabile.
 
 - È stato aggiunto anche un test d'integrazione PostgreSQL che verifica claim, rifiuto del duplicato in elaborazione, completamento e replay della risposta decifrata; il workflow backend dispone già di un servizio PostgreSQL effimero. Il risultato della nuova run CI non è ancora verificabile da qui.
+
+
+### Aggiornamento — fencing delle richieste chat
+- Ogni claim nuovo, recupero di lease scaduta o retry di richiesta fallita assegna un token di proprietà distinto.
+- Le operazioni di rinnovo, completamento e fallimento richiedono il token corrente; un worker precedente non può modificare lo stato dopo che un altro worker ha recuperato la richiesta.
+- Migrazione compatibile del registro esistente: aggiunta della colonna lease_token sia per SQLite sia per PostgreSQL, senza cancellare risposte cifrate.
+- Corretto il primo inserimento: se l'INSERT crea il record, claim_chat_request restituisce immediatamente claimed. Il duplicato simultaneo resta processing.
+- Test aggiunti per proprietario precedente, token nuovo, completamento protetto e migrazione di un database SQLite preesistente.
+- Stato: codice e test aggiunti al repository; esecuzione CI e verifica PostgreSQL reale ancora non confermate. Non dichiarare la funzione validata end-to-end.
