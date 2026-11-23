@@ -1,3 +1,5 @@
+> **Nota di stato — 23 novembre 2026:** questo documento descrive il prototipo originario e non l'architettura corrente. La app SuperIA attuale è Android nativa e usa inferenza AI esclusivamente online tramite backend HTTPS, pairing individuale e provider gratuiti approvati. Le indicazioni su Ollama, inferenza locale, localStorage e token condiviso sono storiche e non devono essere seguite per il prodotto corrente. Per lo stato operativo consultare [README](../README.md), [PHASE_TRACKER](PHASE_TRACKER.md) e [VERCEL_HOBBY_PREPARATION](VERCEL_HOBBY_PREPARATION.md).
+
 # Architettura
 
 - Client: interfaccia web di sviluppo; Flutter previsto per Android e desktop.
