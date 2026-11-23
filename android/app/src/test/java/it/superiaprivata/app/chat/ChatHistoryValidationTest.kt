@@ -82,4 +82,12 @@ class ChatHistoryValidationTest {
         assertEquals(Long.MIN_VALUE, nextChatLineId(listOf(Long.MAX_VALUE), Long.MAX_VALUE))
     }
 
+    @Test
+    fun messageIdGenerationSkipsOccupiedIdAfterOverflow() {
+        assertEquals(
+            Long.MIN_VALUE + 1L,
+            nextChatLineId(listOf(Long.MAX_VALUE, Long.MIN_VALUE), Long.MAX_VALUE)
+        )
+    }
+
 }

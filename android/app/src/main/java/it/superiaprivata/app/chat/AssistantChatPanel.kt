@@ -614,10 +614,6 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
 
 
 /**
- * Periodically snapshots streaming output without writing once per token.
- * Version checks prevent an older background write from overwriting a newer snapshot.
- */
-/**
  * Copy Compose state on the caller context before switching to IO. Reading a
  * SnapshotStateList from a worker thread can race with UI mutations.
  */
@@ -626,6 +622,10 @@ private suspend fun persistChatHistory(store: ChatHistoryStore, messages: List<C
     withContext(Dispatchers.IO) { store.save(snapshot) }
 }
 
+/**
+ * Periodically snapshots streaming output without writing once per token.
+ * Version checks prevent an older background write from overwriting a newer snapshot.
+ */
 private class StreamHistoryPersister(
     private val store: ChatHistoryStore,
     private val scope: kotlinx.coroutines.CoroutineScope
