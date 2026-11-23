@@ -263,7 +263,7 @@ async def chat_stream(
             yield f"event: error\ndata: {payload}\n\n"
         except Exception as exc:
             if request_id and not completed:
-                fail_chat_request(database_url, device_id, request_id)
+                fail_chat_request(database_url, device_id, request_id, lease_token or '')
             payload = json.dumps({
                 "message": "Il flusso si è interrotto. Il testo già ricevuto resta visibile; non è stato effettuato un fallback dopo l'inizio della risposta.",
                 "retryable": True,
