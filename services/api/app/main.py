@@ -1,3 +1,4 @@
+import asyncio
 import hmac
 import json
 import os
@@ -15,6 +16,7 @@ from app.chat_requests import claim_chat_request, complete_chat_request, fail_ch
 from app.schemas import ChatRequest, ChatResponse
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
+SSE_HEARTBEAT_SECONDS = 15
 
 
 class RequestBodyTooLarge(Exception):
@@ -230,32 +232,62 @@ async def chat_stream(
         final_provider = "free-only-router"
         completed = False
         try:
-            async for item in provider.stream_chat(
+            stream_iterator = provider.stream_chat(
                 [message.model_dump() for message in request.messages],
                 request.model,
-            ):
-                event = item.get("event", "delta")
-                if event == "delta":
-                    accumulated.append(str(item.get("text", "")))
-                    if request_id and not refresh_chat_request_lease(database_url, device_id, request_id, lease_token or ''):
-                        raise RuntimeError("Lease della richiesta non più attivo.")
-                if item.get("model"):
-                    final_model = str(item["model"])
-                if item.get("provider"):
-                    final_provider = str(item["provider"])
-                if event == "done":
-                    if request_id:
-                        saved = complete_chat_request(
-                            database_url, device_id, request_id,
-                            "".join(accumulated), final_model, final_provider,
-                            idempotency_secret,
-                            lease_token or "",
-                        )
-                        if not saved:
-                            raise RuntimeError("La richiesta non appartiene più a questo tentativo.")
-                    completed = True
-                payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
-                yield f"event: {event}\ndata: {payload}\n\n"
+            ).__aiter__()
+            pending_next = asyncio.create_task(stream_iterator.__anext__())
+            try:
+                while True:
+                    finished, _ = await asyncio.wait(
+                        {pending_next},
+                        timeout=SSE_HEARTBEAT_SECONDS,
+                    )
+                    if not finished:
+                        if request_id and not refresh_chat_request_lease(
+                            database_url, device_id, request_id, lease_token or ""
+                        ):
+                            raise RuntimeError("Lease della richiesta non più attivo.")
+                        # SSE comment: keeps proxies alive without becoming a chat event.
+                        yield ": keep-alive\\n\\n"
+                        continue
+                    try:
+                        item = pending_next.result()
+                    except StopAsyncIteration:
+                        break
+                    event = item.get("event", "delta")
+                    if event == "delta":
+                        accumulated.append(str(item.get("text", "")))
+                        if request_id and not refresh_chat_request_lease(database_url, device_id, request_id, lease_token or ""):
+                            raise RuntimeError("Lease della richiesta non più attivo.")
+                    if item.get("model"):
+                        final_model = str(item["model"])
+                    if item.get("provider"):
+                        final_provider = str(item["provider"])
+                    if event == "done":
+                        if request_id:
+                            saved = complete_chat_request(
+                                database_url, device_id, request_id,
+                                "".join(accumulated), final_model, final_provider,
+                                idempotency_secret,
+                                lease_token or "",
+                            )
+                            if not saved:
+                                raise RuntimeError("La richiesta non appartiene più a questo tentativo.")
+                        completed = True
+                    payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
+                    yield f"event: {event}\\ndata: {payload}\\n\\n"
+                    pending_next = asyncio.create_task(stream_iterator.__anext__())
+            finally:
+                if not pending_next.done():
+                    pending_next.cancel()
+                    try:
+                        await pending_next
+                    except (asyncio.CancelledError, StopAsyncIteration):
+                        pass
+                close_iterator = getattr(stream_iterator, "aclose", None)
+                if close_iterator is not None:
+                    await close_iterator()
             if not completed:
                 raise RuntimeError("Il provider ha chiuso lo stream senza evento done.")
         except NoFreeProviderAvailable as exc:
