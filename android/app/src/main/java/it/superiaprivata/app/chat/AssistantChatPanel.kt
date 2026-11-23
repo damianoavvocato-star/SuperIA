@@ -45,6 +45,7 @@ import it.superiaprivata.app.documents.DocumentTextExtractor
 import it.superiaprivata.app.documents.LocalDocumentContextBuilder
 import it.superiaprivata.app.documents.LocalDocumentRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -454,14 +455,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         streamPersister.flush(messages.toList())
                                         storageError = null
                                     } catch (error: CancellationException) {
-                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                        runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                         throw error
                                     } catch (error: OutOfMemoryError) {
                                         generationError = "Memoria insufficiente durante la preparazione della richiesta. Riprova."
-                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                        runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     } catch (error: Exception) {
                                         generationError = error.message ?: "Ripresa della richiesta non riuscita."
-                                        runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                        runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     } finally {
                                         generating = false
                                     }
@@ -573,14 +574,14 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                     if (pendingIndex >= 0) messages[pendingIndex] = userLine.copy(pending = false)
                                     streamPersister.flush(messages.toList())
                                 } catch (error: CancellationException) {
-                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                    runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                     throw error
                                 } catch (error: OutOfMemoryError) {
                                     generationError = "Memoria insufficiente durante l'inferenza. Chiudi le altre app e riprova."
-                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                    runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                 } catch (error: Exception) {
                                     generationError = error.message ?: "Errore durante la richiesta online."
-                                    runCatching { withContext(Dispatchers.IO) { historyStore.save(messages.toList()) } }
+                                    runCatching { withContext(NonCancellable + Dispatchers.IO) { historyStore.save(messages.toList()) } }
                                 } finally {
                                     generating = false
                                 }
