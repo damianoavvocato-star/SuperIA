@@ -24,7 +24,7 @@ Ambito: audit statico dei sorgenti Android su `main`; nessun APK creato.
 8. Il client ha test unitari per HTTP non sicuro, credenziali mancanti, URL con parametri/user-info/fragment, prompt vuoto o eccessivo e request ID malformato.
 
 ## Rilievi e limiti
-- `OnlineAssistantClient.send()` mantiene un percorso non-streaming verso il vecchio endpoint `/api/v1/chat`. La chat Compose usa `stream()`; il metodo legacy va verificato con ricerca completa dei riferimenti prima di una rimozione separata.
+- Il metodo non-streaming `OnlineAssistantClient.send()` e il vecchio endpoint `/api/v1/chat` sono stati rimossi nella micro-fase 24; il client Android usa esclusivamente SSE.
 - La readiness descrive disponibilità e configurazione dei provider in base al payload, ma non prova una generazione reale; l'interfaccia stessa avverte che il primo invio verifica la risposta.
 - `ChatPromptBuilder` costruisce il contesto multi-turno in un unico prompt testuale inviato come singolo messaggio user. Non è un protocollo con ruoli multipli lato provider.
 - La ripresa della richiesta ripete la generazione con lo stesso request ID; non riprende byte/token dello stream interrotto. I limiti exactly-once in caso di crash tra generazione provider e persistenza sono già documentati nel backend.
