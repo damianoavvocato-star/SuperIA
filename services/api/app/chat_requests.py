@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import time
+import uuid
 from contextlib import closing
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -13,6 +14,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from app.database import connect_database
 
 PROCESSING_LEASE_SECONDS = 30 * 60
+
 
 def _encrypt_response(content: str, secret: str) -> str:
     if not secret:
@@ -30,7 +32,6 @@ def _decrypt_response(value: str, secret: str) -> str:
     return AESGCM(key).decrypt(nonce, ciphertext, None).decode("utf-8")
 
 
-
 def _connect(database_url: str):
     return connect_database(database_url)
 
@@ -45,6 +46,7 @@ def initialize_chat_request_store(database_url: str) -> None:
                 payload_hash TEXT NOT NULL,
                 status TEXT NOT NULL,
                 response_text TEXT,
+                lease_token TEXT,
                 model TEXT,
                 provider TEXT,
                 created_at BIGINT NOT NULL,
@@ -53,6 +55,13 @@ def initialize_chat_request_store(database_url: str) -> None:
             )
             """
         )
+        # Migrate existing databases without invalidating stored encrypted responses.
+        if connection.dialect == "postgres":
+            connection.execute("ALTER TABLE chat_requests ADD COLUMN IF NOT EXISTS lease_token TEXT")
+        else:
+            columns = {row["name"] for row in connection.execute("PRAGMA table_info(chat_requests)").fetchall()}
+            if "lease_token" not in columns:
+                connection.execute("ALTER TABLE chat_requests ADD COLUMN lease_token TEXT")
         connection.commit()
 
 
@@ -73,19 +82,20 @@ def claim_chat_request(
     payload_hash: str,
     encryption_secret: str,
 ) -> dict[str, object]:
-    """Atomically claim a request, replay a completed one, or reject a live duplicate."""
+    """Claim a request with a unique fencing token or replay a completed response."""
     initialize_chat_request_store(database_url)
     now = int(time.time())
+    lease_token = str(uuid.uuid4())
     with closing(_connect(database_url)) as connection:
         connection.execute(
             """
             INSERT INTO chat_requests
-                (device_id, request_id, payload_hash, status, response_text,
+                (device_id, request_id, payload_hash, status, response_text, lease_token,
                  model, provider, created_at, updated_at)
-            VALUES (?, ?, ?, 'processing', NULL, NULL, NULL, ?, ?)
+            VALUES (?, ?, ?, 'processing', NULL, ?, NULL, NULL, ?, ?)
             ON CONFLICT (device_id, request_id) DO NOTHING
             """,
-            (device_id, request_id, payload_hash, now, now),
+            (device_id, request_id, payload_hash, lease_token, now, now),
         )
         row = connection.execute(
             """
@@ -114,45 +124,47 @@ def claim_chat_request(
                 return {"state": "processing"}
             cursor = connection.execute(
                 """
-                UPDATE chat_requests SET updated_at = ?
+                UPDATE chat_requests SET updated_at = ?, lease_token = ?
                 WHERE device_id = ? AND request_id = ? AND status = 'processing'
                   AND updated_at = ?
                 """,
-                (now, device_id, request_id, int(row["updated_at"])),
+                (now, lease_token, device_id, request_id, int(row["updated_at"])),
             )
             connection.commit()
-            return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
+            return {"state": "claimed", "lease_token": lease_token} if cursor.rowcount == 1 else {"state": "processing"}
 
         cursor = connection.execute(
             """
             UPDATE chat_requests
             SET status = 'processing', response_text = NULL, model = NULL,
-                provider = NULL, updated_at = ?
+                provider = NULL, updated_at = ?, lease_token = ?
             WHERE device_id = ? AND request_id = ? AND status = 'failed'
             """,
-            (now, device_id, request_id),
+            (now, lease_token, device_id, request_id),
         )
         connection.commit()
-        return {"state": "claimed" if cursor.rowcount == 1 else "processing"}
-
+        return {"state": "claimed", "lease_token": lease_token} if cursor.rowcount == 1 else {"state": "processing"}
 
 
 def refresh_chat_request_lease(
     database_url: str,
     device_id: str,
     request_id: str,
+    lease_token: str,
 ) -> bool:
-    """Keep a live stream's processing lease fresh while tokens are arriving."""
+    """Refresh only the lease owned by this exact stream attempt."""
     with closing(_connect(database_url)) as connection:
         cursor = connection.execute(
             """
             UPDATE chat_requests SET updated_at = ?
             WHERE device_id = ? AND request_id = ? AND status = 'processing'
+              AND lease_token = ?
             """,
-            (int(time.time()), device_id, request_id),
+            (int(time.time()), device_id, request_id, lease_token),
         )
         connection.commit()
         return cursor.rowcount == 1
+
 
 def complete_chat_request(
     database_url: str,
@@ -162,28 +174,33 @@ def complete_chat_request(
     model: str,
     provider: str,
     encryption_secret: str,
-) -> None:
+    lease_token: str,
+) -> bool:
     encrypted_response = _encrypt_response(content, encryption_secret)
     with closing(_connect(database_url)) as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE chat_requests
             SET status = 'completed', response_text = ?, model = ?,
                 provider = ?, updated_at = ?
             WHERE device_id = ? AND request_id = ? AND status = 'processing'
+              AND lease_token = ?
             """,
-            (encrypted_response, model, provider, int(time.time()), device_id, request_id),
+            (encrypted_response, model, provider, int(time.time()), device_id, request_id, lease_token),
         )
         connection.commit()
+        return cursor.rowcount == 1
 
 
-def fail_chat_request(database_url: str, device_id: str, request_id: str) -> None:
+def fail_chat_request(database_url: str, device_id: str, request_id: str, lease_token: str) -> bool:
     with closing(_connect(database_url)) as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE chat_requests SET status = 'failed', updated_at = ?
             WHERE device_id = ? AND request_id = ? AND status = 'processing'
+              AND lease_token = ?
             """,
-            (int(time.time()), device_id, request_id),
+            (int(time.time()), device_id, request_id, lease_token),
         )
         connection.commit()
+        return cursor.rowcount == 1
