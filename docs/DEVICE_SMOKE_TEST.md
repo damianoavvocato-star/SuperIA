@@ -90,4 +90,4 @@ Questa sezione è una preparazione documentale e statica: **non attesta l'esecuz
 - La cancellazione esplicita non permette il ripristino di copie `.bak`.
 - Ogni caso deve essere eseguito e registrato su entrambi i dispositivi previsti; una prova mancante mantiene aperta la microfase 29.
 
-**Stato attuale:** preparazione completata; esecuzione runtime rinviata al gate autorizzato. Nessun APK generato, nessun test strumentale avviato, nessuna prova su telefono dichiarata.
+**Stato aggiornato al 24 novembre 2026:** autorizzati APK debug temporanei esclusivamente in CI per i test strumentali. Il workflow esegue test su emulatore API 35 e sequenza force-stop/recupero. La verifica su telefono fisico, Wi-Fi/rete mobile e riavvio del dispositivo resta obbligatoria e separata.
