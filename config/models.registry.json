@@ -2,14 +2,13 @@
   "schema_version": 1,
   "project": "SuperIA",
   "created_at": "2026-11-15",
-  "purpose": "Candidate model families for later hardware-specific evaluation. No model is approved for distribution or automatically downloaded by this registry.",
+  "purpose": "Historical reference only. Local LLM model families are not candidates for current SuperIA inference, which is online-only through approved free providers.",
   "policy": {
-    "download_requires_explicit_user_action": true,
-    "verify_exact_model_card_and_license": true,
-    "record_sha256_or_runtime_digest": true,
-    "do_not_assume_family_wide_license": true,
-    "benchmark_italian_quality_and_memory": true,
-    "no_paid_api_required": true
+    "current_inference": "online_only_via_SuperIA_HTTPS_backend",
+    "local_LLM_models": "superseded_not_to_be_downloaded_or_integrated",
+    "no_paid_api_required": true,
+    "no_local_LLM_fallback": true,
+    "exact_provider_terms_and_free_quota_must_be_verified": true
   },
   "candidates": [
     {
@@ -21,18 +20,15 @@
         "reasoning",
         "coding"
       ],
-      "candidate_runtime": [
-        "Ollama",
-        "llama.cpp"
-      ],
+      "candidate_runtime": [],
       "license_status": "verify exact model repository and artifact; do not infer from family name",
       "source": "https://github.com/QwenLM",
       "hardware_profile": "select small quantized variants for low-memory devices; larger variants PC only",
-      "android_status": "not yet validated in SuperIA",
+      "android_status": "not applicable to current online-only inference architecture",
       "version": null,
       "artifact": null,
       "sha256": null,
-      "decision": "candidate"
+      "decision": "superseded_not_to_be_used_for_current_SuperIA_inference"
     },
     {
       "id": "llama32-edge",
@@ -42,18 +38,15 @@
         "compact_chat",
         "edge_on_device"
       ],
-      "candidate_runtime": [
-        "ExecuTorch",
-        "llama.cpp"
-      ],
+      "candidate_runtime": [],
       "license_status": "Llama Community License and acceptable-use terms; review before any redistribution",
       "source": "https://dev.meta.ai/llama/docs/model-cards-and-prompt-formats/llama3_2",
       "hardware_profile": "edge/mobile-oriented quantized variants; benchmark on target device",
-      "android_status": "official model documentation describes ExecuTorch and mobile/edge use; SuperIA integration not implemented",
+      "android_status": "not applicable to current online-only inference architecture",
       "version": null,
       "artifact": null,
       "sha256": null,
-      "decision": "candidate"
+      "decision": "superseded_not_to_be_used_for_current_SuperIA_inference"
     },
     {
       "id": "gemma4-family",
@@ -64,19 +57,15 @@
         "multimodal",
         "mobile_and_pc"
       ],
-      "candidate_runtime": [
-        "Ollama",
-        "llama.cpp",
-        "LiteRT where supported"
-      ],
+      "candidate_runtime": [],
       "license_status": "verify exact Gemma 4 model card, terms and prohibited-use policy for chosen artifact",
       "source": "https://ai.google.dev/gemma/docs/core",
       "hardware_profile": "separate mobile-optimized small variants from PC variants; measure memory",
-      "android_status": "official mobile-oriented quantized artifacts exist; SuperIA integration not implemented",
+      "android_status": "not applicable to current online-only inference architecture",
       "version": null,
       "artifact": null,
       "sha256": null,
-      "decision": "candidate"
+      "decision": "superseded_not_to_be_used_for_current_SuperIA_inference"
     },
     {
       "id": "phi-family",
@@ -86,19 +75,15 @@
         "compact_chat",
         "reasoning"
       ],
-      "candidate_runtime": [
-        "Ollama",
-        "llama.cpp",
-        "ONNX where supported"
-      ],
+      "candidate_runtime": [],
       "license_status": "verify exact repository and artifact license; do not infer from a different Phi release",
       "source": "https://huggingface.co/microsoft",
       "hardware_profile": "small variants may suit constrained devices; benchmark actual quantization",
-      "android_status": "not yet validated in SuperIA",
+      "android_status": "not applicable to current online-only inference architecture",
       "version": null,
       "artifact": null,
       "sha256": null,
-      "decision": "candidate"
+      "decision": "superseded_not_to_be_used_for_current_SuperIA_inference"
     }
   ],
   "required_before_approval": [
@@ -114,5 +99,6 @@
     "PC_OS_test",
     "Android_device_test_if_claimed",
     "privacy_and_telemetry_review"
-  ]
+  ],
+  "updated_at": "2026-11-23"
 }
