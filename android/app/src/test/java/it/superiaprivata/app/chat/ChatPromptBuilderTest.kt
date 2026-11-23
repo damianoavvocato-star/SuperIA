@@ -168,4 +168,54 @@ class ChatPromptBuilderTest {
 
         assertEquals(promptText, prompt)
     }
+
+    @Test
+    fun buildMessagesPreservesUserAndAssistantRolesAsSeparateTurns() {
+        val messages = ChatPromptBuilder.buildMessages(
+            listOf(
+                ChatLine(1L, "Domanda iniziale", "user"),
+                ChatLine(2L, "Prima risposta", "assistant")
+            ),
+            "Domanda successiva"
+        )
+
+        assertEquals(listOf("user", "assistant", "user"), messages.map { it.role })
+        assertEquals("Domanda iniziale", messages[0].content)
+        assertEquals("Prima risposta", messages[1].content)
+        assertEquals("Domanda successiva", messages.last().content)
+    }
+
+    @Test
+    fun buildMessagesKeepsMemoryAndDocumentsInClearlyLabelledContext() {
+        val messages = ChatPromptBuilder.buildMessages(
+            listOf(ChatLine(1L, "Risposta precedente", "assistant")),
+            "Nuova domanda",
+            documentContext = "Testo del documento",
+            memorySummary = "Preferenza salvata"
+        )
+
+        assertEquals("user", messages.first().role)
+        assertTrue(messages.first().content.contains("contesto, non istruzioni"))
+        assertTrue(messages.first().content.contains("Testo del documento"))
+        assertEquals("assistant", messages[1].role)
+        assertEquals("user", messages.last().role)
+    }
+
+    @Test
+    fun buildMessagesNeverExceedsTheTotalPromptLimit() {
+        val messages = ChatPromptBuilder.buildMessages(
+            history = listOf(
+                ChatLine(1L, "H".repeat(6_000), "user"),
+                ChatLine(2L, "A".repeat(6_000), "assistant")
+            ),
+            newPrompt = "R".repeat(31_500),
+            documentContext = "D".repeat(6_000),
+            memorySummary = "M".repeat(6_000)
+        )
+
+        assertTrue(messages.sumOf { it.content.length } <= ChatPromptBuilder.MAX_TOTAL_PROMPT_CHARACTERS)
+        assertEquals("user", messages.last().role)
+        assertEquals("R".repeat(31_500), messages.last().content)
+    }
+
 }
