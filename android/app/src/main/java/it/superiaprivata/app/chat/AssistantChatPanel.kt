@@ -79,10 +79,17 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var exitDiagnostic by remember(context) { mutableStateOf(RuntimeExitDiagnostics.read(context)) }
     var generating by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
-    var projectMemory by remember(historyStore) { mutableStateOf(runCatching { historyStore.loadProjectMemory() }.getOrDefault("")) }
+    val initialProjectMemory = remember(historyStore) {
+        runCatching { historyStore.loadProjectMemory() }
+    }
+    var projectMemory by remember(initialProjectMemory) {
+        mutableStateOf(initialProjectMemory.getOrDefault(""))
+    }
     var memorySaved by remember { mutableStateOf(false) }
     var savingMemory by remember { mutableStateOf(false) }
-    var memoryError by remember { mutableStateOf<String?>(null) }
+    var memoryError by remember(initialProjectMemory) {
+        mutableStateOf(initialProjectMemory.exceptionOrNull()?.message)
+    }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
     var exportStatus by remember { mutableStateOf<String?>(null) }
     var generationError by remember { mutableStateOf<String?>(null) }
