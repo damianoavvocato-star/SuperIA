@@ -122,7 +122,7 @@ object ChatPromptBuilder {
         tokenize(text).count { it in queryTerms }
 
     private fun tokenize(text: String): Set<String> =
-        Regex("[\\\\p{L}\\\\p{N}]{3,}").findAll(text.lowercase())
+        Regex("[\\p{L}\\p{N}]{3,}").findAll(text.lowercase())
             .map { it.value }
             .toSet()
 }
