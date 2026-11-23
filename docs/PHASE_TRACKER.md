@@ -504,3 +504,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il workflow Android resta limitato a `testDebugUnitTest`. La task `connectedDebugAndroidTest` richiede build/installazione degli APK debug e test, vietati dal gate attuale che impedisce qualsiasi assemblaggio APK prima del completamento funzionale. Nessuna task di assemblaggio avviata.
 - Microfase 29 resta aperta: serve autorizzazione esplicita futura per build strumentale non distribuibile, oltre a force-stop/process death, riavvio, rete interrotta e test su dispositivo fisico. Non dichiarare prove eseguite.
 - Report: `docs/ANDROID_RECOVERY_REVIEW_2026-11-23.md`.
+
+
+## Verifica CI e stato micro-fase 29 — 24 novembre 2026
+- Android unit tests [45273970255](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273970255): **SUCCESS**.
+- Backend tests [45273970258](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273970258): **SUCCESS**.
+- Controllo report/documentazione [45273993198](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45273993198): **SUCCESS**.
+- Branch `main`, HEAD verificato: `1331a58f87c9abcf423602d1ba34b2d99b89ddc0`.
+- Questi esiti non includono `androidTest`: nessuna build/installazione APK, force-stop, process death, emulatore o prova su dispositivo fisico. Il workflow continua a eseguire soltanto `gradle --no-daemon testDebugUnitTest`.
+- Micro-fase 29 resta aperta; gate 36 resta bloccato. Nessun servizio esterno o provider attivato.
