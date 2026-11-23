@@ -133,3 +133,12 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Commit codice: `d59a7f462766c71b2899e2e9da2af6378128fdda`; commit test: `8ca78906102ae74b4612d1d7e1cc5ea51a789ff1`.
 - Stato: modifiche e test aggiunti; CI Android non verificata per questi commit. Non è stato eseguito un test end-to-end con rete intermittente e provider reale.
 - Nessun APK generato o distribuito.
+
+
+## Aggiornamento 23 novembre 2026 — heartbeat SSE
+- Backend: lo stream chat invia commenti SSE `: keep-alive` ogni 15 secondi mentre il provider non produce nuovi eventi; i commenti non diventano delta e non modificano la risposta visualizzata.
+- Durante l'attesa viene rinnovata anche la lease della richiesta idempotente, evitando che una generazione lenta venga recuperata da un secondo worker solo perché non ha ancora prodotto token.
+- La lettura asincrona del provider resta pendente tra gli heartbeat; alla chiusura/cancellazione dello stream il task pendente viene cancellato e l'iteratore viene chiuso.
+- Aggiunto test backend con provider simulato lento: verifica heartbeat, delta finale, evento done e singola invocazione del provider.
+- Esito CI da verificare; il test non è dichiarato superato finché GitHub Actions non termina con successo.
+- Nessun APK generato. Hosting, provider reale, PostgreSQL di produzione e collaudo su telefono restano non configurati/non verificati.
