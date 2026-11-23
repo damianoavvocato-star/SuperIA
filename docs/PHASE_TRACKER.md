@@ -162,3 +162,8 @@ Audit repository del 23 novembre 2026: è presente soltanto il branch `main`; la
 Inventario verificato: 182 record numerati da 1 a 182. La policy online-only è stata applicata all'audit strutturato; 16 riferimenti a inferenza LLM locale sono stati sostituiti e i documenti/matrice storici sono stati marcati come superati dove in conflitto. Il registro componenti marca Ollama e llama.cpp come non integrabili per inferenza. Questo completamento è documentale e strutturale: non certifica termini, prezzi, quote, licenze, provider o hardware dei servizi nominati. L'audit dei provider effettivamente candidati resta nella micro-fase 19.
 
 Commit di riferimento: audit `c3815b8`, matrice `585a2c9`, analisi `08cdd38`, registro `cea44df`.
+
+
+## Micro-fase 02 completata — 23 novembre 2026
+
+Consolidata la policy online-only: le proposte local-first/local LLM presenti in ROADMAP, decisioni Fase 0 e architettura Android sono marcate come storiche; il registro modelli locali è disattivato come fonte di candidati per l'inferenza corrente. Nessun modello locale deve essere scaricato o integrato. Le elaborazioni non-LLM locali restano valutabili. Verifica documentale, non runtime.
