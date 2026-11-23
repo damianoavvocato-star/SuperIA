@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
-from app.device_auth import device_id_for_token, issue_device_token, revoke_device_token
+from app.device_auth import device_id_for_token, issue_device_token, revoke_device_token, rotate_device_token
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, refresh_chat_request_lease, request_payload_hash
 from app.schemas import ChatRequest, ChatResponse
@@ -148,6 +148,26 @@ async def revoke_device(
     revoked = revoke_device_token(_auth_database_path(), request.device_id)
     if not revoked:
         raise HTTPException(status_code=404, detail="Dispositivo non trovato o già revocato.")
+    return {"revoked": True}
+
+
+@app.post("/api/v1/device/rotate", tags=["devices"])
+async def rotate_current_device_token(
+    device_id: str = Depends(require_api_token),
+) -> dict[str, object]:
+    rotated = rotate_device_token(_auth_database_path(), device_id)
+    if not rotated:
+        raise HTTPException(status_code=401, detail="Token dispositivo scaduto o non più attivo; associa nuovamente il dispositivo.")
+    return rotated
+
+
+@app.post("/api/v1/device/revoke-self", tags=["devices"])
+async def revoke_current_device_token(
+    device_id: str = Depends(require_api_token),
+) -> dict[str, bool]:
+    revoked = revoke_device_token(_auth_database_path(), device_id)
+    if not revoked:
+        raise HTTPException(status_code=401, detail="Dispositivo già revocato o non più attivo.")
     return {"revoked": True}
 
 
