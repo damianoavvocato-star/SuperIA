@@ -25,3 +25,10 @@ La prima CI Android sul commit dei test ha evidenziato 6 fallimenti. L'analisi d
 
 - Commit test aggiornati: `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`.
 - Android run 45270440049 e backend run 45270440091: **in corso** all'ultimo controllo. Nessun risultato verde dichiarato.
+
+## Esito CI e test di conservazione parziale — 23 novembre 2026
+- Android unit tests run 45270440049: **SUCCESS** sul commit `547b6bb8e9ed9dd074ef0ba88fdbdfc05ddcafb2`.
+- Backend tests run 45270440091: **SUCCESS** sul medesimo commit.
+- Aggiunto un test ulteriore: un delta valido deve restare consegnato al callback quando il successivo evento delta contiene JSON malformato.
+- Commit del nuovo test: `e083de6094fab41afe21fd7c04cf05d3f344af2d`. La CI di questo nuovo commit deve ancora concludersi.
+- Verifica statica: la cancellazione coroutine chiama `connection.disconnect()`; ciò non sostituisce il test reale di rete interrotta.
