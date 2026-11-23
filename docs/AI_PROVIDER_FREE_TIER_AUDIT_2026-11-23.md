@@ -45,8 +45,8 @@ Esito: audit pubblico completato; **nessun provider attivato**. La verifica acco
 ## Policy applicativa
 - Nessun provider è attivo nel repository o in produzione.
 - Le variabili `APPROVED_FREE`, `NO_PAYMENT_METHOD`, `HARD_STOP`, `NO_FIAT_BILLING` devono essere vere solo dopo verifica dell'account reale.
-- Aggiungere un'attestazione distinta `DATA_POLICY_APPROVED` per impedire che una quota gratuita sia sufficiente a rendere automaticamente idoneo un provider con retention/training incompatibile.
-- Nessuna chiave è stata creata, nessun account provider è stato registrato, nessun metodo di pagamento aggiunto.
+- La validazione richiede ora un'attestazione distinta `SUPERIA_PROVIDER_<ID>_DATA_POLICY_APPROVED=true` oltre alle quattro attestazioni economiche; il default resta false. SambaNova è stato rimosso dall'ordine dei provider e le sue variabili ambientali vengono rifiutate.
+- Nessuna chiave è stata creata, nessun account provider è stato registrato, nessun metodo di pagamento aggiunto. Il router non include più SambaNova e rifiuta esplicitamente le sue variabili.
 
 ## Fonti ufficiali
 - Groq limits: https://console.groq.com/docs/rate-limits
