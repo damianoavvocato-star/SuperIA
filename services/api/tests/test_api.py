@@ -421,7 +421,7 @@ def test_authenticated_device_rotation_replaces_old_token(auth_environment):
     assert not validate_device_token(database, token_data["access_token"])
 
     new_client = TestClient(app, headers={"Authorization": "Bearer " + rotated["access_token"]})
-    assert new_client.get("/api/v1/providers").status_code == 200
+    assert new_client.get("/api/v1/models").status_code == 200
 
 
 def test_authenticated_device_can_revoke_its_own_token(auth_environment):
