@@ -6,42 +6,6 @@ import org.junit.Test
 
 class OnlineAssistantClientTest {
     @Test
-    fun refusesPlainHttpEvenWhenTokenIsPresent() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("http://example.test", "test-token"),
-                    "Ciao"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun refusesEndpointWithQueryParameters() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("https://example.test?token=unsafe", "test-token"),
-                    "Ciao"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun refusesMissingCredentialsBeforeOpeningConnection() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("https://example.test", ""),
-                    "Ciao"
-                )
-            }
-        }
-    }
-
-    @Test
     fun streamingRefusesPlainHttpBeforeOpeningConnection() {
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking {
@@ -96,42 +60,6 @@ class OnlineAssistantClientTest {
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking {
                 OnlineAssistantClient.checkHealth("http://example.test")
-            }
-        }
-    }
-
-    @Test
-    fun refusesOversizedPromptBeforeOpeningConnection() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("https://example.test", "test-token"),
-                    "x".repeat(32_001)
-                )
-            }
-        }
-    }
-
-    @Test
-    fun refusesEndpointContainingUserInfo() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("https://user:password@example.test", "test-token"),
-                    "Ciao"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun refusesEndpointContainingFragment() {
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                OnlineAssistantClient.send(
-                    OnlineConnectionConfig("https://example.test/#unsafe", "test-token"),
-                    "Ciao"
-                )
             }
         }
     }
@@ -273,4 +201,42 @@ class OnlineAssistantClientTest {
             }
         }
     }
+
+    @Test
+    fun streamingRejectsEndpointWithQueryParameters() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test?token=unsafe", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsEndpointContainingUserInfo() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://user:password@example.test", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsEndpointContainingFragment() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test/#unsafe", "test-token"),
+                    "Ciao"
+                ) {}
+            }
+        }
+    }
+
+
 }
