@@ -68,6 +68,60 @@ class ChatHistoryValidationTest {
         org.junit.Assert.assertTrue(runCatching { java.util.UUID.fromString(generated) }.isSuccess)
     }
     @Test
+    fun acceptsFrozenPayloadOnlyWhenItMatchesThePendingUserMessage() {
+        val payload = listOf(
+            ChatPromptMessage("assistant", "Risposta precedente"),
+            ChatPromptMessage("user", "Domanda pendente")
+        )
+        validatePersistedChatLines(
+            listOf(
+                ChatLine(
+                    id = 1L,
+                    text = "Domanda pendente",
+                    role = "user",
+                    pending = true,
+                    requestId = "9b3f3a2e-5a90-4b9f-8f7e-6c0d4d5e2a11",
+                    requestMessages = payload
+                )
+            )
+        )
+    }
+
+    @Test
+    fun rejectsFrozenPayloadWhenItDoesNotMatchPendingUserMessage() {
+        assertThrows(IllegalArgumentException::class.java) {
+            validatePersistedChatLines(
+                listOf(
+                    ChatLine(
+                        id = 1L,
+                        text = "Domanda modificata",
+                        role = "user",
+                        pending = true,
+                        requestMessages = listOf(ChatPromptMessage("user", "Domanda originale"))
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun rejectsFrozenPayloadOnCompletedMessage() {
+        assertThrows(IllegalArgumentException::class.java) {
+            validatePersistedChatLines(
+                listOf(
+                    ChatLine(
+                        id = 1L,
+                        text = "Domanda",
+                        role = "user",
+                        pending = false,
+                        requestMessages = listOf(ChatPromptMessage("user", "Domanda"))
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
     fun rejectsDuplicateMessageIds() {
         assertThrows(IllegalArgumentException::class.java) {
             validatePersistedChatLines(
