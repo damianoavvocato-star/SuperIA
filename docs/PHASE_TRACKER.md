@@ -285,3 +285,10 @@ Evidenze: backend CI run 738 **109 passed, 1 warning**; Android CI run 246 SUCCE
 - 35 Bloccata: test fisico Android richiede backend/provider e telefono.
 
 Rapporto: [CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md](CONVERSATION_AND_DOCUMENTS_VALIDATION_2026-11-23.md).
+
+
+## Micro-fase 36 — Gate finale chat online — BLOCCATO (23 novembre 2026)
+Non soddisfatti: backend HTTPS pubblico, database PostgreSQL persistente, WAF IP rate limit reale, provider free account-level, secret manager e test E2E su telefono reale. Nessun APK autorizzato o generato. Fasi 37–50 in attesa del gate. Rapporto: [ONLINE_CHAT_FINAL_GATE_2026-11-23.md](ONLINE_CHAT_FINAL_GATE_2026-11-23.md).
+
+## Riepilogo stato piano — 23 novembre 2026
+21/50 micro-fasi completate (42%); 10 bloccate da dipendenze esterne; 5 in attesa di verifica pratica; 14 non iniziate (fasi 37–50). Le fasi completate sono supportate da test/documenti/commit indicati nei rapporti; nessun completamento è attribuito a deploy o provider reali non eseguiti.
