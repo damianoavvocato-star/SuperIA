@@ -333,4 +333,32 @@ class OnlineAssistantClientTest {
     }
 
 
+
+    @Test
+    fun streamingRejectsUnsupportedStructuredMessageRoleBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    listOf(ChatPromptMessage("tool", "Risultato non ammesso"))
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun streamingRejectsStructuredConversationOverTotalCharacterLimit() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    listOf(
+                        ChatPromptMessage("user", "x".repeat(20_000)),
+                        ChatPromptMessage("assistant", "y".repeat(12_001))
+                    )
+                ) {}
+            }
+        }
+    }
+
 }
