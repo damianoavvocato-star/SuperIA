@@ -29,6 +29,18 @@ class DatabaseConnection:
         self.close()
 
 
+
+def is_postgres_url(database_url: str) -> bool:
+    value = (database_url or "").strip()
+    return value.startswith(("postgresql://", "postgres://", "postgresql+psycopg://"))
+
+
+def validate_deployment_database_url(database_url: str, environment: str, setting_name: str) -> None:
+    """Require shared PostgreSQL for staging/production; SQLite remains local/test only."""
+    mode = (environment or "development").strip().lower()
+    if mode in {"staging", "production"} and not is_postgres_url(database_url):
+        raise ValueError(f"{setting_name} must be a PostgreSQL URL in {mode}; SQLite/temp storage is forbidden.")
+
 def connect_database(database_url: str) -> DatabaseConnection:
     """Open SQLite for local/test use or PostgreSQL for configured deployments."""
     value = (database_url or "").strip()
