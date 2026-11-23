@@ -77,6 +77,20 @@ class OnlineAssistantClientTest {
         }
     }
 
+
+    @Test
+    fun streamingRejectsInvalidRequestIdBeforeOpeningConnection() {
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                OnlineAssistantClient.stream(
+                    OnlineConnectionConfig("https://example.test", "test-token"),
+                    "Ciao",
+                    requestId = "not-a-uuid"
+                ) {}
+            }
+        }
+    }
+
     @Test
     fun healthCheckAlsoRejectsPlainHttp() {
         assertThrows(IllegalArgumentException::class.java) {
