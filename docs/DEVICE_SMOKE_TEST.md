@@ -62,3 +62,32 @@ Quando il gate precedente è completo e la build definitiva è stata autorizzata
 - Esito complessivo e difetti aperti:
 
 Non dichiarare il collaudo superato se una prova è stata saltata o non è riproducibile. Non creare una nuova build per correggere singoli difetti prima che tutte le funzioni chat online siano pronte; raccogliere i difetti e integrarli prima dell'unica build definitiva.
+
+## Preparazione del collaudo recovery — 24 novembre 2026
+
+Questa sezione è una preparazione documentale e statica: **non attesta l'esecuzione di test strumentali o prove su dispositivo**.
+
+### Verifiche statiche effettuate
+- Suite `ChatHistoryStoreInstrumentedTest` presente con casi per: archivio cifrato AES-GCM, memoria cifrata, perdita della chiave Keystore (fail-closed e file preservato), archivio corrotto, recupero AtomicFile da backup, cancellazione senza resurrection, migrazione legacy, concorrenza lettura/scrittura, ID e payload pendenti.
+- Il test `pendingRequestIdSurvivesStoreRecreationForSafeRetry` crea una nuova istanza dello store nello stesso processo: **non** simula process death e non deve essere conteggiato come prova di riavvio.
+- La suite Android CI continua a eseguire esclusivamente `gradle --no-daemon testDebugUnitTest`. Il task `connectedDebugAndroidTest` costruisce e installa APK di test: resta vietato dal blocco APK attuale e non è stato avviato.
+
+### Sequenza da eseguire quando il gate e la build definitiva saranno autorizzati
+1. Registrare commit, versione Android, modello dispositivo, livello API e stato iniziale di rete/batteria.
+2. Installare una sola build definitiva autorizzata; verificare avvio, pairing HTTPS e persistenza delle credenziali.
+3. Inviare una domanda e interrompere la rete durante lo streaming; verificare che la risposta parziale resti visibile e la richiesta resti recuperabile.
+4. Chiudere il processo app dal sistema operativo (non solo ricreare Activity), riaprire e verificare che la richiesta pendente e il payload originale siano recuperati.
+5. Ripristinare la rete e usare “Riprendi richiesta”; verificare stesso request ID, nessun duplicato nella cronologia e completamento coerente.
+6. Ripetere con Wi-Fi e rete mobile, includendo sospensione/riattivazione e riavvio del dispositivo.
+7. Verificare separatamente cancellazione cronologia, cancellazione memoria progetto, esportazione TXT e comportamento fail-closed in caso di archivio/chiave non disponibili.
+8. Allegare log sanitizzati e risultati per ogni caso; non includere token, codici pairing, chiavi o contenuti privati.
+
+### Criteri di accettazione recovery
+- Nessun messaggio utente o risposta già persistita viene duplicato dopo retry.
+- Il retry usa lo stesso request ID e lo stesso payload provider-ready salvato prima della prima chiamata di rete.
+- Una risposta parziale non viene spacciata per risposta completata; un EOF senza evento SSE `done` resta un errore recuperabile.
+- Dati cifrati corrotti o chiave Keystore mancante non vengono trasformati silenziosamente in cronologia/memoria vuota né sovrascritti.
+- La cancellazione esplicita non permette il ripristino di copie `.bak`.
+- Ogni caso deve essere eseguito e registrato su entrambi i dispositivi previsti; una prova mancante mantiene aperta la microfase 29.
+
+**Stato attuale:** preparazione completata; esecuzione runtime rinviata al gate autorizzato. Nessun APK generato, nessun test strumentale avviato, nessuna prova su telefono dichiarata.
