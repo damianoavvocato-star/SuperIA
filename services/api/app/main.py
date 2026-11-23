@@ -14,7 +14,7 @@ from app.device_auth import device_id_for_token, issue_device_token, revoke_devi
 from app.providers.free_router import FreeOnlyRouter, NoFreeProviderAvailable
 from app.chat_requests import claim_chat_request, complete_chat_request, fail_chat_request, refresh_chat_request_lease, request_payload_hash
 from app.schemas import ChatRequest, ChatResponse
-from app.database import validate_deployment_database_url
+from app.database import connect_database, validate_deployment_database_url
 
 MAX_API_BODY_BYTES = 2 * 1024 * 1024
 SSE_HEARTBEAT_SECONDS = 15
@@ -134,6 +134,47 @@ async def home() -> str:
 async def health() -> dict[str, str]:
     return {"status": "ok", "project": "SuperIA"}
 
+
+
+@app.get("/api/v1/readiness", tags=["system"])
+async def readiness(_: None = Depends(require_admin_token)) -> JSONResponse:
+    """Admin-only readiness details; never returns URLs, credentials, or provider identifiers."""
+    database_status = "unavailable"
+    device_auth_status = "not_checked"
+    provider_configuration = "not_checked"
+
+    try:
+        database_url = _auth_database_path()
+        with connect_database(database_url) as connection:
+            connection.execute("SELECT 1").fetchone()
+            database_status = "ok"
+            try:
+                connection.execute("SELECT COUNT(*) FROM device_tokens").fetchone()
+                device_auth_status = "ok"
+            except Exception:
+                device_auth_status = "schema_missing"
+    except Exception:
+        database_status = "unavailable"
+        device_auth_status = "not_checked"
+
+    if database_status == "ok":
+        try:
+            configured_models = await get_provider().list_models()
+            provider_configuration = "configured" if configured_models else "none_configured"
+        except Exception:
+            provider_configuration = "invalid_or_unavailable"
+
+    ready = database_status == "ok" and device_auth_status == "ok"
+    return JSONResponse(
+        status_code=200 if ready else 503,
+        content={
+            "status": "ready" if ready else "degraded",
+            "process": "ok",
+            "database": database_status,
+            "device_auth": device_auth_status,
+            "provider_configuration": provider_configuration,
+        },
+    )
 
 @app.post("/api/v1/device/pair", tags=["devices"])
 async def pair_device(request: PairDeviceRequest) -> dict[str, object]:
