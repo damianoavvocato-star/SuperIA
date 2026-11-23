@@ -117,7 +117,7 @@ class ChatHistoryStore(context: Context) {
         migrated
     }
 
-    fun save(messages: List<ChatLine>) {
+    fun save(messages: List<ChatLine>) = synchronized(ARCHIVE_WRITE_LOCK) {
         validatePersistedChatLines(messages)
         val json = JSONArray()
         messages.forEach { line ->
@@ -137,7 +137,7 @@ class ChatHistoryStore(context: Context) {
         String(decrypt(memoryArchive.openRead().use { it.readBytes() }), Charsets.UTF_8)
     }
 
-    fun saveProjectMemory(memory: String) {
+    fun saveProjectMemory(memory: String) = synchronized(ARCHIVE_WRITE_LOCK) {
         writeAtomically(memoryArchive, encrypt(memory.trim().toByteArray(Charsets.UTF_8)))
     }
 
