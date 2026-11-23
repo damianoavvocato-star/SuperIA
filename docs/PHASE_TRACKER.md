@@ -142,3 +142,9 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Aggiunto test backend con provider simulato lento: verifica heartbeat, delta finale, evento done e singola invocazione del provider.
 - Esito CI da verificare; il test non è dichiarato superato finché GitHub Actions non termina con successo.
 - Nessun APK generato. Hosting, provider reale, PostgreSQL di produzione e collaudo su telefono restano non configurati/non verificati.
+
+### Fase 1 — hardening test client Android (23 novembre 2026)
+- Estesa la suite OnlineAssistantClientTest con verifiche pre-rete per lo streaming: rifiuto di endpoint HTTPS contenenti query string, credenziali nell'URL o frammenti, e rifiuto di prompt vuoti.
+- Commit test: 045a619b092d93b4da8f132ae3f6479b0f45cc96.
+- La modifica al percorso android/** attiva il workflow Android unit tests su push a main; l'esito deve essere controllato prima di considerare verificata la suite.
+- La Fase 1 resta aperta: pairing e connessione su backend HTTPS pubblicato, rate limiting effettivo sul gateway/WAF e prova su dispositivo fisico non sono ancora eseguibili perché l'infrastruttura di produzione non è stata configurata. Nessun APK creato.
