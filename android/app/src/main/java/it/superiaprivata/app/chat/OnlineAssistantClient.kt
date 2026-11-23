@@ -373,7 +373,7 @@ internal fun extractJsonStringField(payload: String, field: String): String? {
             character == '"' -> return result.toString()
             character == '\\' -> {
                 if (index >= payload.length) return null
-                when (val escaped = payload[index++]) {
+                when (payload[index++])
                     '"' -> result.append('"')
                     '\\' -> result.append('\\')
                     '/' -> result.append('/')
