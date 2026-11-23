@@ -353,6 +353,50 @@ object OnlineAssistantClient {
 
 
 
+
+internal fun extractJsonStringField(payload: String, field: String): String? {
+    val key = "\"${field}\""
+    var index = payload.indexOf(key)
+    if (index < 0) return null
+    index += key.length
+    while (index < payload.length && payload[index].isWhitespace()) index++
+    if (index >= payload.length || payload[index] != ':') return null
+    index++
+    while (index < payload.length && payload[index].isWhitespace()) index++
+    if (index >= payload.length || payload[index] != '"') return null
+    index++
+
+    val result = StringBuilder()
+    while (index < payload.length) {
+        val character = payload[index++]
+        when {
+            character == '"' -> return result.toString()
+            character == '\\' -> {
+                if (index >= payload.length) return null
+                when (val escaped = payload[index++]) {
+                    '"' -> result.append('"')
+                    '\\' -> result.append('\\')
+                    '/' -> result.append('/')
+                    'b' -> result.append('\b')
+                    'f' -> result.append('\u000C')
+                    'n' -> result.append('\n')
+                    'r' -> result.append('\r')
+                    't' -> result.append('\t')
+                    'u' -> {
+                        if (index + 4 > payload.length) return null
+                        val code = payload.substring(index, index + 4).toIntOrNull(16) ?: return null
+                        result.append(code.toChar())
+                        index += 4
+                    }
+                    else -> return null
+                }
+            }
+            else -> result.append(character)
+        }
+    }
+    return null
+}
+
 internal suspend fun consumeSseEvents(
     reader: java.io.BufferedReader,
     onDelta: suspend (String) -> Unit,
@@ -367,10 +411,9 @@ internal suspend fun consumeSseEvents(
             line.startsWith("data:") -> {
                 val data = line.substringAfter("data:").trim()
                 if (data.isBlank()) continue
-                val payload = runCatching { JSONObject(data) }.getOrNull() ?: continue
                 when (eventName) {
                     "delta" -> {
-                        val piece = payload.optString("text")
+                        val piece = extractJsonStringField(data, "text").orEmpty()
                         if (piece.isNotEmpty()) {
                             answer.append(piece)
                             onDelta(piece)
@@ -381,7 +424,7 @@ internal suspend fun consumeSseEvents(
                         break
                     }
                     "error" -> throw IllegalStateException(
-                        payload.optString("message").ifBlank { "Il flusso online si è interrotto." }
+                        extractJsonStringField(data, "message").orEmpty().ifBlank { "Il flusso online si è interrotto." }
                     )
                 }
                 eventName = ""
