@@ -193,8 +193,10 @@ Ultima evidenza CI backend registrata nell'audit del 23 novembre: run 605 SUCCES
 ### Micro-fase 05 — Completata
 Audit statico del client Android: [ANDROID_CLIENT_AUDIT_2026-11-23.md](ANDROID_CLIENT_AUDIT_2026-11-23.md). Verificati HTTPS, pairing, token cifrato, SSE, request ID, cancellazione, storage cifrato, memoria e limiti prompt. Resta rilevato il metodo legacy non-streaming `send()`, da rimuovere solo dopo ricerca riferimenti e test mirati. Nessun APK.
 
-### Micro-fase 06 — In attesa di verifica
-Il workflow Android è stato letto e rispetta il vincolo: JDK 17, Gradle 8.11.1, soltanto `testDebugUnitTest`; nessun assemblaggio APK. Non è stata acquisita una run Android CI verificabile sul commit corrente tramite gli strumenti disponibili. I test non sono dichiarati superati.
+### Micro-fase 06 — Completata
+GitHub Actions Android unit tests, run 222 (ID `45091390966`), commit `739f585b168b24bc817ab0cbcc49babc799ad392`: SUCCESS. Log: `gradle --no-daemon testDebugUnitTest`, task `:app:testDebugUnitTest`, BUILD SUCCESSFUL in 28s. Job esegue checkout, JDK 17, Gradle e test unitari; nessun task assemble/sign/upload APK. Evidenza CI del commit indicato; non è un test su dispositivo fisico.
 
 ### Micro-fase 07 — Completata
 GitHub Actions Backend tests, run 577 (ID `45089445756`), commit `036a2be916c7828be6c492d43b6b37fcc1dcacd3`: job PostgreSQL SUCCESS; log pytest **60 passed, 1 warning in 1.31s**. Tutti gli step del job hanno conclusione success. Questa è baseline backend automatica, non test E2E con provider reale.
+
+- Micro-fase 06 chiusa con evidenza run Android 222, job SUCCESS, comando unit-test only; nessun APK prodotto.
