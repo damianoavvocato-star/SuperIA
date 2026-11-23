@@ -385,56 +385,5 @@ object OnlineAssistantClient {
         }
     }
 
-    suspend fun send(config: OnlineConnectionConfig, prompt: String): String = withContext(Dispatchers.IO) {
-        require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend nelle Impostazioni." }
-        require(prompt.isNotBlank()) { "La richiesta non può essere vuota." }
-        require(prompt.length <= 32_000) { "La richiesta supera il limite di 32.000 caratteri. Riduci il testo o il contesto documentale." }
 
-        val endpoint = config.endpoint.trim().trimEnd('/')
-        val base = URL(endpoint)
-        require(base.protocol.equals("https", ignoreCase = true)) {
-            "Per proteggere la conversazione è consentito soltanto un indirizzo HTTPS."
-        }
-        require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
-            "Indirizzo backend non valido: non usare credenziali, parametri o frammenti nell'URL."
-        }
-        val chatUrl = URL("$endpoint/api/v1/chat")
-        val connection = (chatUrl.openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            instanceFollowRedirects = false
-            connectTimeout = 15_000
-            readTimeout = 120_000
-            doOutput = true
-            setRequestProperty("Authorization", "Bearer ${config.token}")
-            setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            setRequestProperty("Accept", "application/json")
-        }
-
-        try {
-            val body = JSONObject().put(
-                "messages",
-                JSONArray().put(JSONObject().put("role", "user").put("content", prompt))
-            ).toString().toByteArray(Charsets.UTF_8)
-            connection.outputStream.use { it.write(body) }
-            val status = connection.responseCode
-            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-            val raw = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-            val json = runCatching { JSONObject(raw) }.getOrNull()
-            if (status !in 200..299) {
-                val detail = json?.optString("detail")?.takeIf { it.isNotBlank() }
-                throw IllegalStateException(
-                    detail ?: when (status) {
-                        401 -> "Token backend non valido."
-                        503 -> "Backend non configurato o nessun provider gratuito disponibile."
-                        else -> "Errore del backend (HTTP $status)."
-                    }
-                )
-            }
-            val answer = json?.optString("content").orEmpty().trim()
-            if (answer.isBlank()) throw IllegalStateException("Il backend ha restituito una risposta vuota.")
-            answer
-        } finally {
-            connection.disconnect()
-        }
-    }
 }
