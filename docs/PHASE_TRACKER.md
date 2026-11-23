@@ -313,3 +313,11 @@ Aggiunta validazione condivisa prima del salvataggio e dopo la decodifica dell'a
 
 ### Micro-fase 29 — unicità identificativi cronologia — 23 novembre 2026
 La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request ID duplicati e messaggi assistant marcati pending. Aggiunti tre test unitari di regressione. Android CI [run 263](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45131163579): **SUCCESS**, `testDebugUnitTest`. Backend CI [run 780](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45131163584): **116 passed, 1 warning**. La fase 29 resta **In attesa di verifica** per il collaudo instrumented su dispositivo/emulatore reale. Nessun APK.
+
+## Verifica persistenza chat e CI — 23 novembre 2026
+- Commit `ec03c7d`: corretta l'aspettativa del test ID duplicati (candidato 42 con 42/43/44 occupati produce 45).
+- Commit `12fe5d1`: salvataggio preventivo del messaggio pending e del segnaposto assistant anche nel normale invio; rimosso un salvataggio duplicato nel percorso di ripresa.
+- Android CI [run 45158387411](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45158387411): SUCCESS, solo `testDebugUnitTest`, BUILD SUCCESSFUL in 38s.
+- Backend CI [run 45158387265](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45158387265): SUCCESS, **116 passed, 1 warning in 1.57s**.
+- La persistenza periodica dei delta resta serializzata e versionata; il test di terminazione forzata, riavvio, sospensione e perdita rete su dispositivo reale non è ancora eseguito. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 bloccato. Nessun APK.
+- Rapporto: [CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md](CHAT_STREAM_PERSISTENCE_HARDENING_2026-11-23.md).
