@@ -423,3 +423,6 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 
 
 - Rifinitura finale della persistenza payload: al completamento di una richiesta nuova il campo temporaneo `requestMessages` viene azzerato, come già avviene nel percorso di retry. Commit UI `542af37dca194db2bc9ecfd6e12943ef9b9d867c`. Android CI run [45268304090](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268304090) in esecuzione al momento dell'annotazione; Backend CI run [45268304495](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268304495) in esecuzione. Nessun APK.
+
+
+- Esito della prima CI Android: run [45268304090](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268304090) **FAILURE** in compilazione Kotlin, per due dichiarazioni locali con lo stesso nome `pendingIndex` nel blocco di invio iniziale (non per i test di persistenza). Corretto rinominando la variabile dedicata al salvataggio del payload in `payloadPendingIndex`. Commit fix `da713b3b3c4ddd938e410563815fbf92fc4d8af8`. Nuove CI Android [45268526027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526027) e Backend [45268526344](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45268526344) avviate; esito ancora da verificare.
