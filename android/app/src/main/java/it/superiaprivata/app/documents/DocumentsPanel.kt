@@ -43,12 +43,14 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
     val extractor = remember(context) { DocumentTextExtractor(context) }
     val ocrStore = remember(context) { OcrLanguageDataStore(context) }
     var status by remember { mutableStateOf<String?>(null) }
+    var archiveReady by remember { mutableStateOf(false) }
     val documents = remember(repository) { mutableStateListOf<StoredDocument>() }
     LaunchedEffect(repository) {
         try {
             val restored = withContext(Dispatchers.IO) { repository.list() }
             documents.clear()
             documents.addAll(restored)
+            archiveReady = true
         } catch (error: Exception) {
             status = error.message ?: "Archivio documenti non leggibile. I file cifrati sono stati preservati."
         }
@@ -138,7 +140,7 @@ fun DocumentsPanel(onContextChanged: (String?) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Apri dizionario italiano ufficiale") }
             Button(
-                enabled = !importing,
+                enabled = !importing && archiveReady,
                 onClick = { picker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
                 modifier = Modifier.fillMaxWidth()
             ) { Text(if (importing) "Importazione…" else "Importa un documento") }
