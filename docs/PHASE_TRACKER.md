@@ -261,3 +261,15 @@ Nessun account provider o API key creati. Attivazione del primo provider reale r
 
 ## Micro-fase 21 — Completata
 Guard-rail free-only verificati: allowlist, attestazioni economiche + data policy, esclusione SambaNova, cooldown/failover 429, disabilitazione 401/402/403, cooldown 408/5xx/rete, nessun cambio provider dopo primo token, nessun fallback locale o pagato. CI backend run 705: **104 passed, 1 warning**. Rapporto: [PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md](PROVIDER_AUDIT_AND_FREE_GUARDS_2026-11-23.md).
+
+
+## Micro-fasi 22–28 — aggiornamento 23 novembre 2026
+- 22 Completata: failover/cooldown solo tra provider free approvati, nessun fallback locale o pagato.
+- 23 Completata: schema ruoli/limiti verificato; prompt totale Android ora limitato a 32.000 caratteri. Contesto ancora serializzato come singolo messaggio user con ruoli nel testo.
+- 24 Completata: rimosse route non-streaming, root web prototype, static index, Ollama backend e metodo client send; solo SSE.
+- 25 Completata: parser SSE Android testato per delta, heartbeat, done, error, troncamento ed escape JSON.
+- 26 In attesa di verifica: heartbeat e lease implementati; test disconnessione reale telefono/rete ancora mancante.
+- 27 Completata: idempotenza, replay cifrato, conflitto payload, lease e fencing testati su PostgreSQL CI.
+- 28 In attesa di verifica: ID e pending persistono, retry usa lo stesso ID; manca test E2E kill/restart app su dispositivo.
+
+Evidenze: backend CI run 738 **109 passed, 1 warning**; Android CI run 246 SUCCESS, BUILD SUCCESSFUL in 39s. Rapporto: [ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md](ONLINE_CHAT_ENGINE_AUDIT_2026-11-23.md).
