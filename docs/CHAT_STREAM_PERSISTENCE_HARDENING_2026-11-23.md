@@ -28,3 +28,14 @@ Sul commit `786823c12afee6f4c94c942f4afd1c250f6993bb` i controlli Android unit e
 - Android CI [run 45161032871](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032871): **SUCCESS**, workflow limitato a `testDebugUnitTest`.
 - Backend CI [run 45161032819](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032819): **SUCCESS**.
 - Le prove CI non sostituiscono il test instrumented/E2E su dispositivo reale: terminazione forzata, riavvio, rete interrotta e recupero dello stream restano da verificare. Non dichiarare completate le micro-fasi 26, 28 o 29 sulla sola base di questi run.
+
+
+## Verifica della sincronizzazione del recupero — 23 novembre 2026
+
+Il commit `790e88da53c2e4e9bf649e465f354e85cd7cad0d` coordina anche i salvataggi di recupero con la persistenza periodica dei delta. Nei percorsi di invio normale e retry, il persister viene creato prima dello streaming; i catch di cancellazione, errore di memoria ed eccezione ordinaria invocano `flush()` in contesto non cancellabile, invece di scrivere direttamente un nuovo snapshot fuori dalla coda serializzata. In questo modo i salvataggi finali condividono mutex e controllo versione con gli snapshot periodici.
+
+- Android CI [run 45162213509](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213509): **SUCCESS**, test unitari Android completati.
+- Backend CI [run 45162213485](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213485): **SUCCESS**, test backend completati.
+- Il workflow Android continua a eseguire soltanto `gradle --no-daemon testDebugUnitTest`; nessun task di assemblaggio APK è stato eseguito.
+
+Questa è evidenza CI, non prova pratica su telefono. Restano da eseguire test di chiusura forzata, riavvio, sospensione e perdita/ripristino della rete; le micro-fasi 26, 28 e 29 non vengono chiuse e il gate 36 resta bloccato.

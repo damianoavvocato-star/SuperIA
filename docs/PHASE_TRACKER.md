@@ -328,3 +328,13 @@ La validazione dell'archivio rifiuta ora anche ID messaggio duplicati, request I
 - Commit `827ad1b35e41b00767235dab5a67496c75becad9`: Android run [45161032871](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032871) **SUCCESS**; backend run [45161032819](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45161032819) **SUCCESS**.
 - Il nuovo test copre collisione ID dopo overflow di `Long.MAX_VALUE`; commento KDoc del persister riallineato alla classe corretta.
 - Questi sono test automatici CI; non eseguono instrumented test né provano kill/restart, perdita rete o sospensione su dispositivo. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 resta bloccato. Nessun APK.
+
+
+### Verifica persistenza serializzata — commit 790e88d — 23 novembre 2026
+- Individuato e corretto un possibile conflitto tra i salvataggi periodici dello streaming e i salvataggi di recupero nei percorsi di errore/cancellazione.
+- I percorsi di invio normale e retry creano ora il medesimo `StreamHistoryPersister` prima dello streaming; anche il recupero nei catch passa da `flush()`, così usa mutex e ordinamento per versione condivisi con gli snapshot periodici.
+- Il salvataggio iniziale del messaggio utente pending e del segnaposto assistant resta precedente all'apertura della rete.
+- Commit: `790e88da53c2e4e9bf649e465f354e85cd7cad0d`.
+- Android CI [run 45162213509](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213509): **SUCCESS**, job `android-unit-tests` completato.
+- Backend CI [run 45162213485](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45162213485): **SUCCESS**, job `test` completato.
+- La CI conferma i test automatici del commit; non prova terminazione forzata, riavvio, sospensione o perdita rete su dispositivo reale. Micro-fasi 26, 28 e 29 restano in attesa di verifica pratica; gate 36 resta bloccato. Nessun APK generato.
