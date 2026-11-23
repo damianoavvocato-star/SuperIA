@@ -131,3 +131,10 @@ Durante la revisione del test `persistsMoreThanOneHundredMessagesAndPendingState
 - Aggiunto inoltre `explicitClearRemovesAtomicFileBackupsAndPreventsDataResurrection`, che verifica la cancellazione di entrambi i backup `.bak` e l'assenza di recupero dei dati cancellati.
 - CI del commit `271e913e78e90aeb51eb21a55171af28f3d986c9`: Android run [45265475942](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265475942) e Backend run [45265476027](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265476027) risultano ancora in esecuzione al momento dell'aggiornamento.
 - I test nuovi sono instrumented e non vengono eseguiti da `testDebugUnitTest`; resta necessario il collaudo su emulatore/dispositivo. Nessun APK.
+
+
+### Interfaccia: errore memoria cifrata non più mascherato — 23 novembre 2026
+- Commit Android `82ca6606083bb5b656e4935f6eb174fa8ed477fa`: il caricamento iniziale della memoria progetto conserva ora il risultato (`Result`) e propaga il messaggio di errore nello stato `memoryError` invece di trasformare ogni errore di decifratura in stringa vuota.
+- Questo evita che una memoria illeggibile per corruzione o perdita della chiave venga presentata come memoria realmente vuota. La UI mantiene comunque un valore vuoto non utilizzabile come prova di successo e mostra l'errore nella sezione memoria.
+- Android CI [run 45265714340](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714340) e Backend CI [run 45265714497](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45265714497) erano ancora in esecuzione al momento della registrazione.
+- Nessun test instrumented è stato eseguito; nessun APK generato.
