@@ -493,3 +493,13 @@ def test_provider_config_rejects_missing_data_policy_approval(tmp_path):
     env.pop("SUPERIA_PROVIDER_GROQ_DATA_POLICY_APPROVED")
     with pytest.raises(ValueError, match="DATA_POLICY_APPROVED"):
         FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "data-policy.sqlite3"))
+
+
+
+def test_sambanova_is_rejected_as_payment_method_required(tmp_path):
+    env = {
+        "SUPERIA_FREE_ONLY": "true",
+        "SUPERIA_PROVIDER_SAMBANOVA_API_KEY": "must-not-be-used",
+    }
+    with pytest.raises(ValueError, match="SambaNova is excluded"):
+        FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "sambanova-excluded.sqlite3"))
