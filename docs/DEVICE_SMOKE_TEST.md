@@ -7,6 +7,38 @@ Questo protocollo sostituisce le vecchie istruzioni per scaricare APK e importar
 
 Il 24 novembre 2026 l'utente ha autorizzato una deroga circoscritta: GitHub Actions può generare e installare APK **debug temporanei esclusivamente nell'emulatore CI** per eseguire i test strumentali delle microfasi 29–30. Questa autorizzazione non consente build release, firma, distribuzione, pubblicazione o installazione di APK intermedi su telefoni personali. L'APK definitivo resta bloccato fino al superamento del gate online e all'autorizzazione finale. I test su dispositivi fisici sono una verifica separata e non sono attestati dai test CI.
 
+
+## Collaudo su telefono fisico — microfasi 29 e 30
+
+Il 24 novembre 2026 l'utente ha scelto esplicitamente di aggiungere il collaudo su telefono Android fisico per aumentare l'affidabilità delle verifiche. È quindi autorizzata una build **debug temporanea, non release**, limitata a questa validazione. Non è un APK finale, non va pubblicato o distribuito ad altri.
+
+Il workflow `android-physical-device-test-apks` genera e conserva per 3 giorni:
+- `app-debug.apk`: applicazione da installare sul telefono di prova;
+- `app-debug-androidTest.apk`: pacchetto dei test strumentali.
+
+### Procedura tecnica (serve un PC con Android Platform Tools/ADB)
+1. Scaricare entrambi gli APK dall'artifact `superia-physical-device-test-apks` della GitHub Actions run.
+2. Attivare temporaneamente Opzioni sviluppatore e Debug USB sul telefono, collegarlo al PC e autorizzare il computer.
+3. Verificare il collegamento con `adb devices`.
+4. Installare l'app e il pacchetto test:
+   `adb install -r app-debug.apk`
+   `adb install -r app-debug-androidTest.apk`
+5. Eseguire la suite strumentale:
+   `adb shell am instrument -w it.superiaprivata.app.test/androidx.test.runner.AndroidJUnitRunner`
+6. Per il test di riavvio processo, eseguire prima il metodo di preparazione, arrestare davvero il processo e poi il metodo di verifica:
+   `adb shell am instrument -w -e class it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart it.superiaprivata.app.test/androidx.test.runner.AndroidJUnitRunner`
+   `adb shell am force-stop it.superiaprivata.app`
+   `adb shell am instrument -w -e class it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart it.superiaprivata.app.test/androidx.test.runner.AndroidJUnitRunner`
+7. Salvare l'output integrale dei test, modello telefono, versione Android e commit testato. Rimuovere i due pacchetti debug al termine del collaudo.
+
+Se il PC non è disponibile, non improvvisare l'installazione del pacchetto test dal telefono: organizzare il test con ADB è necessario per lanciare in modo affidabile la suite strumentale.
+
+### Stato
+- Il run CI `45486302611` ha superato i test unitari Android ma **non ha eseguito alcun test strumentale**: l'emulatore non riusciva ad avviare il servizio Package Manager (`Can't find service: package`) durante l'installazione dell'APK. Non è un fallimento dimostrato del codice dei test.
+- La build fisica separata prepara i due APK temporanei; l'esito reale dipenderà dall'esecuzione sul dispositivo.
+- Microfasi 29 e 30 restano aperte fino alla registrazione dei risultati; il controllo su dispositivo fisico è ora parte del percorso di accettazione.
+- Nessuna build release, firma di distribuzione o pubblicazione è autorizzata.
+
 ## Gate prima del test su telefono
 1. Backend HTTPS pubblicato su hosting verificato gratuito, senza carta o addebiti.
 2. Database persistente configurato e verificato dopo riavvio.
