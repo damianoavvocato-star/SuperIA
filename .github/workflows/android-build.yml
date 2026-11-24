@@ -58,7 +58,7 @@ jobs:
             gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
             gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
             adb shell am force-stop it.superiaprivata.app
-            if [ -n "$(adb shell pidof it.superiaprivata.app | tr -d '\\r')" ]; then
+            if adb shell pidof it.superiaprivata.app | grep -q '[0-9]'; then
               echo "Il processo applicativo risulta ancora attivo dopo force-stop"
               exit 1
             fi
