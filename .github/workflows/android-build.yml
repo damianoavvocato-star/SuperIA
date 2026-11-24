@@ -61,25 +61,14 @@ jobs:
             adb shell pm list instrumentation > android/app/build/diagnostics/installed-instrumentation.txt
             adb logcat -c
 
-            run_instrumented_tests() {
-              if "$@"; then
-                return 0
-              else
-                test_status=$?
-                adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt
-                adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true
-                return "$test_status"
-              fi
-            }
-
-            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
-            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest || { test_status=$?; adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt; adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true; exit "$test_status"; }
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart || { test_status=$?; adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt; adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true; exit "$test_status"; }
             adb shell am force-stop it.superiaprivata.app
             if adb shell pidof it.superiaprivata.app | grep -q '[0-9]'; then
               echo "Il processo applicativo risulta ancora attivo dopo force-stop"
               exit 1
             fi
-            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart || { test_status=$?; adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt; adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true; exit "$test_status"; }
       - name: Upload Android instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
