@@ -5,7 +5,7 @@ Aggiornato: 21 novembre 2026
 ## Stato e vincolo APK
 Questo protocollo sostituisce le vecchie istruzioni per scaricare APK e importare Gemma. Il runtime locale Gemma/LiteRT-LM è stato rimosso e non deve essere testato o reinstallato.
 
-Su richiesta dell'utente, non generare né installare APK intermedi. La pipeline Android resta limitata ai test unitari. Il collaudo su telefono verrà eseguito soltanto dopo il completamento del backend online e la preparazione autorizzata dell'unica build APK definitiva.
+Il 24 novembre 2026 l'utente ha autorizzato una deroga circoscritta: GitHub Actions può generare e installare APK **debug temporanei esclusivamente nell'emulatore CI** per eseguire i test strumentali delle microfasi 29–30. Questa autorizzazione non consente build release, firma, distribuzione, pubblicazione o installazione di APK intermedi su telefoni personali. L'APK definitivo resta bloccato fino al superamento del gate online e all'autorizzazione finale. I test su dispositivi fisici sono una verifica separata e non sono attestati dai test CI.
 
 ## Gate prima del test su telefono
 1. Backend HTTPS pubblicato su hosting verificato gratuito, senza carta o addebiti.
