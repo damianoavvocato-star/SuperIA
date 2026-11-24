@@ -563,3 +563,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android CI [45404458992](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45404458992): **IN_PROGRESS** al controllo; entrambi i job erano in preparazione Gradle, test strumentali non ancora iniziati.
 - La precedente run Android [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674) risulta ancora bloccata nello step emulator/test; log non disponibili (404 BlobNotFound). Non conteggiare come successo.
 - Microfase 29 aperta; microfase 30 in attesa di verifica runtime; nessun test su telefono fisico, release APK o servizio esterno.
+
+
+### Aggiornamento 24 novembre 2026 — prima esecuzione test strumentali 29–30
+- Commit CI esaminato: `783637a9b2877bcf3ebe94b31d8aad507d1a6744`.
+- Android JVM: job `android-unit-tests` **SUCCESS**.
+- Emulator API 35: job `android-instrumented-tests` **FAILURE**. Il report XML indica **0 test eseguiti** e `Instrumentation run failed due to Process crashed`; non è quindi un fallimento di asserzioni e non prova né smentisce il comportamento delle classi sotto test.
+- Diagnostica caricata come artifact GitHub Actions `android-instrumented-test-reports` (ID `14939369301`). Il log UTP conferma installazione dei due APK debug temporanei e crash del processo instrumentation; non contiene lo stack trace nativo/Java necessario per attribuire la causa.
+- Commit `c6a7bba04e9a49a3b58045690f2cb27bc93d02e1`: il workflow ora raccoglie logcat, stato instrumentation e lista dei runner installati in caso di crash e li allega all'artifact. In attesa della nuova run per identificare la causa.
+- Micro-fasi 29 e 30 **restano aperte**: nessun test strumentale è ancora stato eseguito con esito verificabile. Nessun test su telefono fisico, nessuna build release o distribuzione.
