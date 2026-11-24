@@ -57,7 +57,7 @@ Ambito: esclusivamente il repository SuperIA. Questo registro separa codice pres
 11. Test end-to-end completati su backend e dispositivi Android reali.
 12. Documentazione aggiornata e tutti i gate superati.
 
-Finché anche un solo punto obbligatorio resta aperto, non generare APK.
+Finché anche un solo punto obbligatorio resta aperto, non generare né distribuire l'APK definitivo. Restano consentiti soltanto gli APK debug temporanei in CI già autorizzati per i test strumentali 29–30.
 
 ## Sicurezza del backend
 - SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED=true è soltanto un gate di configurazione: non implementa il rate limiting. Non abilitarlo in produzione finché la protezione effettiva non è configurata e provata sul gateway/WAF.
@@ -71,7 +71,7 @@ Finché anche un solo punto obbligatorio resta aperto, non generare APK.
 - Distinguere sempre codice presente, test CI superato, test reale superato e funzione pronta.
 - Non attribuire percentuali globali arbitrarie alle fasi.
 - Non dichiarare un servizio online operativo finché non è pubblicato e testato.
-- Non creare APK intermedi: il blocco è vincolante fino alla chiusura della checklist chat online.
+- Non generare APK release né distribuire build. Unica eccezione autorizzata il 24 novembre 2026: APK debug temporanei esclusivamente in CI/emulatore per test strumentali delle microfasi 29–30; nessuna installazione su telefoni personali e nessuna pubblicazione.
 
 ## Aggiornamento 21 novembre 2026 — streaming chat
 - Backend: endpoint SSE autenticato `/api/v1/chat/stream` aggiunto.
@@ -547,3 +547,9 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit test 3b5c43b4b48df0d3652c0863d7584da5987f4186; commit workflow 22b54c6c2c75c530004d4d80ac0011481949538a.
 - Run Android sul workflow aggiornato: [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674), in esecuzione al momento dell'aggiornamento. Run JVM separata [45289429271](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289429271), in esecuzione.
 - Fino all'esito delle run non dichiarare superati i test strumentali. La prova su telefono fisico, Wi-Fi/rete mobile e riavvio dispositivo resta distinta e non viene simulata dall'emulatore.
+
+
+## Aggiornamento CI e documentazione — 24 novembre 2026
+- Allineato `docs/DEVICE_SMOKE_TEST.md`: la precedente frase che vietava ogni APK intermedio è stata sostituita con l'autorizzazione circoscritta per APK debug temporanei in CI/emulatore. Commit documentazione: `2328406f798179c70dd8d0df3b5aafc36f1793d9`.
+- Run Android [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674), tentativo rilanciato: job `android-unit-tests` **SUCCESS**; job `android-instrumented-tests` ancora **IN_PROGRESS** all'ultimo controllo, step emulatore/test in esecuzione. Il recupero log GitHub ha restituito 404 BlobNotFound; non è quindi disponibile il dettaglio dei test in corso.
+- Non conteggiare ancora la sequenza instrumented/process-restart come superata. Microfase 29 resta aperta; microfase 30 resta in attesa di verifica runtime. Nessuna prova su telefono fisico è stata eseguita. Nessun APK release, distribuzione, deploy, provider o servizio esterno è stato attivato.
