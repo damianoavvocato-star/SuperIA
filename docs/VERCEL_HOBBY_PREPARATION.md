@@ -119,3 +119,25 @@ Durante l'estensione dei test è emersa una differenza reale tra i driver: psyco
 
 ### Verifica integrità dati nella migrazione
 La migrazione manuale ora ordina le righe per chiave primaria, confronta i conteggi e calcola impronte SHA-256 canoniche separate per `device_tokens` e `provider_state`. Se anche un solo valore copiato differisce, la transazione viene annullata; le impronte vengono restituite nel riepilogo dell'operazione. I test verificano la presenza delle impronte. Questa procedura è ancora da collaudare su un database reale destinazione prima di migrare dati effettivi.
+
+
+## Aggiornamento verifiche ufficiali — 24 novembre 2026
+
+- La documentazione Vercel conferma che Python è un runtime di prima classe e che FastAPI viene rilevato tramite un entrypoint supportato come `index.py`; il repository contiene già `services/api/index.py` che esporta `app` da `app.main`.
+- Le Python Functions supportano lo streaming di risposta. Per il piano Hobby la durata massima indicata è 300 secondi; il flusso SSE di SuperIA deve essere collaudato sul deployment reale e deve terminare entro il limite.
+- Il piano Hobby pubblica quote incluse di 1.000.000 invocazioni Functions, 4 ore CPU attiva, 360 GB-ore memoria e 100 GB trasferimento. Al superamento delle quote Hobby, le funzionalità vengono in genere sospese fino al ripristino; non acquistare overage né effettuare upgrade.
+- Hobby permette una sola regola di rate limiting per progetto. Preparare una regola mirata esclusivamente a `POST /api/v1/device/pair`, basata sull'IP, con risposta HTTP 429. Pubblicarla e provarla prima di impostare `SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED=true`.
+- La tabella prezzi indica 1.000.000 richieste Firewall rate-limit incluse nel piano Hobby; le richieste bloccate/limitate dal WAF sono escluse dai costi CDN e trasferimento.
+- La documentazione pubblica non garantisce che ogni registrazione Vercel, in ogni paese/account, sia completabile senza carta. La registrazione senza metodo di pagamento va verificata manualmente prima di importare il repository. Se viene chiesta carta, prova Pro o upgrade, interrompere.
+- Hobby è limitato a uso personale/non commerciale; non è approvato per distribuire un servizio commerciale.
+- Prisma Postgres Free è il database candidato: 2 GB, 200.000 operazioni/mese, nessuna carta; al limite le query si fermano fino al reset mensile. Non sono inclusi backup automatici. Nessun account o database è stato creato.
+
+### Fonti ufficiali
+- FastAPI su Vercel: https://vercel.com/docs/frameworks/backend/fastapi
+- Python runtime e streaming: https://vercel.com/changelog/python-on-vercel-is-now-generally-available
+- Hobby e limiti: https://vercel.com/docs/plans/hobby
+- Rate limiting Hobby: https://vercel.com/academy/optimize-your-vercel-account/firewall-rules
+- Prezzi Firewall: https://vercel.com/pricing
+- Prisma Postgres Free: https://www.prisma.io/postgres/free-postgresql-hosting
+
+**Decisione:** preparazione tecnica pronta; nessun account, import, deploy, database, segreto o provider è stato attivato. La prima verifica manuale richiesta è che Vercel consenta la registrazione/uso Hobby senza carta e senza trial Pro.
