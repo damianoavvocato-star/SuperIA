@@ -141,3 +141,44 @@ La migrazione manuale ora ordina le righe per chiave primaria, confronta i conte
 - Prisma Postgres Free: https://www.prisma.io/postgres/free-postgresql-hosting
 
 **Decisione:** preparazione tecnica pronta; nessun account, import, deploy, database, segreto o provider è stato attivato. La prima verifica manuale richiesta è che Vercel consenta la registrazione/uso Hobby senza carta e senza trial Pro.
+
+
+## Preparazione pratica del progetto Vercel — 24 novembre 2026
+
+### Struttura già presente nel repository
+- Root Directory Vercel da impostare: `services/api`.
+- Entrypoint FastAPI già presente in `services/api/index.py`, che esporta `app` da `app.main`.
+- Dipendenze runtime già dichiarate in `services/api/requirements.txt`.
+- Il test `services/api/tests/test_vercel_entrypoint.py` verifica l'export FastAPI e le route principali.
+- La guida FastAPI ufficiale Vercel riconosce `index.py` nella root del progetto e permette il deploy senza `vercel.json` o riscritture personalizzate. Quindi non aggiungere una seconda app wrapper né una route catch-all.
+
+### Impostazioni da usare solo dopo che l'utente ha verificato l'accesso Hobby senza carta
+1. Importare il repository GitHub `damianoavvocato-star/SuperIA`.
+2. Impostare Root Directory su `services/api`.
+3. Framework preset: FastAPI, se rilevato automaticamente; non sovrascrivere il build command senza necessità.
+4. Lasciare install/build/output overrides vuoti per il rilevamento standard del runtime Python.
+5. Creare prima un deployment Preview, non Production.
+6. Non impostare ancora variabili provider AI né abilitare pairing.
+7. Configurare il database PostgreSQL persistente e tutti i segreti esclusivamente nelle Environment Variables server-side prima del test protetto.
+8. Testare `GET /health`, poi verificare che `/api/v1/readiness` resti protetto da admin token; non esporre token nei log.
+9. Collaudare lo streaming SSE su Preview e misurare la durata effettiva entro i limiti Hobby.
+10. Configurare e pubblicare il rate limit Firewall IP sul solo `POST /api/v1/device/pair`; solo dopo una prova HTTP 429 impostare il flag server-side di conferma.
+
+### Nota importante sulla registrazione
+La documentazione ufficiale conferma che Hobby è gratuito per progetti personali, ma non garantisce che ogni flusso di registrazione/account italiano sia esente da richiesta di carta. L'utente deve verificare manualmente il punto prima dell'import; se viene richiesta carta, trial Pro o upgrade, interrompere. Nessuna autorizzazione a pagamenti o creazione di account è implicita nel «Procedi».
+
+### Compatibilità e limiti ancora da provare
+- FastAPI è supportato come singola Vercel Function; tutte le route condividono quindi il ciclo di vita della stessa funzione.
+- Streaming Python è supportato, ma non è una garanzia che ogni sessione SSE SuperIA resti connessa per tutta la durata desiderata.
+- Per Hobby il limite massimo documentato con Fluid Compute è 300 secondi; senza Fluid Compute le durate predefinite/limiti possono essere inferiori. Verificare l'impostazione effettiva del progetto prima di dichiarare SSE pronto.
+- Il filesystem della Function non è database persistente: in staging/produzione usare esclusivamente PostgreSQL condiviso. SQLite è solo sviluppo/test.
+- Il database Free Prisma non include backup automatici: predisporre export periodici cifrati e provare il ripristino prima di dati utente.
+
+### Riferimenti ufficiali consultati
+- FastAPI su Vercel, entrypoint riconosciuti e zero-config: https://vercel.com/docs/frameworks/backend/fastapi
+- Runtime Python e streaming: https://vercel.com/docs/functions/runtimes/python e https://vercel.com/docs/functions/streaming-functions
+- Limiti durata Functions: https://vercel.com/docs/functions/limitations
+- Piano Hobby: https://vercel.com/docs/plans/hobby
+- Prisma Postgres Free: https://www.prisma.io/postgres/free-postgresql-hosting
+
+**Stato:** configurazione di repository preparata a livello documentale; nessun progetto Vercel creato, nessun import, nessun deploy e nessuna variabile segreta inserita.
