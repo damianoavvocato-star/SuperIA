@@ -150,3 +150,37 @@ Nessun hosting è stato attivato o pubblicato. Cloudflare Workers Free resta il 
 ## Gate tecnico pairing — fail-closed applicativo (21 novembre 2026)
 
 L'endpoint `POST /api/v1/device/pair` ora restituisce HTTP 503 e non emette token se `SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED` non è impostata esattamente a `true`. La variabile è una conferma operativa: può essere impostata solo dopo aver configurato e verificato un rate limit condiviso sul gateway/WAF (per IP e tentativi di codice). Non è essa stessa un rate limiter e non sostituisce la configurazione del gateway. I test API impostano la variabile solo nel fixture di test e verificano il blocco predefinito. Non impostarla in produzione finché la protezione esterna non è effettivamente attiva.
+
+
+## Rivalutazione ufficiale — 24 novembre 2026
+
+Questa rivalutazione non autorizza account, deploy o attivazioni.
+
+### Vercel Hobby — candidato per staging personale, non ancora approvato
+- Il piano Hobby è gratuito e usa quote incluse; in genere, superate le quote, le funzionalità vengono sospese fino al ripristino della finestra. Non è previsto l'acquisto di overage nel piano Hobby.
+- Quote pubblicate: 1.000.000 invocazioni Functions, 4 ore CPU attiva, 360 GB-ore memoria, 100 GB trasferimento dati e 1.000.000 richieste CDN.
+- Il Firewall Hobby consente fino a 3 regole personalizzate e una sola regola rate-limit per progetto; la tabella prezzi indica 1.000.000 richieste consentite incluse. Le richieste bloccate/sfidate/limitate dal WAF sono escluse dai costi CDN e trasferimento.
+- La regola singola è sufficiente per proteggere `POST /api/v1/device/pair`, ma deve essere creata, pubblicata e testata nel pannello.
+- Non è stata verificata la registrazione Vercel senza carta per questo account/paese: non avviare trial Pro e non inserire metodi di pagamento. Se la carta è richiesta, interrompere.
+- Hobby è riservato a uso personale/non commerciale. Restano da verificare compatibilità runtime Python, streaming SSE, limiti CPU/memoria e cold start.
+
+**Esito:** candidato tecnico preferito per staging personale, ma deploy bloccato fino alla verifica manuale senza carta e ai test runtime/firewall.
+
+### Prisma Postgres Free — candidato database preferito
+La pagina ufficiale aggiornata il 24 novembre 2026 conferma PostgreSQL 17, 2 GB, 200.000 operazioni mensili, fino a 50 database, nessuna carta e nessuna scadenza per database reclamati nel workspace Free. Al limite le query si fermano fino al primo giorno del mese o a un upgrade; non c'è overage automatico sul piano Free. Non sono inclusi backup automatici. I database istantanei non reclamati vengono eliminati dopo 24 ore: non usarli per dati reali.
+
+**Esito:** candidato coerente con gratuità e fail-closed; prima di dati reali servono export cifrato, prova di ripristino e verifica limiti. Nessun account o database è stato creato.
+
+### Architettura candidata
+- Backend: Vercel Hobby solo dopo verifica senza carta e conferma uso personale.
+- Database: Prisma Postgres Free.
+- Pairing: una sola regola Firewall rate-limit per `POST /api/v1/device/pair`, risposta 429 e test pratico. Non impostare `SUPERIA_PAIRING_EDGE_RATE_LIMIT_CONFIRMED=true` prima della pubblicazione e verifica della regola.
+- Segreti solo server-side; provider AI disabilitati finché non viene verificato almeno un provider reale gratuito e senza carta.
+- Nessun deploy, account, database, segreto o provider è stato creato/attivato.
+
+### Fonti ufficiali verificate il 24 novembre 2026
+- Vercel Hobby e quote: https://vercel.com/docs/plans/hobby
+- Prezzi Vercel, quote Firewall e rate limiting: https://vercel.com/pricing
+- Rate limiting Hobby (una regola per progetto): https://vercel.com/academy/optimize-your-vercel-account/firewall-rules
+- Traffico WAF bloccato/limitato escluso dai costi CDN: https://vercel.com/changelog/web-application-firewall-mitigated-traffic-is-free-on-vercel
+- Prisma Postgres Free e hard-stop: https://www.prisma.io/postgres/free-postgresql-hosting
