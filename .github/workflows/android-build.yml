@@ -57,14 +57,29 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: |
-            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
-            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
+            mkdir -p android/app/build/diagnostics
+            adb shell pm list instrumentation > android/app/build/diagnostics/installed-instrumentation.txt
+            adb logcat -c
+
+            run_instrumented_tests() {
+              if "$@"; then
+                return 0
+              else
+                test_status=$?
+                adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt
+                adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true
+                return "$test_status"
+              fi
+            }
+
+            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
+            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
             adb shell am force-stop it.superiaprivata.app
             if adb shell pidof it.superiaprivata.app | grep -q '[0-9]'; then
               echo "Il processo applicativo risulta ancora attivo dopo force-stop"
               exit 1
             fi
-            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart
+            run_instrumented_tests gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart
       - name: Upload Android instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,5 +88,6 @@ jobs:
           path: |
             android/app/build/reports/androidTests/connected/
             android/app/build/outputs/androidTest-results/connected/
+            android/app/build/diagnostics/
           if-no-files-found: warn
           retention-days: 7
