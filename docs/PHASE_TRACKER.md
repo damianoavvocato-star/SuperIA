@@ -572,3 +572,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Diagnostica caricata come artifact GitHub Actions `android-instrumented-test-reports` (ID `14939369301`). Il log UTP conferma installazione dei due APK debug temporanei e crash del processo instrumentation; non contiene lo stack trace nativo/Java necessario per attribuire la causa.
 - Commit `c6a7bba04e9a49a3b58045690f2cb27bc93d02e1`: il workflow ora raccoglie logcat, stato instrumentation e lista dei runner installati in caso di crash e li allega all'artifact. In attesa della nuova run per identificare la causa.
 - Micro-fasi 29 e 30 **restano aperte**: nessun test strumentale è ancora stato eseguito con esito verificabile. Nessun test su telefono fisico, nessuna build release o distribuzione.
+
+
+### Correzione workflow emulatore — 24 novembre 2026
+- Esaminati i log completi della run Android [45483033138](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45483033138): il runner emulatore si avvia correttamente, ma lo script si interrompe prima di Gradle con errore shell `Syntax error: end of file unexpected (expecting "}")` sulla definizione di funzione `run_instrumented_tests()`.
+- Causa identificata: l'azione emulator-runner esegue le righe dello script tramite invocazioni shell separate; la definizione multilinea della funzione non persiste tra le invocazioni. Nessun test strumentale è stato eseguito in questa run; l'artifact contiene solo la lista instrumentation vuota.
+- Corretto il workflow eliminando la funzione e rendendo ogni chiamata Gradle e la relativa raccolta diagnostica un singolo comando shell. Il controllo force-stop resta separato.
+- Commit fix: `a3302498c9b460f3a334ab0d24e4e157c980d701`. Nuova run automatica da verificare.
+- Android JVM: **SUCCESS**; backend: **SUCCESS**. Micro-fasi 29 e 30 restano aperte: nessuna prova strumentale completata. Nessun test su telefono fisico, nessuna build release/distribuzione e nessun servizio esterno attivato.
