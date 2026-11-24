@@ -57,15 +57,14 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: |
-            cd android
-            gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
-            gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart
             adb shell am force-stop it.superiaprivata.app
             if adb shell pidof it.superiaprivata.app | grep -q '[0-9]'; then
               echo "Il processo applicativo risulta ancora attivo dopo force-stop"
               exit 1
             fi
-            gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart
+            gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart
       - name: Upload Android instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
