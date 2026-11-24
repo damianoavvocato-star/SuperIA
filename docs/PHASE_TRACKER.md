@@ -580,3 +580,14 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Corretto il workflow eliminando la funzione e rendendo ogni chiamata Gradle e la relativa raccolta diagnostica un singolo comando shell. Il controllo force-stop resta separato.
 - Commit fix: `a3302498c9b460f3a334ab0d24e4e157c980d701`. Nuova run automatica da verificare.
 - Android JVM: **SUCCESS**; backend: **SUCCESS**. Micro-fasi 29 e 30 restano aperte: nessuna prova strumentale completata. Nessun test su telefono fisico, nessuna build release/distribuzione e nessun servizio esterno attivato.
+
+
+## Aggiornamento hosting — 24 novembre 2026
+- Verificata la struttura effettiva del backend: `services/api/index.py` esporta già l'istanza FastAPI `app`; `services/api/requirements.txt` dichiara le dipendenze runtime e il test `test_vercel_entrypoint.py` controlla l'entrypoint.
+- Le istruzioni ufficiali Vercel confermano che `index.py` è un entrypoint FastAPI riconosciuto; con Root Directory `services/api` non serve creare un wrapper aggiuntivo o un `vercel.json` catch-all.
+- Aggiunta checklist di configurazione Preview, variabili server-side, test health/readiness, SSE, PostgreSQL e firewall nel documento `docs/VERCEL_HOBBY_PREPARATION.md`.
+- Confermato da Prisma che Free prevede 200.000 operazioni/mese, 2 GB e nessuna carta; non include backup automatici e al limite le query si fermano. Non è stato creato alcun database.
+- Vercel Hobby è gratuito per uso personale ma non è stata verificata la registrazione senza carta per l'account/paese dell'utente. Questo resta un passaggio manuale obbligatorio; non fare trial Pro, non inserire carta e non effettuare deploy senza verifica.
+- Nessun account, progetto Vercel, database, segreto, provider AI o deployment è stato creato/attivato. Backend online e chat Android restano non operativi.
+- Microfasi backend/staging non chiuse: necessarie registrazione Hobby senza carta, import Preview, PostgreSQL, segreti, firewall rate-limit pubblicato e testato, SSE end-to-end e provider gratuito reale approvato.
+
