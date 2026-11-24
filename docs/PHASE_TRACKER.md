@@ -553,3 +553,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Allineato `docs/DEVICE_SMOKE_TEST.md`: la precedente frase che vietava ogni APK intermedio è stata sostituita con l'autorizzazione circoscritta per APK debug temporanei in CI/emulatore. Commit documentazione: `2328406f798179c70dd8d0df3b5aafc36f1793d9`.
 - Run Android [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674), tentativo rilanciato: job `android-unit-tests` **SUCCESS**; job `android-instrumented-tests` ancora **IN_PROGRESS** all'ultimo controllo, step emulatore/test in esecuzione. Il recupero log GitHub ha restituito 404 BlobNotFound; non è quindi disponibile il dettaglio dei test in corso.
 - Non conteggiare ancora la sequenza instrumented/process-restart come superata. Microfase 29 resta aperta; microfase 30 resta in attesa di verifica runtime. Nessuna prova su telefono fisico è stata eseguita. Nessun APK release, distribuzione, deploy, provider o servizio esterno è stato attivato.
+
+
+### Correzione controllo process-death CI — 24 novembre 2026
+- Corretto il controllo successivo a `adb shell am force-stop`: ora verifica la presenza di un PID numerico con `grep`, evitando il parsing CRLF fragile della precedente pipeline `tr`.
+- Commit: `96c867ef84ec120eeccde3794de5121bcdc37265`.
+- Backend CI [45403971830](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45403971830): **SUCCESS**.
+- Backend CI [45403894403](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45403894403): **SUCCESS**.
+- Android CI [45404458992](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45404458992): **IN_PROGRESS** al controllo; entrambi i job erano in preparazione Gradle, test strumentali non ancora iniziati.
+- La precedente run Android [45289452674](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45289452674) risulta ancora bloccata nello step emulator/test; log non disponibili (404 BlobNotFound). Non conteggiare come successo.
+- Microfase 29 aperta; microfase 30 in attesa di verifica runtime; nessun test su telefono fisico, release APK o servizio esterno.
