@@ -85,6 +85,20 @@ class ChatWorkspaceStore(context: Context) {
         it.copy(archived = archived, updatedAtMillis = System.currentTimeMillis())
     }
 
+    /** Remove an entry only after its workspace-owned data has been cleaned successfully. */
+    fun removeAfterDataCleanup(id: String) = synchronized(LOCK) {
+        requireValidId(id)
+        check(id != LEGACY_WORKSPACE_ID) {
+            "La conversazione precedente protetta non può essere eliminata."
+        }
+        val entries = readIndex()
+        check(entries.any { it.id == id }) { "La chat selezionata non esiste." }
+        writeIndex(entries.filterNot { it.id == id })
+        check(readIndex().none { it.id == id }) {
+            "Verifica della rimozione della chat dall'indice non riuscita."
+        }
+    }
+
     private fun update(id: String, transform: (ChatWorkspace) -> ChatWorkspace): ChatWorkspace =
         synchronized(LOCK) {
             requireValidId(id)
