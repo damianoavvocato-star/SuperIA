@@ -85,7 +85,15 @@ class FreeOnlyRouter:
     ) -> None:
         self.environ = os.environ if environ is None else environ
         validate_provider_environment(self.environ)
-        environment = self.environ.get("SUPERIA_ENVIRONMENT", "development")
+        # Vercel's platform environment is authoritative; never permit ephemeral
+        # SQLite router state in Preview/Production through a custom development flag.
+        vercel_runtime = self.environ.get("VERCEL", "").strip() == "1"
+        vercel_env = self.environ.get("VERCEL_ENV", "").strip().lower()
+        configured_environment = self.environ.get("SUPERIA_ENVIRONMENT", "").strip().lower()
+        if vercel_runtime:
+            environment = "staging" if vercel_env == "preview" else "production"
+        else:
+            environment = configured_environment or "development"
         database_url = self.environ.get("SUPERIA_DATABASE_URL", "").strip()
         router_state_url = self.environ.get("SUPERIA_ROUTER_STATE_DB", "").strip()
         validate_deployment_database_url(database_url, environment, "SUPERIA_DATABASE_URL")
