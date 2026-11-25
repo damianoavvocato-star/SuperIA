@@ -4,7 +4,7 @@ import android.content.Context
 import it.superiaprivata.app.documents.LocalDocumentRepository
 
 /**
- * Fail-closed deletion for one non-legacy workspace.
+ * Fail-closed deletion for one workspace, including the migrated legacy workspace after verification.
  *
  * The index entry is removed last. A failed cleanup leaves the workspace visible
  * so the operation can be inspected/retried; user-selected source files and
@@ -44,9 +44,9 @@ internal object ChatWorkspaceDeletion {
             .firstOrNull { it.id != workspaceId }
             ?: workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
 
-        // Remove the duplicated pre-migration sources only after verifying that
-        // the legacy workspace copy is byte-for-byte equivalent at the data level.
-        // This step is idempotent and runs before deleting the workspace archive.
+        // The migration marker proves that the legacy source archives were copied
+        // and verified. Remove those historical duplicates before deleting the
+        // workspace archive; the operation remains safe to retry.
         if (workspaceId == LEGACY_WORKSPACE_ID) {
             ChatHistoryStore(appContext).deleteLegacySourceCopiesAfterVerifiedMigration(workspaceId)
         }
