@@ -96,19 +96,29 @@ internal fun validatePersistedChatLines(messages: List<ChatLine>) {
  * non-exportable and held by Android Keystore. AtomicFile protects the previous
  * archive if the process is interrupted during a write.
  */
-class ChatHistoryStore(context: Context) {
+class ChatHistoryStore(context: Context, workspaceId: String? = null) {
     private val appContext = context.applicationContext
+    private val workspaceSuffix = workspaceId?.also { UUID.fromString(it) }?.let { "_$it" }.orEmpty()
+    private val isLegacyStore = workspaceId == null
     private val preferences = appContext.getSharedPreferences(
-        "superia_private_chat", Context.MODE_PRIVATE
+        if (isLegacyStore) "superia_private_chat" else "superia_private_chat$workspaceSuffix",
+        Context.MODE_PRIVATE
     )
-    private val archive = AtomicFile(File(appContext.filesDir, "conversation_history.enc"))
-    private val memoryArchive = AtomicFile(File(appContext.filesDir, "project_memory.enc"))
+    // Null preserves the exact legacy filenames; a UUID gives each workspace
+    // independent AtomicFiles while retaining the existing device Keystore key.
+    private val archive = AtomicFile(
+        File(appContext.filesDir, if (isLegacyStore) "conversation_history.enc" else "conversation_history$workspaceSuffix.enc")
+    )
+    private val memoryArchive = AtomicFile(
+        File(appContext.filesDir, if (isLegacyStore) "project_memory.enc" else "project_memory$workspaceSuffix.enc")
+    )
 
     /**
      * One-time migration: discard conversations produced by the retired on-device model.
      * The encrypted archive remains available for new online conversations.
      */
     fun clearLegacyLocalHistoryOnce() = synchronized(ARCHIVE_WRITE_LOCK) {
+        check(isLegacyStore) { "La pulizia legacy è consentita soltanto allo store storico." }
         if (preferences.getBoolean(ONLINE_ONLY_MIGRATION_KEY, false)) return@synchronized
         archive.delete()
         val legacyModels = File(appContext.filesDir, "models")
