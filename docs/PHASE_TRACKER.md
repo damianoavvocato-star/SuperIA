@@ -1,6 +1,6 @@
 # Registro operativo delle fasi — SuperIA
 
-Aggiornato: 23 novembre 2026
+Aggiornato: 25 novembre 2026
 Ambito: esclusivamente il repository SuperIA. Questo registro separa codice presente, test CI, collaudo reale e rilascio.
 
 ## Regole inderogabili
@@ -619,3 +619,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Corretto: `VERCEL=1` prevale sempre; Preview è staging e Production è production. PostgreSQL è richiesto anche per lo stato del router; nessun fallback SQLite temporaneo in quei runtime.
 - Test aggiunti: Preview/Production senza PostgreSQL e Production con override development ma stato router SQLite vengono rifiutati.
 - Codice: `ca5a7e9c6b1a575e370ba3c332a72358e441a725`; test: `e44d38af7535778664ab615e943b7ad819d3077e`. CI da verificare.
+
+
+### Verifica backend — idempotenza concorrente e hardening SSE — 25 novembre 2026
+- Run Backend tests [45650079235](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45650079235): **SUCCESS**. La suite completa ha verificato il claim concorrente: due chiamate simultanee con lo stesso dispositivo/ID producono un solo lease `claimed` e un risultato `processing`.
+- Correzione del test introdotta nel commit `e3cea74238fb2b11e250f45175f2fc0092033406`; non sono stati modificati i vincoli di produzione.
+- Hardening SSE: commit codice `0446d0dcdfc2c2f009fd1fb8ac465e25994a8c83`; commit test `b137a8601bfd4b1cd394a485719253900876e7ea`.
+- Il backend ora accetta soltanto i nomi evento `delta` e `done`; un evento provider non previsto viene trattato come errore retryable. Dopo `done` interrompe il consumo dello stream e chiude l'iteratore, senza elaborare eventi successivi.
+- Run Backend tests [45687252959](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45687252959): **SUCCESS**, inclusi i test contro event injection e dati successivi a `done`.
+- Questi risultati validano la suite backend in CI, non il provider AI reale, il deploy HTTPS, il database persistente di produzione, il pairing protetto da WAF o l'esperienza Android end-to-end.
+- Micro-fase 36 resta **bloccata** dai prerequisiti esterni già elencati. Microfasi Android 29–30 restano aperte per le verifiche strumentali/device non completate. Nessun APK release, provider, hosting o database esterno attivato.
