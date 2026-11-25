@@ -53,6 +53,48 @@ class ChatWorkspaceStoreInstrumentedTest {
     }
 
     @Test
+    fun permanentDeletionRemovesOnlySelectedWorkspaceAndPreservesLegacyAndOtherChat() {
+        val legacy = store.ensureLegacyWorkspace()
+        val target = store.create("Da eliminare")
+        val other = store.create("Da conservare")
+
+        ChatHistoryStore(context, legacy.id).save(listOf(ChatLine(1L, "cronologia storica", "user")))
+        ChatHistoryStore(context, target.id).apply {
+            save(listOf(ChatLine(2L, "segreto da eliminare", "user")))
+            saveProjectMemory("memoria da eliminare")
+        }
+        ChatHistoryStore(context, other.id).apply {
+            save(listOf(ChatLine(3L, "segreto da conservare", "user")))
+            saveProjectMemory("memoria da conservare")
+        }
+
+        val result = ChatWorkspaceDeletion.delete(context, target.id)
+
+        assertEquals(other.id, result.activeWorkspaceId)
+        assertFalse(store.list().any { it.id == target.id })
+        assertTrue(store.list().any { it.id == other.id })
+        assertTrue(store.list().any { it.id == legacy.id })
+        assertTrue(ChatHistoryStore(context, target.id).load().isEmpty())
+        assertEquals("", ChatHistoryStore(context, target.id).loadProjectMemory())
+        assertEquals("segreto da conservare", ChatHistoryStore(context, other.id).load().single().text)
+        assertEquals("memoria da conservare", ChatHistoryStore(context, other.id).loadProjectMemory())
+        assertEquals("cronologia storica", ChatHistoryStore(context, legacy.id).load().single().text)
+        assertFalse(File(context.filesDir, "conversation_history_${target.id}.enc").exists())
+        assertFalse(File(context.filesDir, "project_memory_${target.id}.enc").exists())
+        assertFalse(File(context.filesDir, "documents/${target.id}").exists())
+    }
+
+    @Test
+    fun legacyWorkspaceCannotBePermanentlyDeleted() {
+        val legacy = store.ensureLegacyWorkspace()
+        ChatHistoryStore(context, legacy.id).save(listOf(ChatLine(4L, "non eliminare", "user")))
+
+        assertTrue(runCatching { ChatWorkspaceDeletion.delete(context, legacy.id) }.isFailure)
+        assertTrue(store.list().any { it.id == legacy.id })
+        assertEquals("non eliminare", ChatHistoryStore(context, legacy.id).load().single().text)
+    }
+
+    @Test
     fun workspaceIndexIsEncryptedAtRest() {
         val secretTitle = "Titolo progetto riservato"
         store.create(secretTitle)
