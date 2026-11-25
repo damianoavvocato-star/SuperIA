@@ -591,3 +591,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Nessun account, progetto Vercel, database, segreto, provider AI o deployment è stato creato/attivato. Backend online e chat Android restano non operativi.
 - Microfasi backend/staging non chiuse: necessarie registrazione Hobby senza carta, import Preview, PostgreSQL, segreti, firewall rate-limit pubblicato e testato, SSE end-to-end e provider gratuito reale approvato.
 
+
+
+### Correzione preventiva ambiente Vercel — 25 novembre 2026
+- Rilevamento automatico del runtime tramite `VERCEL=1` e `VERCEL_ENV`: Production viene trattato come production, Preview come staging, anche senza `SUPERIA_ENVIRONMENT` personalizzata.
+- In entrambi gli ambienti il backend rifiuta SQLite e richiede `SUPERIA_DATABASE_URL` PostgreSQL; la presenza di `SUPERIA_AUTH_DB` non consente più il fallback a storage effimero.
+- In locale, fuori da Vercel, resta invariata la modalità development per SQLite.
+- Commit codice: `739a9a3ae5fb16e71b96eb6192ff574525b57f80`; commit test: `9b2d19065e3a0a7fbafe00d4567cbb074437d579`; commit documentazione: `20de12c2f4c74849139f48413b5d570cd96c863d`.
+- Aggiunti test per Vercel Production senza configurazione custom, Preview e PostgreSQL configurato. Esito CI non ancora verificato.
+- Nessun account, database, segreto, provider o deployment è stato creato. Il pairing resta disabilitato finché non è confermato il rate limit gateway effettivo.
