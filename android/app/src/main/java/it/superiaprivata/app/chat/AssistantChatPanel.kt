@@ -56,6 +56,7 @@ import kotlinx.coroutines.sync.withLock
 @Composable
 fun AssistantChatPanel(
     documentContext: String? = null,
+    documentContextWorkspaceId: String? = null,
     modifier: Modifier = Modifier,
     onWorkspaceChanged: (String) -> Unit = {},
     onWorkspaceDeleted: (String) -> Unit = {}
@@ -135,6 +136,9 @@ fun AssistantChatPanel(
     var attachmentStatus by remember { mutableStateOf<String?>(null) }
     var importingDocument by remember { mutableStateOf(false) }
     val onlineConfigured = pairedEndpoint.isNotBlank() && backendToken.isNotBlank()
+    val workspaceDocumentContext = documentContext.takeIf {
+        documentContextWorkspaceId == selectedWorkspaceId
+    }
     val messageListState = rememberLazyListState()
 
     LaunchedEffect(messages.size, messages.lastOrNull()?.text) {
@@ -669,7 +673,7 @@ fun AssistantChatPanel(
                                         val retryMessages = pendingLine.requestMessages ?: buildRequestMessages(
                                             messages.filterNot { it.pending || it.id == staleAssistant?.id },
                                             pendingLine.text,
-                                            documentContext
+                                            workspaceDocumentContext
                                         )
                                         val pendingPosition = messages.indexOfFirst { it.id == pendingLine.id }
                                         if (pendingPosition >= 0) {
@@ -806,7 +810,7 @@ fun AssistantChatPanel(
                                 try {
                                     persistChatHistory(historyStore, messages)
                                     storageError = null
-                                    val messagesWithHistory = buildRequestMessages(contextHistory, request, documentContext)
+                                    val messagesWithHistory = buildRequestMessages(contextHistory, request, workspaceDocumentContext)
                                     val payloadPendingIndex = messages.indexOfFirst { it.id == userLine.id }
                                     if (payloadPendingIndex >= 0) {
                                         messages[payloadPendingIndex] = userLine.copy(requestMessages = messagesWithHistory)
