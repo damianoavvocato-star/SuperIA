@@ -328,6 +328,9 @@ async def chat_stream(
                     except StopAsyncIteration:
                         break
                     event = item.get("event", "delta")
+                    # Provider output is untrusted: fixed SSE names prevent event injection.
+                    if event not in {"delta", "done"}:
+                        raise ValueError("Il provider ha restituito un tipo di evento non supportato.")
                     if event == "delta":
                         accumulated.append(str(item.get("text", "")))
                         if request_id and not refresh_chat_request_lease(database_url, device_id, request_id, lease_token or ""):
@@ -349,6 +352,8 @@ async def chat_stream(
                         completed = True
                     payload = json.dumps(item, ensure_ascii=False, separators=(",", ":"))
                     yield f"event: {event}\ndata: {payload}\n\n"
+                    if event == "done":
+                        break
                     pending_next = asyncio.create_task(stream_iterator.__anext__())
             finally:
                 if not pending_next.done():
