@@ -279,46 +279,30 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
      * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
      */
     /**
-     * Remove the pre-migration duplicate archives only after proving that the
-     * stable legacy workspace contains the same transcript and memory. This is
-     * idempotent so a retry after partial cleanup is safe.
+     * Remove the old source copies after the migration marker proves that they
+     * were copied and verified into the stable legacy workspace. The source may
+     * be older than the live workspace after later messages, so equality is not
+     * required at deletion time. This operation is idempotent.
      */
-    internal fun deleteLegacySourceCopiesAfterVerifiedWorkspace(workspaceId: String) =
+    internal fun deleteLegacySourceCopiesAfterVerifiedMigration(workspaceId: String) =
         synchronized(ARCHIVE_WRITE_LOCK) {
-            check(isLegacyStore) { "La verifica deve partire esclusivamente dagli archivi legacy." }
+            check(isLegacyStore) { "La pulizia deve partire esclusivamente dagli archivi legacy." }
             check(workspaceId == LEGACY_WORKSPACE_ID) { "Workspace legacy non valido." }
             check(ChatWorkspaceMigration.isComplete(appContext)) {
                 "La migrazione legacy non è stata verificata: sorgenti conservate."
             }
-            val sourceFiles = listOf(
-                archive.baseFile,
-                File(archive.baseFile.path + ".bak"),
-                memoryArchive.baseFile,
-                File(memoryArchive.baseFile.path + ".bak")
-            )
-            val hasTranscriptSource = archive.baseFile.exists() ||
-                File(archive.baseFile.path + ".bak").exists() ||
-                preferences.getString(HISTORY_KEY, null) != null
-            val hasMemorySource = memoryArchive.baseFile.exists() ||
-                File(memoryArchive.baseFile.path + ".bak").exists()
-            val workspace = ChatHistoryStore(appContext, workspaceId)
-            if (hasTranscriptSource) {
-                check(workspace.load() == load()) {
-                    "La cronologia workspace non coincide con la copia legacy: sorgenti preservate."
-                }
-            }
-            if (hasMemorySource) {
-                check(workspace.loadProjectMemory() == loadProjectMemory()) {
-                    "La memoria workspace non coincide con la copia legacy: sorgenti preservate."
-                }
-            }
-            // Also clear migration-only preference flags left by older versions.
             archive.delete()
             memoryArchive.delete()
             check(preferences.edit().clear().commit()) {
                 "Impossibile rimuovere le preferenze della copia legacy."
             }
-            check(sourceFiles.none { it.exists() } && preferences.all.isEmpty()) {
+            check(
+                !archive.baseFile.exists() &&
+                    !File(archive.baseFile.path + ".bak").exists() &&
+                    !memoryArchive.baseFile.exists() &&
+                    !File(memoryArchive.baseFile.path + ".bak").exists() &&
+                    preferences.all.isEmpty()
+            ) {
                 "Sono rimaste copie legacy della cronologia o della memoria."
             }
         }
