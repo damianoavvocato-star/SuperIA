@@ -40,6 +40,22 @@ class LocalDocumentRepositoryInstrumentedTest {
     }
 
     @Test
+    fun workspaceDocumentArchivesAreIsolatedFromOtherWorkspacesAndLegacy() {
+        val firstId = java.util.UUID.randomUUID().toString()
+        val secondId = java.util.UUID.randomUUID().toString()
+        val firstDirectory = File(context.filesDir, "documents/$firstId")
+        val first = LocalDocumentRepository(context, firstId)
+        val second = LocalDocumentRepository(context, secondId)
+
+        writeEncryptedDocument("workspace-doc", "solo-primo.txt", "documento del primo progetto", firstDirectory)
+
+        assertEquals("documento del primo progetto", first.list().single().text)
+        assertTrue(second.list().isEmpty())
+        assertTrue(repository.list().isEmpty())
+        assertTrue(File(directory, "workspace-doc.enc").exists().not())
+    }
+
+    @Test
     fun listsEncryptedDocumentUsingExistingKeystoreKey() {
         writeEncryptedDocument("document-1", "appunti.txt", "contenuto riservato")
 
@@ -104,13 +120,19 @@ class LocalDocumentRepositoryInstrumentedTest {
         assertTrue(outside.exists())
     }
 
-    private fun writeEncryptedDocument(id: String, title: String, text: String) {
+    private fun writeEncryptedDocument(
+        id: String,
+        title: String,
+        text: String,
+        targetDirectory: File = directory
+    ) {
+        assertTrue(targetDirectory.exists() || targetDirectory.mkdirs())
         val key = getOrCreateKey()
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val cleartext = "$title\ntxt\n\n$text".toByteArray(Charsets.UTF_8)
         val packed = cipher.iv + cipher.doFinal(cleartext)
-        val target = AtomicFile(File(directory, "$id.enc"))
+        val target = AtomicFile(File(targetDirectory, "$id.enc"))
         var output: java.io.FileOutputStream? = null
         try {
             output = target.startWrite()
