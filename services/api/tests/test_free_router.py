@@ -503,3 +503,26 @@ def test_sambanova_is_rejected_as_payment_method_required(tmp_path):
     }
     with pytest.raises(ValueError, match="SambaNova is excluded"):
         FreeOnlyRouter(environ=env, state_db_path=str(tmp_path / "sambanova-excluded.sqlite3"))
+
+
+def test_vercel_runtime_rejects_sqlite_router_state_despite_development_override():
+    env = {
+        "VERCEL": "1",
+        "VERCEL_ENV": "production",
+        "SUPERIA_ENVIRONMENT": "development",
+        "SUPERIA_DATABASE_URL": "postgresql://user:pass@db.example/superia",
+        "SUPERIA_ROUTER_STATE_DB": "/tmp/router.sqlite3",
+    }
+    with pytest.raises(ValueError, match="PostgreSQL"):
+        FreeOnlyRouter(environ=env)
+
+
+@pytest.mark.parametrize("vercel_env", ["preview", "production"])
+def test_vercel_runtime_requires_postgres_before_defaulting_router_state(vercel_env):
+    env = {
+        "VERCEL": "1",
+        "VERCEL_ENV": vercel_env,
+        "SUPERIA_ENVIRONMENT": "development",
+    }
+    with pytest.raises(ValueError, match="PostgreSQL"):
+        FreeOnlyRouter(environ=env)
