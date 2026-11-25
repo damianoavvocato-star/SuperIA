@@ -22,7 +22,7 @@ import it.superiaprivata.app.pairing.DeviceIdentityStore
 import it.superiaprivata.app.pairing.PairingInvite
 import it.superiaprivata.app.chat.AssistantChatPanel
 import it.superiaprivata.app.chat.CrashLogStore
-import LEGACY_WORKSPACE_ID
+import it.superiaprivata.app.chat.LEGACY_WORKSPACE_ID
 import it.superiaprivata.app.documents.DocumentsPanel
 import it.superiaprivata.app.multimedia.RenderforestPanel
 
