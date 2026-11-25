@@ -60,10 +60,6 @@ class ChatWorkspaceStore(context: Context) {
         legacy
     }
 
-    companion object {
-        const val LEGACY_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001"
-    }
-
     fun create(title: String, kind: ChatWorkspace.Kind = ChatWorkspace.Kind.CHAT): ChatWorkspace =
         synchronized(LOCK) {
             val cleanTitle = normalizeTitle(title)
@@ -205,6 +201,7 @@ class ChatWorkspaceStore(context: Context) {
     }
 
     private companion object {
+        const val LEGACY_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001"
         const val INDEX_FILE = "chat_workspaces.enc"
         const val ANDROID_KEY_STORE = "AndroidKeyStore"
         const val KEY_ALIAS = "superia_workspace_index_aes"
