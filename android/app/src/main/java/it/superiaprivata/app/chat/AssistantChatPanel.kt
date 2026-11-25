@@ -59,7 +59,9 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     val historyStore = remember(context) { ChatHistoryStore(context) }
     val initialHistory = remember(historyStore) {
         runCatching {
-            historyStore.clearLegacyLocalHistoryOnce()
+            // Preserve the old archive and copy it into the stable legacy workspace
+            // before the multi-chat UI is enabled. Never run destructive legacy cleanup here.
+            ChatWorkspaceMigration.migrate(context)
             historyStore.load()
         }
     }
