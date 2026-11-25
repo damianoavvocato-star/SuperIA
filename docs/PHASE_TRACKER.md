@@ -1375,3 +1375,15 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 
 - Correzione successiva: il companion del `ChatWorkspaceStore` è privato e il test Android non poteva accedere alla costante. L'ID stabile è ora una costante top-level `internal`, usata anche dai test: commit `7479c4e4`, `0ac4e4f7`, `ba2ba00b`.
 - Il run Android `45693657335` ha confermato il problema di visibilità nel target `compileDebugAndroidTestKotlin`; non è ancora una verifica dei test di migrazione. La correzione è in attesa del nuovo workflow.
+
+
+ 
+### Primo collegamento UI multi-chat — 25 novembre 2026
+- `AssistantChatPanel` ora carica la migrazione legacy prima di costruire lo store attivo e usa `ChatHistoryStore(context, selectedWorkspaceId)`; il workspace storico è selezionato inizialmente.
+- Aggiunti comandi «Nuova chat» e «Progetto», selettore delle chat/progetti non archiviati, rinomina e archiviazione. Il cambio workspace è disabilitato durante generazione o importazione; la selezione azzera il contesto allegato temporaneo.
+- Cronologia e memoria si ricaricano dallo store del workspace selezionato; il repository documenti viene chiamato con lo stesso UUID. Nuovi documenti vengono salvati nella directory dedicata.
+- Aggiornati i testi UI per non promettere più che gli allegati siano condivisi tra chat.
+- Commit UI `035b3dbd`; testi `daa60f10`; commenti store `cb41ead9`.
+- Android CI sul commit UI iniziale era in corso al momento dell'aggiornamento; le modifiche successive hanno generato nuove run. Non dichiarare compilazione o test superati finché non è disponibile il risultato sul commit aggiornato.
+- Limiti noti: archiviate non ancora consultabili/ripristinabili dalla UI; eliminazione definitiva con pulizia coordinata dei documenti/media non ancora implementata. Nessun dato viene cancellato automaticamente.
+
