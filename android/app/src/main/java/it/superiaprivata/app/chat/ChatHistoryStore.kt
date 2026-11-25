@@ -275,10 +275,6 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
     }
 
     /**
-     * Permanently removes only this UUID workspace's encrypted transcript,
-     * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
-     */
-    /**
      * Remove pre-migration duplicate archives after the migration marker proves
      * that the initial copy was verified. The source may be older than the live
      * workspace after later messages, so equality is not required at deletion time.
@@ -306,6 +302,10 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
             }
         }
 
+    /**
+     * Permanently removes only this UUID workspace's encrypted transcript,
+     * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
+     */
     internal fun deleteWorkspaceData() = synchronized(ARCHIVE_WRITE_LOCK) {
         check(!isLegacyStore) { "L'archivio storico non può essere eliminato da questa operazione." }
         archive.delete()
