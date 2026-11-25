@@ -1366,3 +1366,9 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Codice: `77dc9701`; test: `d5568d7c`. CI Android in attesa.
 - La UI continua a usare il repository legacy fino al collegamento della selezione chat. Nessuna cancellazione documenti o media eseguita.
 
+
+
+### Verifica CI e correzione compilazione — 25 novembre 2026
+- Il workflow Android sul commit `fec715e4` ha rilevato un errore Kotlin: il nuovo ID legacy era stato inserito in un secondo `companion object`. Corretto spostando la costante nel companion già esistente: commit `5154181e1e757b7f5be2132201d9f2cfe83adb58`.
+- Il precedente run Android `45691128529` è fallito per crash del processo instrumentation/emulatore prima dell'esecuzione dei test (`INSTRUMENTATION_FAILED`, `Process crashed`); non è un esito di test funzionali superati né una prova di bug applicativo. Run: https://github.com/damianoavvocato-star/SuperIA/actions/runs/45691128529
+- I nuovi workflow Android sul commit `5154181e` sono in coda; compilazione e test della migrazione e dell'isolamento documenti restano non confermati fino alla conclusione.
