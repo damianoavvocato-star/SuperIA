@@ -182,3 +182,12 @@ La documentazione ufficiale conferma che Hobby è gratuito per progetti personal
 - Prisma Postgres Free: https://www.prisma.io/postgres/free-postgresql-hosting
 
 **Stato:** configurazione di repository preparata a livello documentale; nessun progetto Vercel creato, nessun import, nessun deploy e nessuna variabile segreta inserita.
+
+
+## Fail-closed automatico per runtime Vercel — 25 novembre 2026
+- Il backend riconosce ora le variabili di piattaforma `VERCEL=1` e `VERCEL_ENV` anche se `SUPERIA_ENVIRONMENT` non è stata impostata manualmente.
+- Un deployment Vercel Production viene trattato come `production`; un deployment Preview viene trattato come `staging`.
+- In entrambi i casi `SUPERIA_DATABASE_URL` deve essere un URL PostgreSQL. Il backend risponde HTTP 503 se manca o se si tenta di usare SQLite, anche quando è presente il vecchio percorso `SUPERIA_AUTH_DB`.
+- In locale, fuori da Vercel, resta disponibile la modalità development per i test SQLite.
+- Aggiunti test automatici per produzione senza variabile personalizzata, Preview, e PostgreSQL configurato. La modifica è in attesa dell'esito CI.
+- Questo controllo non crea il database e non sostituisce la verifica manuale del piano gratuito, dei segreti o del rate limit gateway.
