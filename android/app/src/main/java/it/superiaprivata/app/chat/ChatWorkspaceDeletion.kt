@@ -19,8 +19,10 @@ internal object ChatWorkspaceDeletion {
     )
 
     fun delete(context: Context, workspaceId: String): Result = synchronized(lock) {
-        require(workspaceId != LEGACY_WORKSPACE_ID) {
-            "La conversazione precedente protetta non può essere eliminata."
+        if (workspaceId == LEGACY_WORKSPACE_ID) {
+            check(ChatWorkspaceMigration.isComplete(context)) {
+                "La conversazione precedente non può essere eliminata finché la migrazione non è verificata."
+            }
         }
         val appContext = context.applicationContext
         val workspaceStore = ChatWorkspaceStore(appContext)
@@ -41,6 +43,13 @@ internal object ChatWorkspaceDeletion {
         val fallback = workspaceStore.list(includeArchived = false)
             .firstOrNull { it.id != workspaceId }
             ?: workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
+
+        // Remove the duplicated pre-migration sources only after verifying that
+        // the legacy workspace copy is byte-for-byte equivalent at the data level.
+        // This step is idempotent and runs before deleting the workspace archive.
+        if (workspaceId == LEGACY_WORKSPACE_ID) {
+            ChatHistoryStore(appContext).deleteLegacySourceCopiesAfterVerifiedWorkspace(workspaceId)
+        }
 
         // Delete only app-owned UUID-scoped archives. If any step fails, keep the
         // index record so the partial cleanup remains visible and retryable.
