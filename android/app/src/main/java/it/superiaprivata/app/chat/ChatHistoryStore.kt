@@ -278,7 +278,7 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
      * Permanently removes only this UUID workspace's encrypted transcript,
      * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
      */
-    fun deleteWorkspaceData() = synchronized(ARCHIVE_WRITE_LOCK) {
+    internal fun deleteWorkspaceData() = synchronized(ARCHIVE_WRITE_LOCK) {
         check(!isLegacyStore) { "L'archivio storico non può essere eliminato da questa operazione." }
         archive.delete()
         memoryArchive.delete()
