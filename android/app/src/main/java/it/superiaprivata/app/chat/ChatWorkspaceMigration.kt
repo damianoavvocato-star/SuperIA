@@ -11,16 +11,26 @@ internal object ChatWorkspaceMigration {
     private const val COMPLETE_KEY = "legacy_workspace_archive_v1"
     private val lock = Any()
 
+    fun isComplete(context: Context): Boolean =
+        context.applicationContext
+            .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+            .getBoolean(COMPLETE_KEY, false)
+
     fun migrate(context: Context): ChatWorkspace = synchronized(lock) {
         val appContext = context.applicationContext
         val workspaces = ChatWorkspaceStore(appContext)
-        val legacyWorkspace = workspaces.ensureLegacyWorkspace()
         val preferences = appContext.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
         if (preferences.getBoolean(COMPLETE_KEY, false)) {
-            return@synchronized legacyWorkspace
+            // A user may permanently delete the migrated legacy workspace.
+            // Never recreate its old transcript container after that deletion.
+            return@synchronized workspaces.list(includeArchived = true)
+                .firstOrNull { it.id == LEGACY_WORKSPACE_ID }
+                ?: workspaces.list(includeArchived = false).firstOrNull()
+                ?: workspaces.create("Nuova chat", ChatWorkspace.Kind.CHAT)
         }
 
+        val legacyWorkspace = workspaces.ensureLegacyWorkspace()
         // Copy encrypted bytes, then decrypt/read back both destination archives.
         // No legacy file or document is removed by this operation.
         ChatHistoryStore(appContext).migrateToWorkspace(legacyWorkspace.id)
