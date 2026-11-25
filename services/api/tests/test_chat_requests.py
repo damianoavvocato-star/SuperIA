@@ -254,3 +254,26 @@ def test_tampered_encrypted_replay_fails_closed(tmp_path):
     with pytest.raises(InvalidTag):
         claim_chat_request(database, "device-1", "tampered-request", payload_hash, secret)
 
+def test_concurrent_claims_only_grant_one_lease(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    database = str(tmp_path / "concurrent-claims.sqlite3")
+    secret = "concurrent-claim-secret-at-least-32-characters"
+    messages = [{"role": "user", "content": "Una sola esecuzione"}]
+    payload_hash = request_payload_hash(messages, None)
+    barrier = Barrier(2)
+
+    def claim():
+        barrier.wait(timeout=5)
+        return claim_chat_request(
+            database, "device-1", "concurrent-request", payload_hash, secret
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(lambda _: claim(), range(2)))
+
+    states = sorted(result["state"] for result in results)
+    assert states == ["claimed", "processing"]
+    assert len({result.get("lease_token") for result in results if result["state"] == "claimed"}) == 1
+\n
