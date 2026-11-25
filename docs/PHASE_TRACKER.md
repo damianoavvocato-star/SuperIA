@@ -1398,3 +1398,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 
 - Correzione di isolamento UI: le liste Compose di messaggi e memoria sono ora chiave anche per l'identità dello store attivo, non soltanto per il contenuto caricato. Questo evita che due chat entrambe vuote riutilizzino accidentalmente lo stesso stato Compose. Commit `69c0d817`.
 - Nuova CI Android sul commit `69c0d817`: `https://github.com/damianoavvocato-star/SuperIA/actions/runs/45694421403` in coda al momento della verifica.
+
+### Cancellazione definitiva per chat/progetto — primo incremento
+- Aggiunto coordinatore fail-closed ChatWorkspaceDeletion: preflight cronologia, memoria e documenti; pulizia UUID-scoped; rimozione dell'indice come ultimo passo; workspace legacy protetto; creazione di chat vuota alternativa se si elimina l'ultima attiva.
+- Aggiunto pulsante «Elimina» con conferma esplicita nella UI. Il comando è disabilitato durante generazione/importazione/salvataggio memoria.
+- Pulizia cronologia/memoria include AtomicFile e .bak, e preferenze private del solo workspace. Pulizia documenti è confinata alla cartella UUID; file sconosciuti bloccano la cancellazione.
+- Test strumentali aggiunti: eliminazione di A preservando B e legacy, blocco eliminazione legacy, verifica backup, blocco su file sconosciuti.
+- Audit media: nessuna generazione/salvataggio MediaStore nativa rilevata; Renderforest è un servizio web esterno; esportazioni CreateDocument sono esterne e non vengono rimosse. La Galleria non viene modificata.
+- Commit principali: 4448a09c, 26a7058f, 93e69650, 467c3328, 7f255d87, 439e71a6, a4fae5c3, c5f26c98.
+- CI Android più recente al momento della nota: 45695040036 (f29c14de) in coda; nessuna prova strumentale conclusa per questo incremento. Non distribuire APK sulla base del solo codice committato.
