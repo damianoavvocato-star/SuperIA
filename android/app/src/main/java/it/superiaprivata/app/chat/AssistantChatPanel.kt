@@ -371,8 +371,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 }
                 TextButton(
                     enabled = !generating && !importingDocument && !savingMemory &&
-                        !deletingWorkspace && activeWorkspace != null &&
-                        selectedWorkspaceId != LEGACY_WORKSPACE_ID,
+                        !deletingWorkspace && activeWorkspace != null,
                     onClick = { confirmWorkspaceDeletion = true }
                 ) { Text("Elimina") }
             }
