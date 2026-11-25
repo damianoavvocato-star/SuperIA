@@ -61,8 +61,11 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         runCatching { ChatWorkspaceMigration.migrate(context) }
     }
     val workspaceStore = remember(context) { ChatWorkspaceStore(context) }
+    val workspaceSelection = remember(context) {
+        context.getSharedPreferences("superia_workspace_selection", android.content.Context.MODE_PRIVATE)
+    }
     var selectedWorkspaceId by rememberSaveable {
-        mutableStateOf(LEGACY_WORKSPACE_ID)
+        mutableStateOf(workspaceSelection.getString("active_workspace_id", LEGACY_WORKSPACE_ID) ?: LEGACY_WORKSPACE_ID)
     }
     var workspaces by remember(workspaceStore, migrationResult) {
         mutableStateOf(runCatching { workspaceStore.list(includeArchived = true) }.getOrDefault(emptyList()))
@@ -72,6 +75,15 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var showArchivedWorkspaces by rememberSaveable { mutableStateOf(false) }
     var confirmWorkspaceDeletion by rememberSaveable { mutableStateOf(false) }
     var deletingWorkspace by remember { mutableStateOf(false) }
+    LaunchedEffect(selectedWorkspaceId) {
+        workspaceSelection.edit().putString("active_workspace_id", selectedWorkspaceId).apply()
+    }
+    LaunchedEffect(workspaces) {
+        if (workspaces.isNotEmpty() && workspaces.none { it.id == selectedWorkspaceId }) {
+            selectedWorkspaceId = workspaces.firstOrNull { !it.archived }?.id
+                ?: workspaces.first().id
+        }
+    }
     val activeWorkspace = workspaces.firstOrNull { it.id == selectedWorkspaceId }
     val historyStore = remember(context, selectedWorkspaceId) {
         ChatHistoryStore(context, selectedWorkspaceId)
