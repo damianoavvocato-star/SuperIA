@@ -99,7 +99,7 @@ class LocalDocumentRepository(context: Context, workspaceId: String? = null) {
      * Unknown files make the operation fail closed; source documents selected
      * through Android's picker and user-created exports are never touched.
      */
-    fun deleteAllWorkspaceDocuments() {
+    internal fun deleteAllWorkspaceDocuments() {
         check(directory.name.matches(Regex("[0-9a-fA-F-]{36}"))) {
             "La raccolta documenti legacy non può essere eliminata come progetto."
         }
