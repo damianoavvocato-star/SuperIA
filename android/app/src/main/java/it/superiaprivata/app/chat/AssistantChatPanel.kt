@@ -56,14 +56,27 @@ import kotlinx.coroutines.sync.withLock
 fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val historyStore = remember(context) { ChatHistoryStore(context) }
-    val initialHistory = remember(historyStore) {
-        runCatching {
-            // Preserve the old archive and copy it into the stable legacy workspace
-            // before the multi-chat UI is enabled. Never run destructive legacy cleanup here.
-            ChatWorkspaceMigration.migrate(context)
-            historyStore.load()
-        }
+    val migrationResult = remember(context) {
+        runCatching { ChatWorkspaceMigration.migrate(context) }
+    }
+    val workspaceStore = remember(context) { ChatWorkspaceStore(context) }
+    var selectedWorkspaceId by rememberSaveable {
+        mutableStateOf(LEGACY_WORKSPACE_ID)
+    }
+    var workspaces by remember(workspaceStore, migrationResult) {
+        mutableStateOf(runCatching { workspaceStore.list(includeArchived = false) }.getOrDefault(emptyList()))
+    }
+    var workspaceTitleDraft by rememberSaveable { mutableStateOf("") }
+    var renameWorkspace by rememberSaveable { mutableStateOf(false) }
+    val activeWorkspace = workspaces.firstOrNull { it.id == selectedWorkspaceId }
+    val historyStore = remember(context, selectedWorkspaceId) {
+        ChatHistoryStore(context, selectedWorkspaceId)
+    }
+    val initialHistory = remember(historyStore, migrationResult) {
+        migrationResult.fold(
+            onSuccess = { runCatching { historyStore.load() } },
+            onFailure = { Result.failure(it) }
+        )
     }
     val messages = remember(initialHistory) {
         mutableStateListOf<ChatLine>().apply {
@@ -112,7 +125,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         explicitlySelectedContext: String?
     ): List<ChatPromptMessage> {
         val storedDocuments = withContext(Dispatchers.IO) {
-            LocalDocumentRepository(context).list()
+            LocalDocumentRepository(context, selectedWorkspaceId).list()
         }
         val combinedContext = listOfNotNull(explicitlySelectedContext, attachedDocumentContext)
             .filter { it.isNotBlank() }.joinToString("\n\n")
@@ -134,7 +147,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 importingDocument = true
                 attachmentStatus = "Importazione documento in corso…"
                 try {
-                    val repository = LocalDocumentRepository(context)
+                    val repository = LocalDocumentRepository(context, selectedWorkspaceId)
                     val stored = withContext(Dispatchers.IO) {
                         repository.import(uri, DocumentTextExtractor(context))
                     }
@@ -191,7 +204,15 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Chat", style = MaterialTheme.typography.titleLarge)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("SuperIA", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        activeWorkspace?.title ?: "Conversazione",
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     if (messages.isNotEmpty()) {
                         TextButton(
@@ -217,6 +238,120 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     OutlinedButton(onClick = { showSettings = !showSettings }) {
                         Text(if (showSettings) "Chiudi" else "Impostazioni")
                     }
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    enabled = !generating && !importingDocument,
+                    onClick = {
+                        runCatching {
+                            val created = workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
+                            workspaces = workspaceStore.list(includeArchived = false)
+                            selectedWorkspaceId = created.id
+                            attachedDocumentContext = null
+                            attachmentStatus = null
+                            generationError = null
+                            exportStatus = null
+                            draft = ""
+                        }.onFailure { storageError = it.message ?: "Creazione chat non riuscita." }
+                    }
+                ) { Text("＋ Nuova chat") }
+                OutlinedButton(
+                    enabled = !generating && !importingDocument,
+                    onClick = {
+                        runCatching {
+                            val created = workspaceStore.create("Nuovo progetto", ChatWorkspace.Kind.PROJECT)
+                            workspaces = workspaceStore.list(includeArchived = false)
+                            selectedWorkspaceId = created.id
+                            attachedDocumentContext = null
+                            attachmentStatus = null
+                            generationError = null
+                            exportStatus = null
+                            draft = ""
+                        }.onFailure { storageError = it.message ?: "Creazione progetto non riuscita." }
+                    }
+                ) { Text("＋ Progetto") }
+            }
+            androidx.compose.foundation.lazy.LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(workspaces, key = { it.id }) { workspace ->
+                    OutlinedButton(
+                        enabled = !generating && !importingDocument && workspace.id != selectedWorkspaceId,
+                        onClick = {
+                            selectedWorkspaceId = workspace.id
+                            attachedDocumentContext = null
+                            attachmentStatus = null
+                            generationError = null
+                            exportStatus = null
+                            draft = ""
+                            renameWorkspace = false
+                        }
+                    ) {
+                        Text(
+                            (if (workspace.kind == ChatWorkspace.Kind.PROJECT) "▣ " else "▤ ") +
+                                workspace.title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                TextButton(
+                    enabled = !generating && activeWorkspace != null,
+                    onClick = {
+                        workspaceTitleDraft = activeWorkspace?.title.orEmpty()
+                        renameWorkspace = !renameWorkspace
+                    }
+                ) { Text(if (renameWorkspace) "Annulla" else "Rinomina") }
+                TextButton(
+                    enabled = !generating && !importingDocument &&
+                        activeWorkspace != null && selectedWorkspaceId != LEGACY_WORKSPACE_ID,
+                    onClick = {
+                        runCatching {
+                            workspaceStore.setArchived(selectedWorkspaceId, true)
+                            workspaces = workspaceStore.list(includeArchived = false)
+                            val next = workspaces.firstOrNull()
+                            if (next != null) selectedWorkspaceId = next.id
+                            attachedDocumentContext = null
+                            attachmentStatus = null
+                            renameWorkspace = false
+                        }.onFailure { storageError = it.message ?: "Archiviazione non riuscita." }
+                    }
+                ) { Text("Archivia") }
+            }
+            if (renameWorkspace) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = workspaceTitleDraft,
+                        onValueChange = { workspaceTitleDraft = it },
+                        modifier = Modifier.weight(1f),
+                        label = { Text("Nome chat/progetto") },
+                        singleLine = true
+                    )
+                    OutlinedButton(
+                        enabled = !generating && workspaceTitleDraft.isNotBlank(),
+                        onClick = {
+                            runCatching {
+                                workspaceStore.rename(selectedWorkspaceId, workspaceTitleDraft)
+                                workspaces = workspaceStore.list(includeArchived = false)
+                                renameWorkspace = false
+                            }.onFailure { storageError = it.message ?: "Rinomina non riuscita." }
+                        }
+                    ) { Text("Salva") }
                 }
             }
             if (showSettings) {
