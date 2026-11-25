@@ -1337,3 +1337,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Definito isolamento futuro documenti sotto directory per workspace e cancellazione coordinata prima della rimozione dall'indice.
 - Documento: `docs/MULTI_CHAT_DATA_ISOLATION_ARCHITECTURE.md`, commit `2e255fa9d89037103efbdd5333f5950588ba0f5c`.
 - Nessuna modifica runtime in questo incremento; nessuna migrazione eseguita, nessun dato legacy toccato, nessun test o APK dichiarato. Il registro cifrato e i test strumentali del precedente incremento restano in attesa di CI verificabile.
+
+
+### Isolamento archivio cronologia e memoria per workspace — 25 novembre 2026
+- `ChatHistoryStore(context, workspaceId)` ora supporta percorsi AtomicFile e SharedPreferences distinti per UUID workspace; l'uso senza ID mantiene i nomi e il comportamento legacy esistenti.
+- La cifratura AES-GCM continua a usare la chiave non esportabile Android Keystore già esistente: gli archivi dei workspace sono separati ma restano cifrati a riposo.
+- `clearLegacyLocalHistoryOnce()` rifiuta esplicitamente qualsiasi store associato a un workspace, impedendo che la pulizia del vecchio archivio venga invocata accidentalmente da una nuova chat.
+- Codice: commit `38f03b20ca5c0ddca52f8defb57b77f2b1d2789b`.
+- Test strumentali aggiunti per verificare isolamento di due cronologie e due memorie, persistenza dopo ricreazione dello store, preservazione dell'archivio legacy e blocco della pulizia legacy da workspace: commit `8b3309bde33950c6f25f0e418cc51f1b6049ff97`.
+- **Test non ancora eseguiti/confermati**. Nessuna migrazione automatica è stata eseguita; i dati legacy restano nei percorsi originali. La UI non usa ancora il nuovo costruttore e non espone ancora chat/progetti multipli.
+- Prossimo passo: migrazione legacy idempotente e verificata, poi isolamento documenti e collegamento UI. Nessun APK, deploy, provider o servizio esterno attivato.
