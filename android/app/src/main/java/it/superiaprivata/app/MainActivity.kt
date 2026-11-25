@@ -79,6 +79,7 @@ class MainActivity : ComponentActivity() {
                         if (!showMore) {
                             AssistantChatPanel(
                                 documentContext = workspaceDocumentContexts[activeWorkspaceId],
+                                documentContextWorkspaceId = activeWorkspaceId,
                                 modifier = Modifier.weight(1f).padding(horizontal = 10.dp, vertical = 4.dp),
                                 onWorkspaceChanged = { activeWorkspaceId = it },
                                 onWorkspaceDeleted = { workspaceDocumentContexts.remove(it) }
