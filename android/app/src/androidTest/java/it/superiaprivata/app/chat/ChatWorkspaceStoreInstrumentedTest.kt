@@ -63,6 +63,14 @@ class ChatWorkspaceStoreInstrumentedTest {
             save(listOf(ChatLine(2L, "segreto da eliminare", "user")))
             saveProjectMemory("memoria da eliminare")
         }
+        File(context.filesDir, "conversation_history_${target.id}.enc").copyTo(
+            File(context.filesDir, "conversation_history_${target.id}.enc.bak"),
+            overwrite = true
+        )
+        File(context.filesDir, "project_memory_${target.id}.enc").copyTo(
+            File(context.filesDir, "project_memory_${target.id}.enc.bak"),
+            overwrite = true
+        )
         ChatHistoryStore(context, other.id).apply {
             save(listOf(ChatLine(3L, "segreto da conservare", "user")))
             saveProjectMemory("memoria da conservare")
@@ -81,6 +89,8 @@ class ChatWorkspaceStoreInstrumentedTest {
         assertEquals("cronologia storica", ChatHistoryStore(context, legacy.id).load().single().text)
         assertFalse(File(context.filesDir, "conversation_history_${target.id}.enc").exists())
         assertFalse(File(context.filesDir, "project_memory_${target.id}.enc").exists())
+        assertFalse(File(context.filesDir, "conversation_history_${target.id}.enc.bak").exists())
+        assertFalse(File(context.filesDir, "project_memory_${target.id}.enc.bak").exists())
         assertFalse(File(context.filesDir, "documents/${target.id}").exists())
     }
 
