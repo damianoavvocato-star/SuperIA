@@ -279,10 +279,9 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
      * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
      */
     /**
-     * Remove the old source copies after the migration marker proves that they
-     * were copied and verified into the stable legacy workspace. The source may
-     * be older than the live workspace after later messages, so equality is not
-     * required at deletion time. This operation is idempotent.
+     * Remove pre-migration duplicate archives after the migration marker proves
+     * that the initial copy was verified. The source may be older than the live
+     * workspace after later messages, so equality is not required at deletion time.
      */
     internal fun deleteLegacySourceCopiesAfterVerifiedMigration(workspaceId: String) =
         synchronized(ARCHIVE_WRITE_LOCK) {
