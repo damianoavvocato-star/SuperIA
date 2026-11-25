@@ -296,8 +296,9 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
                 memoryArchive.baseFile,
                 File(memoryArchive.baseFile.path + ".bak")
             )
-            val hasSourcePreferences = preferences.getString(HISTORY_KEY, null) != null
-            if (sourceFiles.any { it.exists() } || hasSourcePreferences) {
+            val hasSourceArchive = sourceFiles.any { it.exists() } ||
+                preferences.getString(HISTORY_KEY, null) != null
+            if (hasSourceArchive) {
                 val sourceTranscript = load()
                 val sourceMemory = loadProjectMemory()
                 val workspace = ChatHistoryStore(appContext, workspaceId)
@@ -307,11 +308,12 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
                 check(workspace.loadProjectMemory() == sourceMemory) {
                     "La memoria workspace non coincide con la copia legacy: sorgenti preservate."
                 }
-                archive.delete()
-                memoryArchive.delete()
-                check(preferences.edit().clear().commit()) {
-                    "Impossibile rimuovere le preferenze della copia legacy."
-                }
+            }
+            // Also clear migration-only preference flags left by older versions.
+            archive.delete()
+            memoryArchive.delete()
+            check(preferences.edit().clear().commit()) {
+                "Impossibile rimuovere le preferenze della copia legacy."
             }
             check(sourceFiles.none { it.exists() } && preferences.all.isEmpty()) {
                 "Sono rimaste copie legacy della cronologia o della memoria."
