@@ -1387,3 +1387,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android CI sul commit UI iniziale era in corso al momento dell'aggiornamento; le modifiche successive hanno generato nuove run. Non dichiarare compilazione o test superati finché non è disponibile il risultato sul commit aggiornato.
 - Limiti noti: archiviate non ancora consultabili/ripristinabili dalla UI; eliminazione definitiva con pulizia coordinata dei documenti/media non ancora implementata. Nessun dato viene cancellato automaticamente.
 
+
+
+### Navigazione archivio chat — 25 novembre 2026
+- Aggiunti filtro «Archiviate» e azione «Ripristina»; il ripristino riporta la chat nell'elenco attivo senza ricreare o spostare i dati.
+- Commit UI archivio: `422f5f05`.
+- La run Android `45694203120` sul commit `daa60f10` ha completato con successo il job `android-unit-tests`; i job strumentali risultavano ancora in corso. Questo esito non copre le modifiche successive né equivale a test su telefono fisico.
+- Run Android per il commit più recente `422f5f05`: `https://github.com/damianoavvocato-star/SuperIA/actions/runs/45694345545` (in coda al momento della verifica).
+- Restano da implementare eliminazione definitiva coordinata e pulizia dei media generati. Nessun contenuto è stato eliminato.
