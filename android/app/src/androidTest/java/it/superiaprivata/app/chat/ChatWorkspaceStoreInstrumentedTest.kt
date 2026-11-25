@@ -124,6 +124,11 @@ class ChatWorkspaceStoreInstrumentedTest {
         val legacy = ChatWorkspaceMigration.migrate(context)
         assertEquals(expected, ChatHistoryStore(context, legacy.id).load())
         assertEquals("memoria legacy da eliminare", ChatHistoryStore(context, legacy.id).loadProjectMemory())
+        // The live workspace may diverge from the retained migration copy after use.
+        ChatHistoryStore(context, legacy.id).apply {
+            save(expected + ChatLine(41L, "messaggio successivo alla migrazione", "user"))
+            saveProjectMemory("memoria aggiornata")
+        }
 
         val result = ChatWorkspaceDeletion.delete(context, legacy.id)
 
