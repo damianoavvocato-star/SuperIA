@@ -54,7 +54,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 @Composable
-fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Modifier) {
+fun AssistantChatPanel(
+    documentContext: String? = null,
+    modifier: Modifier = Modifier,
+    onWorkspaceChanged: (String) -> Unit = {},
+    onWorkspaceDeleted: (String) -> Unit = {}
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val migrationResult = remember(context) {
@@ -77,6 +82,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var deletingWorkspace by remember { mutableStateOf(false) }
     LaunchedEffect(selectedWorkspaceId) {
         workspaceSelection.edit().putString("active_workspace_id", selectedWorkspaceId).apply()
+        onWorkspaceChanged(selectedWorkspaceId)
     }
     LaunchedEffect(workspaces) {
         if (workspaces.isNotEmpty() && workspaces.none { it.id == selectedWorkspaceId }) {
@@ -423,6 +429,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                                         val result = withContext(Dispatchers.IO) {
                                             ChatWorkspaceDeletion.delete(context, deletingId)
                                         }
+                                        onWorkspaceDeleted(deletingId)
                                         selectedWorkspaceId = result.activeWorkspaceId
                                         workspaces = workspaceStore.list(includeArchived = true)
                                         attachedDocumentContext = null
