@@ -640,3 +640,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - I test backend in CI non dimostrano ancora pairing pubblico, provider AI reale, PostgreSQL di produzione, deploy HTTPS o chat Android end-to-end. Gate 36 resta bloccato dai prerequisiti esterni; microfasi Android 29–30 restano aperte per i test strumentali non completati. Nessun APK release, servizio esterno, database o provider è stato attivato.
 
 - Estensione successiva del test di cancellazione: dopo aver verificato `failed` e chiusura dell'iteratore, il test prova a reclamare immediatamente lo stesso `request_id` con lo stesso payload e verifica un nuovo lease. Commit: `5c228d2a392335b7d45fcfeb8662dd9d300e2d88`. Il wrapper GitHub disponibile non espone l'elenco completo dei workflow push; lo stato CI di questo commit non è stato quindi confermato e resta da verificare dalla pagina Actions.
+
+
+## Nuova funzionalità approvata — chat multiple, progetti separati e cancellazione completa — 25 novembre 2026
+- L'utente ha approvato la possibilità di creare più chat/progetti indipendenti, passare da un progetto all'altro e conservare separatamente cronologia, memoria, documenti e file.
+- Requisito di eliminazione: cancellare definitivamente i dati della chat e gli output attribuiti ad essa, incluse copie private dell'app e copie esportate nella Galleria quando Android consente la rimozione.
+- Specifica dettagliata aggiunta in `docs/MULTI_CHAT_PROJECTS_AND_DELETION_PLAN.md` (commit `0a2d38de32cf2cdc701d81e4dd920d09939eb7bc`).
+- Vincoli Android: le copie in MediaStore create da SuperIA saranno tracciate per chat; se il sistema richiede consenso, la cancellazione attende il dialogo Android. Non si eliminano file preesistenti/importati o copie esterne non più controllabili; gli esiti parziali devono essere espliciti.
+- Audit iniziale: l'archivio corrente `ChatHistoryStore` conserva una sola cronologia cifrata e una memoria progetto globale; `LocalDocumentRepository` conserva documenti in un archivio privato condiviso. Non esiste ancora un'associazione per chat ID sufficiente per cancellare selettivamente.
+- Stato: **specifica approvata, implementazione da avviare**. Prossimo passo: audit completo delle dipendenze di persistenza/UI, poi modello multi-chat cifrato con migrazione legacy atomica. Nessun test nuovo eseguito, nessun APK, deploy, provider o servizio esterno attivato.
