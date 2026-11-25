@@ -152,7 +152,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         repository.import(uri, DocumentTextExtractor(context))
                     }
                     attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\nContenuto estratto:\n${stored.text.take(6000)}"
-                    attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato e sarà consultabile anche nelle prossime chat."
+                    attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato in questo progetto."
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {
@@ -367,7 +367,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             }
             }
             if (showSettings) {
-            Text("Una conversazione persistente: la cronologia resta cifrata sul dispositivo. Per rispondere, la richiesta viene inviata al backend HTTPS configurato.", style = MaterialTheme.typography.bodyMedium)
+            Text("Ogni chat e progetto conserva cronologia, memoria e documenti separati e cifrati sul dispositivo. Per rispondere, la richiesta viene inviata al backend HTTPS configurato.", style = MaterialTheme.typography.bodyMedium)
             OutlinedTextField(
                 value = backendEndpoint,
                 onValueChange = { backendEndpoint = it },
