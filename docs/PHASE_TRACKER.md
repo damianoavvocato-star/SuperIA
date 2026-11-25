@@ -600,3 +600,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit codice: `739a9a3ae5fb16e71b96eb6192ff574525b57f80`; commit test: `9b2d19065e3a0a7fbafe00d4567cbb074437d579`; commit documentazione: `20de12c2f4c74849139f48413b5d570cd96c863d`.
 - Aggiunti test per Vercel Production senza configurazione custom, Preview e PostgreSQL configurato. Esito CI non ancora verificato.
 - Nessun account, database, segreto, provider o deployment è stato creato. Il pairing resta disabilitato finché non è confermato il rate limit gateway effettivo.
+
+
+### Rafforzamento fail-closed Vercel — 25 novembre 2026
+- Revisione del controllo precedente: la variabile di piattaforma `VERCEL=1` ora prevale sempre su `SUPERIA_ENVIRONMENT`, così un valore custom `development` non può riabilitare SQLite in Preview/Production.
+- Aggiunti test specifici per downgrade tentato sia in Production sia in Preview.
+- Commit logica: `b290eb875dfb633acbb67393590fd76924c3fba0`; commit test: `c30e5ff5c076ba66b5d0a8412ddfc2185d446156`.
+- Stato CI non verificabile tramite i controlli disponibili al momento; non dichiarare i test superati finché GitHub Actions non mostra un'esecuzione completata.
