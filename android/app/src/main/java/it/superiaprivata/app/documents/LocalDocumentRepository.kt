@@ -17,8 +17,9 @@ data class StoredDocument(val id: String, val title: String, val text: String, v
 
 /** Stores extracted document text encrypted at rest with a non-exportable Android Keystore key. */
 class LocalDocumentRepository(context: Context, workspaceId: String? = null) {
+    private val appFilesDir = context.applicationContext.filesDir
     private val directory = File(
-        context.applicationContext.filesDir,
+        appFilesDir,
         if (workspaceId == null) {
             "documents"
         } else {
@@ -104,7 +105,7 @@ class LocalDocumentRepository(context: Context, workspaceId: String? = null) {
         }
         val canonicalDirectory = directory.canonicalFile
         require(canonicalDirectory.parentFile?.canonicalFile ==
-            File(directory.parentFile, "documents").canonicalFile) {
+            File(appFilesDir, "documents").canonicalFile) {
             "Percorso archivio documenti non valido."
         }
         val candidates = directory.listFiles().orEmpty()
