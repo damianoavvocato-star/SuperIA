@@ -22,6 +22,16 @@ class ChatWorkspaceStoreInstrumentedTest {
         val file = File(context.filesDir, "chat_workspaces.enc")
         file.delete()
         File(file.absolutePath + ".bak").delete()
+        context.getSharedPreferences("superia_workspace_migration", Context.MODE_PRIVATE)
+            .edit().clear().commit()
+        ChatHistoryStore(context).apply {
+            clear()
+            clearProjectMemory()
+        }
+        ChatHistoryStore(context, LEGACY_WORKSPACE_ID).apply {
+            clear()
+            clearProjectMemory()
+        }
         store = ChatWorkspaceStore(context)
     }
 
@@ -95,13 +105,34 @@ class ChatWorkspaceStoreInstrumentedTest {
     }
 
     @Test
-    fun legacyWorkspaceCannotBePermanentlyDeleted() {
+    fun legacyWorkspaceCannotBeDeletedBeforeMigrationVerification() {
         val legacy = store.ensureLegacyWorkspace()
         ChatHistoryStore(context, legacy.id).save(listOf(ChatLine(4L, "non eliminare", "user")))
 
         assertTrue(runCatching { ChatWorkspaceDeletion.delete(context, legacy.id) }.isFailure)
         assertTrue(store.list().any { it.id == legacy.id })
         assertEquals("non eliminare", ChatHistoryStore(context, legacy.id).load().single().text)
+    }
+
+    @Test
+    fun migratedLegacyWorkspaceCanBeDeletedAndIsNotRecreatedOnStartup() {
+        val source = ChatHistoryStore(context)
+        val expected = listOf(ChatLine(40L, "vecchia conversazione da eliminare", "user"))
+        source.save(expected)
+        source.saveProjectMemory("memoria legacy da eliminare")
+
+        val legacy = ChatWorkspaceMigration.migrate(context)
+        assertEquals(expected, ChatHistoryStore(context, legacy.id).load())
+        assertEquals("memoria legacy da eliminare", ChatHistoryStore(context, legacy.id).loadProjectMemory())
+
+        val result = ChatWorkspaceDeletion.delete(context, legacy.id)
+
+        assertEquals(result.activeWorkspaceId, ChatWorkspaceMigration.migrate(context).id)
+        assertFalse(store.list().any { it.id == legacy.id })
+        assertFalse(File(context.filesDir, "conversation_history.enc").exists())
+        assertFalse(File(context.filesDir, "project_memory.enc").exists())
+        assertFalse(File(context.filesDir, "conversation_history_${legacy.id}.enc").exists())
+        assertFalse(File(context.filesDir, "project_memory_${legacy.id}.enc").exists())
     }
 
     @Test
