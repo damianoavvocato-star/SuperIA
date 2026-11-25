@@ -1357,3 +1357,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Test strumentale aggiunto per verificare contenuti, payload pendenti `requestId`/`requestMessages`, uguaglianza byte-per-byte e retry della migrazione.
 - Codice: `4a072312`, `452fe5ff`, `29728fa`, `9447cdaf`; test: `fec715e4`.
 - Test CI ancora da verificare. Nessun APK rilasciato; nessun dato sorgente cancellato.
+
+
+### Directory documenti isolate per workspace — 25 novembre 2026
+- `LocalDocumentRepository` accetta un UUID workspace e usa `filesDir/documents/<UUID>/`; il costruttore senza ID conserva esattamente il percorso legacy.
+- Cifratura AES-GCM, chiave Keystore, AtomicFile e controlli dimensione restano invariati. I documenti esistenti non vengono spostati né duplicati.
+- Test strumentale aggiunto per isolamento tra due workspace e archivio legacy.
+- Codice: `77dc9701`; test: `d5568d7c`. CI Android in attesa.
+- La UI continua a usare il repository legacy fino al collegamento della selezione chat. Nessuna cancellazione documenti o media eseguita.
+
