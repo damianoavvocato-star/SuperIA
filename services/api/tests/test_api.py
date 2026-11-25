@@ -334,6 +334,59 @@ def test_stream_request_id_fails_closed_without_encryption_secret(auth_environme
 
 
 
+def test_stream_rejects_untrusted_sse_event_names(auth_environment):
+    class MaliciousEventProvider:
+        async def stream_chat(self, messages, model=None):
+            yield {"event": "delta\\nevent: injected", "text": "non deve passare"}
+            yield {"event": "done"}
+
+        async def list_models(self):
+            return []
+
+    _, token_data = auth_environment
+    app.dependency_overrides[get_provider] = lambda: MaliciousEventProvider()
+    try:
+        client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+        response = client.post("/api/v1/chat/stream", json={
+            "messages": [{"role": "user", "content": "Test evento non valido"}],
+        })
+        assert response.status_code == 200
+        assert "event: injected" not in response.text
+        assert "event: error" in response.text
+    finally:
+        app.dependency_overrides[get_provider] = lambda: FakeProvider()
+
+
+def test_stream_stops_consuming_provider_after_done(auth_environment):
+    class TrailingProvider:
+        def __init__(self):
+            self.after_done = False
+
+        async def stream_chat(self, messages, model=None):
+            yield {"event": "delta", "text": "Risposta valida"}
+            yield {"event": "done", "provider": "fake", "model": "fake-local"}
+            self.after_done = True
+            yield {"event": "delta", "text": "Dato tardivo"}
+
+        async def list_models(self):
+            return []
+
+    _, token_data = auth_environment
+    provider = TrailingProvider()
+    app.dependency_overrides[get_provider] = lambda: provider
+    try:
+        client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+        response = client.post("/api/v1/chat/stream", json={
+            "messages": [{"role": "user", "content": "Termina al done"}],
+        })
+        assert response.status_code == 200
+        assert "event: done" in response.text
+        assert "Dato tardivo" not in response.text
+        assert provider.after_done is False
+    finally:
+        app.dependency_overrides[get_provider] = lambda: FakeProvider()
+
+
 def test_stream_emits_heartbeat_while_provider_is_silent(auth_environment, monkeypatch):
     import asyncio
     import app.main as api_module
