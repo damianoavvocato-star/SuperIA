@@ -1410,3 +1410,7 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 
 - Ulteriore correzione di usabilità: la selezione del workspace attivo viene ora salvata nelle preferenze locali e ripristinata all'avvio; se il workspace non esiste più, la UI ripiega su uno spazio valido. Commit b12d14e8.
 - CI Android sul commit codice/test b12d14e8 in attesa di esecuzione: verificare la run più recente prima di considerare conclusa la fase.
+
+- Isolato anche il contesto scelto da Documenti: la MainActivity lo indicizza per workspace e AssistantChatPanel lo accetta soltanto quando l'ID proprietario coincide con quello selezionato. Il contesto in memoria viene rimosso alla cancellazione del workspace. Commit UI: b29e3f1f, 4ad45d02, a4e3f495, 2302fb76, e0c2d07d.
+- La conversazione legacy è eliminabile dopo che il marker di migrazione è verificato; le copie storiche globali vengono eliminate insieme alla chat, mentre la raccolta Documenti generale/OCR rimane separata e non attribuita al workspace. La migrazione non ricrea una conversazione legacy già eliminata. Commit: 0d78b5c3, 4e85c811, 10f92d2a, 8f5121dc, 37a4bca7, e7207601, f894155e, 31fd2633.
+- Run Android per il commit di test più recente 31fd2633: https://github.com/damianoavvocato-star/SuperIA/actions/runs/45696080470 (in coda al momento dell'ultimo controllo). Alcune run precedenti hanno completato i job unitari e di build APK debug, ma il job strumentale emulator è rimasto in corso; nessuna validazione completa dell'incremento è ancora dichiarata.
