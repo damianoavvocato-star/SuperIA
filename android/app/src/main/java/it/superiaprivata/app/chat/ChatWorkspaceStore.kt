@@ -15,6 +15,8 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /** Metadata for one independent conversation or project. */
+internal const val LEGACY_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001"
+
 data class ChatWorkspace(
     val id: String,
     val title: String,
@@ -201,7 +203,6 @@ class ChatWorkspaceStore(context: Context) {
     }
 
     private companion object {
-        const val LEGACY_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001"
         const val INDEX_FILE = "chat_workspaces.enc"
         const val ANDROID_KEY_STORE = "AndroidKeyStore"
         const val KEY_ALIAS = "superia_workspace_index_aes"
