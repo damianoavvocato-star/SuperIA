@@ -726,5 +726,6 @@ def test_cancelled_chat_stream_releases_lease_and_closes_provider(auth_environme
             "SELECT status, lease_token FROM chat_requests WHERE request_id = ?",
             (request_id,),
         ).fetchone()
-    assert row == ("failed", row[1])
+    assert row is not None
+    assert row[0] == "failed"
     assert row[1]
