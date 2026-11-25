@@ -612,3 +612,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 ### Isolamento dei test Vercel — 25 novembre 2026
 - Il fixture helper dei test rimuove anche `VERCEL` e `VERCEL_ENV` prima di impostare i valori specifici di ciascun test, evitando dipendenze dall'ambiente del runner.
 - Commit: `2c7882ada509b686174cbfcacf2ef7bb20e23902`. Esito CI non ancora disponibile tramite i controlli consultabili.
+
+
+### Hardening stato router su Vercel — 25 novembre 2026
+- Audit ha rilevato che `FreeOnlyRouter` determinava l'ambiente solo da `SUPERIA_ENVIRONMENT`: una variabile custom `development` avrebbe potuto consentire `SUPERIA_ROUTER_STATE_DB=/tmp/...` anche su Vercel.
+- Corretto: `VERCEL=1` prevale sempre; Preview è staging e Production è production. PostgreSQL è richiesto anche per lo stato del router; nessun fallback SQLite temporaneo in quei runtime.
+- Test aggiunti: Preview/Production senza PostgreSQL e Production con override development ma stato router SQLite vengono rifiutati.
+- Codice: `ca5a7e9c6b1a575e370ba3c332a72358e441a725`; test: `e44d38af7535778664ab615e943b7ad819d3077e`. CI da verificare.
