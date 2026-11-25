@@ -58,3 +58,12 @@ Nessun deploy, provider AI, database, account esterno, APK release o modifica al
 - `ChatWorkspaceMigration` registra un marker durevole soltanto dopo la verifica. La migrazione è ripetibile dopo un'interruzione e non elimina i file sorgente.
 - `AssistantChatPanel` esegue la migrazione prima del caricamento e non richiama più `clearLegacyLocalHistoryOnce()`, che era distruttiva per l'archivio legacy.
 - La migrazione riguarda solo cronologia e memoria. I documenti restano condivisi/legacy finché non sarà implementato il repository per workspace.
+
+
+## Isolamento repository documenti — primo incremento
+- `LocalDocumentRepository(context, workspaceId)` risolve un percorso dedicato `filesDir/documents/<UUID>/`; senza ID mantiene il percorso storico `filesDir/documents/`.
+- Validazione UUID prima di comporre il percorso. Cifratura, AtomicFile, limiti e chiave Keystore restano invariati.
+- I documenti legacy non vengono copiati nei nuovi workspace e non sono visibili agli altri workspace.
+- `AssistantChatPanel` continua temporaneamente a usare il repository legacy finché la selezione workspace non viene collegata alla UI.
+- Test strumentale aggiunto per verificare che un documento in un workspace non sia visibile né al secondo workspace né all'archivio legacy.
+
