@@ -572,3 +572,52 @@ def test_pairing_gate_rejects_unconfirmed_values_and_spoofed_forwarding_headers(
     assert response.status_code == 503
     assert "protezione anti-abuso non confermata" in response.json()["detail"]
     assert "pairing-secret-code-123456" not in response.text
+
+
+def test_interrupted_stream_can_retry_same_request_id_and_then_replay(auth_environment):
+    from app.providers.free_router import NoFreeProviderAvailable
+
+    class InterruptedProvider:
+        def __init__(self):
+            self.stream_calls = 0
+
+        async def stream_chat(self, messages, model=None):
+            self.stream_calls += 1
+            yield {"event": "delta", "text": "Parte parziale", "provider": "fake", "model": "fake-local"}
+            raise RuntimeError("connessione provider interrotta")
+
+        async def list_models(self):
+            return ["fake-local"]
+
+    _, token_data = auth_environment
+    request_id = "f02d78f5-c40e-4d55-9f2d-cb8f82c2d6d1"
+    payload = {
+        "request_id": request_id,
+        "messages": [{"role": "user", "content": "Verifica retry dopo interruzione"}],
+    }
+    client = TestClient(app, headers={"Authorization": "Bearer " + token_data["access_token"]})
+    interrupted = InterruptedProvider()
+    app.dependency_overrides[get_provider] = lambda: interrupted
+    try:
+        first = client.post("/api/v1/chat/stream", json=payload)
+        assert first.status_code == 200
+        assert '"text":"Parte parziale"' in first.text
+        assert "event: error" in first.text
+        assert interrupted.stream_calls == 1
+
+        recovered = FakeProvider()
+        app.dependency_overrides[get_provider] = lambda: recovered
+        second = client.post("/api/v1/chat/stream", json=payload)
+        assert second.status_code == 200
+        assert "event: done" in second.text
+        assert '"text":"Risposta "' in second.text
+        assert recovered.stream_calls == 1
+
+        replay = client.post("/api/v1/chat/stream", json=payload)
+        assert replay.status_code == 200
+        assert "event: done" in replay.text
+        assert '"text":"Risposta in streaming"' in replay.text
+        assert recovered.stream_calls == 1
+    finally:
+        app.dependency_overrides[get_provider] = lambda: FakeProvider()
+
