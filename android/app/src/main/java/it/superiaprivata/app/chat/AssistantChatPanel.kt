@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -69,6 +70,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     var workspaceTitleDraft by rememberSaveable { mutableStateOf("") }
     var renameWorkspace by rememberSaveable { mutableStateOf(false) }
     var showArchivedWorkspaces by rememberSaveable { mutableStateOf(false) }
+    var confirmWorkspaceDeletion by rememberSaveable { mutableStateOf(false) }
+    var deletingWorkspace by remember { mutableStateOf(false) }
     val activeWorkspace = workspaces.firstOrNull { it.id == selectedWorkspaceId }
     val historyStore = remember(context, selectedWorkspaceId) {
         ChatHistoryStore(context, selectedWorkspaceId)
@@ -354,6 +357,12 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         }
                     ) { Text("Archivia") }
                 }
+                TextButton(
+                    enabled = !generating && !importingDocument && !savingMemory &&
+                        !deletingWorkspace && activeWorkspace != null &&
+                        selectedWorkspaceId != LEGACY_WORKSPACE_ID,
+                    onClick = { confirmWorkspaceDeletion = true }
+                ) { Text("Elimina") }
             }
             if (renameWorkspace) {
                 Row(
@@ -379,6 +388,57 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         }
                     ) { Text("Salva") }
                 }
+            }
+            if (confirmWorkspaceDeletion) {
+                AlertDialog(
+                    onDismissRequest = {
+                        if (!deletingWorkspace) confirmWorkspaceDeletion = false
+                    },
+                    title = { Text("Eliminare definitivamente?") },
+                    text = {
+                        Text(
+                            "Verranno eliminati cronologia, memoria e documenti cifrati di «${activeWorkspace?.title ?: "questa chat"}». " +
+                                "L'operazione non si può annullare. File esportati in altre app e contenuti esterni non verranno toccati."
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            enabled = !deletingWorkspace,
+                            onClick = {
+                                val deletingId = selectedWorkspaceId
+                                deletingWorkspace = true
+                                scope.launch {
+                                    try {
+                                        val result = withContext(Dispatchers.IO) {
+                                            ChatWorkspaceDeletion.delete(context, deletingId)
+                                        }
+                                        selectedWorkspaceId = result.activeWorkspaceId
+                                        workspaces = workspaceStore.list(includeArchived = true)
+                                        attachedDocumentContext = null
+                                        attachmentStatus = null
+                                        generationError = null
+                                        storageError = null
+                                        exportStatus = null
+                                        draft = ""
+                                        renameWorkspace = false
+                                        showArchivedWorkspaces = false
+                                        confirmWorkspaceDeletion = false
+                                    } catch (error: Exception) {
+                                        storageError = error.message ?: "Eliminazione non completata. I dati non rimossi restano associati alla chat."
+                                    } finally {
+                                        deletingWorkspace = false
+                                    }
+                                }
+                            }
+                        ) { Text(if (deletingWorkspace) "Eliminazione…" else "Elimina definitivamente") }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            enabled = !deletingWorkspace,
+                            onClick = { confirmWorkspaceDeletion = false }
+                        ) { Text("Annulla") }
+                    }
+                )
             }
             if (showSettings) {
             Card {
