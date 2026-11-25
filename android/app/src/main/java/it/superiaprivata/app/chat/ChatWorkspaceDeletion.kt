@@ -48,7 +48,7 @@ internal object ChatWorkspaceDeletion {
         // the legacy workspace copy is byte-for-byte equivalent at the data level.
         // This step is idempotent and runs before deleting the workspace archive.
         if (workspaceId == LEGACY_WORKSPACE_ID) {
-            ChatHistoryStore(appContext).deleteLegacySourceCopiesAfterVerifiedWorkspace(workspaceId)
+            ChatHistoryStore(appContext).deleteLegacySourceCopiesAfterVerifiedMigration(workspaceId)
         }
 
         // Delete only app-owned UUID-scoped archives. If any step fails, keep the
