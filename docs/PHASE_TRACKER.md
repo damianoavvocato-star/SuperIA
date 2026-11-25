@@ -1407,3 +1407,6 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Audit media: nessuna generazione/salvataggio MediaStore nativa rilevata; Renderforest è un servizio web esterno; esportazioni CreateDocument sono esterne e non vengono rimosse. La Galleria non viene modificata.
 - Commit principali: 4448a09c, 26a7058f, 93e69650, 467c3328, 7f255d87, 439e71a6, a4fae5c3, c5f26c98.
 - CI Android più recente al momento della nota: 45695040036 (f29c14de) in coda; nessuna prova strumentale conclusa per questo incremento. Non distribuire APK sulla base del solo codice committato.
+
+- Ulteriore correzione di usabilità: la selezione del workspace attivo viene ora salvata nelle preferenze locali e ripristinata all'avvio; se il workspace non esiste più, la UI ripiega su uno spazio valido. Commit b12d14e8.
+- CI Android sul commit codice/test b12d14e8 in attesa di esecuzione: verificare la run più recente prima di considerare conclusa la fase.
