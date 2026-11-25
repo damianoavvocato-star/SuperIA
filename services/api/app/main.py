@@ -94,8 +94,20 @@ def _required_secret(name: str) -> str:
 
 
 def _auth_database_path() -> str:
-    # Deployed environments must never silently fall back to ephemeral/local SQLite.
-    environment = os.environ.get("SUPERIA_ENVIRONMENT", "development").strip().lower()
+    # Vercel deployments must fail closed even if SUPERIA_ENVIRONMENT was omitted.
+    # VERCEL=1 is platform-provided; Preview is treated as staging.
+    vercel_runtime = os.environ.get("VERCEL", "").strip() == "1"
+    vercel_env = os.environ.get("VERCEL_ENV", "").strip().lower()
+    configured_environment = os.environ.get("SUPERIA_ENVIRONMENT", "").strip().lower()
+    if configured_environment:
+        environment = configured_environment
+    elif vercel_runtime and vercel_env == "preview":
+        environment = "staging"
+    elif vercel_runtime:
+        environment = "production"
+    else:
+        environment = "development"
+
     database_url = os.environ.get("SUPERIA_DATABASE_URL", "").strip()
     try:
         validate_deployment_database_url(database_url, environment, "SUPERIA_DATABASE_URL")
