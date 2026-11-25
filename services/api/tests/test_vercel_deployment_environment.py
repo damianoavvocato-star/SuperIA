@@ -10,6 +10,7 @@ def _clear_database_environment(monkeypatch):
         "SUPERIA_DATABASE_URL",
         "SUPERIA_AUTH_DB",
         "VERCEL_ENV",
+        "VERCEL",
     ):
         monkeypatch.delenv(name, raising=False)
 
