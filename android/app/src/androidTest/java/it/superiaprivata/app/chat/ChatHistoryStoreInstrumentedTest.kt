@@ -40,7 +40,7 @@ class ChatHistoryStoreInstrumentedTest {
             .edit().clear().commit()
         context.getSharedPreferences("superia_workspace_migration", Context.MODE_PRIVATE)
             .edit().clear().commit()
-        ChatHistoryStore(context, ChatWorkspaceStore.LEGACY_WORKSPACE_ID).apply {
+        ChatHistoryStore(context, LEGACY_WORKSPACE_ID).apply {
             clear()
             clearProjectMemory()
         }
@@ -516,7 +516,7 @@ class ChatHistoryStoreInstrumentedTest {
             context.filesDir, "project_memory_${workspace.id}.enc"
         )
 
-        assertEquals(ChatWorkspaceStore.LEGACY_WORKSPACE_ID, workspace.id)
+        assertEquals(LEGACY_WORKSPACE_ID, workspace.id)
         assertEquals(transcript, destination.load())
         assertEquals(memory, destination.loadProjectMemory())
         assertArrayEquals(sourceTranscript, destinationTranscriptFile.readBytes())
