@@ -94,19 +94,15 @@ def _required_secret(name: str) -> str:
 
 
 def _auth_database_path() -> str:
-    # Vercel deployments must fail closed even if SUPERIA_ENVIRONMENT was omitted.
-    # VERCEL=1 is platform-provided; Preview is treated as staging.
+    # Platform runtime is authoritative: custom settings must never downgrade Vercel
+    # Preview/Production to development and permit ephemeral SQLite.
     vercel_runtime = os.environ.get("VERCEL", "").strip() == "1"
     vercel_env = os.environ.get("VERCEL_ENV", "").strip().lower()
     configured_environment = os.environ.get("SUPERIA_ENVIRONMENT", "").strip().lower()
-    if configured_environment:
-        environment = configured_environment
-    elif vercel_runtime and vercel_env == "preview":
-        environment = "staging"
-    elif vercel_runtime:
-        environment = "production"
+    if vercel_runtime:
+        environment = "staging" if vercel_env == "preview" else "production"
     else:
-        environment = "development"
+        environment = configured_environment or "development"
 
     database_url = os.environ.get("SUPERIA_DATABASE_URL", "").strip()
     try:
