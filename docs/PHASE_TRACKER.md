@@ -1395,3 +1395,6 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - La run Android `45694203120` sul commit `daa60f10` ha completato con successo il job `android-unit-tests`; i job strumentali risultavano ancora in corso. Questo esito non copre le modifiche successive né equivale a test su telefono fisico.
 - Run Android per il commit più recente `422f5f05`: `https://github.com/damianoavvocato-star/SuperIA/actions/runs/45694345545` (in coda al momento della verifica).
 - Restano da implementare eliminazione definitiva coordinata e pulizia dei media generati. Nessun contenuto è stato eliminato.
+
+- Correzione di isolamento UI: le liste Compose di messaggi e memoria sono ora chiave anche per l'identità dello store attivo, non soltanto per il contenuto caricato. Questo evita che due chat entrambe vuote riutilizzino accidentalmente lo stesso stato Compose. Commit `69c0d817`.
+- Nuova CI Android sul commit `69c0d817`: `https://github.com/damianoavvocato-star/SuperIA/actions/runs/45694421403` in coda al momento della verifica.
