@@ -607,3 +607,8 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Aggiunti test specifici per downgrade tentato sia in Production sia in Preview.
 - Commit logica: `b290eb875dfb633acbb67393590fd76924c3fba0`; commit test: `c30e5ff5c076ba66b5d0a8412ddfc2185d446156`.
 - Stato CI non verificabile tramite i controlli disponibili al momento; non dichiarare i test superati finché GitHub Actions non mostra un'esecuzione completata.
+
+
+### Isolamento dei test Vercel — 25 novembre 2026
+- Il fixture helper dei test rimuove anche `VERCEL` e `VERCEL_ENV` prima di impostare i valori specifici di ciascun test, evitando dipendenze dall'ambiente del runner.
+- Commit: `2c7882ada509b686174cbfcacf2ef7bb20e23902`. Esito CI non ancora disponibile tramite i controlli consultabili.
