@@ -44,6 +44,26 @@ class ChatWorkspaceStore(context: Context) {
                 .sortedWith(compareByDescending<ChatWorkspace> { it.updatedAtMillis }.thenBy { it.id })
         }
 
+    /** Stable entry that owns conversations already present before multi-chat activation. */
+    fun ensureLegacyWorkspace(): ChatWorkspace = synchronized(LOCK) {
+        val existing = readIndex().firstOrNull { it.id == LEGACY_WORKSPACE_ID }
+        if (existing != null) return@synchronized existing
+        val now = System.currentTimeMillis()
+        val legacy = ChatWorkspace(
+            id = LEGACY_WORKSPACE_ID,
+            title = "Conversazione precedente",
+            kind = ChatWorkspace.Kind.CHAT,
+            createdAtMillis = now,
+            updatedAtMillis = now
+        )
+        writeIndex(readIndex() + legacy)
+        legacy
+    }
+
+    companion object {
+        const val LEGACY_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001"
+    }
+
     fun create(title: String, kind: ChatWorkspace.Kind = ChatWorkspace.Kind.CHAT): ChatWorkspace =
         synchronized(LOCK) {
             val cleanTitle = normalizeTitle(title)
