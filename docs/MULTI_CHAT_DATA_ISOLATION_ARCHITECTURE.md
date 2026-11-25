@@ -83,3 +83,8 @@ Nessun deploy, provider AI, database, account esterno, APK release o modifica al
 - Audit dei moduli attuali: RenderforestPanel apre un servizio web esterno e non salva media in SuperIA; DocumentsPanel usa l'archivio globale legacy e OCR globale, quindi non viene toccato dalla cancellazione di un workspace. Le esportazioni tramite CreateDocument sono file scelti dall'utente e non sono controllabili dall'app.
 - Non è stato trovato un flusso attuale di generazione/salvataggio media in MediaStore né un registro di media generati. Perciò questo incremento non dichiara di cancellare foto/video dalla Galleria; quando si implementerà la generazione interna, ogni URI MediaStore dovrà essere registrata con proprietario workspace e cancellata con il consenso Android richiesto.
 - Nessun dato sul dispositivo è stato cancellato in questa fase: è stato aggiunto il codice, non eseguito su telefono fisico.
+
+## Contesto documentale temporaneo per workspace
+- Il testo selezionato dal pannello Documenti viene ora conservato nella memoria UI della MainActivity sotto l'ID del workspace attivo e passato alla chat solo se l'ID proprietario coincide con quello selezionato.
+- Il cambio chat non può quindi riutilizzare per errore il contesto selezionato nella chat precedente; la cancellazione del workspace rimuove anche la relativa voce di contesto in memoria.
+- La raccolta generale Documenti e il dizionario OCR restano strumenti globali separati: non vengono eliminati cancellando una chat perché non sono attribuiti a quel workspace. I documenti importati direttamente nella chat, invece, sono archiviati nella cartella UUID e vengono rimossi con il progetto.
