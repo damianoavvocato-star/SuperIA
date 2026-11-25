@@ -202,3 +202,55 @@ def test_idempotency_records_are_isolated_between_devices(tmp_path):
     replay_b = claim_chat_request(database, "device-B", request_id, payload_hash, secret)
     assert replay_a["content"] == "Risposta A"
     assert replay_b["content"] == "Risposta B"
+
+
+def test_reused_request_id_with_different_payload_is_rejected(tmp_path):
+    database = str(tmp_path / "payload-conflict.sqlite3")
+    secret = "payload-conflict-secret-at-least-32-characters"
+    first_messages = [{"role": "user", "content": "Prima domanda"}]
+    second_messages = [{"role": "user", "content": "Domanda diversa"}]
+    first_hash = request_payload_hash(first_messages, None)
+    second_hash = request_payload_hash(second_messages, None)
+
+    first = claim_chat_request(database, "device-1", "same-request-id", first_hash, secret)
+    assert first["state"] == "claimed"
+    assert complete_chat_request(
+        database, "device-1", "same-request-id", "Risposta privata",
+        "test-model", "test-provider", secret, str(first["lease_token"]),
+    )
+
+    conflict = claim_chat_request(database, "device-1", "same-request-id", second_hash, secret)
+    assert conflict == {"state": "conflict"}
+
+
+def test_tampered_encrypted_replay_fails_closed(tmp_path):
+    import sqlite3
+
+    from cryptography.exceptions import InvalidTag
+
+    database = str(tmp_path / "tampered-replay.sqlite3")
+    secret = "tampered-replay-secret-at-least-32-characters"
+    messages = [{"role": "user", "content": "Non divulgare"}]
+    payload_hash = request_payload_hash(messages, None)
+
+    first = claim_chat_request(database, "device-1", "tampered-request", payload_hash, secret)
+    assert first["state"] == "claimed"
+    assert complete_chat_request(
+        database, "device-1", "tampered-request", "Risposta segreta",
+        "test-model", "test-provider", secret, str(first["lease_token"]),
+    )
+
+    with sqlite3.connect(database) as connection:
+        encrypted = connection.execute(
+            "SELECT response_text FROM chat_requests WHERE device_id = ? AND request_id = ?",
+            ("device-1", "tampered-request"),
+        ).fetchone()[0]
+        replacement = ("A" if encrypted[0] != "A" else "B") + encrypted[1:]
+        connection.execute(
+            "UPDATE chat_requests SET response_text = ? WHERE device_id = ? AND request_id = ?",
+            (replacement, "device-1", "tampered-request"),
+        )
+
+    with pytest.raises(InvalidTag):
+        claim_chat_request(database, "device-1", "tampered-request", payload_hash, secret)
+
