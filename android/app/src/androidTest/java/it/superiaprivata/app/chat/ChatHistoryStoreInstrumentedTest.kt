@@ -487,4 +487,44 @@ class ChatHistoryStoreInstrumentedTest {
         assertTrue(ChatHistoryStore(context).load().isEmpty())
     }
 
+
+    @Test
+    fun workspaceArchivesKeepTranscriptsAndMemoryIndependentFromEachOtherAndLegacy() {
+        val legacyTranscript = listOf(ChatLine(900L, "cronologia legacy intatta", "user"))
+        store.save(legacyTranscript)
+        store.saveProjectMemory("memoria legacy intatta")
+
+        val firstId = java.util.UUID.randomUUID().toString()
+        val secondId = java.util.UUID.randomUUID().toString()
+        val first = ChatHistoryStore(context, firstId)
+        val second = ChatHistoryStore(context, secondId)
+        val firstTranscript = listOf(ChatLine(1L, "solo progetto uno", "user"))
+        val secondTranscript = listOf(ChatLine(1L, "solo progetto due", "user"))
+
+        first.save(firstTranscript)
+        first.saveProjectMemory("memoria uno")
+        second.save(secondTranscript)
+        second.saveProjectMemory("memoria due")
+
+        assertEquals(firstTranscript, ChatHistoryStore(context, firstId).load())
+        assertEquals(secondTranscript, ChatHistoryStore(context, secondId).load())
+        assertEquals("memoria uno", ChatHistoryStore(context, firstId).loadProjectMemory())
+        assertEquals("memoria due", ChatHistoryStore(context, secondId).loadProjectMemory())
+        assertEquals(legacyTranscript, ChatHistoryStore(context).load())
+        assertEquals("memoria legacy intatta", ChatHistoryStore(context).loadProjectMemory())
+        assertTrue(File(context.filesDir, "conversation_history_$firstId.enc").exists())
+        assertTrue(File(context.filesDir, "conversation_history_$secondId.enc").exists())
+    }
+
+    @Test
+    fun workspaceStoreCannotRunLegacyCleanup() {
+        val workspace = ChatHistoryStore(context, java.util.UUID.randomUUID().toString())
+        var rejected = false
+        try {
+            workspace.clearLegacyLocalHistoryOnce()
+        } catch (_: IllegalStateException) {
+            rejected = true
+        }
+        assertTrue("La pulizia legacy non deve essere invocabile da uno workspace", rejected)
+    }
 }
