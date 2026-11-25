@@ -16,8 +16,15 @@ import javax.crypto.spec.GCMParameterSpec
 data class StoredDocument(val id: String, val title: String, val text: String, val file: File)
 
 /** Stores extracted document text encrypted at rest with a non-exportable Android Keystore key. */
-class LocalDocumentRepository(context: Context) {
-    private val directory = File(context.applicationContext.filesDir, "documents")
+class LocalDocumentRepository(context: Context, workspaceId: String? = null) {
+    private val directory = File(
+        context.applicationContext.filesDir,
+        if (workspaceId == null) {
+            "documents"
+        } else {
+            "documents/${UUID.fromString(workspaceId)}"
+        }
+    )
 
     init {
         check(directory.exists() || directory.mkdirs()) { "Impossibile creare l'archivio documenti privato." }
