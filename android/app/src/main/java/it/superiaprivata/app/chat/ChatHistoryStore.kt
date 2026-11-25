@@ -137,6 +137,65 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
         ) { "Impossibile completare la migrazione della cronologia online." }
     }
 
+    /**
+     * Copies the legacy encrypted archives into a workspace without deleting or
+     * modifying the source. Existing destinations are accepted only when their
+     * decrypted contents exactly match the legacy source.
+     */
+    fun migrateToWorkspace(workspaceId: String) = synchronized(ARCHIVE_WRITE_LOCK) {
+        check(isLegacyStore) { "La migrazione deve partire esclusivamente dall'archivio legacy." }
+        val destination = ChatHistoryStore(appContext, workspaceId)
+
+        // Normalize the former encrypted SharedPreferences format into the
+        // legacy AtomicFile first; load() removes its old key only after save succeeds.
+        val expectedTranscript = load()
+        val expectedMemory = loadProjectMemory()
+
+        val sourceTranscriptBytes = readPackedArchiveOrNull(archive)
+        if (sourceTranscriptBytes != null) {
+            val existing = readPackedArchiveOrNull(destination.archive)
+            if (existing == null) {
+                destination.writeAtomically(destination.archive, sourceTranscriptBytes)
+            } else {
+                check(destination.load() == expectedTranscript) {
+                    "La destinazione legacy contiene una cronologia diversa: migrazione interrotta senza sovrascrivere dati."
+                }
+            }
+            check(destination.load() == expectedTranscript) {
+                "Verifica della cronologia migrata non riuscita."
+            }
+        } else {
+            check(destination.load().isEmpty()) {
+                "Esiste una cronologia destinazione ma non una sorgente legacy verificabile."
+            }
+        }
+
+        val sourceMemoryBytes = readPackedArchiveOrNull(memoryArchive)
+        if (sourceMemoryBytes != null) {
+            val existing = readPackedArchiveOrNull(destination.memoryArchive)
+            if (existing == null) {
+                destination.writeAtomically(destination.memoryArchive, sourceMemoryBytes)
+            } else {
+                check(destination.loadProjectMemory() == expectedMemory) {
+                    "La destinazione legacy contiene una memoria diversa: migrazione interrotta senza sovrascrivere dati."
+                }
+            }
+            check(destination.loadProjectMemory() == expectedMemory) {
+                "Verifica della memoria migrata non riuscita."
+            }
+        } else {
+            check(destination.loadProjectMemory().isBlank()) {
+                "Esiste una memoria destinazione ma non una sorgente legacy verificabile."
+            }
+        }
+    }
+
+    private fun readPackedArchiveOrNull(target: AtomicFile): ByteArray? = try {
+        target.openRead().use { it.readBytes() }
+    } catch (_: java.io.FileNotFoundException) {
+        null
+    }
+
     fun load(): List<ChatLine> = synchronized(ARCHIVE_WRITE_LOCK) {
         // openRead() performs AtomicFile recovery before reading. Do not gate it
         // on baseFile.exists(): after an interrupted replacement the valid
