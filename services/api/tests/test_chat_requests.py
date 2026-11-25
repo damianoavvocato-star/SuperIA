@@ -276,4 +276,4 @@ def test_concurrent_claims_only_grant_one_lease(tmp_path):
     states = sorted(result["state"] for result in results)
     assert states == ["claimed", "processing"]
     assert len({result.get("lease_token") for result in results if result["state"] == "claimed"}) == 1
-\n
+
