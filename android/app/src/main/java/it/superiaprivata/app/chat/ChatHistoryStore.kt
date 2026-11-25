@@ -274,6 +274,28 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
         memoryArchive.delete()
     }
 
+    /**
+     * Permanently removes only this UUID workspace's encrypted transcript,
+     * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
+     */
+    fun deleteWorkspaceData() = synchronized(ARCHIVE_WRITE_LOCK) {
+        check(!isLegacyStore) { "L'archivio storico non può essere eliminato da questa operazione." }
+        archive.delete()
+        memoryArchive.delete()
+        check(preferences.edit().clear().commit()) {
+            "Impossibile rimuovere le preferenze private del progetto."
+        }
+        check(!archive.baseFile.exists() && !File(archive.baseFile.path + ".bak").exists()) {
+            "La cronologia del progetto non è stata rimossa completamente."
+        }
+        check(!memoryArchive.baseFile.exists() && !File(memoryArchive.baseFile.path + ".bak").exists()) {
+            "La memoria del progetto non è stata rimossa completamente."
+        }
+        check(preferences.all.isEmpty()) {
+            "Sono rimasti dati nelle preferenze private del progetto."
+        }
+    }
+
     private fun writeAtomically(target: AtomicFile, bytes: ByteArray) = synchronized(ARCHIVE_WRITE_LOCK) {
         var stream: java.io.FileOutputStream? = null
         try {
