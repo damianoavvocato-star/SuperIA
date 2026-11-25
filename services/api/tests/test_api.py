@@ -337,7 +337,7 @@ def test_stream_request_id_fails_closed_without_encryption_secret(auth_environme
 def test_stream_rejects_untrusted_sse_event_names(auth_environment):
     class MaliciousEventProvider:
         async def stream_chat(self, messages, model=None):
-            yield {"event": "delta\\nevent: injected", "text": "non deve passare"}
+            yield {"event": "delta\nevent: injected", "text": "non deve passare"}
             yield {"event": "done"}
 
         async def list_models(self):
