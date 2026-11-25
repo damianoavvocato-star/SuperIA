@@ -649,3 +649,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Vincoli Android: le copie in MediaStore create da SuperIA saranno tracciate per chat; se il sistema richiede consenso, la cancellazione attende il dialogo Android. Non si eliminano file preesistenti/importati o copie esterne non più controllabili; gli esiti parziali devono essere espliciti.
 - Audit iniziale: l'archivio corrente `ChatHistoryStore` conserva una sola cronologia cifrata e una memoria progetto globale; `LocalDocumentRepository` conserva documenti in un archivio privato condiviso. Non esiste ancora un'associazione per chat ID sufficiente per cancellare selettivamente.
 - Stato: **specifica approvata, implementazione da avviare**. Prossimo passo: audit completo delle dipendenze di persistenza/UI, poi modello multi-chat cifrato con migrazione legacy atomica. Nessun test nuovo eseguito, nessun APK, deploy, provider o servizio esterno attivato.
+
+
+### Audit iniziale multi-chat e cancellazione — 25 novembre 2026
+- Verificati staticamente `ChatHistoryStore.kt`, `AssistantChatPanel.kt`, `LocalDocumentRepository.kt` e `MainActivity.kt`.
+- Confermato: una sola cronologia cifrata `conversation_history.enc`, una sola memoria globale `project_memory.enc`, documenti condivisi in `filesDir/documents`, UI senza elenco conversazioni né ID chat.
+- Il pulsante attuale `Svuota` elimina soltanto la cronologia globale, non è ancora una cancellazione completa chat/progetto.
+- L'import documenti conserva una copia cifrata globale e la UI la rende consultabile nelle chat successive; non attribuire retroattivamente tali file a una nuova chat né cancellarli automaticamente.
+- L'esportazione TXT usa un URI scelto dall'utente e non è attualmente tracciata; non dichiarare che SuperIA possa cancellare copie esterne già esportate.
+- Audit dettagliato: `docs/MULTI_CHAT_INITIAL_AUDIT_2026-11-25.md` (commit `0d1b7036856f204ed3bec9a0782940c67ec3ed94`).
+- Prossimo step implementativo: progettare/aggiungere archivio cifrato multi-chat con migrazione legacy atomica, preservando memoria e richieste pendenti. Nessuna modifica runtime né test sono stati eseguiti in questo audit.
