@@ -1347,3 +1347,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Test strumentali aggiunti per verificare isolamento di due cronologie e due memorie, persistenza dopo ricreazione dello store, preservazione dell'archivio legacy e blocco della pulizia legacy da workspace: commit `8b3309bde33950c6f25f0e418cc51f1b6049ff97`.
 - **Test non ancora eseguiti/confermati**. Nessuna migrazione automatica è stata eseguita; i dati legacy restano nei percorsi originali. La UI non usa ancora il nuovo costruttore e non espone ancora chat/progetti multipli.
 - Prossimo passo: migrazione legacy idempotente e verificata, poi isolamento documenti e collegamento UI. Nessun APK, deploy, provider o servizio esterno attivato.
+
+
+### Migrazione non distruttiva del workspace legacy — 25 novembre 2026
+- Aggiunto workspace stabile `00000000-0000-4000-8000-000000000001` per la conversazione preesistente.
+- Migrazione copia byte-per-byte gli archivi AES-GCM di cronologia e memoria e verifica la lettura della destinazione; conserva intatti i file sorgente e interrompe se rileva contenuti di destinazione differenti.
+- Marker di completamento durevole, migrazione ripetibile e chiamata integrata prima del caricamento della chat.
+- Rimosso dal percorso di avvio il richiamo a `clearLegacyLocalHistoryOnce()`: non deve cancellare la cronologia esistente durante l'avvio multi-chat.
+- Test strumentale aggiunto per verificare contenuti, payload pendenti `requestId`/`requestMessages`, uguaglianza byte-per-byte e retry della migrazione.
+- Codice: `4a072312`, `452fe5ff`, `29728fa`, `9447cdaf`; test: `fec715e4`.
+- Test CI ancora da verificare. Nessun APK rilasciato; nessun dato sorgente cancellato.
