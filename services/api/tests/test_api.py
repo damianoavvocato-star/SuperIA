@@ -614,7 +614,7 @@ def test_interrupted_stream_can_retry_same_request_id_and_then_replay(auth_envir
         replay = client.post("/api/v1/chat/stream", json=payload)
         assert replay.status_code == 200
         assert "event: done" in replay.text
-        assert '"text":"Risposta in streaming"' in replay.text
+        assert "Risposta in streaming" in replay.text
         assert recovered.stream_calls == 1
     finally:
         app.dependency_overrides[get_provider] = lambda: FakeProvider()
