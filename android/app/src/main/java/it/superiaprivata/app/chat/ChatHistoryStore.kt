@@ -218,6 +218,9 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
         val packed = Base64.decode(legacy, Base64.NO_WRAP)
         val migrated = decode(String(decrypt(packed), Charsets.UTF_8))
         save(migrated)
+        check(load() == migrated) {
+            "Verifica dell'archivio AtomicFile migrato non riuscita; la copia SharedPreferences è stata conservata."
+        }
         check(preferences.edit().remove(HISTORY_KEY).commit()) {
             "Cronologia migrata, ma impossibile rimuovere la copia precedente."
         }
