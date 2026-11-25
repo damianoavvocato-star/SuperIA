@@ -64,10 +64,11 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
         mutableStateOf(LEGACY_WORKSPACE_ID)
     }
     var workspaces by remember(workspaceStore, migrationResult) {
-        mutableStateOf(runCatching { workspaceStore.list(includeArchived = false) }.getOrDefault(emptyList()))
+        mutableStateOf(runCatching { workspaceStore.list(includeArchived = true) }.getOrDefault(emptyList()))
     }
     var workspaceTitleDraft by rememberSaveable { mutableStateOf("") }
     var renameWorkspace by rememberSaveable { mutableStateOf(false) }
+    var showArchivedWorkspaces by rememberSaveable { mutableStateOf(false) }
     val activeWorkspace = workspaces.firstOrNull { it.id == selectedWorkspaceId }
     val historyStore = remember(context, selectedWorkspaceId) {
         ChatHistoryStore(context, selectedWorkspaceId)
@@ -250,7 +251,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     onClick = {
                         runCatching {
                             val created = workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
-                            workspaces = workspaceStore.list(includeArchived = false)
+                            workspaces = workspaceStore.list(includeArchived = true)
                             selectedWorkspaceId = created.id
                             attachedDocumentContext = null
                             attachmentStatus = null
@@ -265,7 +266,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     onClick = {
                         runCatching {
                             val created = workspaceStore.create("Nuovo progetto", ChatWorkspace.Kind.PROJECT)
-                            workspaces = workspaceStore.list(includeArchived = false)
+                            workspaces = workspaceStore.list(includeArchived = true)
                             selectedWorkspaceId = created.id
                             attachedDocumentContext = null
                             attachmentStatus = null
@@ -276,11 +277,21 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                     }
                 ) { Text("＋ Progetto") }
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    enabled = !generating && !importingDocument,
+                    onClick = { showArchivedWorkspaces = !showArchivedWorkspaces }
+                ) { Text(if (showArchivedWorkspaces) "Mostra attive" else "Archiviate") }
+            }
+            val visibleWorkspaces = workspaces.filter { it.archived == showArchivedWorkspaces }
             androidx.compose.foundation.lazy.LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(workspaces, key = { it.id }) { workspace ->
+                items(visibleWorkspaces, key = { it.id }) { workspace ->
                     OutlinedButton(
                         enabled = !generating && !importingDocument && workspace.id != selectedWorkspaceId,
                         onClick = {
@@ -313,21 +324,34 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         renameWorkspace = !renameWorkspace
                     }
                 ) { Text(if (renameWorkspace) "Annulla" else "Rinomina") }
-                TextButton(
-                    enabled = !generating && !importingDocument &&
-                        activeWorkspace != null && selectedWorkspaceId != LEGACY_WORKSPACE_ID,
-                    onClick = {
-                        runCatching {
-                            workspaceStore.setArchived(selectedWorkspaceId, true)
-                            workspaces = workspaceStore.list(includeArchived = false)
-                            val next = workspaces.firstOrNull()
-                            if (next != null) selectedWorkspaceId = next.id
-                            attachedDocumentContext = null
-                            attachmentStatus = null
-                            renameWorkspace = false
-                        }.onFailure { storageError = it.message ?: "Archiviazione non riuscita." }
-                    }
-                ) { Text("Archivia") }
+                if (activeWorkspace?.archived == true) {
+                    TextButton(
+                        enabled = !generating && !importingDocument,
+                        onClick = {
+                            runCatching {
+                                workspaceStore.setArchived(selectedWorkspaceId, false)
+                                workspaces = workspaceStore.list(includeArchived = true)
+                                showArchivedWorkspaces = false
+                            }.onFailure { storageError = it.message ?: "Ripristino chat non riuscito." }
+                        }
+                    ) { Text("Ripristina") }
+                } else {
+                    TextButton(
+                        enabled = !generating && !importingDocument &&
+                            activeWorkspace != null && selectedWorkspaceId != LEGACY_WORKSPACE_ID,
+                        onClick = {
+                            runCatching {
+                                workspaceStore.setArchived(selectedWorkspaceId, true)
+                                workspaces = workspaceStore.list(includeArchived = true)
+                                val next = workspaces.firstOrNull { !it.archived }
+                                if (next != null) selectedWorkspaceId = next.id
+                                attachedDocumentContext = null
+                                attachmentStatus = null
+                                renameWorkspace = false
+                            }.onFailure { storageError = it.message ?: "Archiviazione non riuscita." }
+                        }
+                    ) { Text("Archivia") }
+                }
             }
             if (renameWorkspace) {
                 Row(
@@ -347,7 +371,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                         onClick = {
                             runCatching {
                                 workspaceStore.rename(selectedWorkspaceId, workspaceTitleDraft)
-                                workspaces = workspaceStore.list(includeArchived = false)
+                                workspaces = workspaceStore.list(includeArchived = true)
                                 renameWorkspace = false
                             }.onFailure { storageError = it.message ?: "Rinomina non riuscita." }
                         }
