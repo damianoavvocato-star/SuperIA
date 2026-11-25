@@ -1328,3 +1328,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit codice: `004b9cb2fbc331c3ef5c56e5c8c366515da2d1bf`; commit test: `1d155cfbdaac328129258bfc083f1c8d0c3ce730`.
 - **Limite esplicito:** il registro è soltanto il primo livello dati. Non è ancora collegato alla UI, alla cronologia/memoria per chat o ai documenti. La vecchia cronologia `conversation_history.enc` e la memoria `project_memory.enc` restano intatte e non vengono migrate o cancellate. Non esporre ancora la cancellazione chat: prima occorre implementare archivi separati e cancellazione coordinata per ID.
 - Test strumentali aggiunti ma non ancora eseguiti/confermati in CI; nessun APK generato, nessun test su telefono, nessun servizio esterno attivato.
+
+
+### Architettura isolamento cronologia/memoria — 25 novembre 2026
+- Tracciato il flusso reale in `AssistantChatPanel`: store singolo, stato Compose caricato una volta, memoria globale, persister streaming e retry legati allo store iniziale; il repository documenti è condiviso.
+- Definita migrazione conservativa: workspace legacy stabile, copia byte-per-byte degli archivi già cifrati con la chiave esistente, verifica destinazioni e marker durevole prima di trattare i vecchi percorsi come obsoleti. Nessuna cancellazione dei vecchi archivi nella prima migrazione.
+- Specificati i requisiti per coroutine/stream: ID workspace immutabile per ogni richiesta; navigazione bloccata durante generazione o job sempre vincolato al workspace d'origine; mai cambiare il target di scrittura di un retry pendente.
+- Definito isolamento futuro documenti sotto directory per workspace e cancellazione coordinata prima della rimozione dall'indice.
+- Documento: `docs/MULTI_CHAT_DATA_ISOLATION_ARCHITECTURE.md`, commit `2e255fa9d89037103efbdd5333f5950588ba0f5c`.
+- Nessuna modifica runtime in questo incremento; nessuna migrazione eseguita, nessun dato legacy toccato, nessun test o APK dichiarato. Il registro cifrato e i test strumentali del precedente incremento restano in attesa di CI verificabile.
