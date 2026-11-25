@@ -672,3 +672,59 @@ def test_interrupted_stream_can_retry_same_request_id_and_then_replay(auth_envir
     finally:
         app.dependency_overrides[get_provider] = lambda: FakeProvider()
 
+
+
+
+def test_cancelled_chat_stream_releases_lease_and_closes_provider(auth_environment, monkeypatch):
+    import asyncio
+    import sqlite3
+    import app.main as api_module
+    from app.schemas import ChatRequest
+
+    database, token_data = auth_environment
+    request_id = "5a8b1f8d-4c0d-4d7b-8a11-5f9d1c8b7e20"
+    monkeypatch.setattr(api_module, "_auth_database_path", lambda: database)
+
+    class BlockingProvider:
+        def __init__(self):
+            self.waiting = asyncio.Event()
+            self.closed = asyncio.Event()
+
+        async def stream_chat(self, messages, model=None):
+            try:
+                yield {"event": "delta", "text": "Parziale", "provider": "fake", "model": "fake-local"}
+                self.waiting.set()
+                await asyncio.Event().wait()
+            finally:
+                self.closed.set()
+
+    async def scenario():
+        provider = BlockingProvider()
+        request = ChatRequest(
+            request_id=request_id,
+            messages=[{"role": "user", "content": "Interrompi lo stream"}],
+        )
+        response = await api_module.chat_stream(
+            request,
+            device_id=token_data["device_id"],
+            provider=provider,
+        )
+        iterator = response.body_iterator
+        first = await iterator.__anext__()
+        assert "event: delta" in first
+        next_event = asyncio.create_task(iterator.__anext__())
+        await asyncio.wait_for(provider.waiting.wait(), timeout=1)
+        next_event.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await next_event
+        assert provider.closed.is_set()
+
+    asyncio.run(scenario())
+
+    with sqlite3.connect(database) as connection:
+        row = connection.execute(
+            "SELECT status, lease_token FROM chat_requests WHERE request_id = ?",
+            (request_id,),
+        ).fetchone()
+    assert row == ("failed", row[1])
+    assert row[1]
