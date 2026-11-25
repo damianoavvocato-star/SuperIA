@@ -38,6 +38,12 @@ class ChatHistoryStoreInstrumentedTest {
         store.clearProjectMemory()
         context.getSharedPreferences("superia_private_chat", Context.MODE_PRIVATE)
             .edit().clear().commit()
+        context.getSharedPreferences("superia_workspace_migration", Context.MODE_PRIVATE)
+            .edit().clear().commit()
+        ChatHistoryStore(context, ChatWorkspaceStore.LEGACY_WORKSPACE_ID).apply {
+            clear()
+            clearProjectMemory()
+        }
     }
 
     @Test
@@ -487,6 +493,43 @@ class ChatHistoryStoreInstrumentedTest {
         assertTrue(ChatHistoryStore(context).load().isEmpty())
     }
 
+
+    @Test
+    fun legacyMigrationCopiesEncryptedArchivesAndRetainsSourceAcrossRetries() {
+        val transcript = listOf(
+            ChatLine(701L, "conversazione storica", "user", pending = true,
+                requestId = java.util.UUID.randomUUID().toString(),
+                requestMessages = listOf(ChatPromptMessage("user", "conversazione storica")))
+        )
+        val memory = "decisioni del progetto precedente"
+        store.save(transcript)
+        store.saveProjectMemory(memory)
+        val sourceTranscript = File(context.filesDir, "conversation_history.enc").readBytes()
+        val sourceMemory = File(context.filesDir, "project_memory.enc").readBytes()
+
+        val workspace = ChatWorkspaceMigration.migrate(context)
+        val destination = ChatHistoryStore(context, workspace.id)
+        val destinationTranscriptFile = File(
+            context.filesDir, "conversation_history_${workspace.id}.enc"
+        )
+        val destinationMemoryFile = File(
+            context.filesDir, "project_memory_${workspace.id}.enc"
+        )
+
+        assertEquals(ChatWorkspaceStore.LEGACY_WORKSPACE_ID, workspace.id)
+        assertEquals(transcript, destination.load())
+        assertEquals(memory, destination.loadProjectMemory())
+        assertArrayEquals(sourceTranscript, destinationTranscriptFile.readBytes())
+        assertArrayEquals(sourceMemory, destinationMemoryFile.readBytes())
+        assertArrayEquals(sourceTranscript, File(context.filesDir, "conversation_history.enc").readBytes())
+        assertArrayEquals(sourceMemory, File(context.filesDir, "project_memory.enc").readBytes())
+
+        ChatWorkspaceMigration.migrate(context)
+        assertEquals(transcript, destination.load())
+        assertEquals(memory, destination.loadProjectMemory())
+        assertArrayEquals(sourceTranscript, File(context.filesDir, "conversation_history.enc").readBytes())
+        assertArrayEquals(sourceMemory, File(context.filesDir, "project_memory.enc").readBytes())
+    }
 
     @Test
     fun workspaceArchivesKeepTranscriptsAndMemoryIndependentFromEachOtherAndLegacy() {
