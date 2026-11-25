@@ -278,6 +278,46 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
      * Permanently removes only this UUID workspace's encrypted transcript,
      * memory, AtomicFile backups and preferences. Legacy storage is never eligible.
      */
+    /**
+     * Remove the pre-migration duplicate archives only after proving that the
+     * stable legacy workspace contains the same transcript and memory. This is
+     * idempotent so a retry after partial cleanup is safe.
+     */
+    internal fun deleteLegacySourceCopiesAfterVerifiedWorkspace(workspaceId: String) =
+        synchronized(ARCHIVE_WRITE_LOCK) {
+            check(isLegacyStore) { "La verifica deve partire esclusivamente dagli archivi legacy." }
+            check(workspaceId == LEGACY_WORKSPACE_ID) { "Workspace legacy non valido." }
+            check(ChatWorkspaceMigration.isComplete(appContext)) {
+                "La migrazione legacy non è stata verificata: sorgenti conservate."
+            }
+            val sourceFiles = listOf(
+                archive.baseFile,
+                File(archive.baseFile.path + ".bak"),
+                memoryArchive.baseFile,
+                File(memoryArchive.baseFile.path + ".bak")
+            )
+            val hasSourcePreferences = preferences.getString(HISTORY_KEY, null) != null
+            if (sourceFiles.any { it.exists() } || hasSourcePreferences) {
+                val sourceTranscript = load()
+                val sourceMemory = loadProjectMemory()
+                val workspace = ChatHistoryStore(appContext, workspaceId)
+                check(workspace.load() == sourceTranscript) {
+                    "La cronologia workspace non coincide con la copia legacy: sorgenti preservate."
+                }
+                check(workspace.loadProjectMemory() == sourceMemory) {
+                    "La memoria workspace non coincide con la copia legacy: sorgenti preservate."
+                }
+                archive.delete()
+                memoryArchive.delete()
+                check(preferences.edit().clear().commit()) {
+                    "Impossibile rimuovere le preferenze della copia legacy."
+                }
+            }
+            check(sourceFiles.none { it.exists() } && preferences.all.isEmpty()) {
+                "Sono rimaste copie legacy della cronologia o della memoria."
+            }
+        }
+
     internal fun deleteWorkspaceData() = synchronized(ARCHIVE_WRITE_LOCK) {
         check(!isLegacyStore) { "L'archivio storico non può essere eliminato da questa operazione." }
         archive.delete()
