@@ -729,3 +729,16 @@ def test_cancelled_chat_stream_releases_lease_and_closes_provider(auth_environme
     assert row is not None
     assert row[0] == "failed"
     assert row[1]
+
+    # The same immutable request ID must be immediately retryable after cancellation.
+    from app.chat_requests import claim_chat_request, request_payload_hash
+    messages = [{"role": "user", "content": "Interrompi lo stream"}]
+    retry = claim_chat_request(
+        database,
+        token_data["device_id"],
+        request_id,
+        request_payload_hash(messages, None),
+        os.environ["SUPERIA_CHAT_IDEMPOTENCY_KEY"],
+    )
+    assert retry["state"] == "claimed"
+    assert str(retry["lease_token"]) != row[1]
