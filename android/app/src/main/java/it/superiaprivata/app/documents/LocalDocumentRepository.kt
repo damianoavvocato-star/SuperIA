@@ -93,6 +93,37 @@ class LocalDocumentRepository(context: Context, workspaceId: String? = null) {
         AtomicFile(canonicalFile).delete()
     }
 
+    /**
+     * Removes only this workspace's encrypted imported-document archives.
+     * Unknown files make the operation fail closed; source documents selected
+     * through Android's picker and user-created exports are never touched.
+     */
+    fun deleteAllWorkspaceDocuments() {
+        check(directory.name.matches(Regex("[0-9a-fA-F-]{36}"))) {
+            "La raccolta documenti legacy non può essere eliminata come progetto."
+        }
+        val canonicalDirectory = directory.canonicalFile
+        require(canonicalDirectory.parentFile?.canonicalFile ==
+            File(directory.parentFile, "documents").canonicalFile) {
+            "Percorso archivio documenti non valido."
+        }
+        val candidates = directory.listFiles().orEmpty()
+        require(candidates.all { file ->
+            file.isFile && (file.name.endsWith(".enc") || file.name.endsWith(".enc.bak"))
+        }) {
+            "La cartella del progetto contiene file non riconosciuti: nessun file è stato eliminato."
+        }
+        candidates.filter { it.name.endsWith(".enc") }.forEach { file ->
+            AtomicFile(file).delete()
+        }
+        check(directory.listFiles().orEmpty().isEmpty()) {
+            "Non è stato possibile rimuovere tutti gli archivi documenti del progetto."
+        }
+        check(directory.delete() || !directory.exists()) {
+            "Impossibile rimuovere la cartella documenti del progetto."
+        }
+    }
+
     private fun documentFiles(): List<File> {
         val candidates = directory.listFiles().orEmpty()
         return candidates.asSequence()
