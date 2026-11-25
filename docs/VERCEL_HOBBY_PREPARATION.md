@@ -195,3 +195,7 @@ La documentazione ufficiale conferma che Hobby è gratuito per progetti personal
 
 ### Precedenza dell'ambiente Vercel
 Il runtime di piattaforma `VERCEL=1` è autorevole rispetto a `SUPERIA_ENVIRONMENT`: Preview richiede PostgreSQL come staging; Production richiede PostgreSQL come production. Un'impostazione custom `development` non può consentire SQLite in un deployment Vercel. Test aggiunti per entrambi i tentativi di downgrade. CI da verificare.
+
+
+### Correzione ulteriore: stato del router in ambiente Vercel
+Anche il router provider usa ora `VERCEL=1` come fonte autorevole dell'ambiente: Preview richiede PostgreSQL come staging e Production come production, indipendentemente da `SUPERIA_ENVIRONMENT`. Un percorso `SUPERIA_ROUTER_STATE_DB` SQLite o il fallback `/tmp` vengono rifiutati. I test coprono Preview/Production senza DB e un override development che tenta di usare SQLite su Production. Nessun database è stato creato o collegato.
