@@ -51,3 +51,10 @@ Non basta cambiare il titolo o aggiungere un selettore: lo store e il persister 
 
 ## Non obiettivi di questo incremento
 Nessun deploy, provider AI, database, account esterno, APK release o modifica al backend.
+
+## Stato di implementazione — migrazione legacy
+- `ChatWorkspaceStore.ensureLegacyWorkspace()` crea un workspace con UUID stabile per la conversazione preesistente.
+- `ChatHistoryStore.migrateToWorkspace()` normalizza prima il vecchio formato SharedPreferences, copia byte-per-byte gli archivi cifrati AtomicFile e rilegge la destinazione per verificarne il contenuto. Se trova una destinazione differente, interrompe senza sovrascriverla.
+- `ChatWorkspaceMigration` registra un marker durevole soltanto dopo la verifica. La migrazione è ripetibile dopo un'interruzione e non elimina i file sorgente.
+- `AssistantChatPanel` esegue la migrazione prima del caricamento e non richiama più `clearLegacyLocalHistoryOnce()`, che era distruttiva per l'archivio legacy.
+- La migrazione riguarda solo cronologia e memoria. I documenti restano condivisi/legacy finché non sarà implementato il repository per workspace.
