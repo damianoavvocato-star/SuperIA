@@ -31,9 +31,9 @@ data class ChatWorkspace(
 /**
  * Encrypted, atomic index for independent chats/projects.
  *
- * This first storage layer deliberately does not migrate or delete the legacy
- * transcript. ChatHistoryStore remains the sole owner of that data until the
- * per-workspace archive migration is implemented and verified.
+ * The stable legacy workspace owns the pre-multi-chat transcript after the
+ * verified, non-destructive ChatWorkspaceMigration. This index never deletes
+ * transcript or document data; deletion is handled by a separate coordinator.
  */
 class ChatWorkspaceStore(context: Context) {
     private val appContext = context.applicationContext
