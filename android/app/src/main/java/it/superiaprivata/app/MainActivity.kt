@@ -35,7 +35,14 @@ class MainActivity : ComponentActivity() {
                 var profile by remember { mutableStateOf(profileReader.read()) }
                 var pairingQr by remember { mutableStateOf<Bitmap?>(null) }
                 var pairingError by remember { mutableStateOf<String?>(null) }
-                var documentContext by remember { mutableStateOf<String?>(null) }
+                var activeWorkspaceId by remember {
+                    mutableStateOf(
+                        getSharedPreferences("superia_workspace_selection", MODE_PRIVATE)
+                            .getString("active_workspace_id", it.superiaprivata.app.chat.LEGACY_WORKSPACE_ID)
+                            ?: it.superiaprivata.app.chat.LEGACY_WORKSPACE_ID
+                    )
+                }
+                val workspaceDocumentContexts = remember { mutableStateMapOf<String, String>() }
                 var showMore by rememberSaveable { mutableStateOf(false) }
                 val identityStore = remember { DeviceIdentityStore() }
 
@@ -70,8 +77,10 @@ class MainActivity : ComponentActivity() {
 
                         if (!showMore) {
                             AssistantChatPanel(
-                                documentContext = documentContext,
-                                modifier = Modifier.weight(1f).padding(horizontal = 10.dp, vertical = 4.dp)
+                                documentContext = workspaceDocumentContexts[activeWorkspaceId],
+                                modifier = Modifier.weight(1f).padding(horizontal = 10.dp, vertical = 4.dp),
+                                onWorkspaceChanged = { activeWorkspaceId = it },
+                                onWorkspaceDeleted = { workspaceDocumentContexts.remove(it) }
                             )
                         } else {
                             LazyColumn(
@@ -80,7 +89,10 @@ class MainActivity : ComponentActivity() {
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 item {
-                                    DocumentsPanel(onContextChanged = { documentContext = it })
+                                    DocumentsPanel(onContextChanged = { selectedContext ->
+                                        if (selectedContext == null) workspaceDocumentContexts.remove(activeWorkspaceId)
+                                        else workspaceDocumentContexts[activeWorkspaceId] = selectedContext
+                                    })
                                 }
                                 item {
                                     ElevatedCard {
