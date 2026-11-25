@@ -22,6 +22,7 @@ import it.superiaprivata.app.pairing.DeviceIdentityStore
 import it.superiaprivata.app.pairing.PairingInvite
 import it.superiaprivata.app.chat.AssistantChatPanel
 import it.superiaprivata.app.chat.CrashLogStore
+import LEGACY_WORKSPACE_ID
 import it.superiaprivata.app.documents.DocumentsPanel
 import it.superiaprivata.app.multimedia.RenderforestPanel
 
@@ -38,8 +39,8 @@ class MainActivity : ComponentActivity() {
                 var activeWorkspaceId by remember {
                     mutableStateOf(
                         getSharedPreferences("superia_workspace_selection", MODE_PRIVATE)
-                            .getString("active_workspace_id", it.superiaprivata.app.chat.LEGACY_WORKSPACE_ID)
-                            ?: it.superiaprivata.app.chat.LEGACY_WORKSPACE_ID
+                            .getString("active_workspace_id", LEGACY_WORKSPACE_ID)
+                            ?: LEGACY_WORKSPACE_ID
                     )
                 }
                 val workspaceDocumentContexts = remember { mutableStateMapOf<String, String>() }
