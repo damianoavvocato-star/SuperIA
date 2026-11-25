@@ -112,6 +112,20 @@ class LocalDocumentRepositoryInstrumentedTest {
     }
 
     @Test
+    fun workspaceCleanupFailsClosedWhenUnknownFileIsPresent() {
+        val workspaceId = java.util.UUID.randomUUID().toString()
+        val workspaceDirectory = File(context.filesDir, "documents/$workspaceId")
+        val workspaceRepository = LocalDocumentRepository(context, workspaceId)
+        val unknown = File(workspaceDirectory, "do-not-touch.tmp").apply { writeText("preserva") }
+
+        val result = runCatching { workspaceRepository.deleteAllWorkspaceDocuments() }
+
+        assertTrue("File non riconosciuti devono bloccare la cancellazione", result.isFailure)
+        assertTrue("Il file sconosciuto deve restare intatto", unknown.readText() == "preserva")
+        assertTrue(workspaceDirectory.exists())
+    }
+
+    @Test
     fun deleteRejectsFileOutsidePrivateDocumentDirectory() {
         val outside = File(context.filesDir, "must-not-delete.txt").apply { writeText("preserva") }
         val forged = StoredDocument("forged", "falso.txt", "testo", outside)
