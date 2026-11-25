@@ -296,16 +296,19 @@ class ChatHistoryStore(context: Context, workspaceId: String? = null) {
                 memoryArchive.baseFile,
                 File(memoryArchive.baseFile.path + ".bak")
             )
-            val hasSourceArchive = sourceFiles.any { it.exists() } ||
+            val hasTranscriptSource = archive.baseFile.exists() ||
+                File(archive.baseFile.path + ".bak").exists() ||
                 preferences.getString(HISTORY_KEY, null) != null
-            if (hasSourceArchive) {
-                val sourceTranscript = load()
-                val sourceMemory = loadProjectMemory()
-                val workspace = ChatHistoryStore(appContext, workspaceId)
-                check(workspace.load() == sourceTranscript) {
+            val hasMemorySource = memoryArchive.baseFile.exists() ||
+                File(memoryArchive.baseFile.path + ".bak").exists()
+            val workspace = ChatHistoryStore(appContext, workspaceId)
+            if (hasTranscriptSource) {
+                check(workspace.load() == load()) {
                     "La cronologia workspace non coincide con la copia legacy: sorgenti preservate."
                 }
-                check(workspace.loadProjectMemory() == sourceMemory) {
+            }
+            if (hasMemorySource) {
+                check(workspace.loadProjectMemory() == loadProjectMemory()) {
                     "La memoria workspace non coincide con la copia legacy: sorgenti preservate."
                 }
             }
