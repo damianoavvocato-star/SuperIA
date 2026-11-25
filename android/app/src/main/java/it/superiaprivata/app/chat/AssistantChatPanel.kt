@@ -79,7 +79,7 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
             onFailure = { Result.failure(it) }
         )
     }
-    val messages = remember(initialHistory) {
+    val messages = remember(historyStore, initialHistory) {
         mutableStateListOf<ChatLine>().apply {
             addAll(initialHistory.getOrDefault(emptyList()))
         }
@@ -98,12 +98,12 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
     val initialProjectMemory = remember(historyStore) {
         runCatching { historyStore.loadProjectMemory() }
     }
-    var projectMemory by remember(initialProjectMemory) {
+    var projectMemory by remember(historyStore, initialProjectMemory) {
         mutableStateOf(initialProjectMemory.getOrDefault(""))
     }
     var memorySaved by remember { mutableStateOf(false) }
     var savingMemory by remember { mutableStateOf(false) }
-    var memoryError by remember(initialProjectMemory) {
+    var memoryError by remember(historyStore, initialProjectMemory) {
         mutableStateOf(initialProjectMemory.exceptionOrNull()?.message)
     }
     var storageError by remember { mutableStateOf(initialHistory.exceptionOrNull()?.message) }
@@ -301,6 +301,8 @@ fun AssistantChatPanel(documentContext: String? = null, modifier: Modifier = Mod
                             generationError = null
                             exportStatus = null
                             draft = ""
+                            storageError = null
+                            memorySaved = false
                             renameWorkspace = false
                         }
                     ) {
