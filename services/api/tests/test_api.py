@@ -575,8 +575,6 @@ def test_pairing_gate_rejects_unconfirmed_values_and_spoofed_forwarding_headers(
 
 
 def test_interrupted_stream_can_retry_same_request_id_and_then_replay(auth_environment):
-    from app.providers.free_router import NoFreeProviderAvailable
-
     class InterruptedProvider:
         def __init__(self):
             self.stream_calls = 0
