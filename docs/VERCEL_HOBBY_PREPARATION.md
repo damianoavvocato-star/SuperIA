@@ -191,3 +191,7 @@ La documentazione ufficiale conferma che Hobby è gratuito per progetti personal
 - In locale, fuori da Vercel, resta disponibile la modalità development per i test SQLite.
 - Aggiunti test automatici per produzione senza variabile personalizzata, Preview, e PostgreSQL configurato. La modifica è in attesa dell'esito CI.
 - Questo controllo non crea il database e non sostituisce la verifica manuale del piano gratuito, dei segreti o del rate limit gateway.
+
+
+### Precedenza dell'ambiente Vercel
+Il runtime di piattaforma `VERCEL=1` è autorevole rispetto a `SUPERIA_ENVIRONMENT`: Preview richiede PostgreSQL come staging; Production richiede PostgreSQL come production. Un'impostazione custom `development` non può consentire SQLite in un deployment Vercel. Test aggiunti per entrambi i tentativi di downgrade. CI da verificare.
