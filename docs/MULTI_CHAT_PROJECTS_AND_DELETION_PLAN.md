@@ -1,7 +1,7 @@
 # Piano funzionale — chat multiple, progetti separati e cancellazione completa
 
 Data: 25 novembre 2026
-Stato: specifica approvata dall'utente; implementazione non ancora iniziata.
+Stato: specifica approvata; primo incremento del registro chat/progetti cifrato presente. Integrazione con cronologia, memoria, documenti, UI e cancellazione ancora da implementare.
 
 ## Obiettivo
 
