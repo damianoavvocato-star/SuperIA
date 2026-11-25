@@ -86,7 +86,7 @@ class ChatWorkspaceStore(context: Context) {
     }
 
     /** Remove an entry only after its workspace-owned data has been cleaned successfully. */
-    fun removeAfterDataCleanup(id: String) = synchronized(LOCK) {
+    internal fun removeAfterDataCleanup(id: String) = synchronized(LOCK) {
         requireValidId(id)
         check(id != LEGACY_WORKSPACE_ID) {
             "La conversazione precedente protetta non può essere eliminata."
