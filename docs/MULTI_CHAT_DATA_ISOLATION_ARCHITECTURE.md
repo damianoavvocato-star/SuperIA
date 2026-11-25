@@ -74,3 +74,12 @@ Nessun deploy, provider AI, database, account esterno, APK release o modifica al
 - Il pannello Android usa il workspace selezionato come chiave per cronologia, memoria e repository documenti.
 - La prima schermata espone creazione chat/progetto, selezione, rinomina e archiviazione; cambio chat disabilitato durante generazione e importazione.
 - Le chat archiviate e il ripristino non sono ancora esposti; la cancellazione definitiva è deliberatamente rimandata al coordinatore che dovrà verificare tutti gli artefatti locali e media Android prima di eliminare l'indice.
+
+## Cancellazione definitiva per workspace — primo incremento
+- ChatWorkspaceDeletion esegue un preflight degli archivi cifrati di cronologia/memoria e dell'archivio documenti; se una chiave manca o un archivio non è leggibile, si interrompe prima della cancellazione.
+- La pulizia rimuove soltanto gli AtomicFile e le preferenze con UUID del workspace selezionato, inclusi i backup .bak; il repository documenti rimuove esclusivamente file cifrati .enc nella directory dedicata. File sconosciuti nella directory bloccano l'operazione.
+- Il workspace viene rimosso dall'indice soltanto dopo la pulizia; in caso di errore resta visibile e l'operazione può essere ripetuta. Si crea prima un workspace vuoto alternativo se quello da eliminare è l'ultimo attivo.
+- La conversazione legacy protetta non è eliminabile tramite questo flusso. Test strumentali aggiunti per isolamento, protezione legacy, backup e comportamento fail-closed.
+- Audit dei moduli attuali: RenderforestPanel apre un servizio web esterno e non salva media in SuperIA; DocumentsPanel usa l'archivio globale legacy e OCR globale, quindi non viene toccato dalla cancellazione di un workspace. Le esportazioni tramite CreateDocument sono file scelti dall'utente e non sono controllabili dall'app.
+- Non è stato trovato un flusso attuale di generazione/salvataggio media in MediaStore né un registro di media generati. Perciò questo incremento non dichiara di cancellare foto/video dalla Galleria; quando si implementerà la generazione interna, ogni URI MediaStore dovrà essere registrata con proprietario workspace e cancellata con il consenso Android richiesto.
+- Nessun dato sul dispositivo è stato cancellato in questa fase: è stato aggiunto il codice, non eseguito su telefono fisico.
