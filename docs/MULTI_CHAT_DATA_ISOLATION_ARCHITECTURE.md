@@ -67,3 +67,10 @@ Nessun deploy, provider AI, database, account esterno, APK release o modifica al
 - `AssistantChatPanel` continua temporaneamente a usare il repository legacy finché la selezione workspace non viene collegata alla UI.
 - Test strumentale aggiunto per verificare che un documento in un workspace non sia visibile né al secondo workspace né all'archivio legacy.
 
+
+
+
+## Collegamento UI multi-chat
+- Il pannello Android usa il workspace selezionato come chiave per cronologia, memoria e repository documenti.
+- La prima schermata espone creazione chat/progetto, selezione, rinomina e archiviazione; cambio chat disabilitato durante generazione e importazione.
+- Le chat archiviate e il ripristino non sono ancora esposti; la cancellazione definitiva è deliberatamente rimandata al coordinatore che dovrà verificare tutti gli artefatti locali e media Android prima di eliminare l'indice.
