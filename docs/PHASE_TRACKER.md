@@ -1421,3 +1421,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - La raccolta generale Documenti e il dizionario OCR restano globali e non attribuiti a una chat; non vengono cancellati eliminando un progetto. File esportati dall'utente in altre app e contenuti di servizi esterni (es. Renderforest) non sono controllabili da SuperIA.
 - Commit recenti di correzione: 5e35d939, f8faa195, 2bb86be9; documentazione architettura aggiornata in c7a6e6b6.
 - Run Android sul commit più recente con modifiche Android: https://github.com/damianoavvocato-star/SuperIA/actions/runs/45696319701 (in coda). Run precedenti hanno completato unit test e build temporanea APK in alcuni commit, ma i job emulator strumentali sono rimasti in corso; l'incremento attuale non è ancora validato completamente.
+
+
+### Verifica CI Android aggiornata — 26 novembre 2026
+- Controllato il run Android `45696319701` sul commit `2bb86be98171a70a11a1acf7ac257598422ba818`.
+- `android-unit-tests`: **success**. Compilazione Kotlin app e test Android è arrivata a termine; il job unitario è superato.
+- `android-physical-device-test-apks`: **success** nella sola generazione degli APK temporanei di test. Non è stato avviato alcun rilascio né distribuzione; nessun nuovo APK è stato consegnato o installato sul telefono.
+- `android-instrumented-tests`: **failure infrastrutturale/emulatore**. Gradle ha compilato app e test, ma il runner ha avviato 0 test e ha terminato con `Instrumentation run failed due to Process crashed`; non è quindi un fallimento attribuibile a un test funzionale specifico, né una validazione positiva dell'incremento.
+- Workflow backend sul commit documentale `ff4cf6278b9fe6202ff1a1ae6ae3cb491c1902dc`: **success** (`45696378360`).
+- Stato: codice multi-chat presente su `main`; unit test e compilazione superati; suite strumentale emulator ancora non verificata. Non dichiarare completata la verifica end-to-end né la cancellazione reale sul dispositivo. Prossimo passo: isolare il crash dell'instrumentation runner e ripetere la suite senza modificare dati utente o attivare servizi esterni.
