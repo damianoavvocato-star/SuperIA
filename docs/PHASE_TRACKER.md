@@ -1462,3 +1462,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - L'analisi dei fallimenti evidenzia un test di concorrenza che supera il timeout di 30 secondi su TCG; il test condivideva inoltre l'archivio legacy globale con gli altri test, quindi un worker lento poteva contaminare i test successivi. Correzione: archivio workspace UUID isolato, carico concorrente ridotto e timeout più realistico.
 - Correzione UI: l'importazione documentale conserva l'ID del workspace che ha aperto il selettore; la navigazione tra workspace è bloccata mentre il selettore è aperto o l'importazione è in corso. Questo evita di salvare il documento nel progetto sbagliato.
 - Nessun APK è stato consegnato o installato sul telefono; nessun test fisico o rilascio eseguito.
+
+
+### Verifica test strumentali e correzione script CI — 26 novembre 2026
+- Run Android `45827701798` sul commit `a51bb61268d3de997a59f4ac50879f9a1baabd14`: unit test **success**; build degli APK debug/test temporanei **success**; backend run `45827701660` **success**.
+- La suite emulator Android 14 AOSP ha eseguito **38/38 test: 0 falliti, 0 saltati**. Il test separato `writePendingStateForProcessRestart` ha completato **1/1** senza errori.
+- Il job complessivo è tuttavia terminato **failure dopo i test**: lo shell step di verifica post-`force-stop` ha restituito `Syntax error: end of file unexpected (expecting "fi")`. Il log mostra che i test erano già terminati correttamente; non si tratta di un test applicativo fallito.
+- Correzione in corso su `main`: rimosso il blocco condizionale shell ridondante dopo `adb shell am force-stop`. Il test successivo di recovery verifica direttamente il recupero del processo/stato; il comando force-stop rimane.
+- Nessun APK consegnato/installato, nessun test su telefono fisico, nessun rilascio o attivazione backend/provider.
