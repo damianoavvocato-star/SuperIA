@@ -135,6 +135,8 @@ fun AssistantChatPanel(
     var attachedDocumentContext by remember { mutableStateOf<String?>(null) }
     var attachmentStatus by remember { mutableStateOf<String?>(null) }
     var importingDocument by remember { mutableStateOf(false) }
+    var selectingDocument by remember { mutableStateOf(false) }
+    var pendingDocumentWorkspaceId by remember { mutableStateOf<String?>(null) }
     val onlineConfigured = pairedEndpoint.isNotBlank() && backendToken.isNotBlank()
     val workspaceDocumentContext = documentContext.takeIf {
         documentContextWorkspaceId == selectedWorkspaceId
@@ -168,17 +170,23 @@ fun AssistantChatPanel(
     val documentPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
-        if (uri != null) {
+        val targetWorkspaceId = pendingDocumentWorkspaceId
+        pendingDocumentWorkspaceId = null
+        selectingDocument = false
+        if (uri != null && targetWorkspaceId != null) {
             scope.launch {
                 importingDocument = true
                 attachmentStatus = "Importazione documento in corso…"
                 try {
-                    val repository = LocalDocumentRepository(context, selectedWorkspaceId)
+                    // Bind the import to the workspace that opened the picker.
+                    val repository = LocalDocumentRepository(context, targetWorkspaceId)
                     val stored = withContext(Dispatchers.IO) {
                         repository.import(uri, DocumentTextExtractor(context))
                     }
-                    attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\nContenuto estratto:\n${stored.text.take(6000)}"
-                    attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato in questo progetto."
+                    if (selectedWorkspaceId == targetWorkspaceId) {
+                        attachedDocumentContext = "Documento allegato alla conversazione: ${stored.title}\nContenuto estratto:\n${stored.text.take(6000)}"
+                        attachmentStatus = "Allegato pronto: ${stored.title}. Il file è conservato cifrato in questo progetto."
+                    }
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {
@@ -272,7 +280,7 @@ fun AssistantChatPanel(
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
                 OutlinedButton(
-                    enabled = !generating && !importingDocument,
+                    enabled = !generating && !importingDocument && !selectingDocument,
                     onClick = {
                         runCatching {
                             val created = workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
@@ -287,7 +295,7 @@ fun AssistantChatPanel(
                     }
                 ) { Text("＋ Nuova chat") }
                 OutlinedButton(
-                    enabled = !generating && !importingDocument,
+                    enabled = !generating && !importingDocument && !selectingDocument,
                     onClick = {
                         runCatching {
                             val created = workspaceStore.create("Nuovo progetto", ChatWorkspace.Kind.PROJECT)
@@ -307,7 +315,7 @@ fun AssistantChatPanel(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(
-                    enabled = !generating && !importingDocument,
+                    enabled = !generating && !importingDocument && !selectingDocument,
                     onClick = { showArchivedWorkspaces = !showArchivedWorkspaces }
                 ) { Text(if (showArchivedWorkspaces) "Mostra attive" else "Archiviate") }
             }
@@ -318,7 +326,7 @@ fun AssistantChatPanel(
             ) {
                 items(visibleWorkspaces, key = { it.id }) { workspace ->
                     OutlinedButton(
-                        enabled = !generating && !importingDocument && workspace.id != selectedWorkspaceId,
+                        enabled = !generating && !importingDocument && !selectingDocument && workspace.id != selectedWorkspaceId,
                         onClick = {
                             selectedWorkspaceId = workspace.id
                             attachedDocumentContext = null
@@ -353,7 +361,7 @@ fun AssistantChatPanel(
                 ) { Text(if (renameWorkspace) "Annulla" else "Rinomina") }
                 if (activeWorkspace?.archived == true) {
                     TextButton(
-                        enabled = !generating && !importingDocument,
+                        enabled = !generating && !importingDocument && !selectingDocument,
                         onClick = {
                             runCatching {
                                 workspaceStore.setArchived(selectedWorkspaceId, false)
@@ -364,7 +372,7 @@ fun AssistantChatPanel(
                     ) { Text("Ripristina") }
                 } else {
                     TextButton(
-                        enabled = !generating && !importingDocument &&
+                        enabled = !generating && !importingDocument && !selectingDocument &&
                             activeWorkspace != null && selectedWorkspaceId != LEGACY_WORKSPACE_ID,
                         onClick = {
                             runCatching {
@@ -380,7 +388,7 @@ fun AssistantChatPanel(
                     ) { Text("Archivia") }
                 }
                 TextButton(
-                    enabled = !generating && !importingDocument && !savingMemory &&
+                    enabled = !generating && !importingDocument && !selectingDocument && !savingMemory &&
                         !deletingWorkspace && activeWorkspace != null,
                     onClick = { confirmWorkspaceDeletion = true }
                 ) { Text("Elimina") }
@@ -783,8 +791,12 @@ fun AssistantChatPanel(
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = !importingDocument && !generating,
-                    onClick = { documentPicker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) }
+                    enabled = !importingDocument && !selectingDocument && !generating,
+                    onClick = {
+                        pendingDocumentWorkspaceId = selectedWorkspaceId
+                        selectingDocument = true
+                        documentPicker.launch(arrayOf("application/pdf", "text/plain", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    }
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Allega documento")
                 }

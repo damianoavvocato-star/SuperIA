@@ -1454,3 +1454,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Analisi dell'artefatto diagnostico `15109107059`: il logcat registra `SIGABRT` nel thread `bt_stack_manage` del processo `com.android.bluetooth`; il device UTP inoltre segnala permesso negato per `/sdcard/Android/media/it.superiaprivata.app/additional_test_output`. Non vi è evidenza sufficiente per attribuire il crash al codice SuperIA.
 - Correzione CI su `main`, commit `b1d0f02c3d962ae80b4a68b4048f83bb073d2871`: immagine emulatore ridotta da API 35 Google APIs a API 34 AOSP default per isolare i crash dei servizi Google/Bluetooth nell'emulazione TCG. La correzione è sperimentale; richiede nuova CI.
 - Backend run `45802841352`: **success**. Nessun APK distribuito/installato e nessun test su telefono fisico.
+
+
+### Verifica strumentale Android 14 AOSP — 26 novembre 2026
+- Run Android `45811087356` sul commit `b1d0f02c3d962ae80b4a68b4048f83bb073d2871`: `android-unit-tests` **success**, compilazione e APK temporanei di test **success**; backend run `45811087165` **success**.
+- La suite strumentale è partita ed ha eseguito **38 test**: 34 superati e 4 falliti. Non è stato un crash dell'emulatore: i test sono stati eseguiti.
+- L'analisi dei fallimenti evidenzia un test di concorrenza che supera il timeout di 30 secondi su TCG; il test condivideva inoltre l'archivio legacy globale con gli altri test, quindi un worker lento poteva contaminare i test successivi. Correzione: archivio workspace UUID isolato, carico concorrente ridotto e timeout più realistico.
+- Correzione UI: l'importazione documentale conserva l'ID del workspace che ha aperto il selettore; la navigazione tra workspace è bloccata mentre il selettore è aperto o l'importazione è in corso. Questo evita di salvare il documento nel progetto sbagliato.
+- Nessun APK è stato consegnato o installato sul telefono; nessun test fisico o rilascio eseguito.

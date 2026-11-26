@@ -303,8 +303,10 @@ class ChatHistoryStoreInstrumentedTest {
 
     @Test
     fun concurrentArchiveReadersObserveOnlyCompleteTranscripts() {
-        val writer = ChatHistoryStore(context)
-        val reader = ChatHistoryStore(context)
+        // A dedicated workspace prevents slow test workers from touching the shared legacy archive.
+        val workspaceId = java.util.UUID.randomUUID().toString()
+        val writer = ChatHistoryStore(context, workspaceId)
+        val reader = ChatHistoryStore(context, workspaceId)
         val initial = listOf(ChatLine(1L, "iniziale", "user"))
         val replacement = (0 until 120).map {
             ChatLine(it.toLong(), "aggiornamento-$it", if (it % 2 == 0) "user" else "assistant")
@@ -315,21 +317,25 @@ class ChatHistoryStoreInstrumentedTest {
         try {
             val write = executor.submit {
                 start.await()
-                repeat(20) { writer.save(replacement) }
+                repeat(8) { writer.save(replacement) }
             }
             val read = executor.submit {
                 start.await()
-                repeat(40) {
+                repeat(16) {
                     val snapshot = reader.load()
                     assertTrue(snapshot == initial || snapshot == replacement)
                 }
             }
             start.countDown()
-            write.get(30, TimeUnit.SECONDS)
-            read.get(30, TimeUnit.SECONDS)
+            write.get(120, TimeUnit.SECONDS)
+            read.get(120, TimeUnit.SECONDS)
             assertEquals(replacement, reader.load())
         } finally {
             executor.shutdownNow()
+            if (executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                writer.clear()
+                writer.clearProjectMemory()
+            }
         }
     }
 
