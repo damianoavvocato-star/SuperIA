@@ -1446,3 +1446,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - In caso di errore durante la cancellazione, la UI rilegge ora l'indice workspace prima di mostrare l'errore. Se il coordinatore aveva già creato una chat di fallback prima di interrompersi, questa compare subito nell'elenco e l'utente può riprovare senza riavviare l'app.
 - Modifica su `main`: commit `2dea1b02f2ba68c944394ae6c4249b979f61cf30`.
 - Verifica Android della modifica appena inviata: in attesa della nuova run CI. La suite emulator precedente resta non verificata per crash del processo instrumentation prima dell'avvio dei test.
+
+
+### Diagnosi terzo tentativo emulatore Android — 26 novembre 2026
+- Run Android `45802841443` sul commit `f2e6e73e1675aeffa051c2862d8cc7b889aab8ff`: `android-unit-tests` **success**, `android-physical-device-test-apks` **success** (solo APK debug temporanei), `android-instrumented-tests` **failure**.
+- Il report XML conferma `tests=0`, `failures=0` e `Instrumentation run failed due to Process crashed`: nessun test strumentale è stato eseguito.
+- Analisi dell'artefatto diagnostico `15109107059`: il logcat registra `SIGABRT` nel thread `bt_stack_manage` del processo `com.android.bluetooth`; il device UTP inoltre segnala permesso negato per `/sdcard/Android/media/it.superiaprivata.app/additional_test_output`. Non vi è evidenza sufficiente per attribuire il crash al codice SuperIA.
+- Correzione CI su `main`, commit `b1d0f02c3d962ae80b4a68b4048f83bb073d2871`: immagine emulatore ridotta da API 35 Google APIs a API 34 AOSP default per isolare i crash dei servizi Google/Bluetooth nell'emulazione TCG. La correzione è sperimentale; richiede nuova CI.
+- Backend run `45802841352`: **success**. Nessun APK distribuito/installato e nessun test su telefono fisico.
