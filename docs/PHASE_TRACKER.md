@@ -8,6 +8,11 @@ Ambito: esclusivamente il repository SuperIA. Questo registro separa codice pres
 - Diagnosi dai log: il workflow forzava TCG/software emulation tramite `ANDROID_I_WANT_MY_TCG=yes`; l'emulatore ha impiegato circa 479 secondi per il boot e il servizio `settings` ha restituito `Broken pipe`, causando exit code 224 prima dell'esecuzione dello script di test.
 - Correzione workflow: rimosso il forcing TCG e impostata accelerazione automatica (`-accel auto`) con opzioni headless/no-snapshot/SwiftShader. La correzione deve essere convalidata da una nuova esecuzione CI; non equivale a test strumentali superati.
 
+## Seconda diagnosi emulatore Android — 26 novembre 2026
+- Run `45800116557` sul commit `dd6fa40b`: test unitari Android superati, backend superato, build APK debug temporanea superata; test strumentali non avviati.
+- Log: l'action `reactivecircus/android-emulator-runner` disabilita l'accelerazione hardware e aggiunge `-accel off`; l'emulatore termina con `Software CPU emulation (-accel off) is not supported` perché il runner non espone accelerazione hardware.
+- Correzione successiva: abilita esplicitamente TCG tramite `ANDROID_I_WANT_MY_TCG=yes` e aumenta il boot timeout a 1200 secondi. Il precedente tentativo TCG ha raggiunto `sys.boot_completed=1` dopo circa 479 secondi ma ha poi avuto `Broken pipe` sul servizio Settings; questa soluzione resta sperimentale e deve essere verificata.
+
 ## Regole inderogabili
 - SuperIA deve restare gratuita: niente pagamenti, carte, ricariche, acquisti, overage fatturabili o fallback a pagamento.
 - I crediti gratuiti dei provider sono ammessi anche se espressi in valuta o token; quando terminano si passa a un provider gratuito approvato oppure si interrompe il servizio senza addebiti.
