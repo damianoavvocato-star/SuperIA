@@ -1430,3 +1430,9 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - `android-instrumented-tests`: **failure infrastrutturale/emulatore**. Gradle ha compilato app e test, ma il runner ha avviato 0 test e ha terminato con `Instrumentation run failed due to Process crashed`; non è quindi un fallimento attribuibile a un test funzionale specifico, né una validazione positiva dell'incremento.
 - Workflow backend sul commit documentale `ff4cf6278b9fe6202ff1a1ae6ae3cb491c1902dc`: **success** (`45696378360`).
 - Stato: codice multi-chat presente su `main`; unit test e compilazione superati; suite strumentale emulator ancora non verificata. Non dichiarare completata la verifica end-to-end né la cancellazione reale sul dispositivo. Prossimo passo: isolare il crash dell'instrumentation runner e ripetere la suite senza modificare dati utente o attivare servizi esterni.
+
+
+### Rifinitura recupero dopo cancellazione parziale — 26 novembre 2026
+- In caso di errore durante la cancellazione, la UI rilegge ora l'indice workspace prima di mostrare l'errore. Se il coordinatore aveva già creato una chat di fallback prima di interrompersi, questa compare subito nell'elenco e l'utente può riprovare senza riavviare l'app.
+- Modifica su `main`: commit `2dea1b02f2ba68c944394ae6c4249b979f61cf30`.
+- Verifica Android della modifica appena inviata: in attesa della nuova run CI. La suite emulator precedente resta non verificata per crash del processo instrumentation prima dell'avvio dei test.
