@@ -446,6 +446,11 @@ fun AssistantChatPanel(
                                         showArchivedWorkspaces = false
                                         confirmWorkspaceDeletion = false
                                     } catch (error: Exception) {
+                                        // A failed cleanup may already have created the fallback workspace.
+                                        // Refresh the index so the user can see it and retry safely.
+                                        workspaces = runCatching {
+                                            workspaceStore.list(includeArchived = true)
+                                        }.getOrDefault(workspaces)
                                         storageError = error.message ?: "Eliminazione non completata. I dati non rimossi restano associati alla chat."
                                     } finally {
                                         deletingWorkspace = false
