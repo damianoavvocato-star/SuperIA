@@ -1,7 +1,12 @@
 # Registro operativo delle fasi — SuperIA
 
-Aggiornato: 25 novembre 2026
+Aggiornato: 26 novembre 2026
 Ambito: esclusivamente il repository SuperIA. Questo registro separa codice presente, test CI, collaudo reale e rilascio.
+
+## Verifica emulatore Android — 26 novembre 2026
+- Run `45796356330` sul commit `2dea1b02`: test unitari Android superati e APK debug temporanei compilati; test strumentali non avviati.
+- Diagnosi dai log: il workflow forzava TCG/software emulation tramite `ANDROID_I_WANT_MY_TCG=yes`; l'emulatore ha impiegato circa 479 secondi per il boot e il servizio `settings` ha restituito `Broken pipe`, causando exit code 224 prima dell'esecuzione dello script di test.
+- Correzione workflow: rimosso il forcing TCG e impostata accelerazione automatica (`-accel auto`) con opzioni headless/no-snapshot/SwiftShader. La correzione deve essere convalidata da una nuova esecuzione CI; non equivale a test strumentali superati.
 
 ## Regole inderogabili
 - SuperIA deve restare gratuita: niente pagamenti, carte, ricariche, acquisti, overage fatturabili o fallback a pagamento.
