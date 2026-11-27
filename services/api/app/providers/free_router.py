@@ -52,8 +52,6 @@ SAMBANOVA_VERIFIED_FREE_MODELS = frozenset({
     "DeepSeek-V3.1",
     "Meta-Llama-3.3-70B-Instruct",
     "gpt-oss-120b",
-    "DeepSeek-V3.2",
-    "gemma-4-31B-it",
 })
 
 
