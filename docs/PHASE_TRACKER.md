@@ -1517,3 +1517,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - La causa precedente è risolta: le variabili shell venivano perse tra righe eseguite in shell separate; cattura status e controllo output sono stati accorpati nello stesso comando.
 - Artefatto report emulator: `15227843683`; artefatto APK debug/test temporanei: `15227755914` (non installati sul telefono fisico, non distribuiti e con scadenza breve).
 - Stato: test automatici Android unitari, strumentali e backend superati per questo commit. La prova non sostituisce test sul telefono fisico né valida l'invio chat con backend reale/provider. Nessun deploy, provisioning, APK release o attivazione provider effettuati.
+
+
+### Rifinitura selezione workspace dopo archiviazione — 27 novembre 2026
+- Audit della UI multi-chat: creazione chat/progetto, selezione, rinomina, archiviazione, filtro archiviate/ripristino ed eliminazione sono presenti nello stesso pannello, senza richiedere schermate separate.
+- Corretto il caso limite in cui l'utente archivia l'ultima chat attiva rimasta (possibile dopo la rimozione del workspace legacy): la UI crea automaticamente una nuova chat vuota e la seleziona, evitando una schermata senza workspace attivo.
+- Commit su `main`: `adbc2197c19020a0c6bd887bb60a454e5b870d3c`.
+- CI avviata: Android run `46060796600`, backend run `46060796611`; entrambi ancora in esecuzione al momento della nota. Non dichiarare la modifica validata fino al completamento dei job.
+- La modifica non tocca archivi delle altre chat e non cambia la policy di cancellazione. Nessun APK consegnato/installato sul telefono fisico, nessun deploy o provider attivato.
