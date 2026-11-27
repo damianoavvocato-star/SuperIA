@@ -64,7 +64,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if any(key.startswith(excluded_prefix) and value.strip() for key, value in environ.items()):
         raise ValueError("SambaNova is excluded because its current Free plan requires a payment method and credit purchase.")
 
-    provider_ids = ("gemini", "groq", "openrouter", "cloudflare")
+    provider_ids = ("gemini", "groq", "cohere", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
@@ -110,7 +110,7 @@ class FreeOnlyRouter:
     and hard-stops at quota exhaustion. No paid model is selected automatically.
     """
 
-    PROVIDER_ORDER = ("gemini", "groq", "openrouter", "cloudflare")
+    PROVIDER_ORDER = ("gemini", "groq", "cohere", "openrouter", "cloudflare")
 
     def __init__(
         self,
@@ -224,6 +224,9 @@ class FreeOnlyRouter:
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "groq":
             endpoint = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {api_key}"}
+        elif provider_id == "cohere":
+            endpoint = "https://api.cohere.com/v2/chat"
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "openrouter":
             endpoint = "https://openrouter.ai/api/v1/chat/completions"
@@ -352,9 +355,15 @@ class FreeOnlyRouter:
                                 break
                             try:
                                 payload = json.loads(data)
-                                choices = payload.get("choices") or []
-                                delta = choices[0].get("delta", {}) if choices else {}
-                                piece = delta.get("content")
+                                if provider.provider_id == "cohere":
+                                    delta = payload.get("delta", {})
+                                    message_delta = delta.get("message", {}) if isinstance(delta, dict) else {}
+                                    content_delta = message_delta.get("content", {}) if isinstance(message_delta, dict) else {}
+                                    piece = content_delta.get("text") if isinstance(content_delta, dict) else None
+                                else:
+                                    choices = payload.get("choices") or []
+                                    delta = choices[0].get("delta", {}) if choices else {}
+                                    piece = delta.get("content")
                                 if isinstance(piece, list):
                                     piece = "".join(
                                         item.get("text", "") for item in piece
@@ -448,7 +457,16 @@ class FreeOnlyRouter:
                     continue
                 response.raise_for_status()
                 payload = response.json()
-                content = payload.get("choices", [{}])[0].get("message", {}).get("content")
+                if provider.provider_id == "cohere":
+                    message = payload.get("message", {})
+                    blocks = message.get("content", []) if isinstance(message, dict) else []
+                    content = "".join(
+                        block.get("text", "") for block in blocks
+                        if isinstance(block, dict) and block.get("type") == "text"
+                        and isinstance(block.get("text", ""), str)
+                    )
+                else:
+                    content = payload.get("choices", [{}])[0].get("message", {}).get("content")
                 if not isinstance(content, str) or not content.strip():
                     last_error = f"{provider.provider_id}: risposta vuota o formato non riconosciuto."
                     continue
