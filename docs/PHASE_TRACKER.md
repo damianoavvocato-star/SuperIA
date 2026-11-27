@@ -1690,3 +1690,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - AxForge: escluso perché i termini richiedono un controllo carta Stripe per sbloccare i 3M token/30 giorni, nonostante nessun addebito per il controllo; quota lancio modificabile. Fonte: https://axforge.ai/terms.html.
 - Hugging Face Inference Providers: escluso come free tier stabile; utenti Free senza crediti mensili inclusi nella documentazione attuale, con possibilità di pay-as-you-go/acquisto crediti. Fonte: https://huggingface.co/docs/inference-providers/en/pricing.
 - Nessun account/chiave/API call creati; nessun provider aggiunto al router o attivato.
+
+
+### Verifica micro-fase 26 — heartbeat SSE e rinnovo lease — 27 novembre 2026
+- Commit `c066ed8faf2bd6ab06d6a02fc224bf87a14360ee`: aggiunto test con provider lento che verifica heartbeat SSE (`: keep-alive`), emissione degli eventi `delta` e `done` e rinnovo ripetuto della lease associata allo stesso request ID.
+- GitHub Actions Backend tests run `46075657157`: **completed / success**.
+- Il test dimostra il comportamento backend in ambiente CI; non dimostra ancora il comportamento dietro un proxy di staging né su un telefono Android fisico.
+- Micro-fase 26 resta quindi **In attesa di verifica pratica**. Non sono stati attivati hosting, database esterno, provider o pairing pubblico; nessun APK creato.
