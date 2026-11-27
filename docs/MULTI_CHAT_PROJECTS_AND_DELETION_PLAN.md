@@ -1,7 +1,7 @@
 # Piano funzionale — chat multiple, progetti separati e cancellazione completa
 
 Data: 25 novembre 2026
-Stato: specifica approvata; primo incremento del registro chat/progetti cifrato presente. Integrazione con cronologia, memoria, documenti, UI e cancellazione ancora da implementare.
+Stato al 27 novembre 2026: registro cifrato, cronologia/memoria per workspace, migrazione legacy, repository documenti isolato, UI multi-chat e cancellazione locale coordinata sono implementati su main. CI Android API 34: 38/38 test strumentali superati; writer e verifica dopo force-stop superati. Restano limiti espliciti su media Galleria, archivio Documenti globale/OCR, backend remoto e prova su telefono fisico.
 
 ## Obiettivo
 
@@ -69,3 +69,12 @@ La cancellazione è definitiva nell'ambito dei dati sotto il controllo di SuperI
 - File esportati nella Galleria vengono rimossi solo dopo il consenso Android richiesto; copie esterne/non più controllabili sono segnalate senza dichiarazioni false.
 - I test di migrazione e cancellazione non fanno ricomparire dati da backup AtomicFile.
 - Nessun provider, hosting, database o servizio esterno viene attivato senza consenso esplicito; nessun costo è ammesso.
+
+
+## Stato effettivo e limiti residui — 27 novembre 2026
+
+- **Implementato:** creazione e selezione chat/progetti, rinomina, archivio, cronologia e memoria cifrate per workspace, migrazione legacy verificata, documenti importati nella chat isolati, contesto documentale selezionato associato al workspace, cancellazione definitiva locale con preflight e fail-closed.
+- **Verificato in CI emulator API 34:** 38 test strumentali superati; test separati di scrittura dello stato pendente e recupero dopo `force-stop` entrambi `OK (1 test)`. Backend pytest e Android unit test superati nello stesso ciclo CI.
+- **Non dichiarare:** cancellazione di foto/video dalla Galleria. Non esiste ancora un registro di URI MediaStore generati da SuperIA; i contenuti esportati fuori dall'app e i servizi esterni non sono controllabili.
+- **Residui:** il pannello Documenti/OCR generale resta un archivio globale distinto e non viene eliminato insieme alla singola chat; non è stato implementato un endpoint remoto di cancellazione per workspace; nessun backend pubblico/provider è attivo; nessun test su telefono fisico è stato eseguito.
+- **Prossima priorità sicura:** chiudere l'audit funzionale UI/accessibilità e chiarire il perimetro del pannello Documenti globale prima di ampliare la cancellazione ai media. La prova fisica resta distinta dalla CI emulator.
