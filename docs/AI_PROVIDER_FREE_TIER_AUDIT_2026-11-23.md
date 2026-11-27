@@ -62,3 +62,15 @@ Esito: audit pubblico completato; **nessun provider attivato**. La verifica acco
 
 ## Esito
 La verifica delle pagine pubbliche è completata. La micro-fase 19 resta **bloccata** per la verifica account-level no-card, hard-stop e privacy; non attivare provider sulla sola base dei documenti pubblici.
+
+## Aggiornamento verifica documentale — 27 novembre 2026
+
+Nuovo controllo delle fonti ufficiali Cloudflare, senza creare account né abilitare servizi:
+
+- Workers AI Free mantiene una quota di **10.000 Neurons al giorno**; oltre la quota, sul piano Workers Free le richieste vengono rifiutate. Per superare il limite occorre passare a Workers Paid, che non è ammesso per SuperIA. Fonte: https://developers.cloudflare.com/workers-ai/platform/pricing/ (pagina aggiornata 18 novembre 2026).
+- La documentazione aggiornata dichiara zero retention per richieste standard stateless e nessun uso del Customer Content per addestrare i modelli; logging, caching e funzioni stateful possono cambiare il trattamento e devono restare disattivati. Fonte: https://developers.cloudflare.com/workers-ai/platform/data-usage/ (aggiornata 16 ottobre 2026).
+- Due candidati da valutare sul piano Free: `@cf/zai-org/glm-4.7-flash` e `@cf/google/gemma-4-26b-a4b-it`. Le pagine ufficiali documentano supporto chat completions/streaming e zero data retention: https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/ e https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/.
+- Attenzione: alcuni modelli richiedono un metodo di pagamento o Workers Paid; la lista viene aggiornata. Non utilizzare modelli che richiedono billing. Il changelog del 5 novembre 2026 documenta anche la deprecazione dal 20 novembre di vari modelli precedenti: https://developers.cloudflare.com/changelog/post/2026-11-05-planned-model-deprecations/.
+- L'endpoint OpenAI-compatible del router SuperIA è già predisposto per Workers AI. La verifica pubblica rende Cloudflare il candidato prioritario da controllare nell'account, ma **non dimostra** che l'account dell'utente sia Free/no-card né che l'accesso al modello sia abilitato senza billing.
+
+**Esito:** candidato tecnico aggiornato, non attivato. Restano obbligatori: verifica visiva dell'account Free senza metodo di pagamento, verifica che il modello selezionato non richieda billing, conferma hard-stop oltre quota e creazione autorizzata del token API. Tutte le attestazioni runtime restano `false` fino a tali verifiche. Nessun prompt è stato inviato a Cloudflare e nessun segreto è stato creato.
