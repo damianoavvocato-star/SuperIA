@@ -1577,3 +1577,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit test: `746ff0bc9d98e46c200576f63dbf15691f65833a`.
 - Run backend sul commit test: `46062054725`, in coda/in esecuzione al momento della registrazione. Non dichiarare superati questi nuovi test fino al completamento con successo.
 - Il readiness verifica la configurazione, non la raggiungibilità effettiva del provider né la quota residua; il primo messaggio reale resta il test end-to-end decisivo.
+
+
+## Aggiornamento audit Multi-Provider — 27 novembre 2026
+- Esteso l'audit dei provider oltre Cloudflare/Groq: valutati NVIDIA Build, Mistral, Cohere, SambaNova, Gemini, OpenRouter, Z.ai e SiliconFlow.
+- Decisione: non aggiungere provider alla rotazione privata sulla sola base di un badge 'free'. NVIDIA Build trial dichiara registrazione input/output e uso per migliorare i servizi; Mistral Labs non offre opt-out/ZDR e ZDR è documentato per pay-as-you-go; Cohere resta trial/prototipazione senza evidenza sufficiente di garanzie privacy e idoneità produzione; SambaNova richiede metodo di pagamento/acquisto crediti; Gemini/OpenRouter non approvati per chat privata per le ragioni già documentate.
+- Pool candidati per la chat privata: Cloudflare Workers AI e GroqCloud, entrambi ancora subordinati a verifica account-level no-card, hard-stop e policy dati. Nessun provider attivo, nessuna chiave/account creati.
+- Z.ai e SiliconFlow restano in valutazione: servono prove ufficiali sufficienti su piano gratuito permanente, no-card, hard-stop e trattamento prompt prima di qualsiasi integrazione.
+- Documento dettagliato: docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md.
+- Fonti pubbliche: https://build.nvidia.com/fastino/gliner2-pii ; https://docs.mistral.ai/inference/model-lifecycle ; https://docs.mistral.ai/admin/monitor-comply/zero-data-retention ; https://docs.cohere.com/docs/rate-limits ; https://cloud.sambanova.ai/plans ; https://ai.google.dev/gemini-api/docs/pricing.
+- Questa è una verifica documentale; non è un test account-level né un'integrazione runtime.
