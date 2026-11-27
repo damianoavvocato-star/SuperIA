@@ -376,3 +376,25 @@ Fonti: https://docs.nvidia.com/nim/large-language-models/latest/about-nim-llm/ni
 
 ### Decisione
 Non aggiungere provider solo perché una pagina li chiama "free". Il requisito di ammissione resta: quota API rinnovabile e senza scadenza, nessuna carta/metodo di pagamento, nessun credito acquistato o referral, hard-stop effettivo, modello identificato e autorizzazione compatibile con l'uso multiutente di SuperIA. Le offerte che non soddisfano ogni punto restano escluse o in laboratorio separato.
+
+
+## Rettifica documentale: SambaNova e verifica SenseNova — 27 novembre 2026
+
+Questa sezione prevale sulle precedenti righe di questo documento che indicavano SambaNova come escluso o non presente nel router: quelle righe erano diventate obsolete dopo la verifica ufficiale successiva e l'integrazione dell'adapter.
+
+### SambaNova Cloud — stato corretto
+- La documentazione ufficiale consultata per l'adapter conferma un Free Tier senza metodo di pagamento collegato; il Developer Tier è associato al collegamento di un metodo di pagamento.
+- L'adapter è presente in `services/api/app/providers/free_router.py`, con allowlist limitata ai tre modelli di produzione `DeepSeek-V3.1`, `Meta-Llama-3.3-70B-Instruct`, `gpt-oss-120b`.
+- Il router applica le attestazioni account-level free-only e il blocco persistente in caso di HTTP 402/429. Il provider non è attivo: non sono stati creati account o API key e non è stata eseguita alcuna chiamata reale.
+- La suite backend sul commit `72f0249f4968e44ce0272b34a5c569fbb93335ae` ha superato **172 test** (1 warning). Il successivo commit documentale `2777188867f335c59c3ae0f6a6f2762593144548` ha completato con successo il workflow backend `46064312749`.
+- Fonti ufficiali: https://docs.sambanova.ai/docs/en/models/rate-limits ; https://sambanova.ai/cloud-end-user-license-agreement.
+
+### SenseNova / SenseTime — candidato ancora NON approvato
+- La pagina ufficiale Token Plan descrive un piano Free durante la public beta a $0/mese e dichiara 1.500 chiamate per modello ogni 5 ore; la pagina consultata elenca SenseNova 6.7 Flash-Lite e SenseNova U1 Fast. I piani Lite/Pro sono indicati come in arrivo: https://www.sensenova.ai/token-plan.
+- La FAQ ufficiale SenseTime consultata riporta la stessa quota e chiarisce che l'accesso richiede registrazione e creazione di API key tramite la piattaforma: https://sensetime.com/en/faq.
+- Una comunicazione ufficiale successiva del settembre 2026 promuove inoltre U1.5 Lite con quota beta, mentre altri documenti tecnici pubblici descrivono endpoint/modelli di generazioni differenti. La discrepanza tra modello, regione e piattaforma va risolta prima di implementare un adapter: https://sensetime.com/en/news/sensenova-u1-5-lite-token-plan-20260911-1741.
+- Non è stata trovata conferma ufficiale sufficiente che un account registrato dall'Italia possa attivare l'API senza carta/metodo di pagamento, né una garanzia documentata di hard-stop prima di ogni possibile tariffazione al termine della beta. La procedura pubblica può inoltre richiedere verifica dell'identità.
+- Esito: **candidato sperimentale, non approvato e non integrato**. Nessuna registrazione, chiave o chiamata API effettuata. Non aggiungere al router finché non sono verificati in modo ufficiale accesso dall'Italia, assenza di carta, quota effettiva, blocco economico, termini e schema streaming del modello esatto.
+
+### Regola di prevalenza
+Le sezioni precedenti che classificano SambaNova come escluso per richiesta di carta/acquisto crediti sono superate dall'aggiornamento ufficiale e dall'adapter testato sopra. Il provider resta comunque disattivato fino alla verifica dell'account reale e all'autorizzazione dell'utente. La valutazione SenseNova resta prudenziale e non autorizza alcuna attivazione.
