@@ -313,3 +313,36 @@ Fonti ufficiali:
 | Z.AI | Adapter aggiunto | No-card e limiti account da verificare | Riserva condizionata |
 
 Nessun provider è stato attivato. Non sono stati creati account, chiavi, carte, crediti o servizi esterni.
+
+
+## Addendum provider SambaNova Cloud — 27 novembre 2026
+
+### Esito verifica ufficiale: Free Tier senza metodo di pagamento
+
+La documentazione ufficiale SambaNova distingue esplicitamente:
+- **Free Tier:** applicato quando non è collegato alcun metodo di pagamento.
+- **Developer Tier:** applicato quando viene collegato un metodo di pagamento.
+
+Per i modelli di produzione pubblicati nella tabella Free Tier, i limiti sono **20 richieste/minuto, 20 richieste/giorno e 200.000 token/giorno per modello**. I tre modelli di produzione ammessi dal router sono:
+- `DeepSeek-V3.1`
+- `Meta-Llama-3.3-70B-Instruct`
+- `gpt-oss-120b`
+
+La documentazione separa i modelli Preview (DeepSeek-V3.2 e gemma-4-31B-it) e avverte che sono solo per valutazione/sperimentazione, con capacità limitata e possibile rimozione a breve termine: per questo **non** sono inclusi nell'allowlist di produzione.
+
+API OpenAI-compatible:
+- Endpoint: `https://api.sambanova.ai/v1/chat/completions`
+- Autenticazione: Bearer API key.
+- Streaming: formato SSE compatibile con Chat Completions.
+- Le risposte API indicano l'utilizzo dei limiti tramite header dedicati; gli errori di quota sono espliciti.
+
+**Privacy:** il Cloud End User License Agreement stabilisce che il contenuto del cliente viene elaborato per fornire il servizio o quando richiesto dalla legge; i query log e i dati d'uso non contenenti Customer Content possono essere utilizzati per amministrare, sviluppare, migliorare e gestire prodotti/servizi. Non è quindi corretto descrivere la policy come "nessuna raccolta dati"; la policy è compatibile con la preferenza espressa dall'utente, ma deve essere dichiarata chiaramente nell'app.
+
+**Implementazione su main:** aggiunto adapter `sambanova` al router, endpoint OpenAI-compatible, allowlist hard-coded dei soli tre modelli di produzione gratuiti senza metodo di pagamento. Le attestazioni free-only rimangono obbligatorie. Un HTTP 402 disabilita il provider attraverso la protezione generale; qualsiasi HTTP 429 disabilita persistentemente il provider fino a verifica manuale, senza retry automatico e senza fallback a pagamento. Nessun provider è stato attivato e nessun account/chiave è stato creato.
+
+**Limite operativo:** 20 richieste al giorno per modello è una quota molto contenuta. SambaNova è una riserva aggiuntiva, non un provider sufficiente da solo per una chat quotidiana intensa. Il router deve comunque mantenere gli altri provider gratuiti e interrompere le richieste quando tutti hanno esaurito le quote.
+
+Fonti:
+- Rate limits ufficiali: https://docs.sambanova.ai/docs/en/models/rate-limits
+- Quickstart/dashboard ufficiale e endpoint: https://cloud.sambanova.ai/dashboard
+- Cloud End User License Agreement e trattamento Customer Content / Service Usage Data: https://sambanova.ai/cloud-end-user-license-agreement
