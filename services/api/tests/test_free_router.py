@@ -584,3 +584,31 @@ def test_cloudflare_daily_free_quota_exhaustion_disables_provider_until_manual_r
         assert calls == ["api.cloudflare.com"]
 
     asyncio.run(run())
+
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "@cf/zai-org/glm-4.7-flash",
+        "@cf/google/gemma-4-26b-a4b-it",
+    ],
+)
+def test_cloudflare_accepts_only_verified_workers_free_chat_models(tmp_path, model):
+    env = free_env("cloudflare", model)
+    env["SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID"] = "test-account"
+    router = FreeOnlyRouter(
+        environ=env,
+        state_db_path=str(tmp_path / f"cloudflare-{model.split('/')[-1]}.sqlite3"),
+    )
+    assert asyncio.run(router.list_models()) == [f"cloudflare:{model}"]
+
+
+def test_cloudflare_rejects_model_outside_verified_workers_free_allowlist(tmp_path):
+    env = free_env("cloudflare", "@cf/zai-org/glm-5.3-flash")
+    env["SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID"] = "test-account"
+    with pytest.raises(ValueError, match="verified Workers Free model IDs"):
+        FreeOnlyRouter(
+            environ=env,
+            state_db_path=str(tmp_path / "cloudflare-paid-model.sqlite3"),
+        )
