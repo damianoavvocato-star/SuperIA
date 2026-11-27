@@ -1507,3 +1507,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Correzione su `main`, commit `af0e2a6343895c5071896fd122d413d816543118`: ogni invocazione `adb shell am instrument`, cattura exit status, stampa output e controllo `OK (1 test)`/assenza `FAILURES!!!` sono ora nello stesso comando shell. Il force-stop resta tra writer e verifier.
 - Nuovi run avviati: Android `46058183460`, backend `46058183407`. Entrambi erano in coda al momento dell'aggiornamento. Non dichiarare ancora superata la verifica di process restart finché il verifier non restituisce `OK (1 test)`.
 - Nessun APK consegnato/installato sul telefono fisico, nessun test fisico, nessun rilascio o attivazione backend/provider.
+
+
+### Verifica completa CI Android e recupero dopo arresto processo — 27 novembre 2026
+- Run Android `46058183460` sul commit applicativo `af0e2a6343895c5071896fd122d413d816543118`: tutti e tre i job **success** (`android-unit-tests`, `android-instrumented-tests`, `android-physical-device-test-apks`).
+- Report XML emulator API 34: **38 test, 0 failures, 0 errors, 0 skipped**.
+- Diagnostica `process-restart-write.txt`: `OK (1 test)`; `process-restart-verification.txt`: `OK (1 test)`. La verifica finale è stata effettivamente eseguita dopo `adb shell am force-stop it.superiaprivata.app`, senza nuova installazione Gradle tra writer e verifier.
+- Run backend `46058183407`: **success**; suite pytest backend superata.
+- La causa precedente è risolta: le variabili shell venivano perse tra righe eseguite in shell separate; cattura status e controllo output sono stati accorpati nello stesso comando.
+- Artefatto report emulator: `15227843683`; artefatto APK debug/test temporanei: `15227755914` (non installati sul telefono fisico, non distribuiti e con scadenza breve).
+- Stato: test automatici Android unitari, strumentali e backend superati per questo commit. La prova non sostituisce test sul telefono fisico né valida l'invio chat con backend reale/provider. Nessun deploy, provisioning, APK release o attivazione provider effettuati.
