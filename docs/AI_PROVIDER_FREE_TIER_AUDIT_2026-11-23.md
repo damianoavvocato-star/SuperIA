@@ -74,3 +74,34 @@ Nuovo controllo delle fonti ufficiali Cloudflare, senza creare account né abili
 - L'endpoint OpenAI-compatible del router SuperIA è già predisposto per Workers AI. La verifica pubblica rende Cloudflare il candidato prioritario da controllare nell'account, ma **non dimostra** che l'account dell'utente sia Free/no-card né che l'accesso al modello sia abilitato senza billing.
 
 **Esito:** candidato tecnico aggiornato, non attivato. Restano obbligatori: verifica visiva dell'account Free senza metodo di pagamento, verifica che il modello selezionato non richieda billing, conferma hard-stop oltre quota e creazione autorizzata del token API. Tutte le attestazioni runtime restano `false` fino a tali verifiche. Nessun prompt è stato inviato a Cloudflare e nessun segreto è stato creato.
+
+
+## Aggiornamento estensione provider — 27 novembre 2026
+
+È stata eseguita una verifica aggiuntiva dei provider proposti per ampliare la rotazione. L'esito distingue disponibilità di un piano gratuito da idoneità a ricevere conversazioni private di SuperIA.
+
+| Provider | Evidenza gratuita pubblica | Vincolo rilevante | Esito per la rotazione privata |
+|---|---|---|---|
+| GroqCloud | Piano Free documentato; 429 al superamento dei limiti; upgrade Developer richiede metodo di pagamento | Verificare account Free e controlli dati/ZDR effettivamente attivi | Candidato condizionato, secondo Cloudflare |
+| NVIDIA NIM / Build | Alcuni endpoint sono marcati Free Endpoint | La pagina di prova dichiara registrazione di input/output e uso per migliorare prodotti/servizi NVIDIA | Escluso per prompt privati finché non esiste un endpoint/contratto con garanzie diverse |
+| Mistral | La documentazione distingue modelli Labs gratuiti | I modelli Labs non supportano opt-out della raccolta dati né ZDR; ZDR documentato per piano pay-as-you-go | Non approvato per chat privata gratuita |
+| Cohere | Trial key gratuita e limitata; documentazione indica 1.000 chiamate/mese per trial e alcuni modelli | Trial/prototipazione non dimostra idoneità di produzione, assenza di retention/training o quota gratuita permanente | Candidato da approfondire, non abilitabile |
+| SambaNova | La pagina Plans/Billing attuale chiede metodo di pagamento e acquisto crediti per iniziare | Contraddice il requisito no-card/no-purchase | Escluso; non inserirlo nel router |
+| Gemini API | Piano Free disponibile su modelli selezionati | Google dichiara che i contenuti Free sono usati per migliorare i prodotti; alcuni strumenti possono generare costi | Escluso dalla chat privata senza consenso separato e controlli dedicati |
+| OpenRouter | Modelli con suffisso :free disponibili entro limiti | Il gateway inoltra i prompt a provider diversi; il piano Free non assicura una policy dati uniforme né routing basato su policy | Escluso dalla chat privata predefinita |
+| Z.ai / SiliconFlow | Sono stati trovati riferimenti pubblici a modelli o accessi promozionali/free | Non è stata completata una verifica ufficiale sufficiente di quota permanente, no-card, hard-stop, privacy e condizioni d'uso applicabili | Non approvati; nessuna integrazione finché non verificati |
+
+### Fonti aggiuntive consultate
+- NVIDIA Build endpoint trial/privacy: https://build.nvidia.com/fastino/gliner2-pii (la pagina dichiara registrazione di input/output e uso per migliorare prodotti/servizi).
+- Mistral model lifecycle: https://docs.mistral.ai/inference/model-lifecycle (Labs gratuiti senza opt-out e senza ZDR).
+- Mistral Zero Data Retention: https://docs.mistral.ai/admin/monitor-comply/zero-data-retention (ZDR disponibile per organizzazioni idonee su pay-as-you-go; non prova disponibilità sul piano gratuito).
+- Cohere trial limits: https://docs.cohere.com/docs/rate-limits e https://docs.cohere.com/v2/docs/cohere-faqs.
+- SambaNova Plans: https://cloud.sambanova.ai/plans.
+- Gemini pricing/data use: https://ai.google.dev/gemini-api/docs/pricing.
+- Cloudflare pricing e data use: https://developers.cloudflare.com/workers-ai/platform/pricing/ e https://developers.cloudflare.com/workers-ai/platform/data-usage/.
+- Groq rate limits e billing: https://console.groq.com/docs/rate-limits e https://console.groq.com/docs/billing-faqs.
+
+### Decisione operativa
+Non aumentare il numero di provider solo per avere più nomi in elenco. Per la chat privata la priorità è la protezione dei dati e l'impossibilità tecnica di generare addebiti. Al momento la rotazione di produzione può considerare soltanto Cloudflare Workers AI e GroqCloud, entrambi subordinati alla verifica account-level; nessuno è attivo. Gli altri servizi restano esclusi o in valutazione e non devono essere presentati come già integrati.
+
+La rotazione tra account/chiavi dello stesso provider per eludere quote è vietata. Il failover deve usare soltanto provider indipendenti approvati, con hard-stop, cooldown e nessun fallback a pagamento.
