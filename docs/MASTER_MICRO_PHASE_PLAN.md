@@ -1,6 +1,6 @@
 # Piano operativo SuperIA — 50 micro-fasi
 
-Aggiornato: 23 novembre 2026 — 21/50 micro-fasi completate; gate chat online 36 bloccato  
+Aggiornato: 27 novembre 2026 — 22/50 micro-fasi completate; micro-fase 29 validata in CI emulator; gate chat online 36 bloccato  
 Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 16 macro-aree della roadmap in 50 unità di lavoro verificabili. Non sostituisce i requisiti vincolanti di README e PHASE_TRACKER: li rende eseguibili passo per passo.
 
 ## Regole di esecuzione
@@ -70,7 +70,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | In attesa di verifica pratica |
 | 27 | Idempotenza e deduplicazione richieste | Request ID, hash payload, replay cifrato, lease e fencing sono testati su PostgreSQL; limiti exactly-once sono documentati. | Completata in CI; staging reale aperto |
 | 28 | Retry e ripresa dopo interruzione | Retry usa lo stesso ID, non duplica risposte già persistite e comunica chiaramente quando deve rigenerare invece di riprendere lo stream. | In attesa di verifica pratica |
-| 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | In attesa di verifica |
+| 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | Completata in CI emulator; telefono fisico separato alla fase 35 |
 | 30 | Contesto documentale e privacy dei dati | PDF/DOCX/TXT/CSV, retrieval, citazioni, minimizzazione contesto, log, retention, export e cancellazione sono testati e documentati. | In attesa di verifica |
 
 ### D. Collaudo e sblocco della chat online
@@ -260,3 +260,7 @@ La prima esecuzione reale su emulatore API 35 ha compilato e installato gli APK 
 
 ### Diagnosi e correzione esecuzione emulatore — 24 novembre 2026
 La run [45483033138](https://github.com/damianoavvocato-star/SuperIA/actions/runs/45483033138) è fallita prima dell'avvio dei test strumentali: l'emulatore è partito, ma lo script shell multilinea ha definito una funzione in una singola invocazione e le righe successive sono state eseguite in shell separate. Errore osservato: `Syntax error: end of file unexpected (expecting "}")`. Corretto in commit `a3302498c9b460f3a334ab0d24e4e157c980d701`, rimuovendo la funzione e usando comandi autosufficienti per ciascuna invocazione Gradle con raccolta diagnostica inline. Nessuna prova strumentale è ancora valida; micro-fasi 29–30 aperte e gate 36 invariato.
+
+
+### Aggiornamento micro-fase 29 e test Android multi-chat — 27 novembre 2026
+La micro-fase 29 è **Completata per la verifica automatica CI emulator**: Android API 34 ha eseguito 38/38 test strumentali senza errori o skip; le prove distinte di scrittura dello stato pendente e recupero dopo `adb shell am force-stop` hanno entrambe restituito `OK (1 test)`. Android unit test e build temporanea dei soli APK di test sono SUCCESS; backend run `46058183407` SUCCESS. Run Android `46058183460`: https://github.com/damianoavvocato-star/SuperIA/actions/runs/46058183460. La fase 30 resta in attesa per copertura funzionale completa dei formati/OCR e privacy documentale; la prova su telefono fisico resta nella fase 35. Nessun APK è stato consegnato o installato sul telefono, nessun deploy/provider è stato attivato.
