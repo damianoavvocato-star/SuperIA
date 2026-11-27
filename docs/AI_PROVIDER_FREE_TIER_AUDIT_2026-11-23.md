@@ -253,3 +253,63 @@ Z.AI's official terms distinguish individual consumer content from API developer
 **Implementation:** router now has a Z.AI adapter and a hard-coded allowlist for the three exact zero-price model IDs. Any paid/non-listed model (including GLM-5.3-Flash, GLM-4.7-FlashX and GLM-4.6V-FlashX) is rejected before any HTTP request. A 401/402/403 response persistently disables Z.AI; no paid fallback exists. The built-in Web Search and other paid tools are not invoked.
 
 **Activation still blocked pending account verification:** public docs do not conclusively establish whether a payment method is required for every region/account, or expose public free-model rate limits. Before activation, verify the specific account can create a key without card/payment, that the selected model appears as $0 in that account, and that quota exhaustion returns an error rather than charging. No Z.AI account/key was created and no live request was made.
+
+
+## Addendum verifica provider successiva — 27 novembre 2026
+
+### Synap / Linkrra — adapter fail-closed aggiunto, attivazione ancora bloccata
+
+La documentazione ufficiale del servizio pubblica una quota API gratuita senza carta per il solo modello `qwen3-coder-30b`:
+- 100.000 token/giorno e 50 richieste/giorno nei primi 7 giorni; successivamente 50.000 token/giorno e 10 richieste/giorno.
+- Limite di 10 richieste/minuto per chiave e massimo 4.096 token in output per richiesta.
+- Quota condivisa per account/rete e ulteriore capacità gratuita aggregata; il servizio può rifiutare richieste se la capacità non è disponibile.
+- Il sito account dichiara che la registrazione gratuita richiede Google sign-in e non richiede carta; oltre la quota Free, i modelli/crediti a pagamento richiedono un acquisto separato.
+- API OpenAI-compatible: `https://synap402.com/v1/chat/completions`.
+- Privacy policy: le richieste API con chiave non conservano prompt/completions e non sono usate per addestrare modelli; restano metadati d'uso (token, modello, timestamp). I nodi GPU sono gestiti anche da operatori indipendenti, che il provider dichiara vincolati a non conservare i contenuti.
+- Termini: servizio distribuito senza SLA di uptime; l'operatore può cambiare limiti e condizioni. È vietato aggirare rate limit e quote.
+
+**Implementazione su main:** aggiunto provider `synap` al router con allowlist hard-coded del solo `qwen3-coder-30b`, endpoint OpenAI-compatible, supporto ai formati chat e SSE standard. Un HTTP 402 disabilita persistentemente il provider (gestione già comune); per prudenza anche qualsiasi HTTP 429 disabilita persistentemente Synap, senza retry automatico e senza fallback a pagamento. Le attestazioni `APPROVED_FREE`, `NO_PAYMENT_METHOD`, `HARD_STOP`, `NO_FIAT_BILLING` e `DATA_POLICY_APPROVED` restano obbligatorie. Nessun account o API key è stato creato, nessun provider è attivo.
+
+**Limiti della verifica:** la quota e la politica sono dichiarazioni del provider, non un test del singolo account o della regione. Prima dell'attivazione occorre verificare che l'account creato dall'utente sia effettivamente Free, senza carta/metodo di pagamento, e che il pannello mostri la quota corrente. La capacità condivisa e l'assenza di SLA rendono Synap una riserva secondaria, non il provider primario.
+
+Fonti ufficiali:
+- Free tier e quote: https://synap.linkrra.com/free.html
+- Account e registrazione senza carta: https://synap.linkrra.com/account.html
+- API e modello: https://synap402.com/v1 e https://synap.linkrra.com/
+- Privacy API: https://synap.linkrra.com/privacy.html
+- Termini e assenza di SLA: https://synap.linkrra.com/terms.html
+
+### SenseNova Token Plan — documentazione aggiornata
+
+La pagina ufficiale Token Plan indica piano Free durante la beta pubblica a $0/RMB 0, con 1.500 chiamate per modello ogni 5 ore per SenseNova 6.8 Flash Lite e SenseNova U1 Fast. La documentazione API corrente descrive l'endpoint chat OpenAI-compatible `https://token.sensetime.com/api/v1/chat/completions` e il model ID `sensenova-6.8-flash-lite`. Le autorizzazioni e le quote effettive sono comunque subordinate al workspace autenticato; i dettagli di streaming non sono definiti in modo sufficiente nelle pagine pubbliche consultate. Il vecchio endpoint `token.sensenova.cn/v1` e il modello `sensenova-u1.5-lite` descritti in un annuncio precedente riguardano soprattutto generazione/edizione immagini e non vanno confusi con l'endpoint chat corrente.
+
+**Decisione:** nessun adapter chat aggiunto. Restano da verificare carta/metodo di pagamento, idoneità geografica per l'Italia, termini privacy/account e streaming. Non inserire nel pool finché questi aspetti non sono risolti.
+
+Fonti ufficiali:
+- Piano e quote: https://www.sensenova.ai/token-plan
+- FAQ e modelli correnti: https://www.sensetime.com/en/faq
+- Chat API: https://token.sensetime.com/docs/api-reference/endpoint/llm/chat
+- Centro documentazione: https://token.sensetime.com/docs
+
+### SEA-LION / AI Singapore — conferma POC, non produzione
+
+Le pagine ufficiali confermano un'API gratuita per proof-of-concept, compatibile OpenAI, con limite di 10 richieste/minuto per utente e una sola chiave trial per utente. La guida richiede accesso al Playground tramite Google e specifica che il piano POC non è progettato per carichi di produzione. Non è stata trovata conferma sufficiente che ogni account/regione sia esente da carta o che esista un hard-stop documentato e verificabile su tutti gli errori di quota.
+
+**Decisione:** mantenere come candidato di laboratorio, non integrarlo nel failover della chat privata finché no-card e comportamento di quota non siano confermati.
+
+Fonti ufficiali:
+- FAQ: https://github.com/aisingapore/sealion/blob/main/overview/faq.md
+- API e rate limit: https://github.com/aisingapore/sealion/blob/main/guides/inferencing/api.md
+- Pagina di accesso: https://sea-lion.ai/try-sea-lion/
+
+### Stato sintetico dopo l'addendum
+
+| Provider | Stato tecnico | Stato account/economico | Uso previsto |
+|---|---|---|---|
+| Synap | Adapter aggiunto; test CI da confermare | Free/no-card dichiarato dal provider; account non verificato | Riserva secondaria, solo dopo verifica account |
+| SenseNova | Nessun adapter | Beta Free pubblica, ma no-card/Italia/streaming non risolti | In valutazione |
+| SEA-LION | Nessun adapter | POC gratuito, no-card/hard-stop non risolti | Solo laboratorio |
+| Cohere | Adapter aggiunto | Trial e no-card da verificare sull'account | Riserva condizionata |
+| Z.AI | Adapter aggiunto | No-card e limiti account da verificare | Riserva condizionata |
+
+Nessun provider è stato attivato. Non sono stati creati account, chiavi, carte, crediti o servizi esterni.
