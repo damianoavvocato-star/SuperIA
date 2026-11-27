@@ -166,7 +166,11 @@ async def readiness(_: None = Depends(require_admin_token)) -> JSONResponse:
         except Exception:
             provider_configuration = "invalid_or_unavailable"
 
-    ready = database_status == "ok" and device_auth_status == "ok"
+    ready = (
+        database_status == "ok"
+        and device_auth_status == "ok"
+        and provider_configuration == "configured"
+    )
     return JSONResponse(
         status_code=200 if ready else 503,
         content={
