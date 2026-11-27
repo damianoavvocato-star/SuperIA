@@ -1470,3 +1470,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il job complessivo è tuttavia terminato **failure dopo i test**: lo shell step di verifica post-`force-stop` ha restituito `Syntax error: end of file unexpected (expecting "fi")`. Il log mostra che i test erano già terminati correttamente; non si tratta di un test applicativo fallito.
 - Correzione in corso su `main`: rimosso il blocco condizionale shell ridondante dopo `adb shell am force-stop`. Il test successivo di recovery verifica direttamente il recupero del processo/stato; il comando force-stop rimane.
 - Nessun APK consegnato/installato, nessun test su telefono fisico, nessun rilascio o attivazione backend/provider.
+
+
+### Diagnosi e correzione verifica process-restart — 27 novembre 2026
+- Run Android `45837855804` sul commit `9dc9e73679b7a872bcfef7c91c4a8398e33e64d6`: unit test **success**; build APK temporanei **success**; backend run `45837855673` **success**.
+- Test strumentali emulator API 34: suite principale **38/38 passati**; `writePendingStateForProcessRestart` **1/1 passato**; `verifyPendingStateAfterProcessRestart` **1/1 fallito** con archivio vuoto dopo force-stop. Il job è quindi correttamente fallito; il controllo shell non era più il problema.
+- Il workflow eseguiva la verifica finale richiamando una seconda volta `connectedDebugAndroidTest`, che può reinstallare i pacchetti di test/app e interferire con la persistenza tra le due invocazioni. Modificato il flusso: dopo il force-stop del solo package app, la verifica viene lanciata direttamente con `adb shell am instrument`, senza un nuovo task Gradle/installazione; output controllato esplicitamente per `OK (1 test)` e `FAILURES!!!`.
+- La nuova esecuzione deve confermare la persistenza reale tra processi; non considerare ancora superato il test fino al suo esito.
+- Nessun APK consegnato/installato sul telefono, nessun test fisico, nessun rilascio o attivazione backend/provider.
