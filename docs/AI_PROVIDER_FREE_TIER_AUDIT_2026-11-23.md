@@ -105,3 +105,45 @@ Nuovo controllo delle fonti ufficiali Cloudflare, senza creare account né abili
 Non aumentare il numero di provider solo per avere più nomi in elenco. Per la chat privata la priorità è la protezione dei dati e l'impossibilità tecnica di generare addebiti. Al momento la rotazione di produzione può considerare soltanto Cloudflare Workers AI e GroqCloud, entrambi subordinati alla verifica account-level; nessuno è attivo. Gli altri servizi restano esclusi o in valutazione e non devono essere presentati come già integrati.
 
 La rotazione tra account/chiavi dello stesso provider per eludere quote è vietata. Il failover deve usare soltanto provider indipendenti approvati, con hard-stop, cooldown e nessun fallback a pagamento.
+
+
+## Decisione aggiornata dell'utente — 27 novembre 2026
+
+L'utente ha chiarito che accetta che i provider gratuiti possano raccogliere e utilizzare prompt e risposte per migliorare i propri prodotti. La raccolta dati per miglioramento non è quindi, da sola, motivo di esclusione. Prima dell'uso restano da comunicare le condizioni applicabili e da rispettare eventuali consensi/termini del provider.
+
+La priorità di selezione diventa:
+1. costo effettivo zero e nessuna possibilità di addebito;
+2. piano API gratuito realmente utilizzabile (non solo chat web o crediti promozionali);
+3. hard-stop o blocco tecnico prima di qualsiasi utilizzo a pagamento;
+4. compatibilità API e stabilità sufficienti;
+5. informativa chiara sulla raccolta e sull'eventuale uso dei prompt.
+
+### Pool ampliato da implementare/verificare
+- **Cloudflare Workers AI**: candidato primario già supportato dal router; restano da verificare account e quota effettiva.
+- **GroqCloud**: candidato API gratuito; già supportato dal router; verificare limiti e assenza di metodo di pagamento sul singolo account.
+- **Google Gemini API Free**: da includere esplicitamente nel pool; la pagina prezzi dichiara input/output gratuiti su modelli selezionati e indica che i contenuti Free sono usati per migliorare i prodotti Google. Disabilitare strumenti/feature con costi separati e non configurare mai un piano Paid.
+- **OpenRouter modelli :free**: da includere come gateway opzionale solo con model ID che termina in :free. La pagina ufficiale dichiara $0 per varianti :free e limiti di 20 richieste/minuto e 50 richieste/giorno; il limite più alto richiede acquisto crediti, quindi SuperIA non deve acquistare crediti né fare upgrade. Il routing automatico openrouter/free va usato solo se il comportamento resta limitato a modelli gratuiti.
+- **Cohere Trial API**: nuovo candidato da implementare/verificare; documentazione ufficiale dichiara trial keys gratuite ma limitate (1.000 chiamate/mese per le chiavi trial e alcuni modelli). Non considerarlo production-ready senza test tecnico e verifica dei termini correnti.
+- **Mistral API**: non aggiungere al pool API gratuito al momento: la documentazione corrente dice che Free mode non include API access e che creare chiavi/usare API richiede billing activation e pay-as-you-go. La disponibilità di modelli Labs nella chat/web app non equivale ad API gratuita.
+- **SambaNova**: resta escluso finché il flusso di attivazione richiede metodo di pagamento/acquisto crediti.
+- **NVIDIA Build, Z.ai, SiliconFlow**: mantenere in valutazione; aggiungere solo dopo verifica documentale corrente di accesso API senza carta, costo zero e hard-stop.
+
+### Protezioni tecniche obbligatorie
+- `SUPERIA_FREE_ONLY=true` resta obbligatorio.
+- Ogni provider deve avere attestazioni separate per account Free, assenza di metodo di pagamento, hard-stop, assenza di billing monetario e presa visione della policy dati.
+- Non configurare carte, crediti, auto-recharge, pay-as-you-go, upgrade o billing automatico.
+- Su 402/403 il provider viene disabilitato; su 429 viene messo in cooldown o disabilitato secondo il codice quota specifico; nessun fallback verso modello/endpoint a pagamento.
+- Il failover tra provider indipendenti è consentito; la rotazione tra account/chiavi dello stesso servizio per eludere limiti è vietata.
+- Il router attualmente supporta Gemini, Groq, OpenRouter e Cloudflare; Cohere richiede adattatore dedicato (schema API/streaming diverso) e test prima dell'inserimento nel pool runtime.
+- Nessun provider è attivo finché non vengono configurati account e segreti autorizzati; questo audit non ha creato account, chiavi o servizi.
+
+### Fonti ufficiali aggiornate
+- Gemini pricing e uso dati: https://ai.google.dev/gemini-api/docs/pricing (Free tier: token gratuiti su modelli selezionati; contenuti usati per migliorare prodotti; alcune funzioni Search possono avere costi oltre soglia).
+- OpenRouter modelli gratuiti: https://openrouter.ai/collections/free-models/ (varianti :free $0, limiti 20 RPM/50 RPD; 1.000 RPD solo dopo acquisto di $10 di crediti, da non utilizzare).
+- OpenRouter pricing: https://openrouter.ai/pricing.
+- Cohere rate limits: https://docs.cohere.com/docs/rate-limits (trial key gratuite e limitate; 1.000 chiamate/mese per trial keys e alcuni modelli).
+- Mistral usage and limits: https://docs.mistral.ai/admin/billing-usage/usage-limits/ (Free mode non include API access; API richiede billing activation e pay-as-you-go).
+- Cloudflare pricing: https://developers.cloudflare.com/workers-ai/platform/pricing/.
+- Groq rate limits: https://console.groq.com/docs/rate-limits.
+
+Questa decisione sostituisce le precedenti esclusioni basate unicamente sul riutilizzo dei dati per migliorare i modelli. Non sostituisce le verifiche economiche, contrattuali e tecniche.
