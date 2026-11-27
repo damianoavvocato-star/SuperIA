@@ -1541,3 +1541,9 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Rapporto aggiornato: [AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md](AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md), commit `efcf2a3b7f9f785b2d34e2f563b78595f621bcaf`.
 - Fonti ufficiali: https://developers.cloudflare.com/workers-ai/platform/pricing/ ; https://developers.cloudflare.com/workers-ai/platform/data-usage/ ; https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/ ; https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/ ; https://developers.cloudflare.com/changelog/post/2026-11-05-planned-model-deprecations/.
 - Blocco ancora aperto: verifica no-card, hard-stop effettivo e creazione autorizzata del token; nessun account o segreto creato, nessun servizio attivato.
+
+## Diagnostica connessione Android — 27 novembre 2026
+- Aggiunto in Impostazioni il pulsante `Verifica indirizzo backend`, utilizzabile prima del pairing. Richiama `GET /health` via HTTPS e mostra se il processo backend risponde; il messaggio chiarisce che questo controllo non certifica database, pairing o provider IA.
+- Il pulsante evita di inserire un codice pairing quando l'endpoint è scritto male o il servizio non è raggiungibile.
+- Commit Android: `d205ae3a9d04fe44e370ac908db6000595fc96cd`.
+- Non è stato eseguito alcun test su backend remoto, perché non esiste ancora un endpoint di staging autorizzato. La suite emulator è rinviata; i test JVM rapidi sono il solo controllo automatico ordinario.
