@@ -64,6 +64,12 @@ jobs:
 
             gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest || { test_status=$?; adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt; adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true; exit "$test_status"; }
             gradle --no-daemon -p android connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#writePendingStateForProcessRestart || { test_status=$?; adb logcat -d -v threadtime > android/app/build/diagnostics/instrumentation-logcat.txt; adb shell dumpsys activity instrumentation > android/app/build/diagnostics/instrumentation-state.txt || true; exit "$test_status"; }
+            # Gradle's connected test task can remove the instrumentation package on completion.
+            # Reinstall only the test APK; adb install -r preserves the app's encrypted data.
+            adb install -r android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell pm list instrumentation > android/app/build/diagnostics/installed-instrumentation-after-install.txt
+            cat android/app/build/diagnostics/installed-instrumentation-after-install.txt
+            grep -F 'it.superiaprivata.app.test/androidx.test.runner.AndroidJUnitRunner' android/app/build/diagnostics/installed-instrumentation-after-install.txt
             adb shell am force-stop it.superiaprivata.app
             adb shell am instrument -w -e class it.superiaprivata.app.chat.ProcessRestartRecoveryInstrumentedTest#verifyPendingStateAfterProcessRestart it.superiaprivata.app.test/androidx.test.runner.AndroidJUnitRunner > android/app/build/diagnostics/process-restart-verification.txt 2>&1
             verification_status=$?
