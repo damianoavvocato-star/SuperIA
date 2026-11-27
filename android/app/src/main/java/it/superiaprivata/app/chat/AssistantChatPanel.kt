@@ -379,7 +379,11 @@ fun AssistantChatPanel(
                                 workspaceStore.setArchived(selectedWorkspaceId, true)
                                 workspaces = workspaceStore.list(includeArchived = true)
                                 val next = workspaces.firstOrNull { !it.archived }
-                                if (next != null) selectedWorkspaceId = next.id
+                                    ?: workspaceStore.create("Nuova chat", ChatWorkspace.Kind.CHAT)
+                                if (next.id !in workspaces.map { it.id }) {
+                                    workspaces = workspaceStore.list(includeArchived = true)
+                                }
+                                selectedWorkspaceId = next.id
                                 attachedDocumentContext = null
                                 attachmentStatus = null
                                 renameWorkspace = false
