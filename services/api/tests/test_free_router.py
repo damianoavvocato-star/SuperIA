@@ -814,3 +814,152 @@ def test_zai_402_disables_provider_and_never_uses_paid_fallback(tmp_path):
         assert calls == ["api.z.ai"]
 
     asyncio.run(run())
+
+
+def synap_free_env(model="qwen3-coder-30b"):
+    return free_env("synap", model)
+
+
+def test_synap_accepts_only_the_verified_free_tier_model(tmp_path):
+    router = FreeOnlyRouter(
+        environ=synap_free_env(),
+        state_db_path=str(tmp_path / "synap-free-model.sqlite3"),
+    )
+    assert [item.provider_id for item in router.configured_providers()] == ["synap"]
+
+
+@pytest.mark.parametrize("model", ["qwen3.5-coder", "qwen3-coder-30b:paid", "synap-v1"])
+def test_synap_rejects_models_outside_the_free_tier_allowlist(tmp_path, model):
+    with pytest.raises(ValueError, match="single verified Synap free-tier model ID"):
+        FreeOnlyRouter(
+            environ=synap_free_env(model),
+            state_db_path=str(tmp_path / f"synap-rejected-{model}.sqlite3"),
+        )
+
+
+def test_synap_openai_compatible_chat_uses_only_free_model(tmp_path):
+    async def run():
+        env = synap_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request)
+            assert request.url == "https://synap402.com/v1/chat/completions"
+            assert request.headers["Authorization"] == "Bearer test-secret"
+            payload = request.read()
+            assert b'"model":"qwen3-coder-30b"' in payload
+            assert b'"stream":false' in payload
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": "Risposta Synap gratuita"}}]},
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "synap-chat.sqlite3"),
+        )
+        result = await router.chat([{"role": "user", "content": "Ciao"}])
+        assert result["content"] == "Risposta Synap gratuita"
+        assert result["provider"] == "synap"
+        assert result["model"] == "qwen3-coder-30b"
+        assert len(calls) == 1
+
+    asyncio.run(run())
+
+
+def test_synap_openai_compatible_streaming_is_normalized(tmp_path):
+    async def run():
+        env = synap_free_env()
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            assert request.url == "https://synap402.com/v1/chat/completions"
+            assert b'"stream":true' in request.read()
+            body = (
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
+                'data: {"choices":[{"delta":{"content":"Synap"}}]}\\n\\n'
+                'data: [DONE]\\n\\n'
+            )
+            return httpx.Response(
+                200,
+                headers={"content-type": "text/event-stream"},
+                content=body,
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "synap-stream.sqlite3"),
+        )
+        events = [
+            item async for item in router.stream_chat(
+                [{"role": "user", "content": "Ciao"}]
+            )
+        ]
+        assert [item["text"] for item in events if item["event"] == "delta"] == [
+            "Ciao ", "Synap"
+        ]
+        assert events[-1]["event"] == "done"
+        assert events[-1]["provider"] == "synap"
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("status_code", [402, 429])
+@pytest.mark.parametrize("streaming", [False, True])
+def test_synap_quota_or_payment_response_disables_provider_without_fallback(
+    tmp_path, status_code, streaming
+):
+    async def run():
+        env = synap_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            return httpx.Response(status_code, json={"error": "free quota unavailable"})
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        state_db = str(tmp_path / f"synap-{status_code}-{streaming}.sqlite3")
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=state_db,
+        )
+        messages = [{"role": "user", "content": "Ciao"}]
+        with pytest.raises(NoFreeProviderAvailable):
+            if streaming:
+                _ = [item async for item in router.stream_chat(messages)]
+            else:
+                await router.chat(messages)
+
+        status = {item["id"]: item for item in router.provider_status()}
+        assert status["synap"]["state"] == "disabled"
+        assert status["synap"]["available"] is False
+
+        second = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=state_db,
+        )
+        with pytest.raises(NoFreeProviderAvailable):
+            if streaming:
+                _ = [item async for item in second.stream_chat(messages)]
+            else:
+                await second.chat(messages)
+        assert calls == ["synap402.com"]
+
+    asyncio.run(run())
