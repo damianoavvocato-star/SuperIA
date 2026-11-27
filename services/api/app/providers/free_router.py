@@ -40,6 +40,12 @@ CLOUDFLARE_VERIFIED_FREE_MODELS = frozenset({
     "@cf/google/gemma-4-26b-a4b-it",
 })
 
+ZAI_VERIFIED_FREE_MODELS = frozenset({
+    "glm-4.7-flash",
+    "glm-4.5-flash",
+    "glm-4.6v-flash",
+})
+
 
 class NoFreeProviderAvailable(RuntimeError):
     """No verified zero-cost provider is currently available."""
@@ -64,7 +70,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if any(key.startswith(excluded_prefix) and value.strip() for key, value in environ.items()):
         raise ValueError("SambaNova is excluded because its current Free plan requires a payment method and credit purchase.")
 
-    provider_ids = ("gemini", "groq", "cohere", "openrouter", "cloudflare")
+    provider_ids = ("gemini", "groq", "cohere", "zai", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
@@ -101,6 +107,10 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError(
                 f"{prefix} MODEL must be one of the verified Workers Free model IDs."
             )
+        if provider_id == "zai" and model not in ZAI_VERIFIED_FREE_MODELS:
+            raise ValueError(
+                f"{prefix} MODEL must be one of the verified Z.AI zero-price model IDs."
+            )
 
 
 class FreeOnlyRouter:
@@ -110,7 +120,7 @@ class FreeOnlyRouter:
     and hard-stops at quota exhaustion. No paid model is selected automatically.
     """
 
-    PROVIDER_ORDER = ("gemini", "groq", "cohere", "openrouter", "cloudflare")
+    PROVIDER_ORDER = ("gemini", "groq", "cohere", "zai", "openrouter", "cloudflare")
 
     def __init__(
         self,
@@ -218,6 +228,8 @@ class FreeOnlyRouter:
             return None
         if provider_id == "cloudflare" and model not in CLOUDFLARE_VERIFIED_FREE_MODELS:
             return None
+        if provider_id == "zai" and model not in ZAI_VERIFIED_FREE_MODELS:
+            return None
 
         if provider_id == "gemini":
             endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
@@ -227,6 +239,9 @@ class FreeOnlyRouter:
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "cohere":
             endpoint = "https://api.cohere.com/v2/chat"
+            headers = {"Authorization": f"Bearer {api_key}"}
+        elif provider_id == "zai":
+            endpoint = "https://api.z.ai/api/paas/v4/chat/completions"
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "openrouter":
             endpoint = "https://openrouter.ai/api/v1/chat/completions"
