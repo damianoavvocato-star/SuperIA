@@ -1,6 +1,6 @@
 # Registro operativo delle fasi — SuperIA
 
-Aggiornato: 26 novembre 2026
+Aggiornato: 27 novembre 2026
 Ambito: esclusivamente il repository SuperIA. Questo registro separa codice presente, test CI, collaudo reale e rilascio.
 
 ## Verifica emulatore Android — 26 novembre 2026
