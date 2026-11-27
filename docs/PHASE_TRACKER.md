@@ -29,7 +29,7 @@ Ambito: esclusivamente il repository SuperIA. Questo registro separa codice pres
 - Backend: prototipo FastAPI, autenticazione per dispositivo, pairing, revoca, endpoint chat e stato provider; non è pubblicato in produzione.
 - Provider: router free-only presente, provider disabilitati per default; nessun provider di produzione è stato attivato o verificato su account reale.
 - Hosting e database: nessun servizio di produzione creato o collegato; i candidati gratuiti restano da verificare prima della registrazione.
-- CI Android: workflow con job JVM testDebugUnitTest e job strumentale su emulatore API 35. Il secondo può assemblare/installare soltanto APK debug temporanei non firmati per prove; non carica né distribuisce APK.
+- CI Android: workflow ordinario limitato ai test JVM rapidi; la suite strumentale su emulatore è disattivata nei push/PR e può essere avviata solo manualmente con `run_instrumented=true`. Il job APK temporanei è stato rimosso.
 - Non dichiarare un esito CI successivo a tale modifica senza una run verificata. Nessun APK va prodotto durante il completamento della chat online.
 
 ## Stato delle 16 fasi
@@ -1533,3 +1533,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Modifica workflow: commit `0e51309855c2f2dcbd9444ccf38a8d67d03f02f7`.
 - Diagnosi operativa: Android dispone già del client HTTPS/SSE e del pairing individuale. La chat reale resta bloccata da backend non pubblicato/configurato e assenza di provider gratuiti attivi con verifiche account-level di no-card, hard-stop e privacy. Non aggirare i guard-rail né inventare un endpoint o credenziali.
 - Hosting/database e provider richiedono ancora approvazione e configurazione esplicita; nessun account, servizio, chiave o pagamento è stato creato/attivato. Prossimo lavoro: preparare l'integrazione e rendere trasparente lo stato di connessione, poi eseguire un unico collaudo end-to-end quando l'infrastruttura autorizzata sarà disponibile.
+
+## Aggiornamento provider prioritario — 27 novembre 2026
+- Verificate le fonti ufficiali Cloudflare Workers AI aggiornate a novembre 2026. Workers Free dispone di 10.000 Neurons/giorno e le richieste oltre quota falliscono; il passaggio a Workers Paid comporta costi ed è escluso.
+- Zero retention e no-training sono documentati per inferenza standard stateless; log, cache e funzionalità stateful restano esclusi dal progetto.
+- Candidati da verificare a livello account: `@cf/zai-org/glm-4.7-flash` e `@cf/google/gemma-4-26b-a4b-it`; nessuno dei due è stato attivato. Non assumere che la presenza nel catalogo equivalga a conferma no-card/account Free.
+- Rapporto aggiornato: [AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md](AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md), commit `efcf2a3b7f9f785b2d34e2f563b78595f621bcaf`.
+- Fonti ufficiali: https://developers.cloudflare.com/workers-ai/platform/pricing/ ; https://developers.cloudflare.com/workers-ai/platform/data-usage/ ; https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/ ; https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/ ; https://developers.cloudflare.com/changelog/post/2026-11-05-planned-model-deprecations/.
+- Blocco ancora aperto: verifica no-card, hard-stop effettivo e creazione autorizzata del token; nessun account o segreto creato, nessun servizio attivato.
