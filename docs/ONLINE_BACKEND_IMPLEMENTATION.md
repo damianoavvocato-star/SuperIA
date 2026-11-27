@@ -37,7 +37,7 @@ Impostare `SUPERIA_FREE_ONLY=true` solo dopo aver verificato manualmente le cond
 - `SUPERIA_PROVIDER_GROQ_MODEL=<ID modello verificato gratuito>`
 - `SUPERIA_PROVIDER_GROQ_FREE_MODEL_IDS=<ID esatti separati da virgola>`
 
-Per OpenRouter usare il prefisso `OPENROUTER` e solo modelli con suffisso `:free`. Per Gemini, Cloudflare e SambaNova usare i rispettivi prefissi. Cloudflare richiede anche `SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID`.
+Per OpenRouter usare il prefisso `OPENROUTER` e solo modelli con suffisso `:free`. Per Gemini e Cloudflare usare i rispettivi prefissi. SambaNova è escluso dal router. Cloudflare richiede anche `SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID`.
 
 Sono ammessi crediti gratuiti interni al servizio (token, punti o crediti), anche se espressi con unità nominali; sono esclusi carta/metodo di pagamento, denaro reale, ricariche, acquisti, addebiti automatici e conversioni a piani a pagamento. La quota deve arrestarsi a zero. Le attestazioni ambientali non verificano da sole il conto: un amministratore deve controllare le condizioni reali e lasciare il provider disabilitato in caso di dubbio.
 
