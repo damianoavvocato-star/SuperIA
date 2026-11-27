@@ -517,7 +517,7 @@ class OnlineAssistantClientTest {
     fun cancellingStreamCoroutineDisconnectsBlockingHttpConnection() {
         var disconnected = false
         val connection = object : HttpURLConnection(URL("https://example.test")) {
-            override fun disconnect() { disconnected.set(true) }
+            override fun disconnect() { disconnected = true }
             override fun usingProxy(): Boolean = false
             override fun connect() {}
         }
