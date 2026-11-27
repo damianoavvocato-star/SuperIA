@@ -35,6 +35,12 @@ def _cloudflare_daily_free_quota_exhausted(response: httpx.Response) -> bool:
     return False
 
 
+CLOUDFLARE_VERIFIED_FREE_MODELS = frozenset({
+    "@cf/zai-org/glm-4.7-flash",
+    "@cf/google/gemma-4-26b-a4b-it",
+})
+
+
 class NoFreeProviderAvailable(RuntimeError):
     """No verified zero-cost provider is currently available."""
 
@@ -91,6 +97,10 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError("OpenRouter model must end with ':free'.")
         if provider_id == "cloudflare" and not environ.get(prefix + "ACCOUNT_ID", "").strip():
             raise ValueError(f"{prefix} ACCOUNT_ID is required for Cloudflare.")
+        if provider_id == "cloudflare" and model not in CLOUDFLARE_VERIFIED_FREE_MODELS:
+            raise ValueError(
+                f"{prefix} MODEL must be one of the verified Workers Free model IDs."
+            )
 
 
 class FreeOnlyRouter:
@@ -205,6 +215,8 @@ class FreeOnlyRouter:
         if model not in allowed_models:
             return None
         if provider_id == "openrouter" and not model.endswith(":free"):
+            return None
+        if provider_id == "cloudflare" and model not in CLOUDFLARE_VERIFIED_FREE_MODELS:
             return None
 
         if provider_id == "gemini":
