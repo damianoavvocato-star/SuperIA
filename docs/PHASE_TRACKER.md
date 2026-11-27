@@ -1628,3 +1628,15 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Added tests for all three allowed model IDs, rejection of paid model IDs, normalized chat response and persistent disable on HTTP 402 / insufficient balance.
 - Z.AI API developer terms say End User Content is not used to improve services unless explicitly agreed; disclose applicable terms. Public docs do not settle no-card requirement or public rate limits for every account/region.
 - No account/key created, no provider activated, no live request. Account-level no-card and quota hard-stop verification remains mandatory.
+
+
+### Synap free-tier adapter — 27 novembre 2026
+- Aggiunto `synap` al router backend con endpoint OpenAI-compatible `https://synap402.com/v1/chat/completions`.
+- Allowlist rigida: solo `qwen3-coder-30b`; ogni altro modello viene rifiutato in fase di configurazione.
+- Chat non-streaming e SSE standard normalizzati nel formato SuperIA.
+- HTTP 402 disabilita il provider; per sicurezza anche HTTP 429 lo disabilita persistentemente, senza retry automatico. Nessun fallback verso crediti/modelli a pagamento.
+- Le cinque attestazioni free-only restano obbligatorie. Nessun account o token creato e nessun provider attivato.
+- Test aggiunti per allowlist, chat, streaming, 402/429, persistenza della disattivazione e assenza di seconda chiamata.
+- Fonte provider: https://synap.linkrra.com/free.html ; privacy: https://synap.linkrra.com/privacy.html ; termini: https://synap.linkrra.com/terms.html.
+- Commit codice: `2770c7c11f0a3b0b20df2aae2cca64ecde726b90`; commit test: `a66c7297b1724abd5af007b3b28d572a2305318c`.
+- CI backend sul commit test da confermare. L'adapter resta non configurato finché non viene verificato il singolo account Free/no-card.
