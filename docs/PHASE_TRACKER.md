@@ -1619,3 +1619,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Official docs: https://docs.cohere.com/v2/reference/chat-stream ; https://docs.cohere.com/v2/docs/chat-api ; https://docs.cohere.com/v2/docs/rate-limits
 - Cohere official trial keys: free but limited; 1,000 calls/month and 20 req/min for listed Chat models. Account-level no-card, model eligibility and hard-stop still require verification.
 - No account/key created, no provider activated, no live API call. Tests are added but have not yet been executed/CI verified.
+
+
+## Z.AI adapter implementation — 27 November 2026
+- Official pricing page confirms input and output prices of Free for `glm-4.7-flash`, `glm-4.5-flash`, and `glm-4.6v-flash`: https://docs.z.ai/guides/overview/pricing
+- Added Z.AI OpenAI-compatible adapter using `https://api.z.ai/api/paas/v4/chat/completions`.
+- Added hard-coded allowlist for the three official zero-price model IDs; paid and non-listed models are rejected before HTTP calls.
+- Added tests for all three allowed model IDs, rejection of paid model IDs, normalized chat response and persistent disable on HTTP 402 / insufficient balance.
+- Z.AI API developer terms say End User Content is not used to improve services unless explicitly agreed; disclose applicable terms. Public docs do not settle no-card requirement or public rate limits for every account/region.
+- No account/key created, no provider activated, no live request. Account-level no-card and quota hard-stop verification remains mandatory.
