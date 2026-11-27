@@ -304,6 +304,18 @@ object OnlineAssistantClient {
         messages: List<ChatPromptMessage>,
         requestId: String = UUID.randomUUID().toString(),
         onDelta: suspend (String) -> Unit,
+    ): String = streamInternal(
+        config, messages, requestId,
+        { url -> url.openConnection() as HttpURLConnection },
+        onDelta
+    )
+
+    internal suspend fun streamInternal(
+        config: OnlineConnectionConfig,
+        messages: List<ChatPromptMessage>,
+        requestId: String,
+        connectionFactory: (URL) -> HttpURLConnection,
+        onDelta: suspend (String) -> Unit,
     ): String = withContext(Dispatchers.IO) {
         require(config.isConfigured) { "Configura prima l'indirizzo HTTPS e il token del backend." }
         require(messages.isNotEmpty() && messages.size <= 60) {
@@ -328,7 +340,7 @@ object OnlineAssistantClient {
         require(base.host.isNotBlank() && base.userInfo == null && base.query == null && base.ref == null) {
             "Indirizzo backend non valido: non usare credenziali, parametri o frammenti nell'URL."
         }
-        val connection = (URL("$endpoint/api/v1/chat/stream").openConnection() as HttpURLConnection).apply {
+        val connection = connectionFactory(URL("$endpoint/api/v1/chat/stream")).apply {
             requestMethod = "POST"
             instanceFollowRedirects = false
             connectTimeout = 15_000
