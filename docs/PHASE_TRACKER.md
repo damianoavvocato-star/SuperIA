@@ -1640,3 +1640,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Fonte provider: https://synap.linkrra.com/free.html ; privacy: https://synap.linkrra.com/privacy.html ; termini: https://synap.linkrra.com/terms.html.
 - Commit codice: `2770c7c11f0a3b0b20df2aae2cca64ecde726b90`; commit test: `a66c7297b1724abd5af007b3b28d572a2305318c`.
 - CI backend sul commit test da confermare. L'adapter resta non configurato finché non viene verificato il singolo account Free/no-card.
+
+
+### Esito suite backend Synap — 27 novembre 2026
+- Il primo run test sul commit `a66c7297` ha rilevato un difetto esclusivamente nel fixture SSE: il testo di test conteneva escape letterali anziché newline. Nessun errore nella logica dell'adapter; 158 test erano già passati.
+- Fixture corretto nel commit `5959c4664f8e1615a1bbcb19f8d2107eefb13ba3`.
+- Run GitHub Actions `46063864065`: **success**; pytest **159 passed, 1 warning**, in 1,80 s.
+- Il risultato convalida i test mock del router e dell'adapter; non è una chiamata API reale e non attiva Synap. Restano necessari verifica account Free/no-card e test end-to-end dopo autorizzazione di credenziali e backend.
