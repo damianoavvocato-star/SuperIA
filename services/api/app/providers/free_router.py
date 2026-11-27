@@ -62,6 +62,17 @@ ZAI_VERIFIED_FREE_MODELS = frozenset({
 
 SYNAP_VERIFIED_FREE_MODELS = frozenset({"qwen3-coder-30b"})
 
+def _is_explicit_openrouter_free_model(model: str) -> bool:
+    """Accept concrete provider/model:free IDs, never the dynamic openrouter/free alias."""
+    if not model.endswith(":free"):
+        return False
+    model_slug = model[:-5]
+    if model_slug == "openrouter/free" or model_slug.count("/") != 1:
+        return False
+    author, slug = model_slug.split("/", 1)
+    return bool(author and slug and ":" not in model_slug)
+
+
 SAMBANOVA_VERIFIED_FREE_MODELS = frozenset({
     "DeepSeek-V3.1",
     "Meta-Llama-3.3-70B-Instruct",
@@ -123,7 +134,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError(f"{prefix} MODEL must be one of the verified Groq Free-plan model IDs.")
         if provider_id == "cohere" and model not in COHERE_VERIFIED_FREE_MODELS:
             raise ValueError(f"{prefix} MODEL must be the verified Cohere Trial chat model ID.")
-        if provider_id == "openrouter" and not model.endswith(":free"):
+        if provider_id == "openrouter" and not _is_explicit_openrouter_free_model(model):
             raise ValueError("OpenRouter model must end with ':free'.")
         if provider_id == "cloudflare" and not environ.get(prefix + "ACCOUNT_ID", "").strip():
             raise ValueError(f"{prefix} ACCOUNT_ID is required for Cloudflare.")
@@ -267,7 +278,7 @@ class FreeOnlyRouter:
             return None
         if provider_id == "cohere" and model not in COHERE_VERIFIED_FREE_MODELS:
             return None
-        if provider_id == "openrouter" and not model.endswith(":free"):
+        if provider_id == "openrouter" and not _is_explicit_openrouter_free_model(model):
             return None
         if provider_id == "cloudflare" and model not in CLOUDFLARE_VERIFIED_FREE_MODELS:
             return None
