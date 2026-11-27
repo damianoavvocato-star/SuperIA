@@ -664,12 +664,12 @@ def test_cohere_v2_streaming_content_delta_is_normalized(tmp_path):
             assert request.url == "https://api.cohere.com/v2/chat"
             assert b'"stream":true' in request.read()
             body = (
-                'event: content-delta\\n'
-                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Ciao "}}}}\\n\\n'
-                'event: content-delta\\n'
-                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Cohere"}}}}\\n\\n'
-                'event: message-end\\n'
-                'data: {"type":"message-end","delta":{"finish_reason":"COMPLETE"}}\\n\\n'
+                'event: content-delta\n'
+                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Ciao "}}}}\n\n'
+                'event: content-delta\n'
+                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Cohere"}}}}\n\n'
+                'event: message-end\n'
+                'data: {"type":"message-end","delta":{"finish_reason":"COMPLETE"}}\n\n'
             )
             return httpx.Response(
                 200, headers={"content-type": "text/event-stream"}, content=body
