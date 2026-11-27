@@ -88,3 +88,12 @@ Nessun deploy, provider AI, database, account esterno, APK release o modifica al
 - Il testo selezionato dal pannello Documenti viene ora conservato nella memoria UI della MainActivity sotto l'ID del workspace attivo e passato alla chat solo se l'ID proprietario coincide con quello selezionato.
 - Il cambio chat non può quindi riutilizzare per errore il contesto selezionato nella chat precedente; la cancellazione del workspace rimuove anche la relativa voce di contesto in memoria.
 - La raccolta generale Documenti e il dizionario OCR restano strumenti globali separati: non vengono eliminati cancellando una chat perché non sono attribuiti a quel workspace. I documenti importati direttamente nella chat, invece, sono archiviati nella cartella UUID e vengono rimossi con il progetto.
+
+
+## Stato aggiornato dopo implementazione UI e CI — 27 novembre 2026
+
+L'audit iniziale sopra riportato descrive lo stato precedente all'implementazione e va letto come baseline storica, non come descrizione del codice attuale. Stato corrente: cronologia, memoria e repository documenti importati direttamente in chat usano l'ID workspace; il contesto selezionato è filtrato per proprietario; selezione e cancellazione sono integrate nella UI. Il coordinatore elimina solo archivi e documenti attribuiti al workspace e conserva il workspace nell'indice se il cleanup fallisce.
+
+La CI Android run [46058183460](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46058183460) ha superato unit test, suite strumentale (38/38) e build APK temporanei di test. Le prove specifiche di scrittura e recupero dello stato pendente dopo `force-stop` hanno entrambe restituito `OK (1 test)`. Backend run [46058183407](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46058183407) è SUCCESS.
+
+Restano fuori dal perimetro: file multimediali in Galleria (nessun registro MediaStore di media generati), archivio generale DocumentsPanel/OCR globale, file esportati fuori dall'app e cancellazione remota. Nessuna prova è stata eseguita sul telefono fisico; nessun backend/provider esterno è stato attivato.
