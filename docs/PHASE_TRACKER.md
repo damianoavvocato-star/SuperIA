@@ -1587,3 +1587,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Documento dettagliato: docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md.
 - Fonti pubbliche: https://build.nvidia.com/fastino/gliner2-pii ; https://docs.mistral.ai/inference/model-lifecycle ; https://docs.mistral.ai/admin/monitor-comply/zero-data-retention ; https://docs.cohere.com/docs/rate-limits ; https://cloud.sambanova.ai/plans ; https://ai.google.dev/gemini-api/docs/pricing.
 - Questa è una verifica documentale; non è un test account-level né un'integrazione runtime.
+
+
+## Decisione utente sui provider gratuiti — 27 novembre 2026
+- L'utente accetta che i provider gratuiti possano utilizzare prompt/risposte per migliorare i propri prodotti. Tale uso dei dati non è più motivo automatico di esclusione; le condizioni restano da comunicare.
+- Priorità aggiornata: zero costi e nessuna possibilità di addebito; API Free realmente utilizzabile; hard-stop prima di qualsiasi piano a pagamento; compatibilità e stabilità; informativa sull'uso dei dati.
+- Gemini Free e OpenRouter modelli `:free` possono essere considerati nel pool; il router già supporta Gemini/OpenRouter/Groq/Cloudflare. OpenRouter resta strettamente limitato a ID `:free`; non acquistare mai crediti per aumentare il limite.
+- Cohere Trial API è candidato aggiuntivo (trial gratuito limitato; adapter API/streaming da implementare e testare). Mistral API non è attualmente gratuito: la documentazione dichiara che Free mode non include API access e che API richiede billing activation/pay-as-you-go. SambaNova resta escluso finché richiede pagamento.
+- Audit dettagliato e fonti ufficiali aggiornate in `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
+- Non sono stati creati account, API key, metodi di pagamento, crediti o servizi. Nessun provider è attivo fino a configurazione autorizzata.
