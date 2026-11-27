@@ -237,3 +237,19 @@ Official Cohere docs confirm:
 - Evaluation/trial keys are free but limited; trial keys and production keys on newer model variants are limited to 1,000 calls/month. Trial Chat API rate limits are 20 requests/minute for the listed Command variants: https://docs.cohere.com/v2/docs/rate-limits
 
 **Remaining activation gate:** confirm from the actual Cohere account that the key is an evaluation/trial key, no payment method is attached or required, the chosen model is included in the trial limits, and exhaustion hard-stops rather than switching to a paid key or plan. No key/account was created and no live request was made. Do not mark the Cohere provider attestation true until these checks are completed.
+
+
+## Z.AI adapter and strict model allowlist — 27 November 2026
+
+Official Z.AI pricing page currently lists exactly these text/vision API models with input, cached input and output all marked Free:
+- `glm-4.7-flash`
+- `glm-4.5-flash`
+- `glm-4.6v-flash`
+
+Source: https://docs.z.ai/guides/overview/pricing (pricing rows 84–85 and 96). The general OpenAI-compatible API endpoint is documented as `https://api.z.ai/api/paas/v4`; the chat endpoint is `/chat/completions`. The built-in Web Search tool is priced separately at $0.01/use, so SuperIA must never request it. API endpoint reference is corroborated by the provider's integration documentation; only use the general API endpoint with the three zero-price model IDs above, never Coding Plan endpoints or paid models.
+
+Z.AI's official terms distinguish individual consumer content from API developer/end-user content: API End User Content is used to provide the API, comply with law, enforce policies and prevent abuse, and is not used to improve services unless the developer explicitly agrees. The user's general acceptance of model-improvement data use does not waive SuperIA's need to disclose provider terms. Source: https://chat.z.ai/legal-agreement/terms-of-service (Additional Terms for API Services).
+
+**Implementation:** router now has a Z.AI adapter and a hard-coded allowlist for the three exact zero-price model IDs. Any paid/non-listed model (including GLM-5.3-Flash, GLM-4.7-FlashX and GLM-4.6V-FlashX) is rejected before any HTTP request. A 401/402/403 response persistently disables Z.AI; no paid fallback exists. The built-in Web Search and other paid tools are not invoked.
+
+**Activation still blocked pending account verification:** public docs do not conclusively establish whether a payment method is required for every region/account, or expose public free-model rate limits. Before activation, verify the specific account can create a key without card/payment, that the selected model appears as $0 in that account, and that quota exhaustion returns an error rather than charging. No Z.AI account/key was created and no live request was made.
