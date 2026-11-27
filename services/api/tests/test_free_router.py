@@ -1133,3 +1133,45 @@ def test_provider_is_removed_if_data_policy_attestation_changes_at_runtime(tmp_p
         assert await router.list_models() == []
 
     asyncio.run(run())
+
+@pytest.mark.parametrize(
+    ("provider_id", "model"),
+    [
+        ("gemini", "gemini-3.8-flash"),
+        ("gemini", "gemini-3.1-flash-lite"),
+        ("gemini", "gemini-3-flash-preview"),
+        ("groq", "openai/gpt-oss-120b"),
+        ("groq", "openai/gpt-oss-20b"),
+        ("groq", "qwen/qwen3.8-27b"),
+        ("cohere", "command-r7b-12-2024"),
+    ],
+)
+def test_major_providers_accept_only_explicitly_verified_free_chat_models(
+    tmp_path, provider_id, model
+):
+    router = FreeOnlyRouter(
+        environ=free_env(provider_id, model),
+        state_db_path=str(tmp_path / f"allow-{provider_id}-{model.replace('/', '-')}.sqlite3"),
+    )
+    assert [item.provider_id for item in router.configured_providers()] == [provider_id]
+
+
+@pytest.mark.parametrize(
+    ("provider_id", "model", "message"),
+    [
+        ("gemini", "gemini-4-argon", "verified Gemini API Free-tier"),
+        ("gemini", "gemini-3.1-pro-preview", "verified Gemini API Free-tier"),
+        ("groq", "llama-3.3-70b-versatile", "verified Groq Free-plan"),
+        ("groq", "openai/gpt-oss-120b:paid", "verified Groq Free-plan"),
+        ("cohere", "command-a-reasoning", "verified Cohere Trial"),
+    ],
+)
+def test_major_providers_reject_models_not_in_verified_free_allowlists(
+    tmp_path, provider_id, model, message
+):
+    with pytest.raises(ValueError, match=message):
+        FreeOnlyRouter(
+            environ=free_env(provider_id, model),
+            state_db_path=str(tmp_path / f"reject-{provider_id}-{model.replace('/', '-')}.sqlite3"),
+        )
+
