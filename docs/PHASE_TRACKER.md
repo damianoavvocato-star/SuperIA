@@ -1683,3 +1683,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - L'annuncio SEA-LION v5 specifica che le trial key non sono destinate alla produzione. I pesi open source non equivalgono a un endpoint API hosted gratuito per un gateway multiutente.
 - Decisione: SEA-LION escluso dalla rotazione automatica di produzione; nessun account/chiave/test reale creato.
 - Fonti: https://sea-lion.ai/try-sea-lion/ ; https://docs.sea-lion.ai/guides/inferencing/api ; https://sea-lion.ai/blog/announcing-sea-lion-v5-our-largest-model-frontier-level-performance-and-open/.
+
+
+## Ricognizione provider aggiuntivi — 27 novembre 2026
+- Requesty: piano Free pubblico $0, 200 richieste/giorno, senza carta e modelli a costo zero. Non integrato: i termini vietano rivendita/sublicenza senza consenso scritto; l'uso multiutente di SuperIA richiede autorizzazione specifica. Training Permitted Models possono trattenere e addestrare sui prompt; logging self-serve è attivo per default fino a 30 giorni. Fonti: https://www.requesty.ai/pricing ; https://www.requesty.ai/terms ; https://www.requesty.ai/privacy.
+- AxForge: escluso perché i termini richiedono un controllo carta Stripe per sbloccare i 3M token/30 giorni, nonostante nessun addebito per il controllo; quota lancio modificabile. Fonte: https://axforge.ai/terms.html.
+- Hugging Face Inference Providers: escluso come free tier stabile; utenti Free senza crediti mensili inclusi nella documentazione attuale, con possibilità di pay-as-you-go/acquisto crediti. Fonte: https://huggingface.co/docs/inference-providers/en/pricing.
+- Nessun account/chiave/API call creati; nessun provider aggiunto al router o attivato.
