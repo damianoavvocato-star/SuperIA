@@ -35,6 +35,20 @@ def _cloudflare_daily_free_quota_exhausted(response: httpx.Response) -> bool:
     return False
 
 
+GEMINI_VERIFIED_FREE_MODELS = frozenset({
+    "gemini-3.8-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-3-flash-preview",
+})
+
+GROQ_VERIFIED_FREE_MODELS = frozenset({
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
+})
+
+COHERE_VERIFIED_FREE_MODELS = frozenset({"command-r7b-12-2024"})
+
 CLOUDFLARE_VERIFIED_FREE_MODELS = frozenset({
     "@cf/zai-org/glm-4.7-flash",
     "@cf/google/gemma-4-26b-a4b-it",
@@ -103,6 +117,12 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError(f"{prefix} API_KEY, MODEL and FREE_MODEL_IDS must all be configured.")
         if model not in model_ids:
             raise ValueError(f"{prefix} MODEL must be included in FREE_MODEL_IDS.")
+        if provider_id == "gemini" and model not in GEMINI_VERIFIED_FREE_MODELS:
+            raise ValueError(f"{prefix} MODEL must be one of the verified Gemini API Free-tier model IDs.")
+        if provider_id == "groq" and model not in GROQ_VERIFIED_FREE_MODELS:
+            raise ValueError(f"{prefix} MODEL must be one of the verified Groq Free-plan model IDs.")
+        if provider_id == "cohere" and model not in COHERE_VERIFIED_FREE_MODELS:
+            raise ValueError(f"{prefix} MODEL must be the verified Cohere Trial chat model ID.")
         if provider_id == "openrouter" and not model.endswith(":free"):
             raise ValueError("OpenRouter model must end with ':free'.")
         if provider_id == "cloudflare" and not environ.get(prefix + "ACCOUNT_ID", "").strip():
@@ -240,6 +260,12 @@ class FreeOnlyRouter:
             if item.strip()
         }
         if model not in allowed_models:
+            return None
+        if provider_id == "gemini" and model not in GEMINI_VERIFIED_FREE_MODELS:
+            return None
+        if provider_id == "groq" and model not in GROQ_VERIFIED_FREE_MODELS:
+            return None
+        if provider_id == "cohere" and model not in COHERE_VERIFIED_FREE_MODELS:
             return None
         if provider_id == "openrouter" and not model.endswith(":free"):
             return None
