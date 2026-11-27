@@ -510,6 +510,23 @@ fun AssistantChatPanel(
                 singleLine = true,
                 visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
+            OutlinedButton(
+                enabled = !generating && !checkingBackend && backendEndpoint.startsWith("https://"),
+                onClick = {
+                    scope.launch {
+                        checkingBackend = true
+                        connectionStatus = "Verifica raggiungibilità del backend in corso…"
+                        try {
+                            connectionStatus = OnlineAssistantClient.checkHealth(backendEndpoint.trim())
+                        } catch (error: Exception) {
+                            connectionStatus = error.message ?: "Backend non raggiungibile."
+                        } finally {
+                            checkingBackend = false
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(if (checkingBackend) "Verifica…" else "Verifica indirizzo backend") }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
