@@ -272,7 +272,7 @@ object OnlineAssistantClient {
             }
             when {
                 available.isNotEmpty() ->
-                    "Backend autenticato. Provider gratuiti disponibili: ${available.joinToString(", ")}. Configurati: ${configured.joinToString(", ")}. La risposta IA verrà comunque verificata al primo invio."
+                    "Backend autenticato. Provider configurati senza blocchi locali: ${available.joinToString(", ")}. Configurati: ${configured.joinToString(", ")}. La quota gratuita effettiva viene verificata solo al primo invio."
                 configured.isEmpty() ->
                     "Backend raggiungibile e token valido, ma nessun provider gratuito è configurato."
                 waiting.isNotEmpty() ->
