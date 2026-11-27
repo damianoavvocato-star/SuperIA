@@ -346,3 +346,33 @@ Fonti:
 - Rate limits ufficiali: https://docs.sambanova.ai/docs/en/models/rate-limits
 - Quickstart/dashboard ufficiale e endpoint: https://cloud.sambanova.ai/dashboard
 - Cloud End User License Agreement e trattamento Customer Content / Service Usage Data: https://sambanova.ai/cloud-end-user-license-agreement
+
+
+## Candidati esaminati ed esclusi — aggiornamento 27 novembre 2026
+
+### Aion Labs — escluso (API key richiede carta)
+La pagina pricing presenta un Free Tier a $0, ma la pagina ufficiale Rate Limits chiarisce che le API key Free si attivano solo dopo la verifica di una carta tramite Stripe (dichiarata non addebitata). I limiti gratuiti pubblicati sono 15 RPM e 20.000 token/giorno. La presenza obbligatoria della carta contrasta con i requisiti SuperIA; non integrare.
+Fonti: https://www.aionlabs.ai/pricing/ ; https://www.aionlabs.ai/docs/rate-limits/
+
+### Typhoon / OpenTyphoon — escluso dalla chat di produzione
+L'API ufficiale offre accesso gratuito OpenAI-compatible e pubblica limiti di 5 richieste/secondo e 200/minuto per i modelli testuali. Tuttavia la documentazione definisce l'offerta come gratuita per uso leggero/prototipazione e indirizza il traffico di produzione all'infrastruttura a pagamento Together AI. I termini consentono inoltre l'uso degli Input per sviluppare e addestrare i modelli; la retention non è definita chiaramente. Non viene quindi aggiunto al router di produzione. Può restare un candidato per laboratorio isolato, previa valutazione privacy.
+Fonti: https://docs.opentyphoon.ai/en/ ; https://docs.opentyphoon.ai/en/rate-limits/ ; https://docs.opentyphoon.ai/en/api-reference/ ; https://opentyphoon.ai/tac
+
+### Regolo.ai (Italia) — escluso come quota ricorrente
+È un'opzione italiana interessante per giurisdizione e zero data retention dichiarata, ma l'offerta gratuita è un solo periodo di 30 giorni e fino a 1 milione di token al giorno. Dopo la scadenza l'account passa al piano Pay-as-you-Go; il provider dichiara che non scatta un addebito automatico, ma l'uso successivo è a pagamento. Non soddisfa il requisito di gratuità permanente e hard-stop garantito senza spesa. Non integrare.
+Fonti: https://regolo.ai/pricing/ ; https://regolo.ai/terms-and-conditions/
+
+### Novita AI — escluso (crediti/referral, non free tier ricorrente)
+La pagina prezzi ufficiale espone prezzi per token per i modelli LLM; la dicitura "Free to start" non equivale a modelli gratuiti a costo zero. Le offerte segnalate da terzi sono crediti referral, non una quota API gratuita rinnovabile. Non integrare.
+Fonti: https://novita.ai/pricing ; https://blogs.novita.ai/free-llm-api-comparison-2026/
+
+### LLM7.io — escluso (restrizioni sul downstream e limiti non garantiti)
+I termini aggiornati del servizio descrivono un'offerta gratuita orientata a educazione/ricerca/sperimentazione, con quote modificabili senza preavviso e senza garanzie di disponibilità. Inoltre vietano di usare i normali limiti individuali per offrire accesso downstream o fare da gateway/proxy senza approvazione scritta preventiva. SuperIA è un'app che inoltra le richieste degli utenti: non usare LLM7 senza un'autorizzazione scritta specifica per questo scenario.
+Fonti: https://github.com/chigwell/llm7.io/blob/main/TERMS.md
+
+### NVIDIA NIM hosted Free Endpoints — escluso per ora
+NVIDIA descrive gli endpoint hosted gratuiti come adatti a prototipazione entro limiti documentati, ma non abbiamo verificato limiti correnti, hard-stop di spesa e idoneità di utilizzo continuativo in produzione. Le licenze NIM scaricabili non equivalgono agli endpoint API hosted. Nessuna integrazione finché non è disponibile una prova account-level completa e no-card.
+Fonti: https://docs.nvidia.com/nim/large-language-models/latest/about-nim-llm/nim-offerings.html ; https://forums.developer.nvidia.com/t/nim-question/364032
+
+### Decisione
+Non aggiungere provider solo perché una pagina li chiama "free". Il requisito di ammissione resta: quota API rinnovabile e senza scadenza, nessuna carta/metodo di pagamento, nessun credito acquistato o referral, hard-stop effettivo, modello identificato e autorizzazione compatibile con l'uso multiutente di SuperIA. Le offerte che non soddisfano ogni punto restano escluse o in laboratorio separato.
