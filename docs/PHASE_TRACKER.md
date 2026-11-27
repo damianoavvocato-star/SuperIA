@@ -1567,3 +1567,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit test: `4e171aa58a340ba6deca5f01c1a7777f84d9120b`.
 - Il test automatico precedente sul commit `b00f6b6` era ancora in esecuzione al momento della verifica; il nuovo commit test avvia un ulteriore run. Stato CI da confermare prima di dichiarare i test superati.
 - Fonti ufficiali modello e piano gratuito: https://developers.cloudflare.com/changelog/post/2026-07-28-models-require-workers-paid/ e https://developers.cloudflare.com/workers-ai/platform/pricing/ .
+
+
+## Readiness backend più rigorosa — 27 novembre 2026
+- Audit del codice ha individuato un falso positivo: `/api/v1/readiness` restituiva `ready` anche con database e autenticazione funzionanti ma nessun provider AI configurato. La chat non avrebbe comunque potuto generare risposte.
+- Corretto: ora `ready` richiede database operativo, schema autenticazione presente e almeno un provider gratuito configurato e validato dal router. In assenza di provider, restituisce HTTP 503 e stato `degraded`. Il campo `provider_configuration` resta esplicito.
+- Test aggiornato per il caso senza provider e aggiunto test con provider Cloudflare configurato tramite credenziali fittizie: verifica che il readiness sia positivo senza esporre chiavi o account ID.
+- Commit backend: `e58a587916dbce007f0e45b0be21d20feda27bc7`.
+- Commit test: `746ff0bc9d98e46c200576f63dbf15691f65833a`.
+- Run backend sul commit test: `46062054725`, in coda/in esecuzione al momento della registrazione. Non dichiarare superati questi nuovi test fino al completamento con successo.
+- Il readiness verifica la configurazione, non la raggiungibilità effettiva del provider né la quota residua; il primo messaggio reale resta il test end-to-end decisivo.
