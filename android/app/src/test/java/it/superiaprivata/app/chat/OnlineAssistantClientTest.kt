@@ -1,9 +1,18 @@
 package it.superiaprivata.app.chat
 
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.net.HttpURLConnection
 import java.net.URL
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -509,7 +518,7 @@ class OnlineAssistantClientTest {
     fun cancellingStreamCoroutineDisconnectsBlockingHttpConnection() {
         var disconnected = false
         val connection = object : HttpURLConnection(URL("https://example.test")) {
-            override fun disconnect() { disconnected = true }
+            override fun disconnect() { disconnected.set(true) }
             override fun usingProxy(): Boolean = false
             override fun connect() {}
         }
@@ -537,6 +546,46 @@ class OnlineAssistantClientTest {
 
         assertEquals(false, disconnected)
         handle.dispose()
+    }
+
+
+    @Test
+    fun cancellingStreamWhileSseReadIsBlockedDisconnectsConnection() = runBlocking {
+        val readStarted = CountDownLatch(1)
+        val disconnectSignal = CountDownLatch(1)
+        val disconnected = AtomicBoolean(false)
+        val fakeConnection = object : HttpURLConnection(URL("https://example.test/api/v1/chat/stream")) {
+            override fun connect() {}
+            override fun usingProxy(): Boolean = false
+            override fun disconnect() {
+                disconnected = true
+                disconnectSignal.countDown()
+            }
+            override fun getOutputStream() = ByteArrayOutputStream()
+            override fun getResponseCode(): Int = 200
+            override fun getInputStream(): InputStream = object : InputStream() {
+                override fun read(): Int {
+                    readStarted.countDown()
+                    if (!disconnectSignal.await(5, TimeUnit.SECONDS)) {
+                        throw IOException("Timeout waiting for disconnect")
+                    }
+                    return -1
+                }
+            }
+        }
+
+        val task = async {
+            OnlineAssistantClient.streamInternal(
+                OnlineConnectionConfig("https://example.test", "test-token"),
+                listOf(ChatPromptMessage("user", "Ciao")),
+                java.util.UUID.randomUUID().toString(),
+                { fakeConnection }
+            ) {}
+        }
+
+        assertTrue("Lo stream deve entrare nella lettura SSE", readStarted.await(3, TimeUnit.SECONDS))
+        task.cancelAndJoin()
+        assertTrue("La cancellazione deve interrompere la connessione bloccata", disconnected.get())
     }
 
 }
