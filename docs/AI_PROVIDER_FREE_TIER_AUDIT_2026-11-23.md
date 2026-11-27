@@ -431,3 +431,16 @@ Le sezioni precedenti che classificano SambaNova come escluso per richiesta di c
 
 ### Decisione aggiornata
 Requesty rimane l'unico candidato nuovo con un'offerta pubblica Free da 200 richieste/giorno senza carta tra questi tre, ma il divieto di rivendita/sublicenza richiede autorizzazione scritta prima di qualunque uso come gateway multiutente. AxForge e Hugging Face sono esclusi. Nessun provider aggiunto o attivato in questa microfase.
+
+## Rettifica consolidata — 27 novembre 2026
+
+Questa sezione prevale sulle decisioni provvisorie precedenti del documento quando risultano in conflitto con le verifiche successive e con la preferenza espressa dall'utente.
+
+- **Uso dei prompt per migliorare i prodotti:** l'utente ha accettato esplicitamente questa condizione per i provider API realmente gratuiti. Gemini Free e altri provider non vanno quindi esclusi solo per questo motivo; l'informativa deve comunque descrivere il trattamento dati e il provider effettivo.
+- **SambaNova Cloud:** la precedente esclusione basata sul requisito di carta/crediti è superata dalla verifica ufficiale più recente riportata nel registro tecnico del 27 novembre: il Free Tier è disponibile senza metodo di pagamento collegato, con 20 RPM, 20 RPD e 200.000 token/giorno per modello per i tre ID ammessi dal router: `DeepSeek-V3.1`, `Meta-Llama-3.3-70B-Instruct`, `gpt-oss-120b`. I modelli Preview restano esclusi. La configurazione account-level deve comunque essere verificata prima dell'attivazione.
+- **Router 429:** dal commit `0eb868c`, qualsiasi HTTP 429 disabilita in modo persistente il provider fino a revisione manuale. È una scelta più prudente della precedente regola di cooldown, perché il codice 429 non distingue sempre RPM temporaneo da quota giornaliera o token esaurita.
+- **Stato runtime:** la presenza di un adapter e di un modello allowlisted nel codice non significa che il provider sia attivo o già collaudato con chiavi reali. Nessun provider è attivo in produzione; non sono stati creati account, chiavi o metodi di pagamento.
+
+Fonti ufficiali da consultare prima dell'attivazione: https://cloud.sambanova.ai/plans e https://docs.sambanova.ai/docs/rate-limits ; per Gemini: https://ai.google.dev/gemini-api/docs/pricing.
+
+La lista provider e le condizioni economiche devono essere considerate valide solo dopo verifica documentale e account-level aggiornata. Le condizioni dei piani gratuiti possono cambiare.
