@@ -223,6 +223,11 @@ class FreeOnlyRouter:
             return None
         if env.get(prefix + "NO_FIAT_BILLING", "").lower() != "true":
             return None
+        # Re-check every safety attestation at selection time, not only during
+        # construction. This keeps runtime provider selection fail-closed if
+        # configuration is changed or partially reloaded.
+        if env.get(prefix + "DATA_POLICY_APPROVED", "").lower() != "true":
+            return None
 
         api_key = env.get(prefix + "API_KEY", "").strip()
         model = env.get(prefix + "MODEL", "").strip()
