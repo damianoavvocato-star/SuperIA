@@ -1557,3 +1557,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit test: `b00f6b68e42f9b70c34afbdee4a9c04e66843fe6`.
 - CI backend avviata sul commit test: run `46061807173` (queued al momento dell'aggiornamento). Il run precedente sul solo router `46061796374` era ancora in corso. Non dichiarare i test superati finché il run sul commit test non termina con successo.
 - Nessun provider attivato, token creato, account Cloudflare collegato, backend pubblicato o costo autorizzato. La configurazione rimane disabilitata per impostazione predefinita.
+
+
+### Allowlist rigida modelli Cloudflare Workers Free — 27 novembre 2026
+- Rafforzata la configurazione Cloudflare: il router accetta esclusivamente i due modelli identificati nella documentazione ufficiale come disponibili sul piano Workers Free: `@cf/zai-org/glm-4.7-flash` e `@cf/google/gemma-4-26b-a4b-it`.
+- La lista configurabile `SUPERIA_PROVIDER_CLOUDFLARE_FREE_MODEL_IDS` non può più autorizzare da sola un modello fuori da questa allowlist; il modello scelto deve essere presente sia nella lista esplicita sia nell'allowlist del codice.
+- Aggiunti test per entrambi i modelli ammessi e per il rifiuto di un modello Cloudflare che richiede piano/crediti a pagamento.
+- Commit router: `75725acf0d62868961ff9642634957d84760ecb7`.
+- Commit test: `4e171aa58a340ba6deca5f01c1a7777f84d9120b`.
+- Il test automatico precedente sul commit `b00f6b6` era ancora in esecuzione al momento della verifica; il nuovo commit test avvia un ulteriore run. Stato CI da confermare prima di dichiarare i test superati.
+- Fonti ufficiali modello e piano gratuito: https://developers.cloudflare.com/changelog/post/2026-07-28-models-require-workers-paid/ e https://developers.cloudflare.com/workers-ai/platform/pricing/ .
