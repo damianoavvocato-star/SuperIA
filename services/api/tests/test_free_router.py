@@ -1178,3 +1178,12 @@ def test_major_providers_reject_models_not_in_verified_free_allowlists(
             state_db_path=str(tmp_path / f"reject-{provider_id}-{model.replace('/', '-')}.sqlite3"),
         )
 
+@pytest.mark.parametrize("model", ["openrouter/free", "openrouter/free:free", "some-model"])
+def test_openrouter_rejects_router_aliases_and_non_free_ids(tmp_path, model):
+    env = free_env("openrouter", model)
+    with pytest.raises(ValueError, match="OpenRouter model must end with ':free'"):
+        FreeOnlyRouter(
+            environ=env,
+            state_db_path=str(tmp_path / "openrouter-alias.sqlite3"),
+        )
+
