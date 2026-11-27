@@ -732,3 +732,85 @@ def test_cohere_requires_all_free_only_attestations(tmp_path):
         FreeOnlyRouter(
             environ=env, state_db_path=str(tmp_path / "cohere-no-card.sqlite3")
         )
+
+
+def zai_free_env(model="glm-4.7-flash"):
+    return free_env("zai", model)
+
+
+@pytest.mark.parametrize("model", ["glm-4.7-flash", "glm-4.5-flash", "glm-4.6v-flash"])
+def test_zai_accepts_only_official_zero_price_models(tmp_path, model):
+    router = FreeOnlyRouter(
+        environ=zai_free_env(model),
+        state_db_path=str(tmp_path / f"zai-{model}.sqlite3"),
+    )
+    assert [item.provider_id for item in router.configured_providers()] == ["zai"]
+
+
+@pytest.mark.parametrize("model", ["glm-5.3-flash", "glm-4.7-flashx", "glm-4.6v-flashx"])
+def test_zai_rejects_paid_or_non_allowlisted_models(tmp_path, model):
+    with pytest.raises(ValueError, match="verified Z.AI zero-price model IDs"):
+        FreeOnlyRouter(
+            environ=zai_free_env(model),
+            state_db_path=str(tmp_path / f"zai-paid-{model}.sqlite3"),
+        )
+
+
+def test_zai_openai_compatible_chat_uses_only_free_model(tmp_path):
+    async def run():
+        env = zai_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request)
+            assert request.url == "https://api.z.ai/api/paas/v4/chat/completions"
+            assert request.headers["Authorization"] == "Bearer test-secret"
+            payload = request.read()
+            assert b'"model":"glm-4.7-flash"' in payload
+            assert b'"stream":false' in payload
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": "Risposta GLM gratuita"}}]},
+            )
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env, client_factory=client_factory,
+            state_db_path=str(tmp_path / "zai-chat.sqlite3"),
+        )
+        result = await router.chat([{"role": "user", "content": "Ciao"}])
+        assert result["content"] == "Risposta GLM gratuita"
+        assert result["provider"] == "zai"
+        assert result["model"] == "glm-4.7-flash"
+        assert len(calls) == 1
+
+    asyncio.run(run())
+
+
+def test_zai_402_disables_provider_and_never_uses_paid_fallback(tmp_path):
+    async def run():
+        env = zai_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            return httpx.Response(402, json={"error": {"code": 1113, "message": "insufficient balance"}})
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env, client_factory=client_factory,
+            state_db_path=str(tmp_path / "zai-402.sqlite3"),
+        )
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Ciao"}])
+        status = {item["id"]: item for item in router.provider_status()}
+        assert status["zai"]["state"] == "disabled"
+        assert calls == ["api.z.ai"]
+
+    asyncio.run(run())
