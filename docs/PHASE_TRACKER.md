@@ -1659,3 +1659,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Privacy documentata: Customer Content trattato per erogare il servizio; query log e dati d'uso non contenenti Customer Content possono essere usati per migliorare i servizi. Disclosure necessaria nell'app.
 - Fonti ufficiali: https://docs.sambanova.ai/docs/en/models/rate-limits ; https://cloud.sambanova.ai/dashboard ; https://sambanova.ai/cloud-end-user-license-agreement.
 - CI backend sul commit dei test da confermare.
+
+
+### Chiusura verifica SambaNova e audit candidati — 27 novembre 2026
+- Suite backend sul commit `72f0249f4968e44ce0272b34a5c569fbb93335ae`: **172 passed, 1 warning**, GitHub Actions run `46064211110` concluso `success`.
+- I fallimenti precedenti sui commit intermedi erano dovuti a un test obsoleto che ancora si aspettava l'esclusione di SambaNova; aggiornato il test per richiedere invece tutte le attestazioni account Free. Nessun errore residuo nella suite sul commit di test corretto.
+- Provider esclusi o non integrati dopo verifica: Aion Labs (carta richiesta per attivare API key), Typhoon (ricerca/prototipazione e produzione indirizzata al partner a pagamento; termini consentono training sugli input), Regolo (solo trial gratuito di 30 giorni poi PAYG), Novita (prezzi/referral credit, non quota ricorrente), LLM7 (no downstream gateway senza autorizzazione scritta), NVIDIA NIM hosted (limiti/hard-stop/produzione non sufficientemente verificati).
+- Documentazione completa nell'audit `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
+- SambaNova resta spento fino a verifica account individuale e inserimento manuale delle attestazioni; nessun account/API key creati. La CI sul successivo commit documentale è indipendente dai test codice già superati.
