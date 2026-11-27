@@ -10,7 +10,7 @@ Assistente AI personale e modulare, con client Android nativo e inferenza esclus
 - L'app Android usa il backend SuperIA tramite HTTPS; non contiene modelli LLM locali.
 - La cronologia delle conversazioni resta cifrata sul dispositivo; viene inviato al backend solo il contesto necessario alla richiesta.
 
-## Stato attuale — 21 novembre 2026
+## Stato attuale — 27 novembre 2026
 
 ### Android
 - Chat Compose collegata al client OnlineAssistantClient per richieste HTTPS in streaming SSE a POST /api/v1/chat/stream; il vecchio endpoint non-streaming e il prototipo web sono stati rimossi; SSE è l'unica API chat.
@@ -84,3 +84,9 @@ GitHub Actions Backend tests, run 577, commit `036a2be916c7828be6c492d43b6b37fcc
 
 ## Piano operativo aggiornato — 23 novembre 2026
 Il piano esecutivo corrente è [docs/MASTER_MICRO_PHASE_PLAN.md](docs/MASTER_MICRO_PHASE_PLAN.md), articolato in 50 micro-fasi. Il [registro operativo](docs/PHASE_TRACKER.md) contiene i gate obbligatori e prevale sulle descrizioni sintetiche o storiche delle roadmap precedenti. Le fasi 01–04 sono completate; la fase 05 è il prossimo audit operativo. La presenza del codice non equivale a disponibilità online: hosting, database persistente, rate limiting edge e provider reale restano da configurare e verificare. Nessun APK intermedio.
+
+
+### Verifiche CI — 27 novembre 2026
+- Backend tests sul commit `f6daca313b35f911f4eb3c16a6d665c9a57864e6`: **success** (GitHub Actions run `46068234567`).
+- Android unit tests sul commit `9af73f2f080ee4f5e53452d83f19fbbb235afe70`: **success** (run `46067889203`); i test strumentali sono stati saltati e non sono conteggiati come superati.
+- Nessuna verifica end-to-end con provider reale: hosting HTTPS, database persistente, rate limiting edge, credenziali provider e pairing reale restano non attivati.
