@@ -73,11 +73,6 @@ def _is_explicit_openrouter_free_model(model: str) -> bool:
     return bool(author and slug and ":" not in model_slug)
 
 
-SAMBANOVA_VERIFIED_FREE_MODELS = frozenset({
-    "DeepSeek-V3.1",
-    "Meta-Llama-3.3-70B-Instruct",
-    "gpt-oss-120b",
-})
 
 
 class NoFreeProviderAvailable(RuntimeError):
@@ -99,7 +94,10 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if global_mode and global_mode not in {"true", "false"}:
         raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
 
-    provider_ids = ("gemini", "groq", "cohere", "zai", "synap", "sambanova", "openrouter", "cloudflare")
+    if any(name.startswith("SUPERIA_PROVIDER_SAMBANOVA_") for name in environ):
+        raise ValueError("SambaNova is excluded from the SuperIA free-only provider pool.")
+
+    provider_ids = ("gemini", "groq", "cohere", "zai", "synap", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
@@ -150,10 +148,6 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError(
                 f"{prefix} MODEL must be the single verified Synap free-tier model ID."
             )
-        if provider_id == "sambanova" and model not in SAMBANOVA_VERIFIED_FREE_MODELS:
-            raise ValueError(
-                f"{prefix} MODEL must be one of the verified SambaNova no-payment-method Free-tier model IDs."
-            )
 
 
 class FreeOnlyRouter:
@@ -163,7 +157,7 @@ class FreeOnlyRouter:
     and hard-stops at quota exhaustion. No paid model is selected automatically.
     """
 
-    PROVIDER_ORDER = ("gemini", "groq", "cohere", "zai", "synap", "sambanova", "openrouter", "cloudflare")
+    PROVIDER_ORDER = ("gemini", "groq", "cohere", "zai", "synap", "openrouter", "cloudflare")
 
     def __init__(
         self,
@@ -286,8 +280,6 @@ class FreeOnlyRouter:
             return None
         if provider_id == "synap" and model not in SYNAP_VERIFIED_FREE_MODELS:
             return None
-        if provider_id == "sambanova" and model not in SAMBANOVA_VERIFIED_FREE_MODELS:
-            return None
 
         if provider_id == "gemini":
             endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
@@ -303,9 +295,6 @@ class FreeOnlyRouter:
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "synap":
             endpoint = "https://synap402.com/v1/chat/completions"
-            headers = {"Authorization": f"Bearer {api_key}"}
-        elif provider_id == "sambanova":
-            endpoint = "https://api.sambanova.ai/v1/chat/completions"
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "openrouter":
             endpoint = "https://openrouter.ai/api/v1/chat/completions"
