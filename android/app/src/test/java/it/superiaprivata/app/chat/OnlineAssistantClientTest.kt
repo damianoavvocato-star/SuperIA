@@ -1,8 +1,12 @@
 package it.superiaprivata.app.chat
 
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import java.net.HttpURLConnection
+import java.net.URL
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OnlineAssistantClientTest {
@@ -498,6 +502,41 @@ class OnlineAssistantClientTest {
                 ) {}
             }
         }
+    }
+
+
+    @Test
+    fun cancellingStreamCoroutineDisconnectsBlockingHttpConnection() {
+        var disconnected = false
+        val connection = object : HttpURLConnection(URL("https://example.test")) {
+            override fun disconnect() { disconnected = true }
+            override fun usingProxy(): Boolean = false
+            override fun connect() {}
+        }
+        val job = Job()
+        val handle = registerDisconnectOnCancellation(job, connection)
+
+        job.cancel()
+
+        assertTrue("La connessione deve essere chiusa quando si annulla lo stream", disconnected)
+        handle.dispose()
+    }
+
+    @Test
+    fun normalStreamCompletionDoesNotDisconnectFromCancellationHook() {
+        var disconnected = false
+        val connection = object : HttpURLConnection(URL("https://example.test")) {
+            override fun disconnect() { disconnected = true }
+            override fun usingProxy(): Boolean = false
+            override fun connect() {}
+        }
+        val job = Job()
+        val handle = registerDisconnectOnCancellation(job, connection)
+
+        job.complete()
+
+        assertEquals(false, disconnected)
+        handle.dispose()
     }
 
 }
