@@ -1697,3 +1697,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - GitHub Actions Backend tests run `46075657157`: **completed / success**.
 - Il test dimostra il comportamento backend in ambiente CI; non dimostra ancora il comportamento dietro un proxy di staging né su un telefono Android fisico.
 - Micro-fase 26 resta quindi **In attesa di verifica pratica**. Non sono stati attivati hosting, database esterno, provider o pairing pubblico; nessun APK creato.
+
+
+### Cancellazione stream e recupero immediato — 27 novembre 2026
+- Commit `a676fe67fe0bdfcca5ee542221160cae7b9e86d2`: test backend verifica la propagazione della cancellazione al provider quando il consumer interrompe lo stream.
+- Verificato che la richiesta non completata viene rilasciata e che lo stesso request ID può essere reclamato subito con un nuovo fencing token, senza attendere la lease scaduta.
+- GitHub Actions Backend tests run `46075950792`: **completed / success**.
+- Lato Android esiste già la disconnessione di `HttpURLConnection` in risposta a `CancellationException`; non è ancora stata verificata contro un server staging reale. I test unitari Android correnti non simulano ancora un server SSE lento/interrotto.
+- Micro-fase 26 resta in attesa per proxy reale e verifica pratica Android/dispositivo fisico. Nessun APK o deploy.
