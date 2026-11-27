@@ -881,9 +881,9 @@ def test_synap_openai_compatible_streaming_is_normalized(tmp_path):
             assert request.url == "https://synap402.com/v1/chat/completions"
             assert b'"stream":true' in request.read()
             body = (
-                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
-                'data: {"choices":[{"delta":{"content":"Synap"}}]}\\n\\n'
-                'data: [DONE]\\n\\n'
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\n\n'
+                'data: {"choices":[{"delta":{"content":"Synap"}}]}\n\n'
+                'data: [DONE]\n\n'
             )
             return httpx.Response(
                 200,
