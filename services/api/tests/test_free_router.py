@@ -1118,3 +1118,18 @@ def test_sambanova_quota_or_payment_response_disables_provider_without_fallback(
         assert calls == ["api.sambanova.ai"]
 
     asyncio.run(run())
+
+
+def test_provider_is_removed_if_data_policy_attestation_changes_at_runtime(tmp_path):
+    async def run():
+        env = free_env("groq")
+        router = FreeOnlyRouter(
+            environ=env,
+            state_db_path=str(tmp_path / "runtime-data-policy.sqlite3"),
+        )
+        assert [item.provider_id for item in router.configured_providers()] == ["groq"]
+        env["SUPERIA_PROVIDER_GROQ_DATA_POLICY_APPROVED"] = "false"
+        assert router.configured_providers() == []
+        assert await router.list_models() == []
+
+    asyncio.run(run())
