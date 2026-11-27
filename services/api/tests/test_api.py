@@ -826,3 +826,56 @@ def test_sse_heartbeat_refreshes_request_lease(auth_environment, monkeypatch):
     assert any("event: done" in chunk for chunk in chunks)
     assert len(refresh_calls) >= 2
     assert all(call[1] == request_id for call in refresh_calls)
+
+
+
+def test_stream_cancellation_releases_lease_and_cancels_provider(auth_environment):
+    import asyncio
+    import app.main as api_module
+    from app.chat_requests import claim_chat_request, request_payload_hash
+    from app.schemas import ChatRequest
+
+    database, token_data = auth_environment
+    request_id = "4f0e2d3c-6b7a-4891-9c2d-3e4f5a6b7c8d"
+    messages = [{"role": "user", "content": "Interrompi lo stream"}]
+    provider_started = asyncio.Event()
+    provider_cancelled = asyncio.Event()
+
+    class WaitingProvider:
+        async def stream_chat(self, messages, model=None):
+            try:
+                provider_started.set()
+                await asyncio.Event().wait()
+                yield {"event": "delta", "text": "non deve arrivare"}
+            finally:
+                provider_cancelled.set()
+
+    async def scenario():
+        request = ChatRequest(request_id=request_id, messages=messages)
+        response = await api_module.chat_stream(
+            request,
+            device_id=token_data["device_id"],
+            provider=WaitingProvider(),
+        )
+
+        async def consume():
+            async for _chunk in response.body_iterator:
+                pass
+
+        consumer = asyncio.create_task(consume())
+        await asyncio.wait_for(provider_started.wait(), timeout=1)
+        consumer.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await consumer
+        assert provider_cancelled.is_set()
+
+    asyncio.run(scenario())
+
+    retry = claim_chat_request(
+        database,
+        token_data["device_id"],
+        request_id,
+        request_payload_hash(messages, None),
+        os.environ["SUPERIA_CHAT_IDEMPOTENCY_KEY"],
+    )
+    assert retry["state"] == "claimed"
