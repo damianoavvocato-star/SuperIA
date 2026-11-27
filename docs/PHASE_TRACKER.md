@@ -1596,3 +1596,15 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Cohere Trial API è candidato aggiuntivo (trial gratuito limitato; adapter API/streaming da implementare e testare). Mistral API non è attualmente gratuito: la documentazione dichiara che Free mode non include API access e che API richiede billing activation/pay-as-you-go. SambaNova resta escluso finché richiede pagamento.
 - Audit dettagliato e fonti ufficiali aggiornate in `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
 - Non sono stati creati account, API key, metodi di pagamento, crediti o servizi. Nessun provider è attivo fino a configurazione autorizzata.
+
+
+## Ricognizione estesa provider AI — 27 novembre 2026
+- Ricerca web ampliata a provider globali e regionali: Gemini, Groq, Cloudflare, OpenRouter, Cohere, Z.AI, SenseNova, SEA-LION, Synap/Linkrra, Novita AI/Apodex, SiliconFlow, SambaNova, Cerebras, NVIDIA, Mistral, DeepSeek, Hugging Face, GitHub Models, OpenAI, Anthropic, Together, Fireworks, Replicate, Nebius e altri.
+- Evidenza di API gratuite pubbliche trovata per Gemini Free, Groq Free, Cloudflare Workers AI Free, OpenRouter modelli `:free`, Cohere Trial, Z.AI Flash, SenseNova Token Plan beta, SEA-LION POC, Synap free tier; Novita espone Apodex 1.1 Mini a prezzo Free ma quota/account/hard-stop non sono ancora dimostrati.
+- Distinzione mantenuta tra gratuità ricorrente, quota trial, prezzo modello $0, crediti promozionali e accesso web/chat: non sono equivalenti.
+- Mistral API Free mode non include API access; GitHub Models è ritirato dal 30 luglio 2026; Cerebras è emerso come trial a crediti con metodo di pagamento verificato; DeepSeek e altri servizi non hanno dimostrato una quota ricorrente gratuita no-card; SiliconFlow e SambaNova richiedono ulteriore verifica ufficiale.
+- Graduatoria: Cloudflare/Groq prioritari; Gemini/OpenRouter :free già supportati; Cohere richiede adapter; Z.AI/SenseNova da verificare; SEA-LION/Synap sperimentali; Novita da verificare prima di qualsiasi integrazione.
+- Nessun account, chiave, credito, metodo di pagamento, deploy o provider attivato. Nessun test API reale con credenziali.
+- Rapporto completo: `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
+- Fonti ufficiali principali: https://ai.google.dev/gemini-api/docs/pricing ; https://console.groq.com/docs/rate-limits ; https://developers.cloudflare.com/workers-ai/platform/pricing/ ; https://openrouter.ai/collections/free-models/ ; https://docs.cohere.com/v2/docs/rate-limits ; https://docs.mistral.ai/admin/billing-usage/usage-limits/ ; https://docs.github.com/en/github-models ; https://novita.ai/pricing ; https://sea-lion.ai/try-sea-lion/ ; https://sensetime.com/en/faq ; https://synap.linkrra.com/free .
+- Stato: audit documentale esteso registrato; verifiche account-level, termini per regione e test compatibilità restano aperti. Nessuna integrazione runtime autorizzata automaticamente.
