@@ -1547,3 +1547,13 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il pulsante evita di inserire un codice pairing quando l'endpoint è scritto male o il servizio non è raggiungibile.
 - Commit Android: `d205ae3a9d04fe44e370ac908db6000595fc96cd`.
 - Non è stato eseguito alcun test su backend remoto, perché non esiste ancora un endpoint di staging autorizzato. La suite emulator è rinviata; i test JVM rapidi sono il solo controllo automatico ordinario.
+
+
+## Hard-stop quota gratuita Cloudflare — 27 novembre 2026
+- Verificato il codice reale del router: prima della correzione ogni HTTP 429 applicava solo un cooldown temporaneo. Per Cloudflare questo non distingueva l'esaurimento definitivo della quota giornaliera gratuita dagli altri limiti temporanei.
+- Corretto `services/api/app/providers/free_router.py`: riconosce l'errore Cloudflare `3036` (quota gratuita giornaliera di 10.000 Neurons esaurita) sia nel flusso SSE sia nella richiesta non-streaming; disabilita persistentemente il provider nel database di stato, invece di riprovare ogni minuto. Nessun fallback verso piani/modelli a pagamento; un eventuale altro provider viene considerato solo se è configurato e attestato separatamente come gratuito.
+- Aggiunti test automatici per entrambe le modalità: provider disabilitato dopo errore 3036, stato persistente dopo ricreazione del router e nessuna seconda chiamata al provider.
+- Commit router: `9dc1d8f92e68dcbda92e14be12b89bbe9c6d5056`.
+- Commit test: `b00f6b68e42f9b70c34afbdee4a9c04e66843fe6`.
+- CI backend avviata sul commit test: run `46061807173` (queued al momento dell'aggiornamento). Il run precedente sul solo router `46061796374` era ancora in corso. Non dichiarare i test superati finché il run sul commit test non termina con successo.
+- Nessun provider attivato, token creato, account Cloudflare collegato, backend pubblicato o costo autorizzato. La configurazione rimane disabilitata per impostazione predefinita.
