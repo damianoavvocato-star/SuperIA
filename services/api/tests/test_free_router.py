@@ -77,7 +77,7 @@ def test_payment_method_and_no_fiat_billing_flags_are_mandatory(tmp_path):
     asyncio.run(run())
 
 
-def test_cooldown_survives_router_recreation(tmp_path):
+def test_ambiguous_429_persistently_disables_provider_across_router_recreation(tmp_path):
     async def run():
         env = free_env("groq")
         env.update(free_env("openrouter", "example/free-model:free"))
@@ -108,6 +108,9 @@ def test_cooldown_survives_router_recreation(tmp_path):
         result = await second.chat([{"role": "user", "content": "Ancora ciao"}])
         assert result["provider"] == "openrouter"
         assert "api.groq.com" not in calls
+        status = {item["id"]: item for item in second.provider_status()}
+        assert status["groq"]["state"] == "disabled"
+        assert status["groq"]["available"] is False
     asyncio.run(run())
 
 
