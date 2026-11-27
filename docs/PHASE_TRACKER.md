@@ -1525,3 +1525,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Commit su `main`: `adbc2197c19020a0c6bd887bb60a454e5b870d3c`.
 - CI avviata: Android run `46060796600`, backend run `46060796611`; entrambi ancora in esecuzione al momento della nota. Non dichiarare la modifica validata fino al completamento dei job.
 - La modifica non tocca archivi delle altre chat e non cambia la policy di cancellazione. Nessun APK consegnato/installato sul telefono fisico, nessun deploy o provider attivato.
+
+## Metodo di sviluppo aggiornato — priorità chat online
+- Su richiesta dell'utente, le verifiche strumentali lente su emulatore sono rinviate al collaudo finale della chat online.
+- Il workflow Android su push/PR esegue soltanto i test JVM rapidi. La suite emulator/process-restart è disponibile esclusivamente tramite avvio manuale con input `run_instrumented=true`; non viene eseguita automaticamente.
+- Rimosso il job che assemblava e caricava APK debug temporanei a ogni modifica. Nessun APK viene generato durante lo sviluppo ordinario.
+- Modifica workflow: commit `0e51309855c2f2dcbd9444ccf38a8d67d03f02f7`.
+- Diagnosi operativa: Android dispone già del client HTTPS/SSE e del pairing individuale. La chat reale resta bloccata da backend non pubblicato/configurato e assenza di provider gratuiti attivi con verifiche account-level di no-card, hard-stop e privacy. Non aggirare i guard-rail né inventare un endpoint o credenziali.
+- Hosting/database e provider richiedono ancora approvazione e configurazione esplicita; nessun account, servizio, chiave o pagamento è stato creato/attivato. Prossimo lavoro: preparare l'integrazione e rendere trasparente lo stato di connessione, poi eseguire un unico collaudo end-to-end quando l'infrastruttura autorizzata sarà disponibile.
