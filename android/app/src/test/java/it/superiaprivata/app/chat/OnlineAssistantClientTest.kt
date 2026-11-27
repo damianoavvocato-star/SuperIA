@@ -9,7 +9,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -566,9 +565,7 @@ class OnlineAssistantClientTest {
             override fun getInputStream(): InputStream = object : InputStream() {
                 override fun read(): Int {
                     readStarted.countDown()
-                    if (!disconnectSignal.await(5, TimeUnit.SECONDS)) {
-                        throw IOException("Timeout waiting for disconnect")
-                    }
+                    disconnectSignal.await()
                     return -1
                 }
             }
@@ -584,8 +581,10 @@ class OnlineAssistantClientTest {
         }
 
         assertTrue("Lo stream deve entrare nella lettura SSE", readStarted.await(3, TimeUnit.SECONDS))
+        task.cancel()
+        assertTrue("La cancellazione deve sbloccare subito la lettura SSE", disconnectSignal.await(2, TimeUnit.SECONDS))
         task.cancelAndJoin()
-        assertTrue("La cancellazione deve interrompere la connessione bloccata", disconnected.get())
+        assertTrue("La connessione deve risultare disconnessa", disconnected.get())
     }
 
 }
