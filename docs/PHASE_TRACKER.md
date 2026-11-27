@@ -1499,3 +1499,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il workflow si è interrotto dopo il writer, prima del force-stop e della verifica finale, per un errore sintattico shell: l'action esegue ogni riga dello script separatamente e non supporta blocchi `if/then/fi` distribuiti su più righe.
 - Correzione su `main`: controlli writer e verifier riscritti come singole righe shell con `test`, `grep` e blocco di diagnostica inline. Il test di recovery non è ancora convalidato; attendere il prossimo run.
 - Android unit test, APK temporanei di test e backend **success**. Nessun APK consegnato/installato sul telefono fisico, nessun rilascio o servizio esterno attivato.
+
+
+### Correzione finale isolamento shell process-restart — 27 novembre 2026
+- Analizzato l'artefatto del run Android `46032584074`: report Gradle **38/38 test passati**, 0 fallimenti e 0 saltati; il test writer `writePendingStateForProcessRestart` **1/1 passato**.
+- Causa esatta del job failure: l'emulator-runner esegue ogni riga dello script in un processo shell separato. Le variabili `write_status` e `verification_status` venivano assegnate su righe precedenti e risultavano vuote nel controllo successivo (`test: Illegal number`). Il verifier non era stato avviato.
+- Correzione su `main`, commit `af0e2a6343895c5071896fd122d413d816543118`: ogni invocazione `adb shell am instrument`, cattura exit status, stampa output e controllo `OK (1 test)`/assenza `FAILURES!!!` sono ora nello stesso comando shell. Il force-stop resta tra writer e verifier.
+- Nuovi run avviati: Android `46058183460`, backend `46058183407`. Entrambi erano in coda al momento dell'aggiornamento. Non dichiarare ancora superata la verifica di process restart finché il verifier non restituisce `OK (1 test)`.
+- Nessun APK consegnato/installato sul telefono fisico, nessun test fisico, nessun rilascio o attivazione backend/provider.
