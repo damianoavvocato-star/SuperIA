@@ -15,6 +15,7 @@ import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
@@ -510,7 +511,8 @@ internal suspend fun consumeSseEvents(
 
 
 /** Disconnects a blocking HTTP read as soon as its owning coroutine is cancelled. */
+@OptIn(InternalCoroutinesApi::class)
 internal fun registerDisconnectOnCancellation(job: Job, connection: HttpURLConnection): DisposableHandle =
-    job.invokeOnCompletion { cause ->
+    job.invokeOnCompletion(onCancelling = true, invokeImmediately = true) { cause ->
         if (cause is CancellationException) connection.disconnect()
     }
