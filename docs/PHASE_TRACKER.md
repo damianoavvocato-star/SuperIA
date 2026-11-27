@@ -1676,3 +1676,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Rettificato l'audit provider: le precedenti righe che escludevano SambaNova per carta/acquisto crediti erano obsolete. L'adapter SambaNova è presente e i test sono superati; il provider resta disattivato fino alla verifica account-level e alle attestazioni free-only.
 - CI backend: commit test `72f0249f4968e44ce0272b34a5c569fbb93335ae` — 172 passed, 1 warning; workflow sul commit documentale `2777188867f335c59c3ae0f6a6f2762593144548` — run `46064312749` success.
 - Fonti: https://www.sensenova.ai/token-plan ; https://sensetime.com/en/faq ; https://sensetime.com/en/news/sensenova-u1-5-lite-token-plan-20260911-1741.
+
+
+### Verifica SEA-LION API hosted — 27 novembre 2026
+- La pagina ufficiale riserva l'API gratuita al POC (10 RPM) e indirizza la produzione ai cloud partner; la guida richiede una trial key dal Playground.
+- L'annuncio SEA-LION v5 specifica che le trial key non sono destinate alla produzione. I pesi open source non equivalgono a un endpoint API hosted gratuito per un gateway multiutente.
+- Decisione: SEA-LION escluso dalla rotazione automatica di produzione; nessun account/chiave/test reale creato.
+- Fonti: https://sea-lion.ai/try-sea-lion/ ; https://docs.sea-lion.ai/guides/inferencing/api ; https://sea-lion.ai/blog/announcing-sea-lion-v5-our-largest-model-frontier-level-performance-and-open/.
