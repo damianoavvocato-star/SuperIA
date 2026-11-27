@@ -1647,3 +1647,15 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Fixture corretto nel commit `5959c4664f8e1615a1bbcb19f8d2107eefb13ba3`.
 - Run GitHub Actions `46063864065`: **success**; pytest **159 passed, 1 warning**, in 1,80 s.
 - Il risultato convalida i test mock del router e dell'adapter; non è una chiamata API reale e non attiva Synap. Restano necessari verifica account Free/no-card e test end-to-end dopo autorizzazione di credenziali e backend.
+
+
+### SambaNova Cloud Free Tier — adapter aggiunto, 27 novembre 2026
+- Verificata la documentazione ufficiale: il Free Tier si applica senza metodo di pagamento collegato; Developer Tier solo con metodo collegato.
+- Limiti pubblicati per ciascun modello Free Tier di produzione: 20 RPM, 20 RPD, 200.000 TPD.
+- Allowlist in codice limitata a `DeepSeek-V3.1`, `Meta-Llama-3.3-70B-Instruct`, `gpt-oss-120b`. Esclusi i modelli Preview, perché non raccomandati per produzione.
+- Endpoint OpenAI-compatible `https://api.sambanova.ai/v1/chat/completions`, Bearer key, supporto streaming SSE.
+- HTTP 402 disabilita il provider; HTTP 429 disabilita persistentemente il provider per evitare retry automatici oltre la quota gratuita.
+- Restano obbligatorie tutte le attestazioni free-only. Nessun account o token creato; nessun provider attivato.
+- Privacy documentata: Customer Content trattato per erogare il servizio; query log e dati d'uso non contenenti Customer Content possono essere usati per migliorare i servizi. Disclosure necessaria nell'app.
+- Fonti ufficiali: https://docs.sambanova.ai/docs/en/models/rate-limits ; https://cloud.sambanova.ai/dashboard ; https://sambanova.ai/cloud-end-user-license-agreement.
+- CI backend sul commit dei test da confermare.
