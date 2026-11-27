@@ -13,6 +13,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
@@ -336,9 +338,7 @@ object OnlineAssistantClient {
             setRequestProperty("Content-Type", "application/json; charset=utf-8")
             setRequestProperty("Accept", "text/event-stream")
         }
-        val cancellationHandle = currentCoroutineContext().job.invokeOnCompletion { cause ->
-            if (cause is CancellationException) connection.disconnect()
-        }
+        val cancellationHandle = registerDisconnectOnCancellation(currentCoroutineContext().job, connection)
         try {
             val messageArray = JSONArray()
             messages.forEach { message ->
@@ -495,3 +495,10 @@ internal suspend fun consumeSseEvents(
 }
 
 }
+
+
+/** Disconnects a blocking HTTP read as soon as its owning coroutine is cancelled. */
+internal fun registerDisconnectOnCancellation(job: Job, connection: HttpURLConnection): DisposableHandle =
+    job.invokeOnCompletion { cause ->
+        if (cause is CancellationException) connection.disconnect()
+    }
