@@ -406,3 +406,28 @@ Le sezioni precedenti che classificano SambaNova come escluso per richiesta di c
 - L'annuncio ufficiale SEA-LION v5 ribadisce che le trial key sono rate-limited e **non destinate all'uso in produzione**; indica un partner di inferenza per la distribuzione produttiva: https://sea-lion.ai/blog/announcing-sea-lion-v5-our-largest-model-frontier-level-performance-and-open/.
 - Non risulta quindi una quota API gratuita permanente autorizzata per un gateway multiutente come SuperIA. Il solo fatto che i pesi siano open/free non equivale a un endpoint hosted gratuito per produzione.
 - Esito aggiornato: **escluso dal pool automatico di produzione**; eventualmente utilizzabile solo in un ambiente POC isolato e non con le conversazioni degli utenti. Nessun account, chiave o test API creato.
+
+
+## Ricognizione aggiuntiva Requesty, AxForge e Hugging Face — 27 novembre 2026
+
+### Requesty — candidato condizionato, NON integrato
+- La pagina ufficiale Free indica $0, nessuna carta, 200 richieste al giorno, accesso ai modelli a prezzo zero e API OpenAI-compatible. Le condizioni possono cambiare e l'elenco dei modelli gratuiti è dinamico: https://www.requesty.ai/pricing ; https://www.requesty.ai/models/free.
+- I termini definiscono il piano Free come account senza crediti acquistati o contratto Enterprise/MSA, con 200 richieste/giorno senza metodo di pagamento. Vietano la creazione di account multipli per aggirare limiti; SuperIA non deve usare account/chiavi multipli.
+- Punto legale bloccante: i termini impongono il rispetto e il flow-down dei Model Terms agli utenti finali (sezioni 5.1–5.2), ma vietano anche la rivendita o sublicenza del servizio senza consenso scritto (sezione 10.6). L'uso di Requesty come gateway backend di un'app multiutente potrebbe ricadere nel divieto. Non presumere che sia autorizzato: richiedere prima consenso scritto specifico per SuperIA e il suo modello di accesso.
+- Privacy: su Free, i modelli etichettati Training Permitted possono conservare Input/Output e usarli per training/miglioramento; Requesty può inoltre utilizzare il contenuto de-identificato di tali richieste per migliorare i propri servizi. Logging self-serve è attivo per default e conserva prompt/output fino a 30 giorni; può essere disattivato per chiave, mentre ZDR organizzativo richiede un piano a pagamento. L'utente accetta l'uso dei prompt per migliorare i prodotti, ma l'app deve informare chiaramente e non inviare dati speciali, penali o riservati a Training Permitted Models.
+- Il gateway dichiara modelli gratuiti da NVIDIA, Meta e Google, ma gli ID e i provider upstream devono essere fissati e controllati uno per uno; non usare un router generico che possa scegliere modelli a pagamento. Non attivare fallback automatici verso modelli non verificati.
+- Esito: candidato tecnico interessante (200 RPD), ma escluso dall'integrazione runtime finché non arriva autorizzazione scritta contro il divieto di rivendita/sublicenza, e finché non è definita una allowlist di modelli con condizioni upstream compatibili. Nessun account, chiave o richiesta reale creati.
+- Fonti ufficiali: https://www.requesty.ai/terms ; https://www.requesty.ai/privacy ; https://www.requesty.ai/privacy/subprocessors ; https://www.requesty.ai/pricing ; https://www.requesty.ai/models/free.
+
+### AxForge — escluso (verifica carta obbligatoria)
+- Il sito pubblicizza 3 milioni di token serverless gratuiti ogni 30 giorni per ogni nuovo account e API OpenAI-compatible ospitata a Stoccolma: https://axforge.ai/models/ ; https://dev.axforge.ai/docs/quickstart/.
+- I termini ufficiali chiariscono però che l'allowance viene sbloccata tramite controllo carta su Stripe; la carta viene controllata senza addebito, ma resta obbligatoria. La quota è un'offerta di lancio modificabile; quando il saldo è esaurito le richieste vengono rifiutate fino a ricarica. Le chiavi sono personali e non possono essere condivise o rivendute.
+- La policy dati è molto favorevole (prompt/completions non scritti su disco o log e non usati per training; inferenza in EEA), ma non supera il requisito no-card. Escluso, nessun adapter.
+- Fonte ufficiale: https://axforge.ai/terms.html.
+
+### Hugging Face Inference Providers — escluso come free tier stabile
+- La documentazione attuale indica che gli utenti Free non hanno crediti mensili inclusi; le richieste instradate possono continuare tramite acquisto di crediti/pay-as-you-go. Il custom provider key è fatturato direttamente dal provider e non rende gratuita l'inferenza.
+- Non integrare come provider gratuito. Fonte: https://huggingface.co/docs/inference-providers/en/pricing.
+
+### Decisione aggiornata
+Requesty rimane l'unico candidato nuovo con un'offerta pubblica Free da 200 richieste/giorno senza carta tra questi tre, ma il divieto di rivendita/sublicenza richiede autorizzazione scritta prima di qualunque uso come gateway multiutente. AxForge e Hugging Face sono esclusi. Nessun provider aggiunto o attivato in questa microfase.
