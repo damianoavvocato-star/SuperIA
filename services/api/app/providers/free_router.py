@@ -48,6 +48,14 @@ ZAI_VERIFIED_FREE_MODELS = frozenset({
 
 SYNAP_VERIFIED_FREE_MODELS = frozenset({"qwen3-coder-30b"})
 
+SAMBANOVA_VERIFIED_FREE_MODELS = frozenset({
+    "DeepSeek-V3.1",
+    "Meta-Llama-3.3-70B-Instruct",
+    "gpt-oss-120b",
+    "DeepSeek-V3.2",
+    "gemma-4-31B-it",
+})
+
 
 class NoFreeProviderAvailable(RuntimeError):
     """No verified zero-cost provider is currently available."""
@@ -68,11 +76,7 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
     if global_mode and global_mode not in {"true", "false"}:
         raise ValueError("SUPERIA_FREE_ONLY must be exactly 'true' or 'false'.")
 
-    excluded_prefix = "SUPERIA_PROVIDER_SAMBANOVA_"
-    if any(key.startswith(excluded_prefix) and value.strip() for key, value in environ.items()):
-        raise ValueError("SambaNova is excluded because its current Free plan requires a payment method and credit purchase.")
-
-    provider_ids = ("gemini", "groq", "cohere", "zai", "synap", "openrouter", "cloudflare")
+    provider_ids = ("gemini", "groq", "cohere", "zai", "synap", "sambanova", "openrouter", "cloudflare")
     attestation_keys = ("APPROVED_FREE", "NO_PAYMENT_METHOD", "HARD_STOP", "NO_FIAT_BILLING", "DATA_POLICY_APPROVED")
     for provider_id in provider_ids:
         prefix = f"SUPERIA_PROVIDER_{provider_id.upper()}_"
@@ -117,6 +121,10 @@ def validate_provider_environment(environ: dict[str, str]) -> None:
             raise ValueError(
                 f"{prefix} MODEL must be the single verified Synap free-tier model ID."
             )
+        if provider_id == "sambanova" and model not in SAMBANOVA_VERIFIED_FREE_MODELS:
+            raise ValueError(
+                f"{prefix} MODEL must be one of the verified SambaNova no-payment-method Free-tier model IDs."
+            )
 
 
 class FreeOnlyRouter:
@@ -126,7 +134,7 @@ class FreeOnlyRouter:
     and hard-stops at quota exhaustion. No paid model is selected automatically.
     """
 
-    PROVIDER_ORDER = ("gemini", "groq", "cohere", "zai", "synap", "openrouter", "cloudflare")
+    PROVIDER_ORDER = ("gemini", "groq", "cohere", "zai", "synap", "sambanova", "openrouter", "cloudflare")
 
     def __init__(
         self,
@@ -238,6 +246,8 @@ class FreeOnlyRouter:
             return None
         if provider_id == "synap" and model not in SYNAP_VERIFIED_FREE_MODELS:
             return None
+        if provider_id == "sambanova" and model not in SAMBANOVA_VERIFIED_FREE_MODELS:
+            return None
 
         if provider_id == "gemini":
             endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
@@ -253,6 +263,9 @@ class FreeOnlyRouter:
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "synap":
             endpoint = "https://synap402.com/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {api_key}"}
+        elif provider_id == "sambanova":
+            endpoint = "https://api.sambanova.ai/v1/chat/completions"
             headers = {"Authorization": f"Bearer {api_key}"}
         elif provider_id == "openrouter":
             endpoint = "https://openrouter.ai/api/v1/chat/completions"
@@ -350,9 +363,9 @@ class FreeOnlyRouter:
                             if provider.provider_id == "cloudflare" and _cloudflare_daily_free_quota_exhausted(response):
                                 self._disable(provider.provider_id)
                                 last_error = "cloudflare: quota gratuita giornaliera esaurita; provider disabilitato fino a verifica manuale."
-                            elif provider.provider_id == "synap":
+                            elif provider.provider_id in {"synap", "sambanova"}:
                                 self._disable(provider.provider_id)
-                                last_error = "synap: quota o capacità gratuita limitata; provider disabilitato fino a verifica manuale."
+                                last_error = f"{provider.provider_id}: quota/capacità del piano gratuito raggiunta; provider disabilitato fino a verifica manuale."
                             else:
                                 retry_after = response.headers.get("Retry-After", "60")
                                 try:
@@ -464,9 +477,9 @@ class FreeOnlyRouter:
                     if provider.provider_id == "cloudflare" and _cloudflare_daily_free_quota_exhausted(response):
                         self._disable(provider.provider_id)
                         last_error = "cloudflare: quota gratuita giornaliera esaurita; provider disabilitato fino a verifica manuale."
-                    elif provider.provider_id == "synap":
+                    elif provider.provider_id in {"synap", "sambanova"}:
                         self._disable(provider.provider_id)
-                        last_error = "synap: quota o capacità gratuita limitata; provider disabilitato fino a verifica manuale."
+                        last_error = f"{provider.provider_id}: quota/capacità del piano gratuito raggiunta; provider disabilitato fino a verifica manuale."
                     else:
                         retry_after = response.headers.get("Retry-After", "60")
                         try:
