@@ -17,7 +17,7 @@ SuperIA esegue l'inferenza AI esclusivamente online. Il runtime locale Gemma/Lit
 - Il client Android OnlineAssistantClient invia richieste HTTPS al backend e la UI prepara il prompt con cronologia pertinente, memoria di progetto e contesto documentale.
 - Il pairing individuale è implementato: il codice di associazione viene inviato a POST /api/v1/device/pair; token e ID dispositivo sono conservati cifrati tramite Android Keystore. Il codice di pairing non viene persistito.
 - Il backend FastAPI include autenticazione Bearer per dispositivo, token individuali memorizzati come hash, scadenza, revoca, endpoint chat e stato operativo dei provider.
-- Il router free-only include Gemini, Groq, OpenRouter (solo modelli con suffisso :free), Cloudflare Workers AI e SambaNova; provider disabilitati per default.
+- Il router free-only include Gemini, Groq, Cohere, Z.AI, Synap, OpenRouter (solo modelli con suffisso :free) e Cloudflare Workers AI; provider disabilitati per default. SambaNova è escluso.
 - Sono presenti test unitari per router, autenticazione, API e database; tali test non sostituiscono un collaudo end-to-end con provider e hosting reali.
 - Il backend non è pubblicato e non è collegato a un database di produzione.
 - Non risultano account hosting/database creati, segreti di produzione configurati o provider AI attivati.
