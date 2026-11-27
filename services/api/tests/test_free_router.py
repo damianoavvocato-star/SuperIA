@@ -1038,9 +1038,9 @@ def test_sambanova_openai_compatible_streaming_is_normalized(tmp_path):
             assert request.url == "https://api.sambanova.ai/v1/chat/completions"
             assert b'"stream":true' in request.read()
             body = (
-                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
-                'data: {"choices":[{"delta":{"content":"SambaNova"}}]}\\n\\n'
-                'data: [DONE]\\n\\n'
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\n\n'
+                'data: {"choices":[{"delta":{"content":"SambaNova"}}]}\n\n'
+                'data: [DONE]\n\n'
             )
             return httpx.Response(
                 200,
