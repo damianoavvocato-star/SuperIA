@@ -22,7 +22,7 @@ Assistente AI personale e modulare, con client Android nativo e inferenza esclus
 
 ### Backend e provider
 - Prototipo FastAPI in services/api, con autenticazione Bearer per dispositivo, pairing, revoca, endpoint chat e stato operativo dei provider.
-- Router free-only per Gemini, Groq, OpenRouter, Cloudflare Workers AI e SambaNova; i provider sono disabilitati per default e richiedono approvazioni e credenziali esplicite.
+- Router free-only per Gemini, Groq, Cohere, Z.AI, Synap, OpenRouter e Cloudflare Workers AI; i provider sono disabilitati per default e richiedono approvazioni e credenziali esplicite. SambaNova è escluso.
 - Nessun backend pubblico, database di produzione, segreto di produzione o provider AI è attualmente attivato.
 - Il flag di conferma pairing non sostituisce un rate limiter: occorre configurare e verificare il rate limiting IP effettivo sul gateway/WAF prima dell'esposizione pubblica.
 - In produzione serve un database persistente. Non usare SQLite su filesystem temporanei come /tmp.
