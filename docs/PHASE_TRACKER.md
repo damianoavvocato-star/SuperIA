@@ -1608,3 +1608,14 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Rapporto completo: `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
 - Fonti ufficiali principali: https://ai.google.dev/gemini-api/docs/pricing ; https://console.groq.com/docs/rate-limits ; https://developers.cloudflare.com/workers-ai/platform/pricing/ ; https://openrouter.ai/collections/free-models/ ; https://docs.cohere.com/v2/docs/rate-limits ; https://docs.mistral.ai/admin/billing-usage/usage-limits/ ; https://docs.github.com/en/github-models ; https://novita.ai/pricing ; https://sea-lion.ai/try-sea-lion/ ; https://sensetime.com/en/faq ; https://synap.linkrra.com/free .
 - Stato: audit documentale esteso registrato; verifiche account-level, termini per regione e test compatibilità restano aperti. Nessuna integrazione runtime autorizzata automaticamente.
+
+
+## Cohere adapter implementation — 27 November 2026
+- Added Cohere to `services/api/app/providers/free_router.py` provider order and environment validation.
+- Added Cohere v2 endpoint `https://api.cohere.com/v2/chat` with Bearer authentication.
+- Added non-streaming parser for `message.content[]` text blocks and streaming SSE parser for `delta.message.content.text` events.
+- Preserved free-only attestation requirements and fail-closed behavior: 401/402/403 persistently disables the provider; 429 enters cooldown; no paid fallback.
+- Added tests for Cohere non-streaming, SSE streaming, 402 hard-disable/no retry, and mandatory no-payment attestation in `services/api/tests/test_free_router.py`.
+- Official docs: https://docs.cohere.com/v2/reference/chat-stream ; https://docs.cohere.com/v2/docs/chat-api ; https://docs.cohere.com/v2/docs/rate-limits
+- Cohere official trial keys: free but limited; 1,000 calls/month and 20 req/min for listed Chat models. Account-level no-card, model eligibility and hard-stop still require verification.
+- No account/key created, no provider activated, no live API call. Tests are added but have not yet been executed/CI verified.
