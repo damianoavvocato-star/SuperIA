@@ -1705,3 +1705,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - GitHub Actions Backend tests run `46075950792`: **completed / success**.
 - Lato Android esiste già la disconnessione di `HttpURLConnection` in risposta a `CancellationException`; non è ancora stata verificata contro un server staging reale. I test unitari Android correnti non simulano ancora un server SSE lento/interrotto.
 - Micro-fase 26 resta in attesa per proxy reale e verifica pratica Android/dispositivo fisico. Nessun APK o deploy.
+
+
+### Verifica unit test Android — hook di cancellazione HTTP — 27 novembre 2026
+- Commit `f900f2e5bc885c6484372f2305324609fb3870b0`: isolata la registrazione del callback che chiude `HttpURLConnection` quando la coroutine viene cancellata.
+- Commit `dfe75ac17b358ec3d5ef1266709bdce9751a7b02`: aggiunti due test unitari, uno per la disconnessione in caso di cancellazione e uno per il completamento normale.
+- Android unit tests run [46076365329](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365329): **completed / success**. Backend tests run [46076365260](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365260): **completed / success**.
+- Limite della prova: il test esercita direttamente l'hook con una connessione finta; non simula ancora una richiesta SSE reale bloccata su rete. Servono ancora test d'integrazione dietro proxy/staging e prova su dispositivo Android fisico.
+- Micro-fase 26 resta **In attesa di verifica pratica**. Nessun hosting/database/provider esterno attivato; nessun APK creato.
