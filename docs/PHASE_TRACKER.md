@@ -1485,3 +1485,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - La verifica diretta finale non ha raggiunto il test: `adb shell am instrument` ha restituito `INSTRUMENTATION_FAILED`. L'artefatto mostra che `pm list instrumentation` iniziale era vuoto; il task Gradle precedente non aveva lasciato installato il package runner per la chiamata diretta. Non è un fallimento dell'asserzione di recupero: il test finale non è stato eseguito.
 - Correzione su `main`, commit `1f5067bf0d7134dcfbf5173d43ad9da4db5f31f1`: reinstallazione esplicita del solo APK `app-debug-androidTest.apk` con `adb install -r` (senza rimuovere i dati dell'app), controllo che il runner risulti registrato tramite `pm list instrumentation`, poi force-stop dell'app e verifica diretta.
 - Nuova CI necessaria per convalidare la correzione. Nessun APK consegnato/installato sul telefono, nessun test fisico, nessun deploy o provider attivato.
+
+
+### Diagnosi e correzione installazione runner process-restart — 27 novembre 2026
+- Run Android `46017581505` sul commit `1f5067bf0d7134dcfbf5173d43ad9da4db5f31f1`: unit test **success**; build APK temporanei **success**; backend run `46017581474` **success**.
+- Il report conferma la suite principale eseguita e il test writer `writePendingStateForProcessRestart` **1/1 passato**. La verifica finale non è stata eseguita: dopo l'installazione del solo APK androidTest il runner compare in `pm list instrumentation`, ma `am instrument` restituisce `INSTRUMENTATION_FAILED`. Non è un errore dell'asserzione di recovery.
+- Correzione CI su `main`: installare esplicitamente entrambi gli APK (app e androidTest) una sola volta con `adb install -r`, quindi eseguire direttamente writer, force-stop e verifier con `adb shell am instrument`. Si elimina la seconda invocazione Gradle e si impedisce che Gradle disinstalli/reinstalli i pacchetti tra le due prove. Il nuovo run dovrà verificare entrambi i risultati `OK (1 test)`.
+- Nessun APK consegnato/installato sul telefono fisico; nessun deploy o provider attivato.
