@@ -1667,3 +1667,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Provider esclusi o non integrati dopo verifica: Aion Labs (carta richiesta per attivare API key), Typhoon (ricerca/prototipazione e produzione indirizzata al partner a pagamento; termini consentono training sugli input), Regolo (solo trial gratuito di 30 giorni poi PAYG), Novita (prezzi/referral credit, non quota ricorrente), LLM7 (no downstream gateway senza autorizzazione scritta), NVIDIA NIM hosted (limiti/hard-stop/produzione non sufficientemente verificati).
 - Documentazione completa nell'audit `docs/AI_PROVIDER_FREE_TIER_AUDIT_2026-11-23.md`.
 - SambaNova resta spento fino a verifica account individuale e inserimento manuale delle attestazioni; nessun account/API key creati. La CI sul successivo commit documentale è indipendente dai test codice già superati.
+
+
+### Verifica provider SenseNova e riconciliazione audit — 27 novembre 2026
+- Verificata la pagina ufficiale Token Plan: piano Free pubblico in beta, 1.500 chiamate per modello ogni 5 ore; la pagina consultata elenca SenseNova 6.7 Flash-Lite e U1 Fast. La FAQ ufficiale conferma che occorre registrazione e creazione di API key.
+- Una comunicazione ufficiale successiva promuove U1.5 Lite, mentre la documentazione API pubblica reperita descrive altre generazioni di modelli/endpoint. Non è ancora dimostrata l'idoneità dell'account dall'Italia, l'assenza di carta/metodo di pagamento né il blocco economico al termine della beta.
+- Decisione: SenseNova resta candidato sperimentale, non integrato e non attivato; nessun account, token o test API reale creato.
+- Rettificato l'audit provider: le precedenti righe che escludevano SambaNova per carta/acquisto crediti erano obsolete. L'adapter SambaNova è presente e i test sono superati; il provider resta disattivato fino alla verifica account-level e alle attestazioni free-only.
+- CI backend: commit test `72f0249f4968e44ce0272b34a5c569fbb93335ae` — 172 passed, 1 warning; workflow sul commit documentale `2777188867f335c59c3ae0f6a6f2762593144548` — run `46064312749` success.
+- Fonti: https://www.sensenova.ai/token-plan ; https://sensetime.com/en/faq ; https://sensetime.com/en/news/sensenova-u1-5-lite-token-plan-20260911-1741.
