@@ -1492,3 +1492,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il report conferma la suite principale eseguita e il test writer `writePendingStateForProcessRestart` **1/1 passato**. La verifica finale non è stata eseguita: dopo l'installazione del solo APK androidTest il runner compare in `pm list instrumentation`, ma `am instrument` restituisce `INSTRUMENTATION_FAILED`. Non è un errore dell'asserzione di recovery.
 - Correzione CI su `main`: installare esplicitamente entrambi gli APK (app e androidTest) una sola volta con `adb install -r`, quindi eseguire direttamente writer, force-stop e verifier con `adb shell am instrument`. Si elimina la seconda invocazione Gradle e si impedisce che Gradle disinstalli/reinstalli i pacchetti tra le due prove. Il nuovo run dovrà verificare entrambi i risultati `OK (1 test)`.
 - Nessun APK consegnato/installato sul telefono fisico; nessun deploy o provider attivato.
+
+
+### Correzione controllo shell test process-restart — 27 novembre 2026
+- Run Android `46020798071` sul commit `d21008c1e59fb0d7d15d71706621449baf9e0164`: suite emulator principale **38/38 superati** (XML: 0 failure, 0 error, 0 skipped); test writer `writePendingStateForProcessRestart` **1/1 superato**.
+- Il workflow si è interrotto dopo il writer, prima del force-stop e della verifica finale, per un errore sintattico shell: l'action esegue ogni riga dello script separatamente e non supporta blocchi `if/then/fi` distribuiti su più righe.
+- Correzione su `main`: controlli writer e verifier riscritti come singole righe shell con `test`, `grep` e blocco di diagnostica inline. Il test di recovery non è ancora convalidato; attendere il prossimo run.
+- Android unit test, APK temporanei di test e backend **success**. Nessun APK consegnato/installato sul telefono fisico, nessun rilascio o servizio esterno attivato.
