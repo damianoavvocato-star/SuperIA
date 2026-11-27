@@ -963,3 +963,160 @@ def test_synap_quota_or_payment_response_disables_provider_without_fallback(
         assert calls == ["synap402.com"]
 
     asyncio.run(run())
+
+
+def sambanova_free_env(model="gpt-oss-120b"):
+    return free_env("sambanova", model)
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "DeepSeek-V3.1",
+        "Meta-Llama-3.3-70B-Instruct",
+        "gpt-oss-120b",
+        "DeepSeek-V3.2",
+        "gemma-4-31B-it",
+    ],
+)
+def test_sambanova_accepts_only_official_no_payment_free_tier_models(tmp_path, model):
+    router = FreeOnlyRouter(
+        environ=sambanova_free_env(model),
+        state_db_path=str(tmp_path / f"sambanova-{model}.sqlite3"),
+    )
+    assert [item.provider_id for item in router.configured_providers()] == ["sambanova"]
+
+
+@pytest.mark.parametrize("model", ["GLM-5.3", "MiniMax-M2.7", "DeepSeek-V4", "llama-3.3-70b"])
+def test_sambanova_rejects_models_outside_free_tier_allowlist(tmp_path, model):
+    with pytest.raises(ValueError, match="verified SambaNova no-payment-method Free-tier"):
+        FreeOnlyRouter(
+            environ=sambanova_free_env(model),
+            state_db_path=str(tmp_path / f"sambanova-rejected-{model}.sqlite3"),
+        )
+
+
+def test_sambanova_openai_compatible_chat_uses_free_model(tmp_path):
+    async def run():
+        env = sambanova_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request)
+            assert request.url == "https://api.sambanova.ai/v1/chat/completions"
+            assert request.headers["Authorization"] == "Bearer test-secret"
+            assert b'"model":"gpt-oss-120b"' in request.read()
+            return httpx.Response(
+                200,
+                json={"choices": [{"message": {"content": "Risposta SambaNova gratuita"}}]},
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "sambanova-chat.sqlite3"),
+        )
+        result = await router.chat([{"role": "user", "content": "Ciao"}])
+        assert result["content"] == "Risposta SambaNova gratuita"
+        assert result["provider"] == "sambanova"
+        assert result["model"] == "gpt-oss-120b"
+        assert len(calls) == 1
+
+    asyncio.run(run())
+
+
+def test_sambanova_openai_compatible_streaming_is_normalized(tmp_path):
+    async def run():
+        env = sambanova_free_env()
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            assert request.url == "https://api.sambanova.ai/v1/chat/completions"
+            assert b'"stream":true' in request.read()
+            body = (
+                'data: {"choices":[{"delta":{"content":"Ciao "}}]}\\n\\n'
+                'data: {"choices":[{"delta":{"content":"SambaNova"}}]}\\n\\n'
+                'data: [DONE]\\n\\n'
+            )
+            return httpx.Response(
+                200,
+                headers={"content-type": "text/event-stream"},
+                content=body,
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / "sambanova-stream.sqlite3"),
+        )
+        events = [
+            item async for item in router.stream_chat(
+                [{"role": "user", "content": "Ciao"}]
+            )
+        ]
+        assert [item["text"] for item in events if item["event"] == "delta"] == [
+            "Ciao ", "SambaNova"
+        ]
+        assert events[-1]["event"] == "done"
+        assert events[-1]["provider"] == "sambanova"
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("status_code", [402, 429])
+@pytest.mark.parametrize("streaming", [False, True])
+def test_sambanova_quota_or_payment_response_disables_provider_without_fallback(
+    tmp_path, status_code, streaming
+):
+    async def run():
+        env = sambanova_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            return httpx.Response(status_code, json={"error": "free quota unavailable"})
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        state_db = str(tmp_path / f"sambanova-{status_code}-{streaming}.sqlite3")
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=state_db,
+        )
+        messages = [{"role": "user", "content": "Ciao"}]
+        with pytest.raises(NoFreeProviderAvailable):
+            if streaming:
+                _ = [item async for item in router.stream_chat(messages)]
+            else:
+                await router.chat(messages)
+
+        status = {item["id"]: item for item in router.provider_status()}
+        assert status["sambanova"]["state"] == "disabled"
+        assert status["sambanova"]["available"] is False
+
+        second = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=state_db,
+        )
+        with pytest.raises(NoFreeProviderAvailable):
+            if streaming:
+                _ = [item async for item in second.stream_chat(messages)]
+            else:
+                await second.chat(messages)
+        assert calls == ["api.sambanova.ai"]
+
+    asyncio.run(run())
