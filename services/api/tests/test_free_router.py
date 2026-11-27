@@ -526,3 +526,61 @@ def test_vercel_runtime_requires_postgres_before_defaulting_router_state(vercel_
     }
     with pytest.raises(ValueError, match="PostgreSQL"):
         FreeOnlyRouter(environ=env)
+
+
+
+@pytest.mark.parametrize("streaming", [False, True])
+def test_cloudflare_daily_free_quota_exhaustion_disables_provider_until_manual_review(tmp_path, streaming):
+    async def run():
+        env = free_env("cloudflare", "@cf/zai-org/glm-4.7-flash")
+        env["SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID"] = "test-account"
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            return httpx.Response(
+                429,
+                json={
+                    "success": False,
+                    "errors": [{
+                        "code": 3036,
+                        "message": "You have used up your daily free allocation of 10,000 neurons.",
+                    }],
+                },
+            )
+
+        transport = httpx.MockTransport(handler)
+
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / f"cloudflare-quota-{streaming}.sqlite3"),
+        )
+        messages = [{"role": "user", "content": "Ciao"}]
+        with pytest.raises(NoFreeProviderAvailable, match="quota gratuita giornaliera esaurita"):
+            if streaming:
+                _ = [item async for item in router.stream_chat(messages)]
+            else:
+                await router.chat(messages)
+
+        status = {item["id"]: item for item in router.provider_status()}
+        assert status["cloudflare"]["state"] == "disabled"
+        assert status["cloudflare"]["available"] is False
+
+        # A second request must not contact Cloudflare again, even after router recreation.
+        second = FreeOnlyRouter(
+            environ=env,
+            client_factory=client_factory,
+            state_db_path=str(tmp_path / f"cloudflare-quota-{streaming}.sqlite3"),
+        )
+        with pytest.raises(NoFreeProviderAvailable):
+            if streaming:
+                _ = [item async for item in second.stream_chat(messages)]
+            else:
+                await second.chat(messages)
+        assert calls == ["api.cloudflare.com"]
+
+    asyncio.run(run())
