@@ -398,3 +398,11 @@ Questa sezione prevale sulle precedenti righe di questo documento che indicavano
 
 ### Regola di prevalenza
 Le sezioni precedenti che classificano SambaNova come escluso per richiesta di carta/acquisto crediti sono superate dall'aggiornamento ufficiale e dall'adapter testato sopra. Il provider resta comunque disattivato fino alla verifica dell'account reale e all'autorizzazione dell'utente. La valutazione SenseNova resta prudenziale e non autorizza alcuna attivazione.
+
+
+## Verifica SEA-LION aggiornata — 27 novembre 2026
+- La pagina ufficiale distingue esplicitamente l'API gratuita per **POC/prototipazione** (limite dichiarato: 10 chiamate/minuto) dal percorso per **produzione**, indirizzato a cloud partner: https://sea-lion.ai/try-sea-lion/.
+- La guida API ufficiale descrive una trial API key, ottenuta dopo accesso al Playground tramite Google, con una sola chiave per utente e limite di 10 RPM: https://docs.sea-lion.ai/guides/inferencing/api.
+- L'annuncio ufficiale SEA-LION v5 ribadisce che le trial key sono rate-limited e **non destinate all'uso in produzione**; indica un partner di inferenza per la distribuzione produttiva: https://sea-lion.ai/blog/announcing-sea-lion-v5-our-largest-model-frontier-level-performance-and-open/.
+- Non risulta quindi una quota API gratuita permanente autorizzata per un gateway multiutente come SuperIA. Il solo fatto che i pesi siano open/free non equivale a un endpoint hosted gratuito per produzione.
+- Esito aggiornato: **escluso dal pool automatico di produzione**; eventualmente utilizzabile solo in un ambiente POC isolato e non con le conversazioni degli utenti. Nessun account, chiave o test API creato.
