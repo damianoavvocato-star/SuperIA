@@ -558,7 +558,7 @@ class OnlineAssistantClientTest {
             override fun connect() {}
             override fun usingProxy(): Boolean = false
             override fun disconnect() {
-                disconnected = true
+                disconnected.set(true)
                 disconnectSignal.countDown()
             }
             override fun getOutputStream() = ByteArrayOutputStream()
