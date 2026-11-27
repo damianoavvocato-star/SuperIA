@@ -224,3 +224,16 @@ La ricerca ha inoltre intercettato OpenTyphoon, BroadNet/BroadRouter, SenseNova,
 7. **Mistral, GitHub Models, Cerebras e provider solo trial/crediti**: non inserirli nel pool gratuito permanente secondo le condizioni attualmente documentate.
 
 **Regola finale:** nessun provider è attivo per effetto di questa ricognizione. Non sono stati creati account, API key, crediti, metodi di pagamento o servizi. Tutte le attestazioni runtime restano false fino alla verifica reale autorizzata. La priorità è aumentare il numero di provider realmente gratuiti senza introdurre neppure un rischio teorico di addebito.
+
+
+## Cohere v2 adapter — implementation progress 27 November 2026
+
+The backend router now has a Cohere-specific adapter path at `https://api.cohere.com/v2/chat`, using Bearer authentication. It normalizes the v2 non-streaming `message.content[]` text blocks and the streaming SSE `content-delta` event into SuperIA's existing response format. Cohere has been added to the router's provider order and the same five free-only attestations are mandatory: global free-only mode, operator approval of the Free plan, no payment method, hard stop, no fiat billing, and data-policy acknowledgement.
+
+The adapter does **not** make Cohere automatically active. It only becomes eligible when an operator supplies a trial key and model ID in the backend secret environment and explicitly attests to all conditions. A 401/402/403 response persistently disables the provider; 429 triggers cooldown; there is no paid fallback. The API key remains backend-only.
+
+Official Cohere docs confirm:
+- v2 chat endpoint, Bearer auth, message format and streaming SSE content-delta: https://docs.cohere.com/v2/reference/chat-stream and https://docs.cohere.com/v2/docs/chat-api
+- Evaluation/trial keys are free but limited; trial keys and production keys on newer model variants are limited to 1,000 calls/month. Trial Chat API rate limits are 20 requests/minute for the listed Command variants: https://docs.cohere.com/v2/docs/rate-limits
+
+**Remaining activation gate:** confirm from the actual Cohere account that the key is an evaluation/trial key, no payment method is attached or required, the chosen model is included in the trial limits, and exhaustion hard-stops rather than switching to a paid key or plan. No key/account was created and no live request was made. Do not mark the Cohere provider attestation true until these checks are completed.
