@@ -612,3 +612,123 @@ def test_cloudflare_rejects_model_outside_verified_workers_free_allowlist(tmp_pa
             environ=env,
             state_db_path=str(tmp_path / "cloudflare-paid-model.sqlite3"),
         )
+
+
+def cohere_free_env(model="command-r7b-12-2024"):
+    return free_env("cohere", model)
+
+
+def test_cohere_v2_non_streaming_response_is_normalized(tmp_path):
+    async def run():
+        env = cohere_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request)
+            assert request.url == "https://api.cohere.com/v2/chat"
+            assert request.headers["Authorization"] == "Bearer test-secret"
+            payload = request.read()
+            assert b'"stream":false' in payload
+            return httpx.Response(
+                200,
+                json={"message": {"content": [
+                    {"type": "text", "text": "Risposta "},
+                    {"type": "text", "text": "Cohere"}
+                ]}}
+            )
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env, client_factory=client_factory,
+            state_db_path=str(tmp_path / "cohere-chat.sqlite3"),
+        )
+        result = await router.chat([{"role": "user", "content": "Ciao"}])
+        assert result == {
+            "content": "Risposta Cohere",
+            "model": "command-r7b-12-2024",
+            "provider": "cohere",
+        }
+        assert len(calls) == 1
+
+    asyncio.run(run())
+
+
+def test_cohere_v2_streaming_content_delta_is_normalized(tmp_path):
+    async def run():
+        env = cohere_free_env()
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            assert request.url == "https://api.cohere.com/v2/chat"
+            assert b'"stream":true' in request.read()
+            body = (
+                'event: content-delta\\n'
+                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Ciao "}}}}\\n\\n'
+                'event: content-delta\\n'
+                'data: {"type":"content-delta","delta":{"message":{"content":{"text":"Cohere"}}}}\\n\\n'
+                'event: message-end\\n'
+                'data: {"type":"message-end","delta":{"finish_reason":"COMPLETE"}}\\n\\n'
+            )
+            return httpx.Response(
+                200, headers={"content-type": "text/event-stream"}, content=body
+            )
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env, client_factory=client_factory,
+            state_db_path=str(tmp_path / "cohere-stream.sqlite3"),
+        )
+        events = [
+            item async for item in router.stream_chat(
+                [{"role": "user", "content": "Ciao"}]
+            )
+        ]
+        assert [item["text"] for item in events if item["event"] == "delta"] == [
+            "Ciao ", "Cohere"
+        ]
+        assert events[-1]["event"] == "done"
+        assert events[-1]["provider"] == "cohere"
+
+    asyncio.run(run())
+
+
+def test_cohere_trial_payment_or_quota_error_never_falls_back_to_paid(tmp_path):
+    async def run():
+        env = cohere_free_env()
+        calls = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            calls.append(request.url.host)
+            return httpx.Response(402, json={"message": "payment required"})
+
+        transport = httpx.MockTransport(handler)
+        def client_factory(**kwargs):
+            return httpx.AsyncClient(transport=transport, **kwargs)
+
+        router = FreeOnlyRouter(
+            environ=env, client_factory=client_factory,
+            state_db_path=str(tmp_path / "cohere-402.sqlite3"),
+        )
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Ciao"}])
+        with pytest.raises(NoFreeProviderAvailable):
+            await router.chat([{"role": "user", "content": "Riprova"}])
+        assert calls == ["api.cohere.com"]
+        status = {item["id"]: item for item in router.provider_status()}
+        assert status["cohere"]["state"] == "disabled"
+
+    asyncio.run(run())
+
+
+def test_cohere_requires_all_free_only_attestations(tmp_path):
+    env = cohere_free_env()
+    env["SUPERIA_PROVIDER_COHERE_NO_PAYMENT_METHOD"] = "false"
+    with pytest.raises(ValueError, match="NO_PAYMENT_METHOD"):
+        FreeOnlyRouter(
+            environ=env, state_db_path=str(tmp_path / "cohere-no-card.sqlite3")
+        )
