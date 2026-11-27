@@ -556,10 +556,10 @@ def test_admin_readiness_distinguishes_database_auth_and_provider_state(tmp_path
     finally:
         get_provider.cache_clear()
 
-    assert response.status_code == 200
+    assert response.status_code == 503
     payload = response.json()
     assert payload == {
-        "status": "ready",
+        "status": "degraded",
         "process": "ok",
         "database": "ok",
         "device_auth": "ok",
@@ -742,3 +742,42 @@ def test_cancelled_chat_stream_releases_lease_and_closes_provider(auth_environme
     )
     assert retry["state"] == "claimed"
     assert str(retry["lease_token"]) != row[1]
+
+
+def test_admin_readiness_is_ready_only_with_configured_free_provider(tmp_path, monkeypatch):
+    database = str(tmp_path / "readiness-provider.sqlite3")
+    issue_device_token(database, "readiness-device")
+    monkeypatch.setenv("SUPERIA_ENVIRONMENT", "development")
+    monkeypatch.setenv("SUPERIA_AUTH_DB", database)
+    monkeypatch.setenv("SUPERIA_ROUTER_STATE_DB", str(tmp_path / "router-state-provider.sqlite3"))
+    monkeypatch.setenv("SUPERIA_ADMIN_TOKEN", "readiness-admin-secret")
+    monkeypatch.setenv("SUPERIA_FREE_ONLY", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_APPROVED_FREE", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_NO_PAYMENT_METHOD", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_HARD_STOP", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_NO_FIAT_BILLING", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_DATA_POLICY_APPROVED", "true")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_API_KEY", "test-provider-key")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_ACCOUNT_ID", "test-account")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_MODEL", "@cf/zai-org/glm-4.7-flash")
+    monkeypatch.setenv("SUPERIA_PROVIDER_CLOUDFLARE_FREE_MODEL_IDS", "@cf/zai-org/glm-4.7-flash")
+    monkeypatch.delenv("SUPERIA_DATABASE_URL", raising=False)
+    get_provider.cache_clear()
+    try:
+        response = TestClient(app).get(
+            "/api/v1/readiness",
+            headers={"Authorization": "Bearer readiness-admin-secret"},
+        )
+    finally:
+        get_provider.cache_clear()
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ready",
+        "process": "ok",
+        "database": "ok",
+        "device_auth": "ok",
+        "provider_configuration": "configured",
+    }
+    assert "test-provider-key" not in response.text
+    assert "test-account" not in response.text
