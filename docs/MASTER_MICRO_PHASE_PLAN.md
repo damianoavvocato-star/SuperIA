@@ -67,7 +67,7 @@ Ambito: esclusivamente `damianoavvocato-star/SuperIA`. Questo piano scompone le 
 | 23 | Contratto conversazionale multi-turno | Messaggi, ruoli, limiti, contesto e identificativi richiesta sono coerenti tra Android e backend. | Completata |
 | 24 | Streaming SSE lato backend | Eventi delta/done/error, delimitatori, headers, timeout e chiusura stream sono verificati. | Completata |
 | 25 | Streaming SSE lato Android | Parsing incrementale, ordine dei delta, completamento, errori e cancellazione sono coperti da test. | Completata |
-| 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | In attesa di verifica pratica |
+| 26 | Heartbeat e connessioni lente | Heartbeat, rinnovo lease, timeout proxy e cancellazione provider alla chiusura client sono verificati. | In attesa di verifica pratica (test CI heartbeat/lease superato; proxy e dispositivo fisico restano aperti) |
 | 27 | Idempotenza e deduplicazione richieste | Request ID, hash payload, replay cifrato, lease e fencing sono testati su PostgreSQL; limiti exactly-once sono documentati. | Completata in CI; staging reale aperto |
 | 28 | Retry e ripresa dopo interruzione | Retry usa lo stesso ID, non duplica risposte già persistite e comunica chiaramente quando deve rigenerare invece di riprendere lo stream. | In attesa di verifica pratica |
 | 29 | Continuità della conversazione e memoria | Cronologia persistente, riepiloghi verificabili, recupero contesto e ripresa dopo riavvio funzionano senza imporre una nuova chat. | Completata in CI emulator; telefono fisico separato alla fase 35 |
@@ -264,3 +264,7 @@ La run [45483033138](https://github.com/damianoavvocato-star/SuperIA/actions/run
 
 ### Aggiornamento micro-fase 29 e test Android multi-chat — 27 novembre 2026
 La micro-fase 29 è **Completata per la verifica automatica CI emulator**: Android API 34 ha eseguito 38/38 test strumentali senza errori o skip; le prove distinte di scrittura dello stato pendente e recupero dopo `adb shell am force-stop` hanno entrambe restituito `OK (1 test)`. Android unit test e build temporanea dei soli APK di test sono SUCCESS; backend run `46058183407` SUCCESS. Run Android `46058183460`: https://github.com/damianoavvocato-star/SuperIA/actions/runs/46058183460. La fase 30 resta in attesa per copertura funzionale completa dei formati/OCR e privacy documentale; la prova su telefono fisico resta nella fase 35. Nessun APK è stato consegnato o installato sul telefono, nessun deploy/provider è stato attivato.
+
+
+### Aggiornamento micro-fase 26 — heartbeat e rinnovo lease SSE — 27 novembre 2026
+Il commit `c066ed8faf2bd6ab06d6a02fc224bf87a14360ee` aggiunge un test backend con provider lento: verifica emissione `: keep-alive`, successivi eventi `delta`/`done` e rinnovo ripetuto della lease sulla stessa richiesta. GitHub Actions Backend tests run [46075657157](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46075657157): **success**. La micro-fase 26 resta in attesa di verifica pratica: mancano test attraverso il proxy/hosting reale e su dispositivo Android fisico, inclusi disconnessione e cancellazione effettiva del provider. Nessun deploy o APK autorizzato.
