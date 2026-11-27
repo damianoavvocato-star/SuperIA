@@ -389,20 +389,15 @@ class FreeOnlyRouter:
                         json={"model": provider.model, "messages": messages, "stream": True},
                     ) as response:
                         if response.status_code == 429:
+                            # Free-only safety: provider APIs may use 429 for RPM,
+                            # daily request, token, or account quota exhaustion. Without
+                            # a provider-specific, trustworthy reset signal, do not retry
+                            # automatically after a short cooldown; require manual review.
+                            self._disable(provider.provider_id)
                             if provider.provider_id == "cloudflare" and _cloudflare_daily_free_quota_exhausted(response):
-                                self._disable(provider.provider_id)
                                 last_error = "cloudflare: quota gratuita giornaliera esaurita; provider disabilitato fino a verifica manuale."
-                            elif provider.provider_id in {"synap", "sambanova"}:
-                                self._disable(provider.provider_id)
-                                last_error = f"{provider.provider_id}: quota/capacità del piano gratuito raggiunta; provider disabilitato fino a verifica manuale."
                             else:
-                                retry_after = response.headers.get("Retry-After", "60")
-                                try:
-                                    cooldown = float(retry_after)
-                                except ValueError:
-                                    cooldown = 60.0
-                                self._set_cooldown(provider.provider_id, cooldown)
-                                last_error = f"{provider.provider_id}: quota o limite temporaneo raggiunto."
+                                last_error = f"{provider.provider_id}: limite o quota gratuita raggiunta; provider disabilitato fino a verifica manuale."
                             continue
                         if response.status_code in (401, 402, 403):
                             self._disable(provider.provider_id)
@@ -503,20 +498,13 @@ class FreeOnlyRouter:
                         },
                     )
                 if response.status_code == 429:
+                    # Same fail-closed policy as streaming: an ambiguous 429 may
+                    # mean a daily free quota, not merely a short RPM window.
+                    self._disable(provider.provider_id)
                     if provider.provider_id == "cloudflare" and _cloudflare_daily_free_quota_exhausted(response):
-                        self._disable(provider.provider_id)
                         last_error = "cloudflare: quota gratuita giornaliera esaurita; provider disabilitato fino a verifica manuale."
-                    elif provider.provider_id in {"synap", "sambanova"}:
-                        self._disable(provider.provider_id)
-                        last_error = f"{provider.provider_id}: quota/capacità del piano gratuito raggiunta; provider disabilitato fino a verifica manuale."
                     else:
-                        retry_after = response.headers.get("Retry-After", "60")
-                        try:
-                            cooldown = float(retry_after)
-                        except ValueError:
-                            cooldown = 60.0
-                        self._set_cooldown(provider.provider_id, cooldown)
-                        last_error = f"{provider.provider_id}: quota o limite temporaneo raggiunto."
+                        last_error = f"{provider.provider_id}: limite o quota gratuita raggiunta; provider disabilitato fino a verifica manuale."
                     continue
                 if response.status_code in (401, 402, 403):
                     self._disable(provider.provider_id)
