@@ -1478,3 +1478,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Il workflow eseguiva la verifica finale richiamando una seconda volta `connectedDebugAndroidTest`, che può reinstallare i pacchetti di test/app e interferire con la persistenza tra le due invocazioni. Modificato il flusso: dopo il force-stop del solo package app, la verifica viene lanciata direttamente con `adb shell am instrument`, senza un nuovo task Gradle/installazione; output controllato esplicitamente per `OK (1 test)` e `FAILURES!!!`.
 - La nuova esecuzione deve confermare la persistenza reale tra processi; non considerare ancora superato il test fino al suo esito.
 - Nessun APK consegnato/installato sul telefono, nessun test fisico, nessun rilascio o attivazione backend/provider.
+
+### Verifica CI process-restart — 27 novembre 2026 (run 45954167172)
+- Sul commit `bff3fedc4f6024363841e218766cb7ea0d18e9bf`: unit test Android **success**; build degli APK debug/test temporanei **success**; backend run `45954167131` **success**.
+- Suite strumentale principale **38/38 passati**; `writePendingStateForProcessRestart` **1/1 passato**.
+- La verifica diretta finale non ha raggiunto il test: `adb shell am instrument` ha restituito `INSTRUMENTATION_FAILED`. L'artefatto mostra che `pm list instrumentation` iniziale era vuoto; il task Gradle precedente non aveva lasciato installato il package runner per la chiamata diretta. Non è un fallimento dell'asserzione di recupero: il test finale non è stato eseguito.
+- Correzione su `main`, commit `1f5067bf0d7134dcfbf5173d43ad9da4db5f31f1`: reinstallazione esplicita del solo APK `app-debug-androidTest.apk` con `adb install -r` (senza rimuovere i dati dell'app), controllo che il runner risulti registrato tramite `pm list instrumentation`, poi force-stop dell'app e verifica diretta.
+- Nuova CI necessaria per convalidare la correzione. Nessun APK consegnato/installato sul telefono, nessun test fisico, nessun deploy o provider attivato.
