@@ -781,3 +781,48 @@ def test_admin_readiness_is_ready_only_with_configured_free_provider(tmp_path, m
     }
     assert "test-provider-key" not in response.text
     assert "test-account" not in response.text
+
+
+
+def test_sse_heartbeat_refreshes_request_lease(auth_environment, monkeypatch):
+    import asyncio
+    import app.main as api_module
+    from app.schemas import ChatRequest
+
+    database, token_data = auth_environment
+    request_id = "7f5a1b9c-2d31-4c7e-8a90-123456789abc"
+    monkeypatch.setattr(api_module, "_auth_database_path", lambda: database)
+    monkeypatch.setattr(api_module, "SSE_HEARTBEAT_SECONDS", 0.01)
+    original_refresh = api_module.refresh_chat_request_lease
+    refresh_calls = []
+
+    def tracked_refresh(database_url, device_id, current_request_id, lease_token):
+        refresh_calls.append((device_id, current_request_id, lease_token))
+        return original_refresh(database_url, device_id, current_request_id, lease_token)
+
+    monkeypatch.setattr(api_module, "refresh_chat_request_lease", tracked_refresh)
+
+    class SlowProvider:
+        async def stream_chat(self, messages, model=None):
+            await asyncio.sleep(0.04)
+            yield {"event": "delta", "text": "Risposta lenta", "provider": "fake", "model": "fake-local"}
+            yield {"event": "done", "provider": "fake", "model": "fake-local"}
+
+    async def scenario():
+        request = ChatRequest(
+            request_id=request_id,
+            messages=[{"role": "user", "content": "Verifica heartbeat"}],
+        )
+        response = await api_module.chat_stream(
+            request,
+            device_id=token_data["device_id"],
+            provider=SlowProvider(),
+        )
+        return [chunk async for chunk in response.body_iterator]
+
+    chunks = asyncio.run(scenario())
+    assert any(": keep-alive" in chunk for chunk in chunks)
+    assert any("event: delta" in chunk for chunk in chunks)
+    assert any("event: done" in chunk for chunk in chunks)
+    assert len(refresh_calls) >= 2
+    assert all(call[1] == request_id for call in refresh_calls)
