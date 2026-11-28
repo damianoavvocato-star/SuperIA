@@ -291,3 +291,10 @@ Il commit `f900f2e5bc885c6484372f2305324609fb3870b0` isola la registrazione dell
 - Android fast checks [run 46114110421](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110421): **SUCCESS**, job `android-unit-tests`; `android-instrumented-tests` **SKIPPED**.
 - Backend tests [run 46114110434](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110434): **SUCCESS**.
 - Limite: la CI conferma i test JVM e backend, non il recupero dopo force-stop/process death, né la ripresa E2E su rete reale. Micro-fase 28 resta aperta; nessun APK o servizio esterno attivato.
+
+
+### Audit recupero dopo process death — 28 novembre 2026
+- Individuato il test strumentale già presente `ProcessRestartRecoveryInstrumentedTest.kt`: scrive una richiesta pendente e la memoria cifrata, forza la chiusura del package applicativo, quindi verifica che la seconda invocazione ritrovi request ID, payload originale, stato pending e memoria.
+- La prova è selezionabile soltanto con dispatch manuale e input `run_instrumented=true`. La pipeline richiede `connectedDebugAndroidTest` e installazione dei pacchetti Android di test, generando APK temporanei.
+- Non è stata lanciata: il vincolo attuale vieta APK intermedi. Non aggirare il vincolo modificando il workflow per eseguire build di test automaticamente.
+- Il test non copre il flusso di retry attraverso un backend/provider reale né la rete/proxy; il recupero UI richiede ancora l'azione esplicita dell'utente. Micro-fase 28 resta aperta fino a verifica pratica autorizzata e successivo E2E.
