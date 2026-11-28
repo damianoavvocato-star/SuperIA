@@ -1,5 +1,6 @@
 package it.superiaprivata.app.chat
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -571,7 +572,7 @@ class OnlineAssistantClientTest {
             }
         }
 
-        val task = async {
+        val task = async(Dispatchers.Default) {
             OnlineAssistantClient.streamInternal(
                 OnlineConnectionConfig("https://example.test", "test-token"),
                 listOf(ChatPromptMessage("user", "Ciao")),
