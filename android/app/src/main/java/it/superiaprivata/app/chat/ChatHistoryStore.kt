@@ -20,6 +20,10 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+/** On retry, discard stale partial output on the first replayed delta, then append subsequent deltas. */
+internal fun mergeRetryStreamDelta(existingText: String, delta: String, hasReceivedNewOutput: Boolean): String =
+    if (hasReceivedNewOutput) existingText + delta else delta
+
 /** Generate a stable transcript key without colliding with restored or in-memory messages. */
 internal fun nextChatLineId(existingIds: Collection<Long>, candidate: Long): Long {
     val used = existingIds.toHashSet()
