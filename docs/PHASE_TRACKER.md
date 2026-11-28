@@ -1729,3 +1729,11 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android fast checks [run 46114110421](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110421): **SUCCESS**; unit test superati, test strumentali saltati.
 - Backend tests [run 46114110434](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110434): **SUCCESS**.
 - La micro-fase 28 non è chiusa: resta da eseguire il collaudo strumentale di riavvio del processo e la ripresa end-to-end con backend/rete reali. Nessun APK.
+
+
+### Audit test di riavvio processo Android — 28 novembre 2026
+- Verificato il test esistente `ProcessRestartRecoveryInstrumentedTest.kt`: prima invocazione salva una richiesta pendente, il workflow esegue `adb shell am force-stop it.superiaprivata.app`, seconda invocazione verifica ripristino di request ID, payload, messaggio pendente e memoria cifrata.
+- Il workflow `.github/workflows/android-build.yml` espone questa prova soltanto tramite `workflow_dispatch` con `run_instrumented=true`; non viene eseguita nei normali controlli unitari.
+- Il percorso strumentale usa `connectedDebugAndroidTest` e installa i pacchetti debug/app-test. Questo comporta la generazione di APK temporanei di test. In base al vincolo corrente di non generare APK intermedi, il workflow non è stato avviato.
+- Il test esistente verifica il ripristino dello storage dopo force-stop, ma non dimostra il riavvio completo dell'interfaccia, il retry automatico/manuale fino al backend, né una connessione SSE reale. La ripresa resta esplicitamente manuale e richiede una verifica end-to-end separata.
+- Esito: audit statico completato; prova strumentale non eseguita per rispettare il blocco APK. Micro-fase 28 resta **In attesa di verifica pratica**; nessun APK, deploy, provider o servizio esterno creato.
