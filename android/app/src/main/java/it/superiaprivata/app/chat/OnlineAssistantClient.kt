@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 
@@ -377,10 +378,19 @@ object OnlineAssistantClient {
                 throw IllegalStateException(message)
             }
 
-            connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
-                consumeSseEvents(reader) { piece ->
-                    withContext(kotlinx.coroutines.Dispatchers.Main) { onDelta(piece) }
+            try {
+                connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                    consumeSseEvents(reader) { piece ->
+                        withContext(kotlinx.coroutines.Dispatchers.Main) { onDelta(piece) }
+                    }
                 }
+            } catch (failure: Throwable) {
+                // disconnect() può sbloccare readLine() con EOF prima che la cancellazione
+                // raggiunga il dispatcher: in quel caso deve prevalere la cancellazione.
+                if (!currentCoroutineContext().isActive) {
+                    throw CancellationException("Streaming annullato.", failure)
+                }
+                throw failure
             }
         } finally {
             cancellationHandle.dispose()
