@@ -67,6 +67,18 @@ class ChatHistoryValidationTest {
         assertEquals(generated, requestIdForRetry(generated))
         org.junit.Assert.assertTrue(runCatching { java.util.UUID.fromString(generated) }.isSuccess)
     }
+
+    @Test
+    fun retryFirstDeltaReplacesStalePartialOutput() {
+        assertEquals("Risposta nuova", mergeRetryStreamDelta("Risposta parziale vecchia", "Risposta nuova", false))
+    }
+
+    @Test
+    fun retrySubsequentDeltasAppendToNewOutput() {
+        val first = mergeRetryStreamDelta("Risposta parziale vecchia", "Nuova ", false)
+        assertEquals("Nuova risposta", mergeRetryStreamDelta(first, "risposta", true))
+    }
+
     @Test
     fun acceptsFrozenPayloadOnlyWhenItMatchesThePendingUserMessage() {
         val payload = listOf(
