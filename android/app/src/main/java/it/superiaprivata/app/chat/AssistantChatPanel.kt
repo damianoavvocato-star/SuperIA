@@ -734,7 +734,7 @@ fun AssistantChatPanel(
                                             if (index >= 0) {
                                                 val previous = messages[index].text
                                                 messages[index] = messages[index].copy(
-                                                    text = if (receivedNewOutput) previous + piece else piece
+                                                    text = mergeRetryStreamDelta(previous, piece, receivedNewOutput)
                                                 )
                                                 receivedNewOutput = true
                                                 streamPersister.onDelta(messages.toList())
