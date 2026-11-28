@@ -282,3 +282,12 @@ Il commit `f900f2e5bc885c6484372f2305324609fb3870b0` isola la registrazione dell
 - Android fast checks run [46112002868](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002868): **completed / success**. Il job Android unit tests è riuscito; i test strumentali sono stati saltati.
 - Backend tests run [46112002856](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002856): **completed / success**.
 - La suite CI conferma unit test Android e backend sul commit indicato. Non equivale a prova su rete/proxy reale o telefono fisico; micro-fase 26 resta in attesa di verifica pratica e il gate 36 resta non superato. Nessun deploy, provider, pairing pubblico o APK autorizzato.
+
+
+### Verifica retry stream — 28 novembre 2026
+- La logica di merge dei delta durante la ripresa è stata isolata in `mergeRetryStreamDelta`: il primo delta della nuova esecuzione sostituisce l'output parziale precedente; i delta successivi vengono concatenati.
+- Test JVM dedicati: `retryFirstDeltaReplacesStalePartialOutput` e `retrySubsequentDeltasAppendToNewOutput`.
+- Commit: helper `4336b8dec9fdf0681ce827c28d2fd6d78ab58d31`; test `4605e789742ac28cedfe866052416122d17d1afe`; integrazione UI `1e7a4d4f7bc9c30960d46c2b41c90aea2469f26c`.
+- Android fast checks [run 46114110421](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110421): **SUCCESS**, job `android-unit-tests`; `android-instrumented-tests` **SKIPPED**.
+- Backend tests [run 46114110434](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110434): **SUCCESS**.
+- Limite: la CI conferma i test JVM e backend, non il recupero dopo force-stop/process death, né la ripresa E2E su rete reale. Micro-fase 28 resta aperta; nessun APK o servizio esterno attivato.
