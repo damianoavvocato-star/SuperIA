@@ -1720,3 +1720,12 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - GitHub Actions Android fast checks run [46112002868](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002868): **completed / success**. Il job unit test è verde; i test strumentali sono stati saltati.
 - GitHub Actions Backend tests run [46112002856](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002856): **completed / success**.
 - Evidenza limitata alla CI automatica. Mancano ancora prova attraverso hosting/proxy reale e test su telefono fisico; micro-fase 26 e gate 36 non sono chiusi. Nessun servizio esterno o APK attivato.
+
+
+### Retry stream Android — 28 novembre 2026
+- Estratta e testata la regola di ripresa: il primo delta del nuovo stream sostituisce il testo parziale obsoleto; i delta seguenti si aggiungono al nuovo testo.
+- Test JVM: `retryFirstDeltaReplacesStalePartialOutput`, `retrySubsequentDeltasAppendToNewOutput`.
+- Integrazione su `AssistantChatPanel.kt`, commit finale `1e7a4d4f7bc9c30960d46c2b41c90aea2469f26c`.
+- Android fast checks [run 46114110421](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110421): **SUCCESS**; unit test superati, test strumentali saltati.
+- Backend tests [run 46114110434](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46114110434): **SUCCESS**.
+- La micro-fase 28 non è chiusa: resta da eseguire il collaudo strumentale di riavvio del processo e la ripresa end-to-end con backend/rete reali. Nessun APK.
