@@ -275,3 +275,10 @@ Il commit `a676fe67fe0bdfcca5ee542221160cae7b9e86d2` aggiunge un test backend en
 
 ### Aggiornamento micro-fase 26 — hook di cancellazione HTTP Android — 27 novembre 2026
 Il commit `f900f2e5bc885c6484372f2305324609fb3870b0` isola la registrazione della disconnessione di `HttpURLConnection` alla cancellazione della coroutine. Il commit `dfe75ac17b358ec3d5ef1266709bdce9751a7b02` aggiunge test unitari per verificare che la cancellazione invochi `disconnect()` e che il completamento normale non lo invochi. Android unit tests GitHub Actions run [46076365329](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365329): **success**; Backend tests run [46076365260](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365260): **success**. Questa è una verifica dell'hook di cancellazione, non una simulazione di rete lenta né una prova di interruzione di una lettura SSE reale: restano aperte la prova con server/proxy di staging e la verifica su dispositivo fisico. Micro-fase 26 non chiusa; nessun deploy o APK autorizzato.
+
+
+### Aggiornamento micro-fase 26 — cancellazione durante lettura SSE Android — 28 novembre 2026
+- Il commit `a35a1ed27dbade13c6964f31aaf2cbd00bc252eb` rende esplicita la precedenza della cancellazione coroutine quando `HttpURLConnection.disconnect()` sblocca la lettura SSE e questa restituisce EOF/errore.
+- Android fast checks run [46112002868](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002868): **completed / success**. Il job Android unit tests è riuscito; i test strumentali sono stati saltati.
+- Backend tests run [46112002856](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002856): **completed / success**.
+- La suite CI conferma unit test Android e backend sul commit indicato. Non equivale a prova su rete/proxy reale o telefono fisico; micro-fase 26 resta in attesa di verifica pratica e il gate 36 resta non superato. Nessun deploy, provider, pairing pubblico o APK autorizzato.
