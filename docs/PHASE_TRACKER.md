@@ -1713,3 +1713,10 @@ Corretto il percorso server quando il client interrompe la connessione: la cance
 - Android unit tests run [46076365329](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365329): **completed / success**. Backend tests run [46076365260](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46076365260): **completed / success**.
 - Limite della prova: il test esercita direttamente l'hook con una connessione finta; non simula ancora una richiesta SSE reale bloccata su rete. Servono ancora test d'integrazione dietro proxy/staging e prova su dispositivo Android fisico.
 - Micro-fase 26 resta **In attesa di verifica pratica**. Nessun hosting/database/provider esterno attivato; nessun APK creato.
+
+
+### Aggiornamento verifica cancellazione SSE Android — 28 novembre 2026
+- Commit `a35a1ed27dbade13c6964f31aaf2cbd00bc252eb`: quando la chiusura HTTP provocata dalla cancellazione sblocca la lettura SSE, il client ora controlla lo stato della coroutine e rilancia una `CancellationException` invece di classificare la chiusura come errore di stream.
+- GitHub Actions Android fast checks run [46112002868](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002868): **completed / success**. Il job unit test è verde; i test strumentali sono stati saltati.
+- GitHub Actions Backend tests run [46112002856](https://github.com/damianoavvocato-star/SuperIA/actions/runs/46112002856): **completed / success**.
+- Evidenza limitata alla CI automatica. Mancano ancora prova attraverso hosting/proxy reale e test su telefono fisico; micro-fase 26 e gate 36 non sono chiusi. Nessun servizio esterno o APK attivato.
